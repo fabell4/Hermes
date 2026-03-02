@@ -1,0 +1,1 @@
+"""CSVExporter — appends SpeedResult rows to a CSV file and exposes it for download."""

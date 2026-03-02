@@ -1,0 +1,1 @@
+"""ResultDispatcher — fans a SpeedResult out to every registered exporter."""

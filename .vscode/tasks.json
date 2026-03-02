@@ -1,0 +1,11 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run Hermes",
+			"type": "shell",
+			"command": "C:/Users/psywa/AppData/Local/Programs/Python/Python313/python.exe -m src.main",
+			"group": "build"
+		}
+	]
+}

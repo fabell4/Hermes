@@ -1,0 +1,1 @@
+"""Web layer — Flask routes only, no business logic."""

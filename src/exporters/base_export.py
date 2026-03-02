@@ -1,0 +1,1 @@
+"""BaseExporter — abstract interface that all exporters must implement."""

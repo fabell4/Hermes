@@ -1,0 +1,1 @@
+"""LokiExporter — ships SpeedResult as a structured JSON log event to Loki's push API."""
