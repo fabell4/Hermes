@@ -4,7 +4,7 @@ import speedtest  # type: ignore
 from datetime import datetime, timezone
 from typing import Any, cast
 
-from src.models.speed_results import SpeedResult
+from src.models.speed_result import SpeedResult
 
 class SpeedtestRunner:
     """

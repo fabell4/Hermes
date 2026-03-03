@@ -6,43 +6,40 @@ A Python application that periodically runs internet speed tests and exports res
 
 ### Data Flow
 
-```
-┌──────────────────────────────────────────────────────┐
-│                    Frontend (Web UI)                 │
-│         Trigger run · View latest · Download CSV     │
-└────────────────────┬─────────────────────────────────┘
-                     │ HTTP
-┌────────────────────▼─────────────────────────────────┐
-│                   Web Layer (API)                    │
-│            Routes · Scheduling · State               │
-└────────────────────┬─────────────────────────────────┘
-                     │
-┌────────────────────▼─────────────────────────────────┐
-│              Speedtest Service                       │
-│         Runs test · Returns SpeedResult              │
-└────────────────────┬─────────────────────────────────┘
-                     │ SpeedResult (structured object)
-┌────────────────────▼─────────────────────────────────┐
-│              Result Dispatcher                       │
-│      Receives result, fans out to all exporters      │
-└──────┬──────────────┬──────────────┬─────────────────┘
-       │              │              │
-┌──────▼─────┐ ┌──────▼──────┐ ┌─────▼───────────────┐
-│CSV Exporter│ │Prom Exporter│ │  Loki/OTel Exporter │
-│ Appends row│ │Updates Gauge│ │  Ships log event    │
-│ Serves file│ │ /metrics EP │ │  (OTLP or HTTP)     │
-└────────────┘ └─────────────┘ └─────────────────────┘
-```
+> Solid lines = implemented. Dashed lines = planned.
 
-### Dependency Flow
+```mermaid
+flowchart TD
+    subgraph current["Current Implementation"]
+        MAIN["**main.py**\nEntry point"]
+        RUNNER["**SpeedtestRunner**\nsrc/services/speedtest_runner.py"]
+        MODEL["**SpeedResult**\nsrc/models/speed_results.py"]
+        STDOUT["Console output\nstdout"]
+    end
 
-```
-main.py
-  └── creates SpeedtestService
-  └── creates Exporters → registers into ResultDispatcher
-  └── injects Dispatcher into web app
-        └── web routes call Service + Dispatcher
-              └── Dispatcher calls each Exporter(SpeedResult)
+    subgraph planned["Planned"]
+        UI["Frontend\nWeb UI"]
+        WEB["Web Layer\nsrc/web/app.py"]
+        DISP["ResultDispatcher\nsrc/dispatcher.py"]
+        CSV["CSVExporter"]
+        PROM["PrometheusExporter"]
+        LOKI["LokiExporter"]
+    end
+
+    MAIN --> RUNNER
+    RUNNER --> MODEL
+    MODEL --> STDOUT
+
+    UI -. "HTTP" .-> WEB
+    WEB -. " " .-> RUNNER
+    MODEL -. " " .-> DISP
+    DISP -. " " .-> CSV
+    DISP -. " " .-> PROM
+    DISP -. " " .-> LOKI
+
+    style current fill:#e8f5e9,stroke:#4caf50
+    style planned fill:#f3f3f3,stroke:#bbb,stroke-dasharray: 4 4
+    style STDOUT fill:#fff9c4,stroke:#f9a825
 ```
 
 ## Project Structure
