@@ -9,10 +9,13 @@ import time
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from . import config
-from .runtime_config import set_interval_minutes
+from . import runtime_config
+from .runtime_config import set_interval_minutes, set_enabled_exporters
 from .services.speedtest_runner import SpeedtestRunner
 from .result_dispatcher import ResultDispatcher, DispatchError
 from .exporters.csv_exporter import CSVExporter
+# from .exporters.prometheus_exporter import PrometheusExporter
+# from .exporters.loki_exporter import LokiExporter
 
 # --- Logging setup ---
 logging.basicConfig(
@@ -26,17 +29,48 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# All known exporters and how to build them.
+# Uncomment each entry as the exporter is implemented.
+EXPORTER_REGISTRY = {
+    "csv": lambda: CSVExporter(path=config.CSV_LOG_PATH),
+    # "prometheus": lambda: PrometheusExporter(port=config.PROMETHEUS_PORT),
+    # "loki": lambda: LokiExporter(url=config.LOKI_URL),
+}
+
 
 def build_dispatcher() -> ResultDispatcher:
     """
-    Instantiates and registers all exporters.
-    Add new exporters here as they are built — nothing else needs to change.
+    Instantiates and registers exporters based on the enabled list.
+    Priority: runtime_config.json → ENABLED_EXPORTERS env var.
     """
     dispatcher = ResultDispatcher()
-    dispatcher.add_exporter("csv", CSVExporter(path=config.CSV_LOG_PATH))
-    # dispatcher.add_exporter("prometheus", PrometheusExporter(port=config.PROMETHEUS_PORT))
-    # dispatcher.add_exporter("loki", LokiExporter(url=config.LOKI_URL))
+    enabled = runtime_config.get_enabled_exporters(default=config.ENABLED_EXPORTERS)
+
+    for name in enabled:
+        if name in EXPORTER_REGISTRY:
+            dispatcher.add_exporter(name, EXPORTER_REGISTRY[name]())
+        else:
+            logger.warning("Unknown exporter '%s' in enabled list — skipping.", name)
+
     return dispatcher
+
+
+def update_exporters(dispatcher: ResultDispatcher, enabled: list[str]) -> None:
+    """
+    Updates the active exporters at runtime and persists the change.
+    Called by the UI when the user toggles exporters.
+    Clears all current exporters and re-registers only the enabled ones.
+    """
+    dispatcher.clear()
+
+    for name in enabled:
+        if name in EXPORTER_REGISTRY:
+            dispatcher.add_exporter(name, EXPORTER_REGISTRY[name]())
+        else:
+            logger.warning("Unknown exporter '%s' in enabled list — skipping.", name)
+
+    set_enabled_exporters(enabled)
+    logger.info("Exporters updated — active: %s", dispatcher.exporter_names)
 
 
 def run_once(service: SpeedtestRunner, dispatcher: ResultDispatcher) -> None:

@@ -9,12 +9,12 @@ import streamlit as st
 import pandas as pd
 from pathlib import Path
 
-from src import config
-from src import runtime_config
+import src.config as config
+import src.runtime_config as runtime_config
 from src.services.speedtest_runner import SpeedtestRunner
 from src.result_dispatcher import ResultDispatcher, DispatchError
 from src.exporters.csv_exporter import CSVExporter
-from main import run_once, build_scheduler, update_schedule
+from src.main import run_once, build_scheduler, update_schedule, update_exporters, EXPORTER_REGISTRY
 
 # --- Page config ---
 st.set_page_config(
@@ -33,7 +33,9 @@ def get_service() -> SpeedtestRunner:
 @st.cache_resource
 def get_dispatcher() -> ResultDispatcher:
     dispatcher = ResultDispatcher()
-    dispatcher.add_exporter("csv", CSVExporter(path=config.CSV_LOG_PATH))
+    enabled = runtime_config.get_enabled_exporters(default=config.ENABLED_EXPORTERS)
+    if "csv" in enabled:
+        dispatcher.add_exporter("csv", CSVExporter(path=config.CSV_LOG_PATH))
     return dispatcher
 
 
@@ -44,7 +46,7 @@ def get_scheduler():
 
 # --- Helpers ---
 def load_csv() -> pd.DataFrame | None:
-    if not config.CSV_LOG_PATH.exists():
+    if not Path(config.CSV_LOG_PATH).exists():
         return None
     df = pd.read_csv(config.CSV_LOG_PATH)
     if df.empty:
@@ -66,7 +68,7 @@ with col1:
     st.subheader("Run a Test")
     st.write("Triggers a full download, upload, and ping test. Takes ~30 seconds.")
 with col2:
-    run_button = st.button("▶ Run Now", use_container_width=True, type="primary")
+    run_button = st.button("▶ Run Now", width="stretch", type="primary")
 
 if run_button:
     with st.spinner("Running speedtest... this takes about 30 seconds."):
@@ -98,7 +100,7 @@ st.caption(f"Current interval: every **{current_interval} minutes**")
 new_interval = st.number_input(
     "New interval (minutes)",
     min_value=1,
-    max_value=1440,   # 24 hours max
+    max_value=1440,
     value=current_interval,
     step=5,
 )
@@ -110,9 +112,42 @@ if st.button("💾 Save Schedule"):
         try:
             update_schedule(get_scheduler(), new_interval)
             st.success(f"Schedule updated — next run in {new_interval} minutes.")
-            st.rerun()  # Refresh so the caption reflects the new value
+            st.rerun()
         except Exception as e:
             st.error(f"Failed to update schedule: {e}")
+
+st.divider()
+
+# --- Exporter Toggles ---
+st.subheader("Exporters")
+st.caption("Enable or disable exporters. Changes take effect immediately.")
+
+current_enabled = runtime_config.get_enabled_exporters(default=config.ENABLED_EXPORTERS)
+
+# Friendly display names for each exporter key
+EXPORTER_LABELS = {
+    "csv": "CSV — log results to file",
+    "prometheus": "Prometheus — expose /metrics endpoint",
+    "loki": "Loki — ship structured logs",
+}
+
+new_enabled = []
+for name in EXPORTER_REGISTRY:
+    label = EXPORTER_LABELS.get(name, name)
+    checked = st.checkbox(label, value=name in current_enabled, key=f"exporter_{name}")
+    if checked:
+        new_enabled.append(name)
+
+if st.button("💾 Save Exporters"):
+    if sorted(new_enabled) == sorted(current_enabled):
+        st.info("No changes to exporter configuration.")
+    else:
+        try:
+            update_exporters(get_dispatcher(), new_enabled)
+            st.success(f"Exporters updated — active: {', '.join(new_enabled) or 'none'}")
+            st.rerun()
+        except Exception as e:
+            st.error(f"Failed to update exporters: {e}")
 
 st.divider()
 
@@ -132,11 +167,11 @@ else:
 
     st.line_chart(
         df.set_index("timestamp")[["download_mbps", "upload_mbps"]],
-        use_container_width=True,
+        width="stretch",
     )
 
     with st.expander("Raw data"):
-        st.dataframe(df, use_container_width=True, hide_index=True)
+        st.dataframe(df, width="stretch", hide_index=True)
 
     csv_bytes = df.to_csv(index=False).encode("utf-8")
     st.download_button(

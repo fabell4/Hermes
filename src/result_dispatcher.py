@@ -1,3 +1,5 @@
+# src/result_dispatcher.py
+
 """ResultDispatcher — fans out a SpeedResult to all registered exporters."""
 
 import logging
@@ -28,17 +30,9 @@ class ResultDispatcher:
         self._exporters: dict[str, BaseExporter] = {}
 
     def add_exporter(self, name: str, exporter: BaseExporter) -> None:
-        """
-        Register an exporter under a given name.
-        The name is used for logging and error reporting.
-
-        Example:
-            dispatcher.add_exporter("csv", CSVExporter(...))
-            dispatcher.add_exporter("prometheus", PrometheusExporter(...))
-        """
-        if not isinstance(exporter, BaseExporter):  # type: ignore[misc]
+        """Register an exporter under a given name."""
+        if not isinstance(exporter, BaseExporter):
             raise TypeError(f"Expected a BaseExporter subclass, got {type(exporter).__name__}")
-
         self._exporters[name] = exporter
         logger.info("Registered exporter: %s", name)
 
@@ -48,10 +42,19 @@ class ResultDispatcher:
             del self._exporters[name]
             logger.info("Removed exporter: %s", name)
 
+    def clear(self) -> None:
+        """
+        Unregisters all exporters.
+        Used by update_exporters() in main.py before re-registering
+        the new enabled set.
+        """
+        names = list(self._exporters.keys())
+        self._exporters.clear()
+        logger.info("Cleared all exporters: %s", names)
+
     def dispatch(self, result: SpeedResult) -> None:
         """
         Send a SpeedResult to all registered exporters.
-
         All exporters are attempted regardless of individual failures.
         Raises DispatchError if any exporters fail, after all have been tried.
         """

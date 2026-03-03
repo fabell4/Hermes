@@ -36,6 +36,17 @@ def _get_bool(key: str, default: bool) -> bool:
     return value.strip().lower() in ("true", "1", "yes")
 
 
+def _get_csv_list(key: str, default: list[str]) -> list[str]:
+    """Read an env var as a comma-separated list of strings."""
+    value = os.getenv(key)
+    if value is None:
+        return default
+    parsed = [item.strip() for item in value.split(",") if item.strip()]
+    if not parsed:
+        return default
+    return parsed
+
+
 # --- Application ---
 APP_ENV: str = os.getenv("APP_ENV", "development")
 LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
@@ -46,6 +57,7 @@ _env_interval: int = _get_int("SPEEDTEST_INTERVAL_MINUTES", 60)
 SPEEDTEST_INTERVAL_MINUTES: int = get_interval_minutes(default=_env_interval)
 
 RUN_ON_STARTUP: bool = _get_bool("RUN_ON_STARTUP", True)
+ENABLED_EXPORTERS: list[str] = _get_csv_list("ENABLED_EXPORTERS", ["csv"])
 
 # --- CSV Exporter ---
 CSV_LOG_PATH: Path = Path(os.getenv("CSV_LOG_PATH", "logs/results.csv"))

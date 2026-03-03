@@ -51,9 +51,7 @@ def save(data: dict) -> None:
 
 
 def get_interval_minutes(default: int) -> int:
-    """
-    Returns the persisted interval if set, otherwise the provided default.
-    """
+    """Returns the persisted interval if set, otherwise the provided default."""
     data = load()
     value = data.get("interval_minutes")
     if value is None:
@@ -68,3 +66,23 @@ def get_interval_minutes(default: int) -> int:
 def set_interval_minutes(minutes: int) -> None:
     """Persists a new interval value to disk."""
     save({"interval_minutes": minutes})
+
+
+def get_enabled_exporters(default: list[str]) -> list[str]:
+    """
+    Returns the persisted enabled exporters list if set,
+    otherwise the provided default.
+    """
+    data = load()
+    value = data.get("enabled_exporters")
+    if value is None:
+        return default
+    if not isinstance(value, list):
+        logger.warning("Invalid enabled_exporters in runtime config, using default.")
+        return default
+    return value
+
+
+def set_enabled_exporters(exporters: list[str]) -> None:
+    """Persists the enabled exporters list to disk."""
+    save({"enabled_exporters": exporters})

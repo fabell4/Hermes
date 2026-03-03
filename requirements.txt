@@ -1,3 +1,6 @@
+# Hermes - Internet Speed Test Automation and Visualization
+# Before production release change pinning to ~= for minor version updates, and add upper bounds for major versions
+
 # Core
 speedtest-cli>=2.1
 apscheduler>=3.10

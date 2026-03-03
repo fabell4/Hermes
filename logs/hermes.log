@@ -10,3 +10,9 @@
 2026-03-02 22:15:57 [INFO] apscheduler.scheduler: Added job "Scheduled speedtest run" to job store "default"
 2026-03-02 22:15:57 [INFO] apscheduler.scheduler: Scheduler started
 2026-03-02 22:15:57 [INFO] __main__: Scheduler started — next run in 60 minutes.
+2026-03-02 22:22:02 [INFO] src.result_dispatcher: Registered exporter: csv
+2026-03-02 22:22:02 [INFO] src.exporters.csv_exporter: CSV row written — down: 262.01Mbps up: 13.3Mbps ping: 24.98ms
+2026-03-02 22:22:02 [INFO] src.result_dispatcher: Exporter 'csv' completed successfully.
+2026-03-02 22:35:25 [INFO] src.result_dispatcher: Registered exporter: csv
+2026-03-02 22:35:25 [INFO] src.exporters.csv_exporter: CSV row written — down: 524.57Mbps up: 22.0Mbps ping: 22.84ms
+2026-03-02 22:35:25 [INFO] src.result_dispatcher: Exporter 'csv' completed successfully.
