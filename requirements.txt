@@ -1,5 +1,9 @@
-# Core dependencies
+# Core
 speedtest-cli>=2.1
+
+# Web UI
+streamlit>=1.40
+pandas>=2.0
 
 # Development/testing
 pytest>=8.0
