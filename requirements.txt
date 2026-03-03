@@ -1,5 +1,7 @@
 # Core
 speedtest-cli>=2.1
+apscheduler>=3.10
+python-dotenv>=1.0
 
 # Web UI
 streamlit>=1.40

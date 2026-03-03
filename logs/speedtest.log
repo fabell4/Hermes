@@ -1,0 +1,8 @@
+2026-03-02 21:44:12 [INFO] __main__: Speedtest app starting...
+2026-03-02 21:44:12 [INFO] src.exporters.csv_exporter: Created new CSV log file at: logs\results.csv
+2026-03-02 21:44:12 [INFO] src.result_dispatcher: Registered exporter: csv
+2026-03-02 21:44:12 [INFO] __main__: Starting speedtest run...
+2026-03-02 21:44:34 [INFO] __main__: Test complete — Down: 318.16Mbps | Up: 21.53Mbps | Ping: 35.34ms | Server: Wadsworth Citylink
+2026-03-02 21:44:34 [INFO] src.exporters.csv_exporter: CSV row written — down: 318.16Mbps up: 21.53Mbps ping: 35.34ms
+2026-03-02 21:44:34 [INFO] src.result_dispatcher: Exporter 'csv' completed successfully.
+2026-03-02 21:44:34 [INFO] __main__: Done.

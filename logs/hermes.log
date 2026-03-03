@@ -1,0 +1,12 @@
+2026-03-02 22:15:37 [INFO] __main__: Hermes starting...
+2026-03-02 22:15:37 [INFO] __main__: Config — interval: 60min | run on startup: True | log level: INFO
+2026-03-02 22:15:37 [INFO] src.result_dispatcher: Registered exporter: csv
+2026-03-02 22:15:37 [INFO] __main__: RUN_ON_STARTUP is set — running initial test...
+2026-03-02 22:15:37 [INFO] __main__: Starting speedtest run...
+2026-03-02 22:15:57 [INFO] __main__: Test complete — Down: 377.84Mbps | Up: 21.36Mbps | Ping: 33.34ms | Server: Brightspeed
+2026-03-02 22:15:57 [INFO] src.exporters.csv_exporter: CSV row written — down: 377.84Mbps up: 21.36Mbps ping: 33.34ms
+2026-03-02 22:15:57 [INFO] src.result_dispatcher: Exporter 'csv' completed successfully.
+2026-03-02 22:15:57 [INFO] apscheduler.scheduler: Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-03-02 22:15:57 [INFO] apscheduler.scheduler: Added job "Scheduled speedtest run" to job store "default"
+2026-03-02 22:15:57 [INFO] apscheduler.scheduler: Scheduler started
+2026-03-02 22:15:57 [INFO] __main__: Scheduler started — next run in 60 minutes.

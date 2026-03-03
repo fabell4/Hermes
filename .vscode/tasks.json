@@ -6,6 +6,32 @@
 			"type": "shell",
 			"command": "C:/Users/psywa/AppData/Local/Programs/Python/Python313/python.exe -m src.main",
 			"group": "build"
+		},
+		{
+			"label": "Run Hermes UI",
+			"type": "shell",
+			"command": "c:/Users/psywa/source/repos/projects/Hermes/.venv/Scripts/python.exe",
+			"args": [
+				"-m",
+				"streamlit",
+				"run",
+				"src/streamlit_app.py",
+				"--server.port",
+				"8501"
+			],
+			"isBackground": true,
+			"group": "build"
+		},
+		{
+			"label": "Stop Hermes UI",
+			"type": "shell",
+			"command": "pwsh",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"$pids = Get-NetTCPConnection -LocalPort 8501 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique; if ($pids) { $pids | ForEach-Object { Stop-Process -Id $_ -Force }; Write-Host 'Stopped Hermes UI.' } else { Write-Host 'Hermes UI is not running.' }"
+			],
+			"group": "build"
 		}
 	]
 }

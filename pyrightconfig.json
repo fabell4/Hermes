@@ -1,4 +1,19 @@
 {
+  "venvPath": ".",
+  "venv": ".venv",
+  "include": [
+    "src",
+    "tests"
+  ],
+  "executionEnvironments": [
+    {
+      "root": ".",
+      "extraPaths": [
+        "src",
+        "."
+      ]
+    }
+  ],
   "ignore": [
     "src/streamlit_app.py"
   ]
