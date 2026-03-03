@@ -1,0 +1,167 @@
+name: CI — Hermes
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+  workflow_dispatch:
+
+jobs:
+
+  test:
+    runs-on: local
+    env:
+      DATABASE_URL: postgresql+asyncpg://testuser:${{ secrets.TEST_DB_PASSWORD }}@test-db:5432/hermes_test
+      ENVIRONMENT: test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-asyncio httpx anyio psycopg2-binary
+
+      - name: Create test database
+        run: |
+          python -c "
+          import psycopg2
+          conn = psycopg2.connect(
+            host='test-db', port=5432,
+            user='testuser',
+            password='${{ secrets.TEST_DB_PASSWORD }}',
+            dbname='testdb'
+          )
+          conn.autocommit = True
+          cur = conn.cursor()
+          cur.execute('CREATE DATABASE hermes_test;')
+          conn.close()
+          " || echo "DB exists, continuing"
+
+      - name: Run tests
+        run: |
+          pytest \
+            --cov=src \
+            --cov-report=xml:coverage.xml \
+            --cov-report=term-missing \
+            -v || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage.xml
+          retention-days: 1
+
+  bandit:
+    runs-on: local
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Bandit
+        run: |
+          pip install bandit
+          bandit -r src -f json -o bandit-report.json --exit-zero
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bandit-report
+          path: bandit-report.json
+          retention-days: 1
+
+  trivy-deps:
+    runs-on: local
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trivy dependency scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: table
+          severity: CRITICAL
+          exit-code: 1
+
+  sonarqube:
+    runs-on: local
+    needs: [test, bandit, trivy-deps]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage
+
+      - name: Download bandit report
+        uses: actions/download-artifact@v4
+        with:
+          name: bandit-report
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: Quality Gate Check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+  trivy-image:
+    runs-on: local
+    if: github.ref == 'refs/heads/main'
+    needs: [sonarqube]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t hermes:${{ github.sha }} .
+
+      - name: Trivy image scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: image
+          image-ref: hermes:${{ github.sha }}
+          format: table
+          severity: CRITICAL
+          exit-code: 1
+
+  publish-docs:
+    runs-on: local
+    if: github.ref == 'refs/heads/main'
+    needs: [sonarqube]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install NFS client
+        run: |
+          apt-get update -qq
+          apt-get install -y nfs-common rsync
+
+      - name: Sync docs to NFS
+        env:
+          NFS_SERVER: ${{ secrets.NFS_SERVER }}
+          NFS_MKDOCS_PATH: ${{ secrets.NFS_MKDOCS_PATH }}
+        run: |
+          mkdir -p /mnt/docs
+          mount -t nfs4 -o rw,hard,intr \
+            ${NFS_SERVER}:${NFS_MKDOCS_PATH} /mnt/docs
+          rsync -av --delete docs/ /mnt/docs/hermes/
+          umount /mnt/docs

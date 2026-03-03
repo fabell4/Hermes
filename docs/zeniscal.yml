@@ -1,0 +1,6 @@
+site_name: Hermes
+site_description: Hermes Speedtest Documentation
+docs_dir: .
+
+nav:
+  - Home: index.md
