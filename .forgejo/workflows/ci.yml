@@ -59,6 +59,20 @@ jobs:
           path: coverage.xml
           retention-days: 1
 
+  ruff:
+    runs-on: local
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Ruff
+        run: |
+          pip install ruff
+          ruff check src --output-format=github
+
   bandit:
     runs-on: local
     steps:
@@ -96,7 +110,7 @@ jobs:
 
   sonarqube:
     runs-on: local
-    needs: [test, bandit, trivy-deps]
+    needs: [test, ruff, bandit, trivy-deps]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -152,7 +166,7 @@ jobs:
           docker push registry.greenflametech.net/hermes:${{ github.sha }}
           docker push registry.greenflametech.net/hermes:latest
 
-publish-docs:
+  publish-docs:
     runs-on: local
     if: github.ref == 'refs/heads/main'
     needs: [sonarqube]
@@ -181,3 +195,26 @@ publish-docs:
             ${NFS_SERVER}:${NFS_MKDOCS_PATH} /mnt/docs
           rsync -av --delete site/ /mnt/docs/hermes/
           umount /mnt/docs
+
+  notify:
+    runs-on: local
+    if: always()
+    needs: [test, ruff, bandit, trivy-deps, sonarqube, trivy-image, publish-docs]
+    steps:
+      - name: Notify success
+        if: ${{ !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
+        run: |
+          curl -s -X POST https://ntfy.greenflametech.net/pipeline-alerts \
+            -H "Title: Hermes Pipeline Passed ✅" \
+            -H "Priority: default" \
+            -H "Tags: white_check_mark" \
+            -d "Pipeline passed for commit ${{ github.sha }} on branch ${{ github.ref_name }}"
+
+      - name: Notify failure
+        if: ${{ contains(needs.*.result, 'failure') }}
+        run: |
+          curl -s -X POST https://ntfy.greenflametech.net/pipeline-alerts \
+            -H "Title: Hermes Pipeline Failed ❌" \
+            -H "Priority: high" \
+            -H "Tags: x" \
+            -d "Pipeline failed for commit ${{ github.sha }} on branch ${{ github.ref_name }}. Check Forgejo Actions for details."
