@@ -6,6 +6,9 @@ speedtest-cli>=2.1
 apscheduler>=3.10
 python-dotenv>=1.0
 
+# Exporters
+prometheus-client>=0.20
+
 # Web UI
 streamlit>=1.40
 pandas>=2.0

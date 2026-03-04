@@ -14,7 +14,7 @@ from .runtime_config import set_interval_minutes, set_enabled_exporters
 from .services.speedtest_runner import SpeedtestRunner
 from .result_dispatcher import ResultDispatcher, DispatchError
 from .exporters.csv_exporter import CSVExporter
-# from .exporters.prometheus_exporter import PrometheusExporter
+from .exporters.prometheus_exporter import PrometheusExporter
 # from .exporters.loki_exporter import LokiExporter
 
 # --- Logging setup ---
@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 # Uncomment each entry as the exporter is implemented.
 EXPORTER_REGISTRY = {
     "csv": lambda: CSVExporter(path=config.CSV_LOG_PATH),
-    # "prometheus": lambda: PrometheusExporter(port=config.PROMETHEUS_PORT),
+    "prometheus": lambda: PrometheusExporter(port=config.PROMETHEUS_PORT),
     # "loki": lambda: LokiExporter(url=config.LOKI_URL),
 }
 
