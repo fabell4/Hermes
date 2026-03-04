@@ -1,38 +1,99 @@
-"""
-Tests for src/main.py and src/speedtest_runner.py
-"""
+"""Tests for current SpeedtestRunner and main.run_once behavior."""
+
+from datetime import datetime, timezone
+import logging
 from unittest.mock import MagicMock, patch
 
-from src.services.speedtest_runner import display_results, run_speedtest
+import pytest
+
+import src.main as main_module
+from src.exporters.base_exporter import BaseExporter
+from src.main import build_dispatcher, run_once
+from src.models.speed_result import SpeedResult
+from src.services.speedtest_runner import SpeedtestRunner
 
 
-@patch("src.speedtest_runner.speedtest.Speedtest")
-def test_run_speedtest(mock_st_class):
+class DummyExporter(BaseExporter):
+    def export(self, result: SpeedResult) -> None:
+        return None
+
+
+def _raise_loki_url_required() -> BaseExporter:
+    raise ValueError("Loki URL is required")
+
+
+@patch("src.services.speedtest_runner.speedtest.Speedtest")
+def test_speedtest_runner_run_success(mock_st_class):
     mock_st = MagicMock()
+    mock_st.get_best_server.return_value = {
+        "sponsor": "Test ISP",
+        "name": "Test City",
+        "country": "DE",
+        "id": "1234",
+    }
     mock_st.download.return_value = 100_000_000
     mock_st.upload.return_value = 50_000_000
     mock_st.results.ping = 12.5
-    mock_st.results.server = {"name": "Test Server"}
     mock_st_class.return_value = mock_st
 
-    results = run_speedtest()
+    result = SpeedtestRunner().run()
 
-    assert results["download_mbps"] == 100.0
-    assert results["upload_mbps"] == 50.0
-    assert results["ping_ms"] == 12.5
-    assert results["server"] == "Test Server"
+    assert result.download_mbps == pytest.approx(100.0)
+    assert result.upload_mbps == pytest.approx(50.0)
+    assert result.ping_ms == pytest.approx(12.5)
+    assert result.server_name == "Test ISP"
+    assert result.server_location == "Test City, DE"
+    assert result.server_id == 1234
 
 
-def test_display_results(capsys):
-    results = {
-        "download_mbps": 100.0,
-        "upload_mbps": 50.0,
-        "ping_ms": 12.5,
-        "server": "Test Server",
-    }
-    display_results(results)
-    captured = capsys.readouterr()
-    assert "100.0 Mbps" in captured.out
-    assert "50.0 Mbps" in captured.out
-    assert "12.5 ms" in captured.out
-    assert "Test Server" in captured.out
+def test_run_once_dispatches_result():
+    service = MagicMock()
+    dispatcher = MagicMock()
+    result = SpeedResult(
+        timestamp=datetime.now(timezone.utc),
+        download_mbps=100.0,
+        upload_mbps=50.0,
+        ping_ms=10.0,
+        server_name="Test ISP",
+        server_location="Test City, DE",
+        server_id=1234,
+    )
+    service.run.return_value = result
+
+    run_once(service, dispatcher)
+
+    service.run.assert_called_once()
+    dispatcher.dispatch.assert_called_once_with(result)
+
+
+def test_run_once_handles_runner_error_without_dispatch():
+    service = MagicMock()
+    dispatcher = MagicMock()
+    service.run.side_effect = RuntimeError("network error")
+
+    run_once(service, dispatcher)
+
+    service.run.assert_called_once()
+    dispatcher.dispatch.assert_not_called()
+
+
+def test_build_dispatcher_skips_loki_on_init_error(monkeypatch, caplog):
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_enabled_exporters",
+        lambda default: ["csv", "loki"],
+    )
+    monkeypatch.setattr(
+        main_module,
+        "EXPORTER_REGISTRY",
+        {
+            "csv": lambda: DummyExporter(),
+            "loki": _raise_loki_url_required,
+        },
+    )
+
+    with caplog.at_level(logging.WARNING):
+        dispatcher = build_dispatcher()
+
+    assert dispatcher.exporter_names == ["csv"]
+    assert "could not be initialized" in caplog.text

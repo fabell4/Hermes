@@ -14,10 +14,11 @@
 - [x] `src/runtime_config.py` — JSON persistence for interval and enabled exporters
 - [x] `streamlit_app.py` — MVP UI with run button, schedule control, exporter toggles, history table
 - [x] `PrometheusExporter` — Gauge metrics (`download`, `upload`, `ping`) with labelnames; HTTP `/metrics` server on `PROMETHEUS_PORT`
+- [x] `LokiExporter` — structured log shipping with Loki push payload + runtime registration
+- [x] Exporter resilience + test modernization — init failure handling, Loki/unit tests, dispatcher test coverage
 
 ### 🔲 Still To Do
 
-- [ ] `LokiExporter` — structured log shipping
 - [ ] Real web frontend — replace Streamlit with Flask/FastAPI + proper UI
 - [ ] `Dockerfile` + `docker-compose` — containerize with volume mounts for `logs/` and `data/`
 - [ ] `.dockerignore` — review/update as needed
@@ -25,11 +26,10 @@
 
 ### 📌 Suggested Implementation Order
 
-1. `LokiExporter` — complete structured log pipeline
-2. `requirements.txt` freeze — lock reproducible builds for local + CI + Docker
-3. `Dockerfile` + `docker-compose` — package app/runtime with `logs/` + `data/` mounts
-4. `.dockerignore` review — optimize Docker context size and build time
-6. Real web frontend (Flask/FastAPI + proper UI) — replace MVP Streamlit once backend/exporters are stable
+1. `requirements.txt` freeze — lock reproducible builds for local + CI + Docker
+2. `Dockerfile` + `docker-compose` — package app/runtime with `logs/` + `data/` mounts
+3. `.dockerignore` review — optimize Docker context size and build time
+4. Real web frontend (Flask/FastAPI + proper UI) — replace MVP Streamlit once backend/exporters are stable
 
 ---
 

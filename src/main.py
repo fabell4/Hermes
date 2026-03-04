@@ -15,7 +15,7 @@ from .services.speedtest_runner import SpeedtestRunner
 from .result_dispatcher import ResultDispatcher, DispatchError
 from .exporters.csv_exporter import CSVExporter
 from .exporters.prometheus_exporter import PrometheusExporter
-# from .exporters.loki_exporter import LokiExporter
+from .exporters.loki_exporter import LokiExporter
 
 # --- Logging setup ---
 logging.basicConfig(
@@ -29,12 +29,18 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
+def _build_loki_exporter() -> LokiExporter:
+    if not config.LOKI_URL:
+        raise ValueError("LOKI_URL is required when Loki exporter is enabled.")
+    return LokiExporter(url=config.LOKI_URL, job_label=config.LOKI_JOB_LABEL)
+
 # All known exporters and how to build them.
 # Uncomment each entry as the exporter is implemented.
 EXPORTER_REGISTRY = {
     "csv": lambda: CSVExporter(path=config.CSV_LOG_PATH),
     "prometheus": lambda: PrometheusExporter(port=config.PROMETHEUS_PORT),
-    # "loki": lambda: LokiExporter(url=config.LOKI_URL),
+    "loki": _build_loki_exporter,
 }
 
 
@@ -48,7 +54,10 @@ def build_dispatcher() -> ResultDispatcher:
 
     for name in enabled:
         if name in EXPORTER_REGISTRY:
-            dispatcher.add_exporter(name, EXPORTER_REGISTRY[name]())
+            try:
+                dispatcher.add_exporter(name, EXPORTER_REGISTRY[name]())
+            except Exception as e:
+                logger.warning("Exporter '%s' could not be initialized: %s", name, e)
         else:
             logger.warning("Unknown exporter '%s' in enabled list — skipping.", name)
 
@@ -65,7 +74,10 @@ def update_exporters(dispatcher: ResultDispatcher, enabled: list[str]) -> None:
 
     for name in enabled:
         if name in EXPORTER_REGISTRY:
-            dispatcher.add_exporter(name, EXPORTER_REGISTRY[name]())
+            try:
+                dispatcher.add_exporter(name, EXPORTER_REGISTRY[name]())
+            except Exception as e:
+                logger.warning("Exporter '%s' could not be initialized: %s", name, e)
         else:
             logger.warning("Unknown exporter '%s' in enabled list — skipping.", name)
 
@@ -161,6 +173,7 @@ def main():
         logger.info("Shutdown signal received — stopping scheduler...")
         scheduler.shutdown()
         logger.info("Hermes stopped cleanly.")
+        raise
 
 
 if __name__ == "__main__":

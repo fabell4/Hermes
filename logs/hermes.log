@@ -16,3 +16,13 @@
 2026-03-02 22:35:25 [INFO] src.result_dispatcher: Registered exporter: csv
 2026-03-02 22:35:25 [INFO] src.exporters.csv_exporter: CSV row written — down: 524.57Mbps up: 22.0Mbps ping: 22.84ms
 2026-03-02 22:35:25 [INFO] src.result_dispatcher: Exporter 'csv' completed successfully.
+2026-03-04 13:01:04 [INFO] src.result_dispatcher: Registered exporter: csv
+2026-03-04 13:01:04 [INFO] src.exporters.prometheus_exporter: Prometheus metrics server started on port 8000
+2026-03-04 13:01:04 [INFO] src.result_dispatcher: Registered exporter: prometheus
+2026-03-04 13:01:04 [INFO] src.result_dispatcher: Registered exporter: loki
+2026-03-04 13:02:57 [INFO] src.result_dispatcher: Registered exporter: csv
+2026-03-04 13:02:57 [INFO] src.exporters.prometheus_exporter: Prometheus metrics server started on port 8000
+2026-03-04 13:02:57 [INFO] src.result_dispatcher: Registered exporter: prometheus
+2026-03-04 13:02:57 [INFO] src.result_dispatcher: Registered exporter: loki
+2026-03-04 13:03:03 [INFO] src.result_dispatcher: Registered exporter: csv
+2026-03-04 13:03:03 [WARNING] src.main: Exporter 'loki' could not be initialized: Loki URL is required
