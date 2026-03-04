@@ -1,6 +1,10 @@
 site_name: Hermes
 site_description: Hermes Speedtest Documentation
 docs_dir: .
-
 nav:
   - Home: index.md
+
+plugins:
+  - search
+  - kroki:
+      server_url: https://kroki.greenflametech.net

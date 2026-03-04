@@ -92,6 +92,7 @@ jobs:
           format: table
           severity: CRITICAL
           exit-code: 1
+          trivy-server-url: ${{ secrets.TRIVY_SERVER_URL }}
 
   sonarqube:
     runs-on: local
@@ -142,8 +143,16 @@ jobs:
           format: table
           severity: CRITICAL
           exit-code: 1
+          trivy-server-url: ${{ secrets.TRIVY_SERVER_URL }}
 
-  publish-docs:
+      - name: Push to registry
+        run: |
+          docker tag hermes:${{ github.sha }} registry.greenflametech.net/hermes:${{ github.sha }}
+          docker tag hermes:${{ github.sha }} registry.greenflametech.net/hermes:latest
+          docker push registry.greenflametech.net/hermes:${{ github.sha }}
+          docker push registry.greenflametech.net/hermes:latest
+
+publish-docs:
     runs-on: local
     if: github.ref == 'refs/heads/main'
     needs: [sonarqube]
@@ -155,6 +164,13 @@ jobs:
           apt-get update -qq
           apt-get install -y nfs-common rsync
 
+      - name: Install Zensical and plugins
+        run: |
+          pip install zensical mkdocs-kroki-plugin
+
+      - name: Build docs
+        run: zensical build -f docs/zensical.yml
+
       - name: Sync docs to NFS
         env:
           NFS_SERVER: ${{ secrets.NFS_SERVER }}
@@ -163,5 +179,5 @@ jobs:
           mkdir -p /mnt/docs
           mount -t nfs4 -o rw,hard,intr \
             ${NFS_SERVER}:${NFS_MKDOCS_PATH} /mnt/docs
-          rsync -av --delete docs/ /mnt/docs/hermes/
+          rsync -av --delete site/ /mnt/docs/hermes/
           umount /mnt/docs
