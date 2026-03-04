@@ -9,6 +9,22 @@ on:
 
 jobs:
 
+  gitleaks:
+    runs-on: local
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        run: |
+          docker run --rm \
+            -v $(pwd):/path \
+            zricethezav/gitleaks:latest \
+            detect \
+            --source=/path \
+            --exit-code=1
+
   test:
     runs-on: local
     env:
@@ -51,7 +67,8 @@ jobs:
             --cov=src \
             --cov-report=xml:coverage.xml \
             --cov-report=term-missing \
-            -v || true
+            --cov-fail-under=80 \
+            -v
 
       - uses: actions/upload-artifact@v4
         with:
@@ -68,10 +85,29 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Run Ruff
+      - name: Run Ruff lint
         run: |
           pip install ruff
           ruff check src --output-format=github
+
+      - name: Run Ruff format check
+        run: ruff format --check src
+
+  mypy:
+    runs-on: local
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run MyPy
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install mypy
+          mypy src --ignore-missing-imports
 
   bandit:
     runs-on: local
@@ -93,6 +129,103 @@ jobs:
           path: bandit-report.json
           retention-days: 1
 
+  semgrep:
+    runs-on: local
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Semgrep
+        run: |
+          pip install semgrep
+          semgrep scan \
+            --config=auto \
+            --json \
+            --output=semgrep-report.json \
+            src || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-report
+          path: semgrep-report.json
+          retention-days: 1
+
+  safety:
+    runs-on: local
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Safety
+        run: |
+          pip install safety
+          safety check \
+            -r requirements.txt \
+            --json \
+            --output safety-report.json || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: safety-report
+          path: safety-report.json
+          retention-days: 1
+
+  hadolint:
+    runs-on: local
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Hadolint
+        run: |
+          docker run --rm \
+            -i hadolint/hadolint \
+            hadolint \
+            --format json \
+            - < Dockerfile > hadolint-report.json || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hadolint-report
+          path: hadolint-report.json
+          retention-days: 1
+
+  radon:
+    runs-on: local
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Radon complexity check
+        run: |
+          pip install radon
+          radon cc src -n C --json > radon-report.json || true
+          radon cc src -n C
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: radon-report
+          path: radon-report.json
+          retention-days: 1
+
+  vulture:
+    runs-on: local
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run Vulture
+        run: |
+          pip install vulture
+          vulture src --min-confidence 80 || true
+
   trivy-deps:
     runs-on: local
     steps:
@@ -103,14 +236,21 @@ jobs:
         with:
           scan-type: fs
           scan-ref: .
-          format: table
+          format: cyclonedx
+          output: sbom.json
           severity: CRITICAL
           exit-code: 1
           trivy-server-url: ${{ secrets.TRIVY_SERVER_URL }}
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.json
+          retention-days: 1
+
   sonarqube:
     runs-on: local
-    needs: [test, ruff, bandit, trivy-deps]
+    needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-deps]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -139,6 +279,25 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
+  dependency-track:
+    runs-on: local
+    needs: [trivy-deps]
+    steps:
+      - name: Download SBOM
+        uses: actions/download-artifact@v4
+        with:
+          name: sbom
+
+      - name: Upload SBOM to Dependency Track
+        run: |
+          curl -s -X POST https://owasp.greenflametech.net/api/v1/bom \
+            -H "X-Api-Key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}" \
+            -H "Content-Type: multipart/form-data" \
+            -F "autoCreate=true" \
+            -F "projectName=hermes" \
+            -F "projectVersion=${{ github.ref_name }}" \
+            -F "bom=@sbom.json"
+
   trivy-image:
     runs-on: local
     if: github.ref == 'refs/heads/main'
@@ -154,10 +313,21 @@ jobs:
         with:
           scan-type: image
           image-ref: hermes:${{ github.sha }}
-          format: table
+          format: cyclonedx
+          output: sbom-image.json
           severity: CRITICAL
           exit-code: 1
           trivy-server-url: ${{ secrets.TRIVY_SERVER_URL }}
+
+      - name: Upload image SBOM to Dependency Track
+        run: |
+          curl -s -X POST https://owasp.greenflametech.net/api/v1/bom \
+            -H "X-Api-Key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}" \
+            -H "Content-Type: multipart/form-data" \
+            -F "autoCreate=true" \
+            -F "projectName=hermes-image" \
+            -F "projectVersion=${{ github.ref_name }}" \
+            -F "bom=@sbom-image.json"
 
       - name: Push to registry
         run: |
@@ -165,6 +335,31 @@ jobs:
           docker tag hermes:${{ github.sha }} registry.greenflametech.net/hermes:latest
           docker push registry.greenflametech.net/hermes:${{ github.sha }}
           docker push registry.greenflametech.net/hermes:latest
+
+  # ZAP scan is commented out until a running Hermes instance is available
+  # zap:
+  #   runs-on: local
+  #   if: github.ref == 'refs/heads/main'
+  #   needs: [trivy-image]
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - name: ZAP API Scan
+  #       run: |
+  #         docker run --rm \
+  #           -v $(pwd):/zap/wrk:rw \
+  #           ghcr.io/zaproxy/zaproxy:stable \
+  #           zap-api-scan.py \
+  #           -t https://hermes.greenflametech.net/openapi.json \
+  #           -f openapi \
+  #           -r zap-report.html \
+  #           -z "-addoninstall communityScripts" || true
+  #
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: zap-report
+  #         path: zap-report.html
+  #         retention-days: 7
 
   publish-docs:
     runs-on: local
@@ -199,7 +394,7 @@ jobs:
   notify:
     runs-on: local
     if: always()
-    needs: [test, ruff, bandit, trivy-deps, sonarqube, trivy-image, publish-docs]
+    needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-deps, sonarqube, dependency-track, trivy-image, publish-docs]
     steps:
       - name: Notify success
         if: ${{ !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
