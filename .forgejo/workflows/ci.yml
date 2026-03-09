@@ -516,8 +516,14 @@ jobs:
     needs: [sonarqube]
     container:
       image: nikolaik/python-nodejs:python3.11-nodejs20
-      volumes:
-        - /var/run/docker.sock:/var/run/docker.sock
+    services:
+      dind:
+        image: docker:27-dind
+        privileged: true
+        env:
+          DOCKER_TLS_CERTDIR: ""
+    env:
+      DOCKER_HOST: tcp://dind:2375
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -526,6 +532,14 @@ jobs:
         run: |
           apt-get update -qq
           apt-get install -y -qq docker.io
+
+      - name: Wait for Docker daemon
+        run: |
+          for i in $(seq 1 15); do
+            docker info >/dev/null 2>&1 && echo "Docker ready" && break
+            echo "Waiting for Docker... ($i)"
+            sleep 2
+          done
 
       - name: Build Docker image
         run: docker build -t hermes:${{ github.sha }} .
@@ -663,9 +677,14 @@ jobs:
           NFS_SSH_KEY: ${{ secrets.NFS_SSH_KEY }}
           NFS_SSH_USER: ${{ secrets.NFS_SSH_USER }}
         run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "${NFS_SSH_KEY}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
+          python3 - <<'PYEOF'
+          import os, pathlib, subprocess
+          key = os.environ['NFS_SSH_KEY'].replace('\\n', '\n').strip()
+          p = pathlib.Path('/root/.ssh/id_ed25519')
+          p.parent.mkdir(parents=True, exist_ok=True)
+          p.write_text(key + '\n')
+          p.chmod(0o600)
+          PYEOF
           ssh-keyscan -H "${NFS_SERVER}" >> ~/.ssh/known_hosts 2>/dev/null
           rsync -av --delete -e "ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no" \
             site/ "${NFS_SSH_USER}@${NFS_SERVER}:${NFS_MKDOCS_PATH}/hermes/"
