@@ -301,20 +301,28 @@ jobs:
     runs-on: docker
     timeout-minutes: 15
     continue-on-error: true
+    container:
+      image: nikolaik/python-nodejs:python3.11-nodejs20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install Trivy CLI
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
+            | sh -s -- -b /usr/local/bin v0.59.1
+
       - name: Trivy dependency scan
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          scan-type: fs
-          scan-ref: .
-          format: cyclonedx
-          output: sbom.json
-          severity: CRITICAL
-          exit-code: 1
-          trivy-server-url: ${{ secrets.TRIVY_SERVER_URL }}
+        env:
+          TRIVY_SERVER_URL: ${{ secrets.TRIVY_SERVER_URL }}
+        run: |
+          trivy fs \
+            --server "${TRIVY_SERVER_URL}" \
+            --format cyclonedx \
+            --output sbom.json \
+            --severity CRITICAL \
+            --exit-code 1 \
+            .
 
       - name: Upload SBOM
         if: always()
@@ -488,6 +496,10 @@ jobs:
     timeout-minutes: 20
     if: github.ref == 'refs/heads/main'
     needs: [sonarqube]
+    container:
+      image: docker:27-cli
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -495,16 +507,20 @@ jobs:
       - name: Build Docker image
         run: docker build -t hermes:${{ github.sha }} .
 
+      - name: Install Trivy
+        run: apk add --no-cache trivy
+
       - name: Trivy image scan
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          scan-type: image
-          image-ref: hermes:${{ github.sha }}
-          format: cyclonedx
-          output: sbom-image.json
-          severity: CRITICAL
-          exit-code: 1
-          trivy-server-url: ${{ secrets.TRIVY_SERVER_URL }}
+        env:
+          TRIVY_SERVER_URL: ${{ secrets.TRIVY_SERVER_URL }}
+        run: |
+          trivy image \
+            --server "${TRIVY_SERVER_URL}" \
+            --format cyclonedx \
+            --output sbom-image.json \
+            --severity CRITICAL \
+            --exit-code 1 \
+            hermes:${{ github.sha }}
 
       - name: Upload image SBOM to Dependency Track
         run: |
@@ -594,6 +610,8 @@ jobs:
     timeout-minutes: 15
     if: github.ref == 'refs/heads/main'
     needs: [sonarqube]
+    container:
+      image: nikolaik/python-nodejs:python3.11-nodejs20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
