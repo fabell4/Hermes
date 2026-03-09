@@ -29,12 +29,8 @@ def make_issue(engine_id, rule_id, severity, type_, file_path, line, message):
     return {
         "engineId": engine_id,
         "ruleId": rule_id,
-        "impacts": [
-            {
-                "softwareQuality": _type_to_software_quality(type_),
-                "severity": _severity_to_impact_severity(severity),
-            }
-        ],
+        "severity": severity,  # INFO | MINOR | MAJOR | CRITICAL | BLOCKER
+        "type": type_,  # BUG | VULNERABILITY | CODE_SMELL
         "primaryLocation": {
             "message": message,
             "filePath": file_path,
@@ -333,39 +329,8 @@ def convert_semgrep(report_path, base_dir):
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
-def _type_to_software_quality(type_: str) -> str:
-    return {"BUG": "RELIABILITY", "VULNERABILITY": "SECURITY"}.get(
-        type_, "MAINTAINABILITY"
-    )
-
-
-def _severity_to_impact_severity(severity: str) -> str:
-    if severity in {"BLOCKER", "CRITICAL"}:
-        return "HIGH"
-    if severity == "MAJOR":
-        return "MEDIUM"
-    return "LOW"
-
-
-def _derive_rules(issues: list) -> list:
-    """Build unique rule descriptors from the issues list (new Sonar format)."""
-    seen: dict = {}
-    for issue in issues:
-        key = (issue["engineId"], issue["ruleId"])
-        if key not in seen:
-            seen[key] = {
-                "id": issue["ruleId"],
-                "name": issue["ruleId"].replace("-", " ").replace(":", " ").title(),
-                "description": f"Issue reported by {issue['engineId']}",
-                "engineId": issue["engineId"],
-                "cleanCodeAttribute": "CONVENTIONAL",
-                "impacts": issue["impacts"],
-            }
-    return list(seen.values())
-
-
 def write_report(issues, output_path):
-    payload = {"rules": _derive_rules(issues), "issues": issues}
+    payload = {"issues": issues}
     with open(output_path, "w") as f:
         json.dump(payload, f, indent=2)
     print(f"  → written: {output_path} ({len(issues)} issues)")
@@ -398,20 +363,19 @@ def main():
 
     print("Converting reports to SonarQube Generic Issue format...")
 
-    mypy_issues = convert_mypy(args.mypy, base)
-    vulture_issues = convert_vulture(args.vulture, base)
-    radon_issues = convert_radon(args.radon, base)
-    semgrep_issues = convert_semgrep(args.semgrep, base)
-
-    write_report(mypy_issues, os.path.join(args.outdir, "sonar-mypy.json"))
-    write_report(vulture_issues, os.path.join(args.outdir, "sonar-vulture.json"))
-    write_report(radon_issues, os.path.join(args.outdir, "sonar-radon.json"))
-    write_report(semgrep_issues, os.path.join(args.outdir, "sonar-semgrep.json"))
-
-    # SonarQube is configured to consume a single external issues file.
-    combined_issues = mypy_issues + vulture_issues + radon_issues + semgrep_issues
     write_report(
-        combined_issues, os.path.join(args.outdir, "sonar-external-issues.json")
+        convert_mypy(args.mypy, base), os.path.join(args.outdir, "sonar-mypy.json")
+    )
+    write_report(
+        convert_vulture(args.vulture, base),
+        os.path.join(args.outdir, "sonar-vulture.json"),
+    )
+    write_report(
+        convert_radon(args.radon, base), os.path.join(args.outdir, "sonar-radon.json")
+    )
+    write_report(
+        convert_semgrep(args.semgrep, base),
+        os.path.join(args.outdir, "sonar-semgrep.json"),
     )
 
     print("Done.")

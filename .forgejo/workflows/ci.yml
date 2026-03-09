@@ -387,17 +387,80 @@ jobs:
 
       # --- Scan ---
       - name: SonarQube Scan
-        uses: https://github.com/sonarsource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          apt-get update -qq && apt-get install -y -qq unzip curl
+          SCANNER_VERSION="6.2.1.4610"
+          curl -sSLo sonar-scanner.zip \
+            "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SCANNER_VERSION}-linux-x64.zip"
+          unzip -q sonar-scanner.zip
+          mv "sonar-scanner-${SCANNER_VERSION}-linux-x64" sonar-scanner-cli
+          sonar-scanner-cli/bin/sonar-scanner \
+            -Dsonar.projectBaseDir=. \
+            -Dsonar.token="${SONAR_TOKEN}" \
+            -Dsonar.host.url="${SONAR_HOST_URL}"
 
       - name: Quality Gate Check
-        uses: https://github.com/sonarsource/sonarqube-quality-gate-action@master
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          python3 - <<'EOF'
+          import os, sys, time, urllib.request, urllib.parse, json, base64
+
+          host  = os.environ["SONAR_HOST_URL"].rstrip("/")
+          token = os.environ["SONAR_TOKEN"]
+          auth  = base64.b64encode(f"{token}:".encode()).decode()
+
+          # Retrieve the task ID written by the scanner
+          ce_task_id = None
+          report_file = ".scannerwork/report-task.txt"
+          if os.path.exists(report_file):
+              with open(report_file) as f:
+                  for line in f:
+                      if line.startswith("ceTaskId="):
+                          ce_task_id = line.strip().split("=", 1)[1]
+
+          if not ce_task_id:
+              print("No CE task ID found — skipping quality gate check.")
+              sys.exit(0)
+
+          headers = {"Authorization": f"Basic {auth}"}
+
+          # Wait for analysis to finish (up to 4 min)
+          for attempt in range(24):
+              url = f"{host}/api/ce/task?id={urllib.parse.quote(ce_task_id)}"
+              req = urllib.request.Request(url, headers=headers)
+              with urllib.request.urlopen(req) as resp:
+                  data = json.loads(resp.read())
+              status = data["task"]["status"]
+              print(f"CE task status: {status}")
+              if status in ("SUCCESS", "FAILED", "CANCELLED"):
+                  break
+              time.sleep(10)
+          else:
+              print("Timed out waiting for analysis to complete.")
+              sys.exit(1)
+
+          if status != "SUCCESS":
+              print(f"Analysis task ended with status: {status}")
+              sys.exit(1)
+
+          # Check the quality gate
+          analysis_id = data["task"].get("analysisId", "")
+          url = f"{host}/api/qualitygates/project_status?analysisId={urllib.parse.quote(analysis_id)}"
+          req = urllib.request.Request(url, headers=headers)
+          with urllib.request.urlopen(req) as resp:
+              qg = json.loads(resp.read())
+
+          gate_status = qg["projectStatus"]["status"]
+          print(f"Quality Gate: {gate_status}")
+          if gate_status != "OK":
+              sys.exit(1)
+          EOF
 
   dependency-track:
     runs-on: docker
