@@ -514,32 +514,9 @@ jobs:
     timeout-minutes: 20
     if: github.ref == 'refs/heads/main'
     needs: [sonarqube]
-    container:
-      image: nikolaik/python-nodejs:python3.11-nodejs20
-    services:
-      dind:
-        image: docker:27-dind
-        privileged: true
-        env:
-          DOCKER_TLS_CERTDIR: ""
-    env:
-      DOCKER_HOST: tcp://dind:2375
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Install Docker CLI
-        run: |
-          apt-get update -qq
-          apt-get install -y -qq docker.io
-
-      - name: Wait for Docker daemon
-        run: |
-          for i in $(seq 1 15); do
-            docker info >/dev/null 2>&1 && echo "Docker ready" && break
-            echo "Waiting for Docker... ($i)"
-            sleep 2
-          done
 
       - name: Build Docker image
         run: docker build -t hermes:${{ github.sha }} .
