@@ -378,7 +378,7 @@ jobs:
       - name: Convert reports to SonarQube format
         run: |
           python convert_to_sonar.py \
-            --sonar-base-dir src \
+            --sonar-base-dir . \
             --mypy    mypy-report.txt \
             --vulture vulture-report.txt \
             --radon   radon-cc-report.json \

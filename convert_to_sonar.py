@@ -329,8 +329,44 @@ def convert_semgrep(report_path, base_dir):
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+def _type_to_software_quality(type_: str) -> str:
+    return {"BUG": "RELIABILITY", "VULNERABILITY": "SECURITY"}.get(
+        type_, "MAINTAINABILITY"
+    )
+
+
+def _severity_to_impact_severity(severity: str) -> str:
+    if severity in {"BLOCKER", "CRITICAL"}:
+        return "HIGH"
+    if severity == "MAJOR":
+        return "MEDIUM"
+    return "LOW"
+
+
+def _derive_rules(issues: list) -> list:
+    """Build unique rule descriptors from the issues list (new Sonar format)."""
+    seen: dict = {}
+    for issue in issues:
+        key = (issue["engineId"], issue["ruleId"])
+        if key not in seen:
+            seen[key] = {
+                "id": issue["ruleId"],
+                "name": issue["ruleId"].replace("-", " ").replace(":", " ").title(),
+                "description": f"Issue reported by {issue['engineId']}",
+                "engineId": issue["engineId"],
+                "cleanCodeAttribute": "CONVENTIONAL",
+                "impacts": [
+                    {
+                        "softwareQuality": _type_to_software_quality(issue["type"]),
+                        "severity": _severity_to_impact_severity(issue["severity"]),
+                    }
+                ],
+            }
+    return list(seen.values())
+
+
 def write_report(issues, output_path):
-    payload = {"issues": issues}
+    payload = {"rules": _derive_rules(issues), "issues": issues}
     with open(output_path, "w") as f:
         json.dump(payload, f, indent=2)
     print(f"  → written: {output_path} ({len(issues)} issues)")
