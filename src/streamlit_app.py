@@ -14,7 +14,7 @@ import src.runtime_config as runtime_config
 from src.services.speedtest_runner import SpeedtestRunner
 from src.result_dispatcher import ResultDispatcher, DispatchError
 from src.exporters.csv_exporter import CSVExporter
-from src.main import run_once, build_scheduler, update_schedule, update_exporters, EXPORTER_REGISTRY
+from src.main import build_scheduler, update_schedule, update_exporters, EXPORTER_REGISTRY
 
 # --- Page config ---
 st.set_page_config(
