@@ -651,12 +651,16 @@ jobs:
         env:
           NFS_SERVER: ${{ secrets.NFS_SERVER }}
           NFS_MKDOCS_PATH: ${{ secrets.NFS_MKDOCS_PATH }}
+          NFS_SSH_KEY: ${{ secrets.NFS_SSH_KEY }}
+          NFS_SSH_USER: ${{ secrets.NFS_SSH_USER }}
         run: |
-          mkdir -p /mnt/docs
-          mount -t nfs4 -o rw,hard,intr \
-            ${NFS_SERVER}:${NFS_MKDOCS_PATH} /mnt/docs
-          rsync -av --delete site/ /mnt/docs/hermes/
-          umount /mnt/docs
+          mkdir -p ~/.ssh
+          echo "${NFS_SSH_KEY}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "${NFS_SERVER}" >> ~/.ssh/known_hosts 2>/dev/null
+          rsync -av --delete -e "ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no" \
+            site/ "${NFS_SSH_USER}@${NFS_SERVER}:${NFS_MKDOCS_PATH}/hermes/"
+          rm -f ~/.ssh/id_ed25519
 
   notify:
     runs-on: docker
