@@ -9,6 +9,17 @@ __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
+*$py.class
+
+# Python tooling caches
+.ruff_cache/
+.mypy_cache/
+.hypothesis/
+.nox/
+.tox/
+
+# Coverage artifacts
+.coverage.*
 
 # Distribution / packaging
 dist/

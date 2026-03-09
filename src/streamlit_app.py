@@ -14,7 +14,12 @@ import src.runtime_config as runtime_config
 from src.services.speedtest_runner import SpeedtestRunner
 from src.result_dispatcher import ResultDispatcher, DispatchError
 from src.exporters.csv_exporter import CSVExporter
-from src.main import build_scheduler, update_schedule, update_exporters, EXPORTER_REGISTRY
+from src.main import (
+    build_scheduler,
+    update_schedule,
+    update_exporters,
+    EXPORTER_REGISTRY,
+)
 
 # --- Page config ---
 st.set_page_config(
@@ -94,7 +99,9 @@ st.divider()
 # --- Schedule Control ---
 st.subheader("Schedule")
 
-current_interval = runtime_config.get_interval_minutes(default=config.SPEEDTEST_INTERVAL_MINUTES)
+current_interval = runtime_config.get_interval_minutes(
+    default=config.SPEEDTEST_INTERVAL_MINUTES
+)
 st.caption(f"Current interval: every **{current_interval} minutes**")
 
 new_interval = st.number_input(
@@ -144,7 +151,9 @@ if st.button("💾 Save Exporters"):
     else:
         try:
             update_exporters(get_dispatcher(), new_enabled)
-            st.success(f"Exporters updated — active: {', '.join(new_enabled) or 'none'}")
+            st.success(
+                f"Exporters updated — active: {', '.join(new_enabled) or 'none'}"
+            )
             st.rerun()
         except Exception as e:
             st.error(f"Failed to update exporters: {e}")

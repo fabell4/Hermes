@@ -6,15 +6,16 @@ from typing import Any, cast
 
 from src.models.speed_result import SpeedResult
 
+
 class SpeedtestRunner:
     """
-    Runs a speed test and returns the results as a SpeedResult dataclass.  
+    Runs a speed test and returns the results as a SpeedResult dataclass.
     Raises SpeedtestException on network or server errors.
     """
-    
+
     def run(self) -> SpeedResult:
         """Run the speed test and return the results."""
-        try: 
+        try:
             st = speedtest.Speedtest()
             best: dict[str, Any] = cast(dict[str, Any], st.get_best_server())  # type: ignore[no-untyped-call]
             download_bps = st.download(threads=None)  # type: ignore[no-untyped-call]
@@ -32,7 +33,9 @@ class SpeedtestRunner:
 
         except speedtest.ConfigRetrievalError:
             # Can't reach speedtest.net config endpoint — likely no internet
-            raise RuntimeError("Could not reach speedtest.net — check network connectivity.")
+            raise RuntimeError(
+                "Could not reach speedtest.net — check network connectivity."
+            )
 
         except speedtest.NoMatchedServers:
             # Happens if you manually filter servers and none match

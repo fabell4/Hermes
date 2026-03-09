@@ -24,7 +24,9 @@ def _get_int(key: str, default: int) -> int:
     try:
         return int(value)
     except ValueError:
-        logging.warning("Config: invalid value for %s='%s', using default %s", key, value, default)
+        logging.warning(
+            "Config: invalid value for %s='%s', using default %s", key, value, default
+        )
         return default
 
 

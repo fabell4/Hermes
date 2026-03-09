@@ -11,10 +11,13 @@ logger = logging.getLogger(__name__)
 
 class DispatchError(Exception):
     """Raised when one or more exporters fail during dispatch."""
+
     def __init__(self, failures: dict[str, Exception]):
         self.failures = failures
         summary = ", ".join(f"{name}: {err}" for name, err in failures.items())
-        super().__init__(f"Dispatch completed with {len(failures)} failure(s): {summary}")
+        super().__init__(
+            f"Dispatch completed with {len(failures)} failure(s): {summary}"
+        )
 
 
 class ResultDispatcher:
@@ -32,7 +35,9 @@ class ResultDispatcher:
     def add_exporter(self, name: str, exporter: BaseExporter) -> None:
         """Register an exporter under a given name."""
         if not isinstance(exporter, BaseExporter):
-            raise TypeError(f"Expected a BaseExporter subclass, got {type(exporter).__name__}")
+            raise TypeError(
+                f"Expected a BaseExporter subclass, got {type(exporter).__name__}"
+            )
         self._exporters[name] = exporter
         logger.info("Registered exporter: %s", name)
 

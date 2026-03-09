@@ -3,6 +3,7 @@
 Hermes — entry point.
 Wires all components together, starts the scheduler, and runs the application.
 """
+
 import logging
 import sys
 import time
@@ -34,6 +35,7 @@ def _build_loki_exporter() -> LokiExporter:
     if not config.LOKI_URL:
         raise ValueError("LOKI_URL is required when Loki exporter is enabled.")
     return LokiExporter(url=config.LOKI_URL, job_label=config.LOKI_JOB_LABEL)
+
 
 # All known exporters and how to build them.
 # Uncomment each entry as the exporter is implemented.
@@ -111,7 +113,9 @@ def run_once(service: SpeedtestRunner, dispatcher: ResultDispatcher) -> None:
             logger.warning("  [%s] %s", name, error)
 
 
-def build_scheduler(service: SpeedtestRunner, dispatcher: ResultDispatcher) -> BackgroundScheduler:
+def build_scheduler(
+    service: SpeedtestRunner, dispatcher: ResultDispatcher
+) -> BackgroundScheduler:
     """
     Configures and returns the background scheduler.
     Does not start it — caller decides when to start.
@@ -122,7 +126,7 @@ def build_scheduler(service: SpeedtestRunner, dispatcher: ResultDispatcher) -> B
         trigger=IntervalTrigger(minutes=config.SPEEDTEST_INTERVAL_MINUTES),
         id="speedtest_run",
         name="Scheduled speedtest run",
-        max_instances=1,        # Prevent overlapping runs if a test takes longer than the interval
+        max_instances=1,  # Prevent overlapping runs if a test takes longer than the interval
         misfire_grace_time=60,  # If a run is missed by less than 60s, still execute it
     )
     return scheduler
