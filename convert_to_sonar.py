@@ -29,8 +29,12 @@ def make_issue(engine_id, rule_id, severity, type_, file_path, line, message):
     return {
         "engineId": engine_id,
         "ruleId": rule_id,
-        "severity": severity,  # INFO | MINOR | MAJOR | CRITICAL | BLOCKER
-        "type": type_,  # BUG | VULNERABILITY | CODE_SMELL
+        "impacts": [
+            {
+                "softwareQuality": _type_to_software_quality(type_),
+                "severity": _severity_to_impact_severity(severity),
+            }
+        ],
         "primaryLocation": {
             "message": message,
             "filePath": file_path,
@@ -355,12 +359,7 @@ def _derive_rules(issues: list) -> list:
                 "description": f"Issue reported by {issue['engineId']}",
                 "engineId": issue["engineId"],
                 "cleanCodeAttribute": "CONVENTIONAL",
-                "impacts": [
-                    {
-                        "softwareQuality": _type_to_software_quality(issue["type"]),
-                        "severity": _severity_to_impact_severity(issue["severity"]),
-                    }
-                ],
+                "impacts": issue["impacts"],
             }
     return list(seen.values())
 
