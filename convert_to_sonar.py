@@ -363,19 +363,20 @@ def main():
 
     print("Converting reports to SonarQube Generic Issue format...")
 
+    mypy_issues = convert_mypy(args.mypy, base)
+    vulture_issues = convert_vulture(args.vulture, base)
+    radon_issues = convert_radon(args.radon, base)
+    semgrep_issues = convert_semgrep(args.semgrep, base)
+
+    write_report(mypy_issues, os.path.join(args.outdir, "sonar-mypy.json"))
+    write_report(vulture_issues, os.path.join(args.outdir, "sonar-vulture.json"))
+    write_report(radon_issues, os.path.join(args.outdir, "sonar-radon.json"))
+    write_report(semgrep_issues, os.path.join(args.outdir, "sonar-semgrep.json"))
+
+    # SonarQube is configured to consume a single external issues file.
+    combined_issues = mypy_issues + vulture_issues + radon_issues + semgrep_issues
     write_report(
-        convert_mypy(args.mypy, base), os.path.join(args.outdir, "sonar-mypy.json")
-    )
-    write_report(
-        convert_vulture(args.vulture, base),
-        os.path.join(args.outdir, "sonar-vulture.json"),
-    )
-    write_report(
-        convert_radon(args.radon, base), os.path.join(args.outdir, "sonar-radon.json")
-    )
-    write_report(
-        convert_semgrep(args.semgrep, base),
-        os.path.join(args.outdir, "sonar-semgrep.json"),
+        combined_issues, os.path.join(args.outdir, "sonar-external-issues.json")
     )
 
     print("Done.")
