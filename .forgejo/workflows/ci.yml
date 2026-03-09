@@ -515,20 +515,29 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: [sonarqube]
     container:
-      image: docker:27-cli
+      image: nikolaik/python-nodejs:python3.11-nodejs20
       volumes:
         - /var/run/docker.sock:/var/run/docker.sock
     steps:
       - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Docker CLI
         run: |
-          apk add --no-cache git
-          git clone --depth=1 --branch "${GITHUB_REF_NAME}" "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}.git" .
+          apt-get update -qq
+          apt-get install -y -qq docker.io
 
       - name: Build Docker image
         run: docker build -t hermes:${{ github.sha }} .
 
-      - name: Install Trivy
-        run: apk add --no-cache trivy
+      - name: Ensure Trivy CLI available
+        run: |
+          if command -v trivy >/dev/null 2>&1; then
+            echo "trivy already on PATH: $(command -v trivy)"
+          else
+            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
+              | sh -s -- -b /usr/local/bin v0.59.1
+          fi
 
       - name: Trivy image scan
         env:
@@ -655,7 +664,7 @@ jobs:
           NFS_SSH_USER: ${{ secrets.NFS_SSH_USER }}
         run: |
           mkdir -p ~/.ssh
-          echo "${NFS_SSH_KEY}" > ~/.ssh/id_ed25519
+          printf '%s\n' "${NFS_SSH_KEY}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H "${NFS_SERVER}" >> ~/.ssh/known_hosts 2>/dev/null
           rsync -av --delete -e "ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no" \
