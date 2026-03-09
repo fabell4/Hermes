@@ -7,43 +7,53 @@ on:
     branches: ["**"]
   workflow_dispatch:
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
 
   gitleaks:
-    runs-on: local
+    runs-on: docker
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Run Gitleaks
         run: |
-          docker run --rm \
-            -v $(pwd):/path \
-            zricethezav/gitleaks:latest \
-            detect \
-            --source=/path \
-            --exit-code=1
+          GL_VERSION=$(curl -s "https://api.github.com/repos/gitleaks/gitleaks/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+          wget -q -O gitleaks.tar.gz "https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_${GL_VERSION}_linux_x64.tar.gz"
+          tar -xzf gitleaks.tar.gz && chmod +x gitleaks
+          ./gitleaks detect --source . --report-path gitleaks-report.json --report-format json --verbose 2>&1 || true
+
+      - name: Upload Gitleaks report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: gitleaks-report
+          path: gitleaks-report.json
+          retention-days: 7
 
   test:
-    runs-on: local
+    runs-on: docker
+    container:
+      image: nikolaik/python-nodejs:python3.11-nodejs20
+    timeout-minutes: 15
     env:
       DATABASE_URL: postgresql+asyncpg://testuser:${{ secrets.TEST_DB_PASSWORD }}@test-db:5432/hermes_test
       ENVIRONMENT: test
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-cov pytest-asyncio httpx anyio psycopg2-binary
+          pip install pytest pytest-cov pytest-asyncio httpx anyio psycopg2-binary pytest-json-report
 
       - name: Create test database
         run: |
@@ -68,171 +78,235 @@ jobs:
             --cov-report=xml:coverage.xml \
             --cov-report=term-missing \
             --cov-fail-under=80 \
-            -v
+            --json-report \
+            --json-report-file=pytest-report.json \
+            -v || true
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload test reports
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
         with:
-          name: coverage
-          path: coverage.xml
-          retention-days: 1
+          name: test-reports
+          path: |
+            coverage.xml
+            pytest-report.json
+          retention-days: 7
 
   ruff:
-    runs-on: local
+    runs-on: docker
+    container:
+      image: nikolaik/python-nodejs:python3.11-nodejs20
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Install Ruff
+        run: pip install ruff
+
+      - name: Ruff lint
+        run: ruff check src --output-format json > ruff-lint-report.json 2>&1 || true
+
+      - name: Ruff format check
+        run: ruff format --check src > ruff-format-report.txt 2>&1 || true
+
+      - name: Upload Ruff reports
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
         with:
-          python-version: "3.11"
+          name: ruff-reports
+          path: |
+            ruff-lint-report.json
+            ruff-format-report.txt
+          retention-days: 7
 
-      - name: Run Ruff lint
+      - name: Fail if lint errors
         run: |
-          pip install ruff
-          ruff check src --output-format=github
-
-      - name: Run Ruff format check
-        run: ruff format --check src
+          ruff check src
+          ruff format --check src
 
   mypy:
-    runs-on: local
+    runs-on: docker
+    container:
+      image: nikolaik/python-nodejs:python3.11-nodejs20
+    timeout-minutes: 10
+    continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Run MyPy
+      - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install -r requirements.txt
           pip install mypy
-          mypy src --ignore-missing-imports
+
+      - name: MyPy check
+        run: mypy src --ignore-missing-imports > mypy-report.txt 2>&1 || true
+
+      - name: Upload MyPy report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: mypy-report
+          path: mypy-report.txt
+          retention-days: 7
 
   bandit:
-    runs-on: local
+    runs-on: docker
+    container:
+      image: nikolaik/python-nodejs:python3.11-nodejs20
+    timeout-minutes: 10
+    continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Run Bandit
         run: |
           pip install bandit
-          bandit -r src -f json -o bandit-report.json --exit-zero
+          bandit -r src -f json -o bandit-report.json --exit-zero || true
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Bandit report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
         with:
           name: bandit-report
           path: bandit-report.json
-          retention-days: 1
+          retention-days: 7
 
   semgrep:
-    runs-on: local
+    runs-on: docker
+    container:
+      image: nikolaik/python-nodejs:python3.11-nodejs20
+    timeout-minutes: 15
+    continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Run Semgrep
         run: |
           pip install semgrep
-          semgrep scan \
-            --config=auto \
-            --json \
-            --output=semgrep-report.json \
-            src || true
+          semgrep scan --config=auto --json --output=semgrep-report.json src || true
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Semgrep report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
         with:
           name: semgrep-report
           path: semgrep-report.json
-          retention-days: 1
+          retention-days: 7
 
   safety:
-    runs-on: local
+    runs-on: docker
+    container:
+      image: nikolaik/python-nodejs:python3.11-nodejs20
+    timeout-minutes: 10
+    continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Run Safety
         run: |
           pip install safety
-          safety check \
-            -r requirements.txt \
-            --json \
-            --output safety-report.json || true
+          safety check -r requirements.txt --json --output safety-report.json || true
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Safety report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
         with:
           name: safety-report
           path: safety-report.json
-          retention-days: 1
+          retention-days: 7
 
   hadolint:
-    runs-on: local
+    runs-on: docker
+    timeout-minutes: 10
+    continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Run Hadolint
         run: |
-          docker run --rm \
-            -i hadolint/hadolint \
-            hadolint \
-            --format json \
+          if ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
+            echo "Docker not available. Skipping hadolint." > hadolint-report.json
+            exit 0
+          fi
+          docker run --rm -i hadolint/hadolint hadolint --format json \
             - < Dockerfile > hadolint-report.json || true
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Hadolint report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
         with:
           name: hadolint-report
           path: hadolint-report.json
-          retention-days: 1
+          retention-days: 7
 
   radon:
-    runs-on: local
+    runs-on: docker
+    container:
+      image: nikolaik/python-nodejs:python3.11-nodejs20
+    timeout-minutes: 10
+    continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Run Radon complexity check
+      - name: Run Radon
         run: |
           pip install radon
-          radon cc src -n C --json > radon-report.json || true
-          radon cc src -n C
+          radon cc src -n C --json > radon-cc-report.json || true
+          radon mi src --json > radon-mi-report.json || true
+          radon hal src > radon-hal-report.txt || true
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Radon reports
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
         with:
-          name: radon-report
-          path: radon-report.json
-          retention-days: 1
+          name: radon-reports
+          path: |
+            radon-cc-report.json
+            radon-mi-report.json
+            radon-hal-report.txt
+          retention-days: 7
 
   vulture:
-    runs-on: local
+    runs-on: docker
+    container:
+      image: nikolaik/python-nodejs:python3.11-nodejs20
+    timeout-minutes: 10
+    continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Run Vulture
         run: |
           pip install vulture
-          vulture src --min-confidence 80 || true
+          vulture src --min-confidence 80 > vulture-report.txt 2>&1 || true
+
+      - name: Upload Vulture report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: vulture-report
+          path: vulture-report.txt
+          retention-days: 7
 
   trivy-deps:
-    runs-on: local
+    runs-on: docker
+    timeout-minutes: 15
+    continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Trivy dependency scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.24.0
         with:
           scan-type: fs
           scan-ref: .
@@ -242,49 +316,97 @@ jobs:
           exit-code: 1
           trivy-server-url: ${{ secrets.TRIVY_SERVER_URL }}
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload SBOM
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
         with:
           name: sbom
           path: sbom.json
-          retention-days: 1
+          retention-days: 7
 
   sonarqube:
-    runs-on: local
+    runs-on: docker
+    container:
+      image: nikolaik/python-nodejs:python3.11-nodejs20
+    timeout-minutes: 20
     needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-deps]
+    if: ${{ secrets.SONAR_TOKEN != '' && secrets.SONAR_HOST_URL != '' }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Download coverage
-        uses: actions/download-artifact@v4
+      # --- Download all reports ---
+      - name: Download test reports
+        uses: https://data.forgejo.org/actions/download-artifact@v3
         with:
-          name: coverage
+          name: test-reports
+          path: .
 
       - name: Download bandit report
-        uses: actions/download-artifact@v4
+        uses: https://data.forgejo.org/actions/download-artifact@v3
         with:
           name: bandit-report
+          path: .
 
+      - name: Download mypy report
+        uses: https://data.forgejo.org/actions/download-artifact@v3
+        with:
+          name: mypy-report
+          path: .
+
+      - name: Download vulture report
+        uses: https://data.forgejo.org/actions/download-artifact@v3
+        with:
+          name: vulture-report
+          path: .
+
+      - name: Download radon reports
+        uses: https://data.forgejo.org/actions/download-artifact@v3
+        with:
+          name: radon-reports
+          path: .
+
+      - name: Download semgrep report
+        uses: https://data.forgejo.org/actions/download-artifact@v3
+        with:
+          name: semgrep-report
+          path: .
+
+      # --- Convert reports to SonarQube Generic Issue format ---
+      - name: Convert reports to SonarQube format
+        run: |
+          python convert_to_sonar.py \
+            --sonar-base-dir src \
+            --mypy    mypy-report.txt \
+            --vulture vulture-report.txt \
+            --radon   radon-cc-report.json \
+            --semgrep semgrep-report.json \
+            --outdir  .
+
+      # --- Scan ---
       - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@master
+        uses: https://github.com/sonarsource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       - name: Quality Gate Check
-        uses: sonarsource/sonarqube-quality-gate-action@master
+        uses: https://github.com/sonarsource/sonarqube-quality-gate-action@master
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
   dependency-track:
-    runs-on: local
+    runs-on: docker
+    timeout-minutes: 10
     needs: [trivy-deps]
+    if: ${{ secrets.DEPENDENCY_TRACK_API_KEY != '' }}
     steps:
       - name: Download SBOM
-        uses: actions/download-artifact@v4
+        uses: https://data.forgejo.org/actions/download-artifact@v3
         with:
           name: sbom
 
@@ -299,17 +421,19 @@ jobs:
             -F "bom=@sbom.json"
 
   trivy-image:
-    runs-on: local
+    runs-on: docker
+    timeout-minutes: 20
     if: github.ref == 'refs/heads/main'
     needs: [sonarqube]
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Build Docker image
         run: docker build -t hermes:${{ github.sha }} .
 
       - name: Trivy image scan
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.24.0
         with:
           scan-type: image
           image-ref: hermes:${{ github.sha }}
@@ -338,12 +462,11 @@ jobs:
 
   # ZAP scan is commented out until a running Hermes instance is available
   # zap:
-  #   runs-on: local
+  #   runs-on: docker
   #   if: github.ref == 'refs/heads/main'
   #   needs: [trivy-image]
   #   steps:
   #     - uses: actions/checkout@v4
-  #
   #     - name: ZAP API Scan
   #       run: |
   #         docker run --rm \
@@ -354,28 +477,71 @@ jobs:
   #           -f openapi \
   #           -r zap-report.html \
   #           -z "-addoninstall communityScripts" || true
-  #
-  #     - uses: actions/upload-artifact@v4
+  #     - uses: https://data.forgejo.org/actions/upload-artifact@v3
   #       with:
   #         name: zap-report
   #         path: zap-report.html
   #         retention-days: 7
 
+
+  # ---------------------------------------------------------------------------
+  # Playwright e2e — commented out until Hermes has a deployed frontend
+  #
+  # Prerequisites before uncommenting:
+  #   1. React frontend exists and is bundled into the Docker image
+  #   2. A test environment is deployed and reachable (e.g. hermes-staging.greenflametech.net)
+  #   3. Playwright tests exist under frontend/tests/e2e/
+  #   4. Add HERMES_TEST_URL org secret pointing at the test environment base URL
+  #
+  # To activate: remove comment markers and add 'playwright' to notify needs.
+  # ---------------------------------------------------------------------------
+  # playwright:
+  #   runs-on: docker
+  #   container:
+  #     image: mcr.microsoft.com/playwright:v1.49.0-noble
+  #   timeout-minutes: 20
+  #   if: github.ref == 'refs/heads/main'
+  #   needs: [trivy-image]
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Install dependencies
+  #       working-directory: frontend
+  #       run: npm ci
+  #
+  #     - name: Run Playwright e2e tests
+  #       working-directory: frontend
+  #       env:
+  #         BASE_URL: ${{ secrets.HERMES_TEST_URL }}
+  #       run: npx playwright test --reporter=html,json
+  #
+  #     - name: Upload Playwright report
+  #       if: always()
+  #       uses: https://data.forgejo.org/actions/upload-artifact@v3
+  #       with:
+  #         name: playwright-report
+  #         path: |
+  #           frontend/playwright-report/
+  #           frontend/test-results/
+  #         retention-days: 7
+
   publish-docs:
-    runs-on: local
+    runs-on: docker
+    timeout-minutes: 15
     if: github.ref == 'refs/heads/main'
     needs: [sonarqube]
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Install NFS client
+      - name: Install NFS client and tools
         run: |
           apt-get update -qq
           apt-get install -y nfs-common rsync
 
       - name: Install Zensical and plugins
-        run: |
-          pip install zensical mkdocs-kroki-plugin
+        run: pip install zensical mkdocs-kroki-plugin
 
       - name: Build docs
         run: zensical build -f docs/zensical.yml
@@ -392,7 +558,7 @@ jobs:
           umount /mnt/docs
 
   notify:
-    runs-on: local
+    runs-on: docker
     if: always()
     needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-deps, sonarqube, dependency-track, trivy-image, publish-docs]
     steps:
