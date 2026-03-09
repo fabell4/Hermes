@@ -518,6 +518,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install Docker CLI
+        run: |
+          if command -v docker >/dev/null 2>&1; then
+            echo "docker already on PATH: $(command -v docker)"
+          else
+            curl -fsSLo docker.tgz \
+              "https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz"
+            tar -xzf docker.tgz --strip-components=1 -C /usr/local/bin docker/docker
+            chmod +x /usr/local/bin/docker
+            rm docker.tgz
+          fi
+          docker info
+
       - name: Build Docker image
         run: docker build -t hermes:${{ github.sha }} .
 
