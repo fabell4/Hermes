@@ -530,6 +530,7 @@ jobs:
             rm docker.tgz
             echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           fi
+          docker info  # <-- add this
 
       - name: Build Docker image
         run: docker build -t hermes:${{ github.sha }} .
@@ -645,14 +646,11 @@ jobs:
     needs: [sonarqube]
     container:
       image: nikolaik/python-nodejs:python3.11-nodejs20
+      volumes:
+        - mkdocs_content:/mkdocs
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Install NFS client and tools
-        run: |
-          apt-get update -qq
-          apt-get install -y nfs-common rsync
 
       - name: Install Zensical and plugins
         run: pip install zensical mkdocs-kroki-plugin
@@ -660,25 +658,9 @@ jobs:
       - name: Build docs
         run: zensical build -f docs/zeniscal.yml
 
-      - name: Sync docs to NFS
-        env:
-          NFS_SERVER: ${{ secrets.NFS_SERVER }}
-          NFS_MKDOCS_PATH: ${{ secrets.NFS_MKDOCS_PATH }}
-          NFS_SSH_KEY: ${{ secrets.NFS_SSH_KEY }}
-          NFS_SSH_USER: ${{ secrets.NFS_SSH_USER }}
+      - name: Publish docs to volume
         run: |
-          python3 - <<'PYEOF'
-          import os, pathlib, subprocess
-          key = os.environ['NFS_SSH_KEY'].replace('\\n', '\n').strip()
-          p = pathlib.Path('/root/.ssh/id_ed25519')
-          p.parent.mkdir(parents=True, exist_ok=True)
-          p.write_text(key + '\n')
-          p.chmod(0o600)
-          PYEOF
-          ssh-keyscan -H "${NFS_SERVER}" >> ~/.ssh/known_hosts 2>/dev/null
-          rsync -av --delete -e "ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no" \
-            site/ "${NFS_SSH_USER}@${NFS_SERVER}:${NFS_MKDOCS_PATH}/hermes/"
-          rm -f ~/.ssh/id_ed25519
+          rsync -av --delete site/ /mkdocs/hermes/
 
   notify:
     runs-on: docker
