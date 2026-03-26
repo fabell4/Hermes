@@ -488,27 +488,6 @@ jobs:
               sys.exit(1)
           EOF
 
-  dependency-track:
-    runs-on: docker
-    timeout-minutes: 10
-    needs: [trivy-deps]
-    if: ${{ secrets.DEPENDENCY_TRACK_API_KEY != '' }}
-    steps:
-      - name: Download SBOM
-        uses: https://data.forgejo.org/actions/download-artifact@v3
-        with:
-          name: sbom
-
-      - name: Upload SBOM to Dependency Track
-        run: |
-          curl -s -X POST https://owasp.greenflametech.net/api/v1/bom \
-            -H "X-Api-Key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}" \
-            -H "Content-Type: multipart/form-data" \
-            -F "autoCreate=true" \
-            -F "projectName=hermes" \
-            -F "projectVersion=${{ github.ref_name }}" \
-            -F "bom=@sbom.json"
-
   trivy-image:
     runs-on: docker
     timeout-minutes: 20
@@ -665,7 +644,7 @@ jobs:
   notify:
     runs-on: docker
     if: always()
-    needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-deps, sonarqube, dependency-track, trivy-image, publish-docs]
+    needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-deps, sonarqube, trivy-image, publish-docs]
     steps:
       - name: Notify success
         if: ${{ !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
