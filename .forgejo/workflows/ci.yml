@@ -504,12 +504,12 @@ jobs:
           else
             mkdir -p "$HOME/.local/bin"
             curl -fsSLo docker.tgz \
-              "https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz"
+              "https://download.docker.com/linux/static/stable/x86_oxy/docker-27.3.1.tgz"
             tar -xzf docker.tgz --strip-components=1 -C "$HOME/.local/bin" docker/docker
             rm docker.tgz
             echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           fi
-          docker info  # <-- add this
+          docker info
 
       - name: Build Docker image
         run: docker build -t hermes:${{ github.sha }} .
@@ -529,21 +529,44 @@ jobs:
         run: |
           trivy image \
             --server "${TRIVY_SERVER_URL}" \
-            --format cyclonedx \
-            --output sbom-image.json \
+            --format json \
+            --output trivy-image-results.json \
             --severity CRITICAL \
             --exit-code 1 \
             hermes:${{ github.sha }}
 
-      - name: Upload image SBOM to Dependency Track
+      - name: Ship Trivy image results to Loki log
+        if: always()
         run: |
-          curl -s -X POST https://owasp.greenflametech.net/api/v1/bom \
-            -H "X-Api-Key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}" \
-            -H "Content-Type: multipart/form-data" \
-            -F "autoCreate=true" \
-            -F "projectName=hermes-image" \
-            -F "projectVersion=${{ github.ref_name }}" \
-            -F "bom=@sbom-image.json"
+          if [ ! -f trivy-image-results.json ]; then
+            echo "No trivy-image-results.json found, skipping"
+            exit 0
+          fi
+          jq -c --arg project "${{ github.repository }}" \
+                 --arg branch "${{ github.ref_name }}" \
+                 --arg commit "${{ github.sha }}" \
+                 --arg scan_type "image" '
+            .Results[]? | .Vulnerabilities[]? | {
+              time: now,
+              project: $project,
+              branch: $branch,
+              commit: $commit,
+              scan_type: $scan_type,
+              severity: .Severity,
+              pkg: .PkgName,
+              cve: .VulnerabilityID,
+              installed: .InstalledVersion,
+              fixed: .FixedVersion
+            }
+          ' trivy-image-results.json >> /var/log/trivy-findings.log || true
+
+      - name: Upload Trivy image report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: trivy-image-report
+          path: trivy-image-results.json
+          retention-days: 90
 
       - name: Push to registry
         run: |
@@ -551,7 +574,7 @@ jobs:
           docker tag hermes:${{ github.sha }} registry.greenflametech.net/hermes:latest
           docker push registry.greenflametech.net/hermes:${{ github.sha }}
           docker push registry.greenflametech.net/hermes:latest
-
+          
   # ZAP scan is commented out until a running Hermes instance is available
   # zap:
   #   runs-on: docker
