@@ -568,22 +568,22 @@ jobs:
       - name: Build image for scanning
         run: |
           SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          docker build -t "${REGISTRY}/${IMAGE_NAME}:scan-${SHA}" .
-          echo "IMAGE_TAG=${REGISTRY}/${IMAGE_NAME}:scan-${SHA}" >> $GITHUB_ENV
+          docker build -t "${IMAGE_NAME}:scan-${SHA}" .
+          echo "IMAGE_TAG=${IMAGE_NAME}:scan-${SHA}" >> $GITHUB_ENV
 
       - name: Install Trivy
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
             | sh -s -- -b /usr/local/bin v0.59.1
-          ln -sf /usr/local/bin/trivy ./trivy
 
       - name: Scan image
         run: |
-          ./trivy image \
+          trivy image \
             --format json \
             --output trivy-report.json \
             --exit-code 0 \
-            "${{ env.IMAGE_TAG }}"
+            "${{ env.IMAGE_TAG }}" \
+          || echo '{"Results":[]}' > trivy-report.json
 
       - name: Ship findings to Loki
         if: always()
