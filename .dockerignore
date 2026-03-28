@@ -2,6 +2,7 @@
 .venv-*/
 .vscode/
 .github/
+.forgejo/
 .git/
 __pycache__/
 *.py[cod]
@@ -9,5 +10,10 @@ tests/
 .pytest_cache/
 .env
 *.csv
+logs/
+data/
 app.md
 README.md
+TODO.md
+docker-compose.yml
+*.md

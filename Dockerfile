@@ -6,11 +6,24 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Ensure persistent directories exist at build time.
+# These are overridden by named volumes at runtime but must exist on first start.
+RUN mkdir -p /app/logs /app/data
+
 # Copy source
 COPY src/ ./src/
 
-# Streamlit default port
+# Run as non-root user for security
+RUN useradd --no-create-home --shell /bin/false hermes \
+    && chown -R hermes:hermes /app
+USER hermes
+
+# Streamlit UI port + Prometheus /metrics port
 EXPOSE 8501
+EXPOSE 8000
 
 # Run the Streamlit UI
-CMD ["python", "-m", "streamlit", "run", "src/streamlit_app.py", "--server.address=0.0.0.0"]
+# --server.headless=true suppresses browser-open attempts inside the container
+CMD ["python", "-m", "streamlit", "run", "src/streamlit_app.py", \
+     "--server.address=0.0.0.0", \
+     "--server.headless=true"]

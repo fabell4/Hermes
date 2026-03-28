@@ -1,0 +1,46 @@
+services:
+  hermes:
+    build: .
+    container_name: hermes
+    restart: unless-stopped
+
+    ports:
+      - "${UI_PORT:-8501}:8501"         # Streamlit UI
+      - "${PROMETHEUS_PORT:-8000}:8000" # Prometheus /metrics endpoint
+
+    volumes:
+      - hermes-logs:/app/logs           # CSV result history
+      - hermes-data:/app/data           # runtime_config.json (scheduler interval, exporter state)
+
+    environment:
+      # --- App ---
+      APP_ENV: "${APP_ENV:-production}"
+      LOG_LEVEL: "${LOG_LEVEL:-INFO}"
+      TZ: "${TZ:-UTC}"
+
+      # --- Scheduler ---
+      SPEEDTEST_INTERVAL_MINUTES: "${SPEEDTEST_INTERVAL_MINUTES:-60}"
+      RUN_ON_STARTUP: "${RUN_ON_STARTUP:-true}"
+
+      # --- Exporters ---
+      ENABLED_EXPORTERS: "${ENABLED_EXPORTERS:-csv}"
+
+      # --- CSV ---
+      CSV_LOG_PATH: "logs/results.csv"
+
+      # --- Prometheus ---
+      PROMETHEUS_PORT: "${PROMETHEUS_PORT:-8000}"
+
+      # --- Loki ---
+      LOKI_URL: "${LOKI_URL:-}"
+      LOKI_JOB_LABEL: "${LOKI_JOB_LABEL:-hermes_speedtest}"
+
+    env_file:
+      - path: .env
+        required: false  # Don't fail if .env is absent; env vars above act as defaults
+
+volumes:
+  hermes-logs:
+    driver: local
+  hermes-data:
+    driver: local
