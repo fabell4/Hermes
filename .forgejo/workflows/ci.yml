@@ -214,7 +214,14 @@ jobs:
       - name: Install Docker
         run: |
           apt-get update -qq
-          apt-get install -y -qq docker.io
+          apt-get install -y -qq curl ca-certificates
+          if ! command -v docker >/dev/null 2>&1; then
+            curl -fsSLo /tmp/docker.tgz \
+              "https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz"
+            tar -xzf /tmp/docker.tgz --strip-components=1 -C /usr/local/bin docker/docker
+            rm /tmp/docker.tgz
+          fi
+          docker info
 
       - name: Set image tags
         id: tags
@@ -548,7 +555,15 @@ jobs:
       - name: Install tools
         run: |
           apt-get update -qq
-          apt-get install -y -qq docker.io curl jq wget ca-certificates
+          apt-get install -y -qq curl jq wget ca-certificates
+          # Use host Docker socket — just need the CLI binary
+          if ! command -v docker >/dev/null 2>&1; then
+            curl -fsSLo /tmp/docker.tgz \
+              "https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz"
+            tar -xzf /tmp/docker.tgz --strip-components=1 -C /usr/local/bin docker/docker
+            rm /tmp/docker.tgz
+          fi
+          docker info
 
       - name: Build image for scanning
         run: |
