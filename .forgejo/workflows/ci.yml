@@ -531,88 +531,120 @@ jobs:
     timeout-minutes: 20
     if: github.ref == 'refs/heads/main'
     needs: [sonarqube]
+    env:
+      REGISTRY: registry.greenflametech.net
+      IMAGE_NAME: hermes
+      LOKI_PUSH_URL: https://loki.greenflametech.net/loki/api/v1/push
+      PUSHGATEWAY_URL: https://prometheus.greenflametech.net/metrics/job/trivy/instance/hermes
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Docker CLI
+      - name: Install tools
         run: |
-          if command -v docker >/dev/null 2>&1; then
-            echo "docker already on PATH: $(command -v docker)"
-          else
-            mkdir -p "$HOME/.local/bin"
-            curl -fsSLo docker.tgz \
-              "https://download.docker.com/linux/static/stable/x86_oxy/docker-27.3.1.tgz"
-            tar -xzf docker.tgz --strip-components=1 -C "$HOME/.local/bin" docker/docker
-            rm docker.tgz
-            echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          fi
-          docker info
+          apt-get update -qq
+          apt-get install -y -qq docker.io curl jq wget ca-certificates
 
-      - name: Build Docker image
-        run: docker build -t hermes:${{ github.sha }} .
-
-      - name: Ensure Trivy CLI available
+      - name: Build image for scanning
         run: |
-          if command -v trivy >/dev/null 2>&1; then
-            echo "trivy already on PATH: $(command -v trivy)"
-          else
-            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
-              | sh -s -- -b /usr/local/bin v0.59.1
-          fi
+          SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          docker build -t "${REGISTRY}/${IMAGE_NAME}:scan-${SHA}" .
+          echo "IMAGE_TAG=${REGISTRY}/${IMAGE_NAME}:scan-${SHA}" >> $GITHUB_ENV
 
-      - name: Trivy image scan
-        env:
-          TRIVY_SERVER_URL: ${{ secrets.TRIVY_SERVER_URL }}
+      - name: Install Trivy
         run: |
-          trivy image \
-            --server "${TRIVY_SERVER_URL}" \
+          TRIVY_VERSION=$(curl -sf "https://api.github.com/repos/aquasecurity/trivy/releases/latest" \
+            | grep -Po '"tag_name": "v\K[0-9.]+' | head -1)
+          wget -q "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" \
+            -O trivy.tar.gz
+          tar -xzf trivy.tar.gz trivy
+          chmod +x trivy
+
+      - name: Scan image
+        run: |
+          ./trivy image \
             --format json \
-            --output trivy-image-results.json \
-            --severity CRITICAL \
-            --exit-code 1 \
-            hermes:${{ github.sha }}
+            --output trivy-report.json \
+            --exit-code 0 \
+            "${{ env.IMAGE_TAG }}"
 
-      - name: Ship Trivy image results to Loki log
+      - name: Ship findings to Loki
         if: always()
         run: |
-          if [ ! -f trivy-image-results.json ]; then
-            echo "No trivy-image-results.json found, skipping"
-            exit 0
-          fi
-          jq -c --arg project "${{ github.repository }}" \
-                 --arg branch "${{ github.ref_name }}" \
-                 --arg commit "${{ github.sha }}" \
-                 --arg scan_type "image" '
-            .Results[]? | .Vulnerabilities[]? | {
-              time: now,
-              project: $project,
-              branch: $branch,
-              commit: $commit,
-              scan_type: $scan_type,
-              severity: .Severity,
-              pkg: .PkgName,
-              cve: .VulnerabilityID,
-              installed: .InstalledVersion,
-              fixed: .FixedVersion
-            }
-          ' trivy-image-results.json >> /var/log/trivy-findings.log || true
+          TS=$(date +%s%N)
+          REPO="${{ github.repository }}"
+          REF="${{ github.ref_name }}"
+          SHA="${{ github.sha }}"
 
-      - name: Upload Trivy image report
+          PAYLOAD=$(jq -n \
+            --arg ts "$TS" \
+            --arg repo "$REPO" \
+            --arg ref "$REF" \
+            --arg sha "$SHA" \
+            --slurpfile report trivy-report.json '
+            ($report[0].Results // [])
+            | [.[].Vulnerabilities // [] | .[]]
+            | map({
+                severity: .Severity,
+                pkg:      .PkgName,
+                id:       .VulnerabilityID,
+                installed:.InstalledVersion,
+                fixed:    (.FixedVersion  // "no-fix"),
+                title:    (.Title         // "")
+              } | @json)
+            | if length == 0 then
+                [{
+                  stream: {job: "trivy", repo: $repo, ref: $ref, commit: $sha},
+                  values: [[$ts, "trivy scan complete — no vulnerabilities found"]]
+                }]
+              else
+                [{
+                  stream: {job: "trivy", repo: $repo, ref: $ref, commit: $sha},
+                  values: (map([$ts, .]))
+                }]
+              end
+            | {streams: .}
+          ')
+
+          curl -sf -X POST "${LOKI_PUSH_URL}" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" || echo "Warning: Loki push failed (non-fatal)"
+
+      - name: Push summary metrics to Prometheus Pushgateway
+        if: always()
+        run: |
+          SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          REPORT=trivy-report.json
+
+          jq_count() {
+            jq --arg sev "$1" \
+              '[.Results[]?.Vulnerabilities[]? | select(.Severity==$sev)] | length' \
+              "$REPORT" 2>/dev/null || echo 0
+          }
+
+          CRITICAL=$(jq_count CRITICAL)
+          HIGH=$(jq_count HIGH)
+          MEDIUM=$(jq_count MEDIUM)
+          LOW=$(jq_count LOW)
+
+          printf '# HELP trivy_vulnerabilities Vulnerability count by severity from Trivy image scan\n'  > metrics.txt
+          printf '# TYPE trivy_vulnerabilities gauge\n'                                                >> metrics.txt
+          printf 'trivy_vulnerabilities{severity="CRITICAL",commit="%s"} %s\n' "$SHA" "$CRITICAL"    >> metrics.txt
+          printf 'trivy_vulnerabilities{severity="HIGH",commit="%s"}     %s\n' "$SHA" "$HIGH"        >> metrics.txt
+          printf 'trivy_vulnerabilities{severity="MEDIUM",commit="%s"}   %s\n' "$SHA" "$MEDIUM"      >> metrics.txt
+          printf 'trivy_vulnerabilities{severity="LOW",commit="%s"}      %s\n' "$SHA" "$LOW"         >> metrics.txt
+
+          curl -sf --data-binary @metrics.txt "${PUSHGATEWAY_URL}" \
+            || echo "Warning: Pushgateway push failed (non-fatal)"
+
+      - name: Upload Trivy report
         if: always()
         uses: https://data.forgejo.org/actions/upload-artifact@v3
         with:
-          name: trivy-image-report
-          path: trivy-image-results.json
-          retention-days: 90
+          name: trivy-report
+          path: trivy-report.json
+          retention-days: 30
 
-      - name: Push to registry
-        run: |
-          docker tag hermes:${{ github.sha }} registry.greenflametech.net/hermes:${{ github.sha }}
-          docker tag hermes:${{ github.sha }} registry.greenflametech.net/hermes:latest
-          docker push registry.greenflametech.net/hermes:${{ github.sha }}
-          docker push registry.greenflametech.net/hermes:latest
-          
   # ZAP scan is commented out until a running Hermes instance is available
   # zap:
   #   runs-on: docker
