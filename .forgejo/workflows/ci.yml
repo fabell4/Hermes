@@ -211,6 +211,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install Docker
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq docker.io
+
       - name: Set image tags
         id: tags
         run: |
@@ -553,12 +558,9 @@ jobs:
 
       - name: Install Trivy
         run: |
-          TRIVY_VERSION=$(curl -sf "https://api.github.com/repos/aquasecurity/trivy/releases/latest" \
-            | grep -Po '"tag_name": "v\K[0-9.]+' | head -1)
-          wget -q "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" \
-            -O trivy.tar.gz
-          tar -xzf trivy.tar.gz trivy
-          chmod +x trivy
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
+            | sh -s -- -b /usr/local/bin v0.59.1
+          ln -sf /usr/local/bin/trivy ./trivy
 
       - name: Scan image
         run: |
@@ -716,10 +718,9 @@ jobs:
     timeout-minutes: 15
     if: github.ref == 'refs/heads/main'
     needs: [sonarqube]
+    continue-on-error: true
     container:
       image: nikolaik/python-nodejs:python3.11-nodejs20
-      volumes:
-        - mkdocs_content:/mkdocs
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -730,9 +731,13 @@ jobs:
       - name: Build docs
         run: zensical build -f docs/zeniscal.yml
 
-      - name: Publish docs to volume
-        run: |
-          rsync -av --delete site/ /mkdocs/hermes/
+      - name: Upload docs artifact
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: docs-site
+          path: site/
+          retention-days: 7
 
   notify:
     runs-on: docker
