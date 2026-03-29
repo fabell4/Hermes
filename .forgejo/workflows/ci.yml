@@ -565,25 +565,24 @@ jobs:
           fi
           docker info
 
-      - name: Build image for scanning
-        run: |
-          SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          docker build -t "${IMAGE_NAME}:scan-${SHA}" .
-          echo "IMAGE_TAG=${IMAGE_NAME}:scan-${SHA}" >> $GITHUB_ENV
-
       - name: Install Trivy
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh \
             | sh -s -- -b /usr/local/bin v0.59.1
+          trivy --version
 
-      - name: Scan image
+      - name: Build and scan image
         run: |
+          SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          TAG="${IMAGE_NAME}:scan-${SHA}"
+          docker build -t "$TAG" .
+          DOCKER_HOST=unix:///var/run/docker.sock \
           trivy image \
             --format json \
             --output trivy-report.json \
             --exit-code 0 \
-            "${{ env.IMAGE_TAG }}" \
-          || echo '{"Results":[]}' > trivy-report.json
+            "$TAG" \
+          || { echo '{"Results":[]}' > trivy-report.json; echo "trivy scan failed, using empty report"; }
 
       - name: Ship findings to Loki
         if: always()
