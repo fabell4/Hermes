@@ -40,7 +40,7 @@ jobs:
   test:
     runs-on: docker
     container:
-      image: nikolaik/python-nodejs:python3.11-nodejs20
+      image: registry.greenflametech.net/gft-python-runner:latest
     timeout-minutes: 15
     env:
       DATABASE_URL: postgresql+asyncpg://testuser:${{ secrets.TEST_DB_PASSWORD }}@test-db:5432/hermes_test
@@ -95,7 +95,7 @@ jobs:
   ruff:
     runs-on: docker
     container:
-      image: nikolaik/python-nodejs:python3.11-nodejs20
+      image: registry.greenflametech.net/gft-python-runner:latest
     timeout-minutes: 10
     steps:
       - name: Checkout
@@ -128,7 +128,7 @@ jobs:
   mypy:
     runs-on: docker
     container:
-      image: nikolaik/python-nodejs:python3.11-nodejs20
+      image: registry.greenflametech.net/gft-python-runner:latest
     timeout-minutes: 10
     continue-on-error: true
     steps:
@@ -155,7 +155,7 @@ jobs:
   bandit:
     runs-on: docker
     container:
-      image: nikolaik/python-nodejs:python3.11-nodejs20
+      image: registry.greenflametech.net/gft-python-runner:latest
     timeout-minutes: 10
     continue-on-error: true
     steps:
@@ -178,7 +178,7 @@ jobs:
   semgrep:
     runs-on: docker
     container:
-      image: nikolaik/python-nodejs:python3.11-nodejs20
+      image: registry.greenflametech.net/gft-python-runner:latest
     timeout-minutes: 15
     continue-on-error: true
     steps:
@@ -201,7 +201,7 @@ jobs:
   safety:
     runs-on: docker
     container:
-      image: nikolaik/python-nodejs:python3.11-nodejs20
+      image: registry.greenflametech.net/gft-python-runner:latest
     timeout-minutes: 10
     continue-on-error: true
     steps:
@@ -235,7 +235,7 @@ jobs:
             echo "Docker not available. Skipping hadolint." > hadolint-report.json
             exit 0
           fi
-          docker run --rm -i hadolint/hadolint hadolint --format json \
+          docker run --rm -i registry.greenflametech.net/hadolint/hadolint hadolint --format json \
             - < Dockerfile > hadolint-report.json || true
 
       - name: Upload Hadolint report
@@ -249,7 +249,7 @@ jobs:
   radon:
     runs-on: docker
     container:
-      image: nikolaik/python-nodejs:python3.11-nodejs20
+      image: registry.greenflametech.net/gft-python-runner:latest
     timeout-minutes: 10
     continue-on-error: true
     steps:
@@ -277,7 +277,7 @@ jobs:
   vulture:
     runs-on: docker
     container:
-      image: nikolaik/python-nodejs:python3.11-nodejs20
+      image: registry.greenflametech.net/gft-python-runner:latest
     timeout-minutes: 10
     continue-on-error: true
     steps:
@@ -326,7 +326,7 @@ jobs:
   dependency-check:
     runs-on: docker
     container:
-      image: nikolaik/python-nodejs:python3.13-nodejs20
+      image: registry.greenflametech.net/gft-python-runner:latest
     timeout-minutes: 10
     continue-on-error: true
     defaults:
@@ -353,7 +353,7 @@ jobs:
   sonarqube:
     runs-on: docker
     container:
-      image: nikolaik/python-nodejs:python3.11-nodejs20
+      image: registry.greenflametech.net/gft-python-runner:latest
     timeout-minutes: 20
     needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-deps]
     if: ${{ secrets.SONAR_TOKEN != '' && secrets.SONAR_HOST_URL != '' }}
@@ -417,13 +417,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
-          apt-get update -qq && apt-get install -y -qq unzip curl
-          SCANNER_VERSION="6.2.1.4610"
-          curl -sSLo sonar-scanner.zip \
-            "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SCANNER_VERSION}-linux-x64.zip"
-          unzip -q sonar-scanner.zip
-          mv "sonar-scanner-${SCANNER_VERSION}-linux-x64" sonar-scanner-cli
-          sonar-scanner-cli/bin/sonar-scanner \
+          sonar-scanner \
             -Dsonar.projectBaseDir=. \
             -Dsonar.token="${SONAR_TOKEN}" \
             -Dsonar.host.url="${SONAR_HOST_URL}"
@@ -743,7 +737,7 @@ jobs:
     needs: [sonarqube]
     continue-on-error: true
     container:
-      image: nikolaik/python-nodejs:python3.11-nodejs20
+      image: registry.greenflametech.net/gft-python-runner:latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -767,6 +761,11 @@ jobs:
     if: always()
     needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-deps, sonarqube, docker-publish, trivy-image, publish-docs]
     steps:
+      - name: Install curl
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq curl
+
       - name: Notify success
         if: ${{ !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
         run: |
