@@ -498,18 +498,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Docker
-        run: |
-          apt-get update -qq
-          apt-get install -y -qq curl ca-certificates
-          if ! command -v docker >/dev/null 2>&1; then
-            curl -fsSLo /tmp/docker.tgz \
-              "https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz"
-            tar -xzf /tmp/docker.tgz --strip-components=1 -C /usr/local/bin docker/docker
-            rm /tmp/docker.tgz
-          fi
-          docker info
-
       - name: Set image tags
         id: tags
         run: |
@@ -553,17 +541,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Install tools
-        run: |
-          apt-get update -qq
-          apt-get install -y -qq curl jq ca-certificates
-          curl -fsSLo /tmp/docker.tgz \
-            "https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz"
-          tar -xzf /tmp/docker.tgz --strip-components=1 -C /usr/local/bin docker/docker
-          rm /tmp/docker.tgz
-          docker info
-          docker inspect marion_trivy --format "{{.State.Status}}"
 
       - name: Ensure report placeholder exists
         if: always()
@@ -738,34 +715,23 @@ jobs:
     continue-on-error: true
     container:
       image: registry.greenflametech.net/gft-python-runner:latest
+      volumes:
+        - mkdocs_content:/docs
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Zensical and plugins
-        run: pip install zensical mkdocs-kroki-plugin
-
-      - name: Build docs
-        run: zensical build -f docs/zeniscal.yml
-
-      - name: Upload docs artifact
-        if: always()
-        uses: https://data.forgejo.org/actions/upload-artifact@v3
-        with:
-          name: docs-site
-          path: site/
-          retention-days: 7
+      - name: Publish docs to hub
+        run: |
+          mkdir -p /docs/docs/hermes
+          cp -r docs/. /docs/docs/hermes/
+          rm -f /docs/docs/hermes/zeniscal.yml
 
   notify:
     runs-on: docker
     if: always()
     needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-deps, sonarqube, docker-publish, trivy-image, publish-docs]
     steps:
-      - name: Install curl
-        run: |
-          apt-get update -qq
-          apt-get install -y -qq curl
-
       - name: Notify success
         if: ${{ !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
         run: |
