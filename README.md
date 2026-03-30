@@ -37,9 +37,18 @@ flowchart TD
     DISP -. " " .-> PROM
     DISP -. " " .-> LOKI
 
-    style current fill:#e8f5e9,stroke:#4caf50
-    style planned fill:#f3f3f3,stroke:#bbb,stroke-dasharray: 4 4
-    style STDOUT fill:#fff9c4,stroke:#f9a825
+    style current fill:#1b5e20,stroke:#66bb6a,color:#ffffff
+    style planned fill:#1a237e,stroke:#5c6bc0,color:#ffffff,stroke-dasharray: 4 4
+    style MAIN fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style RUNNER fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style MODEL fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style STDOUT fill:#f57f17,stroke:#ffca28,color:#000000
+    style UI fill:#283593,stroke:#7986cb,color:#ffffff
+    style WEB fill:#283593,stroke:#7986cb,color:#ffffff
+    style DISP fill:#283593,stroke:#7986cb,color:#ffffff
+    style CSV fill:#283593,stroke:#7986cb,color:#ffffff
+    style PROM fill:#283593,stroke:#7986cb,color:#ffffff
+    style LOKI fill:#283593,stroke:#7986cb,color:#ffffff
 ```
 
 ## Project Structure
