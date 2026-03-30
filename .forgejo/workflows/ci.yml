@@ -564,7 +564,12 @@ jobs:
         run: |
           apt-get update -qq
           apt-get install -y -qq curl jq ca-certificates
+          curl -fsSLo /tmp/docker.tgz \
+            "https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz"
+          tar -xzf /tmp/docker.tgz --strip-components=1 -C /usr/local/bin docker/docker
+          rm /tmp/docker.tgz
           docker info
+          docker inspect marion_trivy --format "{{.State.Status}}"
 
       - name: Ensure report placeholder exists
         if: always()
@@ -581,37 +586,10 @@ jobs:
           TAG="${REGISTRY}/${IMAGE_NAME}:${SHA}"
           echo "Attempting to pull: $TAG"
           docker pull "$TAG" || { echo "Pull failed"; exit 1; }
-          docker run --rm \
-            --network marion_internal \
-            aquasec/trivy:latest image \
-              --server "${TRIVY_SERVER}" \
-              --format json \
-              --exit-code 0 \
-              "$TAG" > trivy-report.json \
-          || { echo '{"Results":[]}' > trivy-report.json; echo "trivy scan failed, using empty report"; }
-          ls -la trivy-report.json
-
-      - name: Ensure report placeholder exists
-        if: always()
-        run: |
-          set -x
-          echo '{"Results":[]}' > trivy-report.json
-          ls -la trivy-report.json
-
-      - name: Pull and scan published image
-        if: always()
-        run: |
-          set -x
-          SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          TAG="${REGISTRY}/${IMAGE_NAME}:${SHA}"
-          echo "Attempting to pull: $TAG"
-          docker pull "$TAG" || { echo "Pull failed"; exit 1; }
-          trivy image \
-            --server "${TRIVY_SERVER}" \
+          docker exec marion_trivy trivy image \
             --format json \
-            --output trivy-report.json \
             --exit-code 0 \
-            "$TAG" \
+            "$TAG" > trivy-report.json \
           || { echo '{"Results":[]}' > trivy-report.json; echo "trivy scan failed, using empty report"; }
           ls -la trivy-report.json
 
