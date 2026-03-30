@@ -198,56 +198,6 @@ jobs:
           path: semgrep-report.json
           retention-days: 7
 
-  docker-publish:
-    runs-on: docker
-    # Only publish from main branch pushes — not PRs or feature branches
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [ruff]
-    timeout-minutes: 20
-    env:
-      REGISTRY: registry.greenflametech.net
-      IMAGE_NAME: hermes
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install Docker
-        run: |
-          apt-get update -qq
-          apt-get install -y -qq curl ca-certificates
-          if ! command -v docker >/dev/null 2>&1; then
-            curl -fsSLo /tmp/docker.tgz \
-              "https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz"
-            tar -xzf /tmp/docker.tgz --strip-components=1 -C /usr/local/bin docker/docker
-            rm /tmp/docker.tgz
-          fi
-          docker info
-
-      - name: Set image tags
-        id: tags
-        run: |
-          SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          echo "sha_tag=${REGISTRY}/${IMAGE_NAME}:${SHA}" >> $GITHUB_OUTPUT
-          echo "latest_tag=${REGISTRY}/${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
-
-      - name: Build image
-        run: |
-          docker build \
-            -t "${{ steps.tags.outputs.sha_tag }}" \
-            -t "${{ steps.tags.outputs.latest_tag }}" \
-            .
-
-      - name: Push image
-        run: |
-          docker push "${{ steps.tags.outputs.sha_tag }}"
-          docker push "${{ steps.tags.outputs.latest_tag }}"
-
-      - name: Summary
-        run: |
-          echo "### Docker image published" >> $GITHUB_STEP_SUMMARY
-          echo "- \`${{ steps.tags.outputs.latest_tag }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "- \`${{ steps.tags.outputs.sha_tag }}\`" >> $GITHUB_STEP_SUMMARY
-
   safety:
     runs-on: docker
     container:
@@ -372,7 +322,7 @@ jobs:
           name: sbom
           path: sbom.json
           retention-days: 7
-  
+
   dependency-check:
     runs-on: docker
     container:
@@ -538,11 +488,68 @@ jobs:
               sys.exit(1)
           EOF
 
+  # ---------------------------------------------------------------------------
+  # docker-publish: only runs on main, only after sonarqube quality gate passes.
+  # SonarQube is the hard gate — if it fails or is skipped, nothing publishes.
+  # ---------------------------------------------------------------------------
+  docker-publish:
+    runs-on: docker
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.sonarqube.result == 'success'
+    needs: [sonarqube]
+    timeout-minutes: 20
+    env:
+      REGISTRY: registry.greenflametech.net
+      IMAGE_NAME: hermes
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Docker
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq curl ca-certificates
+          if ! command -v docker >/dev/null 2>&1; then
+            curl -fsSLo /tmp/docker.tgz \
+              "https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz"
+            tar -xzf /tmp/docker.tgz --strip-components=1 -C /usr/local/bin docker/docker
+            rm /tmp/docker.tgz
+          fi
+          docker info
+
+      - name: Set image tags
+        id: tags
+        run: |
+          SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          echo "sha_tag=${REGISTRY}/${IMAGE_NAME}:${SHA}" >> $GITHUB_OUTPUT
+          echo "latest_tag=${REGISTRY}/${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+
+      - name: Build image
+        run: |
+          docker build \
+            -t "${{ steps.tags.outputs.sha_tag }}" \
+            -t "${{ steps.tags.outputs.latest_tag }}" \
+            .
+
+      - name: Push image
+        run: |
+          docker push "${{ steps.tags.outputs.sha_tag }}"
+          docker push "${{ steps.tags.outputs.latest_tag }}"
+
+      - name: Summary
+        run: |
+          echo "### Docker image published" >> $GITHUB_STEP_SUMMARY
+          echo "- \`${{ steps.tags.outputs.latest_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`${{ steps.tags.outputs.sha_tag }}\`" >> $GITHUB_STEP_SUMMARY
+
+  # ---------------------------------------------------------------------------
+  # trivy-image: scans the image that was actually published to the registry.
+  # Depends on docker-publish so we're always scanning the real artifact.
+  # ---------------------------------------------------------------------------
   trivy-image:
     runs-on: docker
     timeout-minutes: 20
-    if: github.ref == 'refs/heads/main'
-    needs: [sonarqube]
+    if: github.ref == 'refs/heads/main' && needs.docker-publish.result == 'success'
+    needs: [docker-publish]
     env:
       REGISTRY: registry.greenflametech.net
       IMAGE_NAME: hermes
@@ -556,7 +563,6 @@ jobs:
         run: |
           apt-get update -qq
           apt-get install -y -qq curl jq wget ca-certificates
-          # Use host Docker socket — just need the CLI binary
           if ! command -v docker >/dev/null 2>&1; then
             curl -fsSLo /tmp/docker.tgz \
               "https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz"
@@ -571,12 +577,14 @@ jobs:
             | sh -s -- -b /usr/local/bin v0.59.1
           trivy --version
 
-      - name: Build and scan image
+      - name: Ensure report placeholder exists
+        run: echo '{"Results":[]}' > trivy-report.json
+
+      - name: Pull and scan published image
         run: |
           SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          TAG="${IMAGE_NAME}:scan-${SHA}"
-          docker build -t "$TAG" .
-          DOCKER_HOST=unix:///var/run/docker.sock \
+          TAG="${REGISTRY}/${IMAGE_NAME}:${SHA}"
+          docker pull "$TAG"
           trivy image \
             --format json \
             --output trivy-report.json \
@@ -756,7 +764,7 @@ jobs:
   notify:
     runs-on: docker
     if: always()
-    needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-deps, sonarqube, trivy-image, publish-docs]
+    needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-deps, sonarqube, docker-publish, trivy-image, publish-docs]
     steps:
       - name: Notify success
         if: ${{ !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
