@@ -722,17 +722,17 @@ jobs:
     needs: [sonarqube]
     continue-on-error: true
     container:
-      image: registry.greenflametech.net/gft-python-runner:latest
-      volumes:
-        - mkdocs_content:/docs
+      image: registry.greenflametech.net/gft-ci-runner:latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Publish docs to hub
         run: |
-          mkdir -p /docs/docs/hermes
-          cp README.md /docs/docs/hermes/index.md
+          CID=$(docker run -d -v mkdocs_content:/docs alpine sleep 30)
+          docker exec "$CID" mkdir -p /docs/docs/hermes
+          docker cp README.md "$CID:/docs/docs/hermes/index.md"
+          docker rm -f "$CID"
 
   notify:
     runs-on: docker
