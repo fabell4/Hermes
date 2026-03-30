@@ -547,6 +547,8 @@ jobs:
   # ---------------------------------------------------------------------------
   trivy-image:
     runs-on: docker
+    container:
+      image: aquasec/trivy:latest
     timeout-minutes: 20
     if: github.ref == 'refs/heads/main' && needs.docker-publish.result == 'success'
     needs: [docker-publish]
@@ -562,18 +564,13 @@ jobs:
 
       - name: Install tools
         run: |
-          apt-get update -qq
-          apt-get install -y -qq curl jq ca-certificates
+          apk add --no-cache curl jq ca-certificates
           if ! command -v docker >/dev/null 2>&1; then
             curl -fsSLo /tmp/docker.tgz \
               "https://download.docker.com/linux/static/stable/x86_64/docker-27.3.1.tgz"
             tar -xzf /tmp/docker.tgz --strip-components=1 -C /usr/local/bin docker/docker
             rm /tmp/docker.tgz
           fi
-          curl -fsSLo /tmp/trivy.tgz \
-            "https://github.com/aquasecurity/trivy/releases/download/v0.59.1/trivy_0.59.1_Linux-64bit.tar.gz"
-          tar -xzf /tmp/trivy.tgz -C /usr/local/bin trivy
-          rm /tmp/trivy.tgz
           docker info
           trivy --version
           trivy health --server "${TRIVY_SERVER}"
