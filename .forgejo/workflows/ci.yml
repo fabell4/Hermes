@@ -16,6 +16,8 @@ jobs:
   gitleaks:
     runs-on: docker
     timeout-minutes: 10
+    container:
+      image: registry.greenflametech.net/gft-ci-runner:latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -225,6 +227,8 @@ jobs:
     runs-on: docker
     timeout-minutes: 10
     continue-on-error: true
+    container:
+      image: registry.greenflametech.net/gft-ci-runner:latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -491,6 +495,8 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.sonarqube.result == 'success'
     needs: [sonarqube]
     timeout-minutes: 20
+    container:
+      image: registry.greenflametech.net/gft-ci-runner:latest
     env:
       REGISTRY: registry.greenflametech.net
       IMAGE_NAME: hermes
@@ -532,6 +538,8 @@ jobs:
     timeout-minutes: 20
     if: github.ref == 'refs/heads/main' && needs.docker-publish.result == 'success'
     needs: [docker-publish]
+    container:
+      image: registry.greenflametech.net/gft-ci-runner:latest
     env:
       REGISTRY: registry.greenflametech.net
       IMAGE_NAME: hermes
@@ -724,13 +732,14 @@ jobs:
       - name: Publish docs to hub
         run: |
           mkdir -p /docs/docs/hermes
-          cp -r docs/. /docs/docs/hermes/
-          rm -f /docs/docs/hermes/zeniscal.yml
+          cp README.md /docs/docs/hermes/index.md
 
   notify:
     runs-on: docker
     if: always()
     needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-deps, sonarqube, docker-publish, trivy-image, publish-docs]
+    container:
+      image: registry.greenflametech.net/gft-ci-runner:latest
     steps:
       - name: Notify success
         if: ${{ !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
