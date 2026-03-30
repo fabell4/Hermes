@@ -578,19 +578,27 @@ jobs:
           trivy --version
 
       - name: Ensure report placeholder exists
-        run: echo '{"Results":[]}' > trivy-report.json
+        shell: bash
+        run: |
+          set -x
+          echo '{"Results":[]}' > trivy-report.json
+          ls -la trivy-report.json
 
       - name: Pull and scan published image
+        shell: bash
         run: |
+          set -x
           SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           TAG="${REGISTRY}/${IMAGE_NAME}:${SHA}"
-          docker pull "$TAG"
+          echo "Attempting to pull: $TAG"
+          docker pull "$TAG" || { echo "Pull failed"; exit 1; }
           trivy image \
             --format json \
             --output trivy-report.json \
             --exit-code 0 \
             "$TAG" \
           || { echo '{"Results":[]}' > trivy-report.json; echo "trivy scan failed, using empty report"; }
+          ls -la trivy-report.json
 
       - name: Ship findings to Loki
         if: always()
