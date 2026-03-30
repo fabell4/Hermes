@@ -547,8 +547,6 @@ jobs:
   # ---------------------------------------------------------------------------
   trivy-image:
     runs-on: docker
-    container:
-      image: nikolaik/python-nodejs:python3.11-nodejs20
     timeout-minutes: 20
     if: github.ref == 'refs/heads/main' && needs.docker-publish.result == 'success'
     needs: [docker-publish]
