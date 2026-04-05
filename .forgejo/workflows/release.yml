@@ -1,0 +1,56 @@
+name: Release — Hermes
+
+on:
+  push:
+    tags:
+      - "v*"
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  release:
+    runs-on: docker
+    timeout-minutes: 30
+    container:
+      image: registry.greenflametech.net/gft-ci-runner:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          # Strip leading 'v' for image tag (v0.1.0-alpha -> 0.1.0-alpha)
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to container registry
+        run: |
+          echo "${{ secrets.REGISTRY_PASSWORD }}" | \
+            docker login registry.greenflametech.net \
+              --username "${{ secrets.REGISTRY_USERNAME }}" \
+              --password-stdin
+
+      - name: Build image
+        run: |
+          docker build \
+            --tag registry.greenflametech.net/hermes:${{ steps.version.outputs.version }} \
+            --tag registry.greenflametech.net/hermes:latest \
+            .
+
+      - name: Push image
+        run: |
+          docker push registry.greenflametech.net/hermes:${{ steps.version.outputs.version }}
+          docker push registry.greenflametech.net/hermes:latest
+
+      - name: Create Forgejo release
+        uses: https://data.forgejo.org/actions/forgejo-release@v2
+        with:
+          direction: upload
+          release-dir: /tmp/release-assets
+          token: ${{ secrets.RELEASE_TOKEN }}
+          tag: ${{ steps.version.outputs.tag }}
+          prerelease: ${{ contains(steps.version.outputs.tag, 'alpha') || contains(steps.version.outputs.tag, 'beta') || contains(steps.version.outputs.tag, 'rc') }}

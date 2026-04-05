@@ -77,12 +77,13 @@ jobs:
         run: |
           pytest \
             --cov=src \
+            --cov-config=.coveragerc \
             --cov-report=xml:coverage.xml \
             --cov-report=term-missing \
             --cov-fail-under=80 \
             --json-report \
             --json-report-file=pytest-report.json \
-            -v || true
+            -v
 
       - name: Upload test reports
         if: always()

@@ -34,6 +34,11 @@ def test_build_push_url_keeps_full_path() -> None:
     assert exporter._push_url == "http://localhost:3100/loki/api/v1/push"
 
 
+def test_build_push_url_strips_trailing_slash() -> None:
+    exporter = LokiExporter("http://localhost:3100/")
+    assert exporter._push_url == "http://localhost:3100/loki/api/v1/push"
+
+
 def test_export_posts_valid_payload() -> None:
     exporter = LokiExporter("http://localhost:3100", job_label="hermes_test")
     result = _sample_result()
@@ -91,3 +96,33 @@ def test_export_raises_on_connection_error() -> None:
 def test_init_requires_url() -> None:
     with pytest.raises(ValueError, match="Loki URL is required"):
         LokiExporter("")
+
+
+def test_loki_timestamp_ns_with_naive_datetime() -> None:
+    result = SpeedResult(
+        timestamp=datetime(2026, 3, 4, 12, 0, 0),  # no tzinfo
+        download_mbps=1.0,
+        upload_mbps=1.0,
+        ping_ms=1.0,
+        server_name="x",
+        server_location="y",
+        server_id=1,
+    )
+    # Should not raise; naive datetime is treated as UTC
+    ns = LokiExporter._to_loki_timestamp_ns(result)
+    assert ns.isdigit()
+
+
+def test_export_raises_on_bad_status() -> None:
+    exporter = LokiExporter("http://localhost:3100")
+    result = _sample_result()
+
+    mock_response = MagicMock()
+    mock_response.__enter__.return_value = mock_response
+    mock_response.__exit__.return_value = None
+    mock_response.status = 500
+    mock_response.read.return_value = b"Internal Server Error"
+
+    with patch("src.exporters.loki_exporter.request.urlopen", return_value=mock_response):
+        with pytest.raises(RuntimeError, match="500"):
+            exporter.export(result)
