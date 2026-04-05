@@ -2,14 +2,19 @@
 """
 convert_to_sonar.py
 
-Converts mypy, vulture, radon, and semgrep reports into SonarQube's
+Converts vulture, radon, and semgrep reports into SonarQube's
 Generic Issue Import format.
+
+NOTE: mypy is intentionally excluded here. It is handled natively by
+SonarQube via sonar.python.mypy.reportPaths in sonar-project.properties,
+which uses built-in rule definitions that SonarLint recognises for
+"Show in IDE". Using the generic external format for mypy produces
+external_mypy:* rule keys that SonarLint cannot resolve.
 
 Usage:
     python convert_to_sonar.py --sonar-base-dir <path>
 
 Output files (written to current directory):
-    sonar-mypy.json
     sonar-vulture.json
     sonar-radon.json
     sonar-semgrep.json
@@ -69,46 +74,6 @@ def _parse_path_lineno_message(line: str) -> tuple[str, str, str] | None:
     return file_path, lineno, message.strip()
 
 
-def _extract_mypy_code(message: str) -> tuple[str, str | None]:
-    """Return (`message_without_code`, `code_or_none`) for trailing `[error-code]`."""
-    if not message.endswith("]"):
-        return message.strip(), None
-
-    code_start = message.rfind(" [")
-    if code_start == -1:
-        return message.strip(), None
-
-    candidate = message[code_start + 2 : -1].strip()
-    if not candidate:
-        return message.strip(), None
-
-    return message[:code_start].rstrip(), candidate
-
-
-def _parse_mypy_line(
-    line: str, severity_map: dict[str, str]
-) -> tuple[str, int, str, str, str | None] | None:
-    """Parse a mypy line into structured fields or return None if not parseable."""
-    head, sep, message = line.rpartition(": ")
-    if not sep:
-        return None
-
-    before_level, sep, level = head.rpartition(": ")
-    if not sep:
-        return None
-
-    file_path, sep, lineno = before_level.rpartition(":")
-    if not sep or not lineno.isdigit():
-        return None
-
-    level = level.strip().lower()
-    if level not in severity_map:
-        return None
-
-    parsed_message, code = _extract_mypy_code(message.strip())
-    return file_path, int(lineno), level, parsed_message, code
-
-
 def _extract_vulture_confidence(message: str) -> int:
     """Extract confidence percentage if present; default to 80."""
     confidence = 80
@@ -126,50 +91,6 @@ def _extract_vulture_confidence(message: str) -> int:
         return int(candidate)
 
     return confidence
-
-
-# ---------------------------------------------------------------------------
-# mypy
-# ---------------------------------------------------------------------------
-def convert_mypy(report_path, base_dir):
-    """
-    Parse mypy plain-text output.
-    Format: path/to/file.py:LINE: error: message  [error-code]
-    """
-    issues = []
-    if not os.path.exists(report_path):
-        print(f"  [skip] mypy report not found: {report_path}")
-        return issues
-
-    severity_map = {
-        "error": "MAJOR",
-        "warning": "MINOR",
-        "note": "INFO",
-    }
-
-    with open(report_path) as f:
-        for line in f:
-            parsed = _parse_mypy_line(line.rstrip(), severity_map)
-            if parsed is None:
-                continue
-
-            file_path, lineno, level, message, code = parsed
-
-            rule_id = f"mypy:{code}" if code else f"mypy:{level}"
-            issues.append(
-                make_issue(
-                    engine_id="mypy",
-                    rule_id=rule_id,
-                    severity=severity_map.get(level, "MINOR"),
-                    type_="CODE_SMELL",
-                    file_path=normalise_path(file_path, base_dir),
-                    line=lineno,
-                    message=message.strip(),
-                )
-            )
-
-    print(f"  mypy: {len(issues)} issues")
-    return issues
 
 
 # ---------------------------------------------------------------------------
@@ -345,7 +266,6 @@ def main():
         default=".",
         help="SonarQube project base directory (sonar.projectBaseDir)",
     )
-    parser.add_argument("--mypy", default="mypy-report.txt", help="Path to mypy report")
     parser.add_argument(
         "--vulture", default="vulture-report.txt", help="Path to vulture report"
     )
@@ -363,9 +283,6 @@ def main():
 
     print("Converting reports to SonarQube Generic Issue format...")
 
-    write_report(
-        convert_mypy(args.mypy, base), os.path.join(args.outdir, "sonar-mypy.json")
-    )
     write_report(
         convert_vulture(args.vulture, base),
         os.path.join(args.outdir, "sonar-vulture.json"),
