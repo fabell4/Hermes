@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from email.message import Message
 import json
-from urllib import error
 from unittest.mock import MagicMock, patch
+
+import requests
 
 import pytest
 
@@ -44,40 +44,33 @@ def test_export_posts_valid_payload() -> None:
     result = _sample_result()
 
     mock_response = MagicMock()
-    mock_response.__enter__.return_value = mock_response
-    mock_response.__exit__.return_value = None
-    mock_response.status = 204
+    mock_response.status_code = 204
 
-    with patch("src.exporters.loki_exporter.request.urlopen", return_value=mock_response) as mock_urlopen:
+    with patch(
+        "src.exporters.loki_exporter.requests.post", return_value=mock_response
+    ) as mock_post:
         exporter.export(result)
 
-    req = mock_urlopen.call_args[0][0]
-    body = req.data.decode("utf-8")
-    payload = json.loads(body)
-    line = payload["streams"][0]["values"][0][1]
-    line_obj = json.loads(line)
+    url = mock_post.call_args[0][0]
+    body = json.loads(mock_post.call_args[1]["data"].decode("utf-8"))
+    line_obj = json.loads(body["streams"][0]["values"][0][1])
 
-    assert req.full_url == "http://localhost:3100/loki/api/v1/push"
-    assert payload["streams"][0]["stream"]["job"] == "hermes_test"
+    assert url == "http://localhost:3100/loki/api/v1/push"
+    assert body["streams"][0]["stream"]["job"] == "hermes_test"
     assert line_obj["download_mbps"] == pytest.approx(123.45)
     assert line_obj["server_name"] == "Berlin-1"
 
 
-def test_export_raises_on_http_error() -> None:
+def test_export_raises_on_http_status_401() -> None:
     exporter = LokiExporter("http://localhost:3100")
     result = _sample_result()
 
-    with patch(
-        "src.exporters.loki_exporter.request.urlopen",
-        side_effect=error.HTTPError(
-            url="http://localhost:3100/loki/api/v1/push",
-            code=401,
-            msg="Unauthorized",
-            hdrs=Message(),
-            fp=None,
-        ),
-    ):
-        with pytest.raises(RuntimeError, match="HTTP error 401"):
+    mock_response = MagicMock()
+    mock_response.status_code = 401
+    mock_response.text = "Unauthorized"
+
+    with patch("src.exporters.loki_exporter.requests.post", return_value=mock_response):
+        with pytest.raises(RuntimeError, match="401"):
             exporter.export(result)
 
 
@@ -86,10 +79,22 @@ def test_export_raises_on_connection_error() -> None:
     result = _sample_result()
 
     with patch(
-        "src.exporters.loki_exporter.request.urlopen",
-        side_effect=error.URLError("connection refused"),
+        "src.exporters.loki_exporter.requests.post",
+        side_effect=requests.exceptions.ConnectionError("connection refused"),
     ):
         with pytest.raises(RuntimeError, match="connection error"):
+            exporter.export(result)
+
+
+def test_export_raises_on_timeout() -> None:
+    exporter = LokiExporter("http://localhost:3100")
+    result = _sample_result()
+
+    with patch(
+        "src.exporters.loki_exporter.requests.post",
+        side_effect=requests.exceptions.Timeout("timed out"),
+    ):
+        with pytest.raises(RuntimeError, match="timed out"):
             exporter.export(result)
 
 
@@ -128,11 +133,9 @@ def test_export_raises_on_bad_status() -> None:
     result = _sample_result()
 
     mock_response = MagicMock()
-    mock_response.__enter__.return_value = mock_response
-    mock_response.__exit__.return_value = None
-    mock_response.status = 500
-    mock_response.read.return_value = b"Internal Server Error"
+    mock_response.status_code = 500
+    mock_response.text = "Internal Server Error"
 
-    with patch("src.exporters.loki_exporter.request.urlopen", return_value=mock_response):
+    with patch("src.exporters.loki_exporter.requests.post", return_value=mock_response):
         with pytest.raises(RuntimeError, match="500"):
             exporter.export(result)

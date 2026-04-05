@@ -6,8 +6,9 @@ import json
 import logging
 from datetime import timezone
 from typing import Any
-from urllib import error, request
 from urllib.parse import urlparse
+
+import requests
 
 from ..models.speed_result import SpeedResult
 from .base_exporter import BaseExporter
@@ -76,31 +77,21 @@ class LokiExporter(BaseExporter):
     def export(self, result: SpeedResult) -> None:
         payload = self._build_payload(result)
         body = json.dumps(payload).encode("utf-8")
-        req = request.Request(
-            url=self._push_url,
-            data=body,
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
 
         try:
-            with request.urlopen(req, timeout=self._timeout_seconds) as response:
-                status = getattr(response, "status", response.getcode())
-                if status >= 300:
-                    response_body = response.read().decode("utf-8", errors="replace")
-                    raise RuntimeError(
-                        f"Loki push failed with status {status}: {response_body[:500]}"
-                    )
-            logger.debug("Loki event pushed successfully to %s", self._push_url)
-        except error.HTTPError as exc:
-            raw = exc.read() if exc.fp else b""
-            body_text = (
-                raw.decode("utf-8", errors="replace")
-                if isinstance(raw, bytes)
-                else str(raw)
+            response = requests.post(
+                self._push_url,
+                data=body,
+                headers={"Content-Type": "application/json"},
+                timeout=self._timeout_seconds,
             )
-            raise RuntimeError(
-                f"Loki push HTTP error {exc.code}: {body_text[:500]}"
-            ) from exc
-        except error.URLError as exc:
+        except requests.exceptions.ConnectionError as exc:
             raise RuntimeError(f"Loki push connection error: {exc}") from exc
+        except requests.exceptions.Timeout as exc:
+            raise RuntimeError(f"Loki push timed out: {exc}") from exc
+
+        if response.status_code >= 300:
+            raise RuntimeError(
+                f"Loki push failed with status {response.status_code}: {response.text[:500]}"
+            )
+        logger.debug("Loki event pushed successfully to %s", self._push_url)

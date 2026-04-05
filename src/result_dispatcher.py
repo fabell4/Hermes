@@ -29,7 +29,7 @@ class ResultDispatcher:
     DispatchError after all exporters have been attempted.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._exporters: dict[str, BaseExporter] = {}
 
     def add_exporter(self, name: str, exporter: BaseExporter) -> None:
