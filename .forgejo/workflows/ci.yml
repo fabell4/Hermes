@@ -334,9 +334,7 @@ jobs:
       image: registry.greenflametech.net/gft-python-runner:latest
     timeout-minutes: 10
     continue-on-error: true
-    defaults:
-      run:
-        working-directory: src
+    # removed: defaults.run.working-directory: src — was causing artifact path mismatch
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -352,7 +350,7 @@ jobs:
         uses: https://data.forgejo.org/actions/upload-artifact@v3
         with:
           name: dependency-check-report
-          path: poc/pip-audit-report.json
+          path: pip-audit-report.json
           retention-days: 7
 
   sonarqube:
@@ -405,12 +403,13 @@ jobs:
           name: semgrep-report
           path: .
 
-      # --- Convert reports to SonarQube Generic Issue format ---
+      # mypy is no longer converted — it is passed directly to SonarQube via
+      # sonar.python.mypy.reportPaths in sonar-project.properties, which uses
+      # the native rule definitions that SonarLint recognises for "Show in IDE"
       - name: Convert reports to SonarQube format
         run: |
           python convert_to_sonar.py \
             --sonar-base-dir . \
-            --mypy    mypy-report.txt \
             --vulture vulture-report.txt \
             --radon   radon-cc-report.json \
             --semgrep semgrep-report.json \
@@ -673,48 +672,6 @@ jobs:
   #         path: zap-report.html
   #         retention-days: 7
 
-
-  # ---------------------------------------------------------------------------
-  # Playwright e2e — commented out until Hermes has a deployed frontend
-  #
-  # Prerequisites before uncommenting:
-  #   1. React frontend exists and is bundled into the Docker image
-  #   2. A test environment is deployed and reachable (e.g. hermes-staging.greenflametech.net)
-  #   3. Playwright tests exist under frontend/tests/e2e/
-  #   4. Add HERMES_TEST_URL org secret pointing at the test environment base URL
-  #
-  # To activate: remove comment markers and add 'playwright' to notify needs.
-  # ---------------------------------------------------------------------------
-  # playwright:
-  #   runs-on: docker
-  #   container:
-  #     image: mcr.microsoft.com/playwright:v1.49.0-noble
-  #   timeout-minutes: 20
-  #   if: github.ref == 'refs/heads/main'
-  #   needs: [trivy-image]
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-  #
-  #     - name: Install dependencies
-  #       working-directory: frontend
-  #       run: npm ci
-  #
-  #     - name: Run Playwright e2e tests
-  #       working-directory: frontend
-  #       env:
-  #         BASE_URL: ${{ secrets.HERMES_TEST_URL }}
-  #       run: npx playwright test --reporter=html,json
-  #
-  #     - name: Upload Playwright report
-  #       if: always()
-  #       uses: https://data.forgejo.org/actions/upload-artifact@v3
-  #       with:
-  #         name: playwright-report
-  #         path: |
-  #           frontend/playwright-report/
-  #           frontend/test-results/
-  #         retention-days: 7
 
   publish-docs:
     runs-on: docker
