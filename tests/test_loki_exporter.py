@@ -98,6 +98,16 @@ def test_init_requires_url() -> None:
         LokiExporter("")
 
 
+def test_init_rejects_file_scheme() -> None:
+    with pytest.raises(ValueError, match="http or https"):
+        LokiExporter("file:///etc/passwd")
+
+
+def test_init_rejects_custom_scheme() -> None:
+    with pytest.raises(ValueError, match="http or https"):
+        LokiExporter("ftp://localhost:3100")
+
+
 def test_loki_timestamp_ns_with_naive_datetime() -> None:
     result = SpeedResult(
         timestamp=datetime(2026, 3, 4, 12, 0, 0),  # no tzinfo

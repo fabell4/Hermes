@@ -41,7 +41,7 @@ def test_does_not_overwrite_existing_file(tmp_path):
     with open(path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
         writer.writeheader()
-        writer.writerow({k: "existing" for k in FIELDNAMES})
+        writer.writerow(dict.fromkeys(FIELDNAMES, "existing"))
 
     CSVExporter(path)  # should not truncate
     with open(path, encoding="utf-8") as f:

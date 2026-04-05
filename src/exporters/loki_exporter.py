@@ -7,6 +7,7 @@ import logging
 from datetime import timezone
 from typing import Any
 from urllib import error, request
+from urllib.parse import urlparse
 
 from ..models.speed_result import SpeedResult
 from .base_exporter import BaseExporter
@@ -28,7 +29,11 @@ class LokiExporter(BaseExporter):
     ) -> None:
         if not url or not url.strip():
             raise ValueError("Loki URL is required")
-        self._push_url = self._build_push_url(url.strip())
+        stripped = url.strip()
+        scheme = urlparse(stripped).scheme.lower()
+        if scheme not in ("http", "https"):
+            raise ValueError(f"Loki URL must use http or https, got: '{scheme}'")
+        self._push_url = self._build_push_url(stripped)
         self._job_label = job_label
         self._timeout_seconds = timeout_seconds
         self._static_labels = static_labels or {}
@@ -88,7 +93,8 @@ class LokiExporter(BaseExporter):
                     )
             logger.debug("Loki event pushed successfully to %s", self._push_url)
         except error.HTTPError as exc:
-            body_text = exc.read().decode("utf-8", errors="replace") if exc.fp else ""
+            raw = exc.read() if exc.fp else b""
+            body_text = raw.decode("utf-8", errors="replace") if isinstance(raw, bytes) else str(raw)
             raise RuntimeError(
                 f"Loki push HTTP error {exc.code}: {body_text[:500]}"
             ) from exc
