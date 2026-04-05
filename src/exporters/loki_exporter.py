@@ -94,7 +94,11 @@ class LokiExporter(BaseExporter):
             logger.debug("Loki event pushed successfully to %s", self._push_url)
         except error.HTTPError as exc:
             raw = exc.read() if exc.fp else b""
-            body_text = raw.decode("utf-8", errors="replace") if isinstance(raw, bytes) else str(raw)
+            body_text = (
+                raw.decode("utf-8", errors="replace")
+                if isinstance(raw, bytes)
+                else str(raw)
+            )
             raise RuntimeError(
                 f"Loki push HTTP error {exc.code}: {body_text[:500]}"
             ) from exc

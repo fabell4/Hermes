@@ -27,11 +27,18 @@ jobs:
           # Strip leading 'v' for image tag (v0.1.0-alpha -> 0.1.0-alpha)
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
-      - name: Log in to container registry
+      - name: Log in to private registry
         run: |
           echo "${{ secrets.REGISTRY_PASSWORD }}" | \
             docker login registry.greenflametech.net \
               --username "${{ secrets.REGISTRY_USERNAME }}" \
+              --password-stdin
+
+      - name: Log in to GHCR
+        run: |
+          echo "${{ secrets.GITHUB_PAT }}" | \
+            docker login ghcr.io \
+              --username "${{ secrets.GITHUB_USERNAME }}" \
               --password-stdin
 
       - name: Build image
@@ -39,12 +46,42 @@ jobs:
           docker build \
             --tag registry.greenflametech.net/hermes:${{ steps.version.outputs.version }} \
             --tag registry.greenflametech.net/hermes:latest \
+            --tag ghcr.io/${{ secrets.GITHUB_USERNAME }}/hermes:${{ steps.version.outputs.version }} \
+            --tag ghcr.io/${{ secrets.GITHUB_USERNAME }}/hermes:latest \
             .
 
-      - name: Push image
+      - name: Push to private registry
         run: |
           docker push registry.greenflametech.net/hermes:${{ steps.version.outputs.version }}
           docker push registry.greenflametech.net/hermes:latest
+
+      - name: Push to GHCR
+        run: |
+          docker push ghcr.io/${{ secrets.GITHUB_USERNAME }}/hermes:${{ steps.version.outputs.version }}
+          docker push ghcr.io/${{ secrets.GITHUB_USERNAME }}/hermes:latest
+
+      - name: Push tag to public GitHub repo
+        run: |
+          git config user.email "ci@greenflametech.net"
+          git config user.name "Hermes CI"
+          git remote add github https://${{ secrets.GITHUB_USERNAME }}:${{ secrets.GITHUB_PAT }}@github.com/${{ secrets.GITHUB_USERNAME }}/hermes.git
+          git push github HEAD:main --force
+          git push github ${{ steps.version.outputs.tag }}
+
+      - name: Create GitHub release
+        run: |
+          IS_PRE=${{ contains(steps.version.outputs.tag, 'alpha') || contains(steps.version.outputs.tag, 'beta') || contains(steps.version.outputs.tag, 'rc') }}
+          curl -fsSL \
+            -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_PAT }}" \
+            -H "Content-Type: application/json" \
+            https://api.github.com/repos/${{ secrets.GITHUB_USERNAME }}/hermes/releases \
+            -d "{
+              \"tag_name\": \"${{ steps.version.outputs.tag }}\",
+              \"name\": \"${{ steps.version.outputs.tag }}\",
+              \"prerelease\": ${IS_PRE},
+              \"body\": \"Docker image: \`docker pull ghcr.io/${{ secrets.GITHUB_USERNAME }}/hermes:${{ steps.version.outputs.version }}\`\"
+            }"
 
       - name: Create Forgejo release
         uses: https://data.forgejo.org/actions/forgejo-release@v2
