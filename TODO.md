@@ -32,6 +32,7 @@ _Goal: make the deployed instance reliable before adding features._
 - [ ] Docker `HEALTHCHECK` — use `/health` once endpoint exists
 - [ ] Environment validation on startup — warn if Loki URL is unreachable when Loki exporter is enabled
 - [ ] Multi-architecture Docker build — add `linux/arm64` for ARM server / Raspberry Pi support
+- [ ] Enable/disable automated scans toggle — UI button (default: enabled) that pauses/resumes the scheduler without changing the configured interval
 
 ---
 
