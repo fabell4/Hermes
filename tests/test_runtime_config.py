@@ -58,6 +58,7 @@ def test_save_merges_with_existing_data(config_path):
 
 def test_save_raises_on_os_error(config_path, monkeypatch):
     import builtins
+
     real_open = builtins.open
 
     def _bad_open(path, mode="r", **kwargs):

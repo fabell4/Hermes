@@ -8,6 +8,7 @@ Validates the full pipeline before building the production web frontend.
 import streamlit as st
 import pandas as pd
 from pathlib import Path
+from apscheduler.triggers.interval import IntervalTrigger
 
 import src.config as config
 import src.runtime_config as runtime_config
@@ -46,7 +47,16 @@ def get_dispatcher() -> ResultDispatcher:
 
 @st.cache_resource
 def get_scheduler():
-    return build_scheduler(get_service(), get_dispatcher())
+    interval = runtime_config.get_interval_minutes(
+        default=config.SPEEDTEST_INTERVAL_MINUTES
+    )
+    scheduler = build_scheduler(get_service(), get_dispatcher())
+    scheduler.reschedule_job(
+        job_id="speedtest_run",
+        trigger=IntervalTrigger(minutes=interval),
+    )
+    scheduler.start()
+    return scheduler
 
 
 # --- Helpers ---
@@ -64,6 +74,9 @@ def load_csv() -> pd.DataFrame | None:
 # --- UI ---
 st.title("📡 Hermes")
 st.caption("Speedtest Monitor — MVP")
+
+# Ensure the scheduler is started on every page load (no-op after first call due to caching)
+get_scheduler()
 
 st.divider()
 

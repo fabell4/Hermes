@@ -1,88 +1,89 @@
-# Hermes TODO
+# Hermes — Roadmap & TODO
 
-## Hermes MVP
+---
 
-### ✅ Done
+## ✅ Completed
 
 - [x] `SpeedResult` — data model
 - [x] `SpeedtestRunner` — runs the test
 - [x] `BaseExporter` — interface contract
 - [x] `ResultDispatcher` — fan-out hub with `clear()`
-- [x] `CSVExporter` — first working backend
+- [x] `CSVExporter` — file-based result logging
+- [x] `PrometheusExporter` — Gauge metrics with `/metrics` HTTP endpoint
+- [x] `LokiExporter` — structured log shipping via HTTP push
 - [x] `main.py` — entry point with scheduler, `update_schedule()`, `update_exporters()`, `EXPORTER_REGISTRY`
-- [x] `src/config.py` — centralized env config including `ENABLED_EXPORTERS`
-- [x] `src/runtime_config.py` — JSON persistence for interval and enabled exporters
-- [x] `streamlit_app.py` — MVP UI with run button, schedule control, exporter toggles, history table
-- [x] `PrometheusExporter` — Gauge metrics (`download`, `upload`, `ping`) with labelnames; HTTP `/metrics` server on `PROMETHEUS_PORT`
-- [x] `LokiExporter` — structured log shipping with Loki push payload + runtime registration
-- [x] Exporter resilience + test modernization — init failure handling, Loki/unit tests, dispatcher test coverage
-
-### 🔲 Still To Do
-
-- [ ] Real web frontend — replace Streamlit with Flask/FastAPI + proper UI
-- [ ] `Dockerfile` + `docker-compose` — containerize with volume mounts for `logs/` and `data/`
-- [ ] `.dockerignore` — review/update as needed
-- [ ] `requirements.txt` — freeze dependencies for Docker build
-
-### 📌 Suggested Implementation Order
-
-1. `requirements.txt` freeze — lock reproducible builds for local + CI + Docker
-2. `Dockerfile` + `docker-compose` — package app/runtime with `logs/` + `data/` mounts
-3. `.dockerignore` review — optimize Docker context size and build time
-4. Real web frontend (Flask/FastAPI + proper UI) — replace MVP Streamlit once backend/exporters are stable
+- [x] `config.py` — centralised env config
+- [x] `runtime_config.py` — JSON persistence for interval and enabled exporters
+- [x] `streamlit_app.py` — UI with run button, schedule control, exporter toggles, history chart
+- [x] `Dockerfile` + `docker-compose.yml` — containerised with volume mounts
+- [x] `.dockerignore` — optimised Docker build context
+- [x] `requirements.txt` — pinned dependencies
+- [x] CI pipeline — ruff, mypy, bandit, semgrep, pytest with 80% coverage gate
+- [x] Release workflow — builds and pushes to private registry + GHCR, creates GitHub + Forgejo releases
 
 ---
 
-## 🔲 Enhancements
+## Phase 1 — Stability (post-alpha)
 
-### 🚀 Next Sprint (Top 4 Impact)
+_Goal: make the deployed instance reliable before adding features._
 
-- [ ] Health check endpoint (`/health`) with scheduler + last-success status _(M, P1)_
-- [ ] SQLite backend exporter for queryable historical data _(L, P1)_
-- [ ] Mock speedtest path for CI (fixture `SpeedResult`) _(M, P1)_
-- [ ] Multi-architecture Docker build (`linux/amd64`, `linux/arm64`) _(L, P1)_
+- [ ] Retry logic in `SpeedtestRunner` — one retry on transient failure to address potential first-run hangs
+- [ ] Health check endpoint (`/health`) — returns scheduler status and last successful run timestamp
+- [ ] Docker `HEALTHCHECK` — use `/health` once endpoint exists
+- [ ] Environment validation on startup — warn if Loki URL is unreachable when Loki exporter is enabled
+- [ ] Multi-architecture Docker build — add `linux/arm64` for ARM server / Raspberry Pi support
 
-### Observability & Data Quality
+---
 
-- [ ] Jitter tracking in `SpeedResult` when available from speedtest results _(M, P2)_
-- [ ] Result anomaly flagging (e.g., >2 std dev drop) _(M, P2)_
-- [ ] Test server tracking in persisted history + UI _(S, P2)_
-- [ ] ISP detection capture in results _(S, P2)_
+## Phase 2 — Data & Observability
 
-### Reliability
+_Goal: make historical data more useful and integrate with the wider observability stack._
 
-- [ ] Retry logic in `SpeedtestRunner` (retry once on transient failure) _(S, P1)_
-- [ ] Health check endpoint (`/health`) with scheduler + last-success status _(M, P1 — tracked in Next Sprint)_
-- [ ] Consecutive failure alerting (email/webhook/Slack/Gotify) _(M, P2)_
+- [ ] SQLite exporter — queryable history, replaces CSV as the primary storage backend
+- [ ] Data retention policy — auto-prune records older than N days (configurable)
+- [ ] Grafana dashboard JSON — pre-built dashboard for one-click import against Prometheus/Loki
+- [ ] Jitter tracking — capture jitter from speedtest results when available
+- [ ] ISP detection — capture ISP name in `SpeedResult` and export it
 
-### Data & History
+---
 
-- [ ] SQLite backend exporter for queryable historical data _(L, P1 — tracked in Next Sprint)_
-- [ ] Data retention policy (auto-prune older than N days) _(M, P2)_
-- [ ] Export to JSON alongside CSV _(S, P3)_
+## Phase 3 — UI & UX Improvements
 
-### UI / UX
+_Goal: improve the Streamlit UI while it remains the primary frontend._
 
-- [ ] Scheduler next-run countdown in the UI _(M, P2)_
-- [ ] Connection quality score (weighted download/upload/ping) _(M, P2)_
-- [ ] Daily/weekly summary stats table (min/max/avg) _(M, P2)_
-- [ ] Mobile-friendly layout _(M, P2)_
-- [ ] Historical charts (beyond the basic line chart in Streamlit) _(M, P2)_
-- [ ] Dark mode support _(S, P3)_
+- [ ] Scheduler next-run countdown
+- [ ] Daily/weekly summary stats table (min/max/avg per day)
+- [ ] Connection quality score — weighted composite of download/upload/ping
+- [ ] Historical charts — per-metric breakdowns, not just the combined line chart
+- [ ] Result anomaly flagging — highlight runs >2 std dev from the rolling mean
+- [ ] Mobile-friendly layout
 
-### Deployment & Operations
+---
 
-- [ ] Multi-architecture Docker build (`linux/amd64`, `linux/arm64`) _(L, P1 — tracked in Next Sprint)_
-- [ ] Grafana dashboard JSON for one-click import _(M, P2)_
-- [ ] Docker `HEALTHCHECK` using `/health` endpoint _(S, P2)_
-- [ ] Environment validation on startup (Loki/Prometheus reachability checks) _(M, P2)_
+## Phase 4 — Alerting
 
-### Testing
+_Goal: notify users when something goes wrong without requiring Grafana._
 
-- [ ] Mock speedtest path for CI (fixture `SpeedResult`) _(M, P1 — tracked in Next Sprint)_
-- [ ] Exporter integration tests (CSV schema, Prometheus metrics, Loki payloads) _(M, P2)_
-- [ ] Scheduler persistence tests across simulated restart _(M, P2)_
+- [ ] Consecutive failure detection — track N consecutive speedtest failures
+- [ ] Webhook alerting — POST to a configurable URL on consecutive failure
+- [ ] Gotify / ntfy support — push notification on failure
+- [ ] Alert cooldown — don't re-alert within a configurable window
 
-### Existing Idea
+---
 
-- [ ] Alerting (Grafana alerts on Prometheus metrics) _(L, P3)_
+## Phase 5 — Production Frontend
+
+_Goal: replace Streamlit with a proper web frontend when the backend is stable._
+
+- [ ] REST API layer (FastAPI) — expose run, history, schedule, and exporter endpoints
+- [ ] Proper frontend (HTMX or lightweight JS) — replaces Streamlit
+- [ ] Dark mode support
+- [ ] Remove Streamlit dependency once frontend is live
+
+---
+
+## Testing Backlog
+
+- [ ] Exporter integration tests — CSV schema validation, Prometheus metric values, Loki payload shape
+- [ ] Scheduler persistence tests — simulate restart and verify interval is restored
+- [ ] SpeedtestRunner retry tests — verify retry behaviour on transient failure

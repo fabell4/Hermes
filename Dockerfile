@@ -3,12 +3,10 @@ FROM python:3.13-slim
 WORKDIR /app
 
 # Install dependencies first (cached layer unless requirements.txt changes)
+# Create persistent directories in the same layer to avoid a separate RUN step
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Ensure persistent directories exist at build time.
-# These are overridden by named volumes at runtime but must exist on first start.
-RUN mkdir -p /app/logs /app/data
+RUN pip install --no-cache-dir -r requirements.txt \
+    && mkdir -p /app/logs /app/data
 
 # Copy source
 COPY src/ ./src/

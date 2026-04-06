@@ -94,6 +94,7 @@ def test_export_raises_on_os_error(tmp_path, monkeypatch):
     exporter = CSVExporter(path)
 
     import builtins
+
     real_open = builtins.open
 
     def _bad_open(p, mode="r", **kwargs):
