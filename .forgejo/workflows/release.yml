@@ -4,6 +4,11 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (e.g. v0.1.0-alpha)"
+        required: true
 
 defaults:
   run:
@@ -22,7 +27,7 @@ jobs:
       - name: Extract version from tag
         id: version
         run: |
-          TAG="${GITHUB_REF_NAME}"
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
           echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
           # Strip leading 'v' for image tag (v0.1.0-alpha -> 0.1.0-alpha)
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
