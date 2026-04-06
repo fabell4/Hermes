@@ -28,6 +28,7 @@ jobs:
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to private registry
+        if: ${{ secrets.REGISTRY_USERNAME != '' }}
         run: |
           echo "${{ secrets.REGISTRY_PASSWORD }}" | \
             docker login registry.greenflametech.net \
@@ -36,9 +37,9 @@ jobs:
 
       - name: Log in to GHCR
         run: |
-          echo "${{ secrets.GITHUB_PAT }}" | \
+          echo "${{ secrets.GH_PAT }}" | \
             docker login ghcr.io \
-              --username "${{ secrets.GITHUB_USERNAME }}" \
+              --username "${{ secrets.GH_USERNAME }}" \
               --password-stdin
 
       - name: Build image
@@ -46,8 +47,8 @@ jobs:
           docker build \
             --tag registry.greenflametech.net/hermes:${{ steps.version.outputs.version }} \
             --tag registry.greenflametech.net/hermes:latest \
-            --tag ghcr.io/${{ secrets.GITHUB_USERNAME }}/hermes:${{ steps.version.outputs.version }} \
-            --tag ghcr.io/${{ secrets.GITHUB_USERNAME }}/hermes:latest \
+            --tag ghcr.io/${{ secrets.GH_USERNAME }}/hermes:${{ steps.version.outputs.version }} \
+            --tag ghcr.io/${{ secrets.GH_USERNAME }}/hermes:latest \
             .
 
       - name: Push to private registry
@@ -57,14 +58,14 @@ jobs:
 
       - name: Push to GHCR
         run: |
-          docker push ghcr.io/${{ secrets.GITHUB_USERNAME }}/hermes:${{ steps.version.outputs.version }}
-          docker push ghcr.io/${{ secrets.GITHUB_USERNAME }}/hermes:latest
+          docker push ghcr.io/${{ secrets.GH_USERNAME }}/hermes:${{ steps.version.outputs.version }}
+          docker push ghcr.io/${{ secrets.GH_USERNAME }}/hermes:latest
 
       - name: Push tag to public GitHub repo
         run: |
           git config user.email "ci@greenflametech.net"
           git config user.name "Hermes CI"
-          git remote add github https://${{ secrets.GITHUB_USERNAME }}:${{ secrets.GITHUB_PAT }}@github.com/${{ secrets.GITHUB_USERNAME }}/hermes.git
+          git remote add github https://${{ secrets.GH_USERNAME }}:${{ secrets.GH_PAT }}@github.com/${{ secrets.GH_USERNAME }}/hermes.git
           git push github HEAD:main --force
           git push github ${{ steps.version.outputs.tag }}
 
@@ -73,14 +74,14 @@ jobs:
           IS_PRE=${{ contains(steps.version.outputs.tag, 'alpha') || contains(steps.version.outputs.tag, 'beta') || contains(steps.version.outputs.tag, 'rc') }}
           curl -fsSL \
             -X POST \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_PAT }}" \
+            -H "Authorization: Bearer ${{ secrets.GH_PAT }}" \
             -H "Content-Type: application/json" \
-            https://api.github.com/repos/${{ secrets.GITHUB_USERNAME }}/hermes/releases \
+            https://api.github.com/repos/${{ secrets.GH_USERNAME }}/hermes/releases \
             -d "{
               \"tag_name\": \"${{ steps.version.outputs.tag }}\",
               \"name\": \"${{ steps.version.outputs.tag }}\",
               \"prerelease\": ${IS_PRE},
-              \"body\": \"Docker image: \`docker pull ghcr.io/${{ secrets.GITHUB_USERNAME }}/hermes:${{ steps.version.outputs.version }}\`\"
+              \"body\": \"Docker image: \`docker pull ghcr.io/${{ secrets.GH_USERNAME }}/hermes:${{ steps.version.outputs.version }}\`\"
             }"
 
       - name: Create Forgejo release
@@ -88,6 +89,6 @@ jobs:
         with:
           direction: upload
           release-dir: /tmp/release-assets
-          token: ${{ secrets.RELEASE_TOKEN }}
+          token: ${{ secrets.FORGEJO_TOKEN }}
           tag: ${{ steps.version.outputs.tag }}
           prerelease: ${{ contains(steps.version.outputs.tag, 'alpha') || contains(steps.version.outputs.tag, 'beta') || contains(steps.version.outputs.tag, 'rc') }}
