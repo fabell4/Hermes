@@ -66,7 +66,7 @@ jobs:
           git config user.email "ci@greenflametech.net"
           git config user.name "Hermes CI"
           git remote add github https://${{ secrets.GH_USERNAME }}:${{ secrets.GH_PAT }}@github.com/${{ secrets.GH_USERNAME }}/hermes.git
-          git push github HEAD:main --force
+          git push github HEAD:refs/heads/main --force
           git push github ${{ steps.version.outputs.tag }}
 
       - name: Create GitHub release
