@@ -6,49 +6,33 @@ A Python application that periodically runs internet speed tests and exports res
 
 ### Data Flow
 
-> Solid lines = implemented. Dashed lines = planned.
-
 ```mermaid
 flowchart TD
-    subgraph current["Current Implementation"]
-        MAIN["**main.py**\nEntry point"]
-        RUNNER["**SpeedtestRunner**\nsrc/services/speedtest_runner.py"]
-        MODEL["**SpeedResult**\nsrc/models/speed_results.py"]
-        STDOUT["Console output\nstdout"]
-    end
+    UI["**Streamlit UI**\nsrc/streamlit_app.py"]
+    MAIN["**main.py**\nEntry point + scheduler"]
+    RUNNER["**SpeedtestRunner**\nsrc/services/speedtest_runner.py"]
+    MODEL["**SpeedResult**\nsrc/models/speed_result.py"]
+    DISP["**ResultDispatcher**\nsrc/result_dispatcher.py"]
+    CSV["CSVExporter"]
+    PROM["PrometheusExporter"]
+    LOKI["LokiExporter"]
 
-    subgraph planned["Planned"]
-        UI["Frontend\nWeb UI"]
-        WEB["Web Layer\nsrc/web/app.py"]
-        DISP["ResultDispatcher\nsrc/dispatcher.py"]
-        CSV["CSVExporter"]
-        PROM["PrometheusExporter"]
-        LOKI["LokiExporter"]
-    end
-
-    MAIN --> RUNNER
+    UI -- "Run Now" --> RUNNER
+    MAIN -- "scheduled" --> RUNNER
     RUNNER --> MODEL
-    MODEL --> STDOUT
+    MODEL --> DISP
+    DISP --> CSV
+    DISP --> PROM
+    DISP --> LOKI
 
-    UI -. "HTTP" .-> WEB
-    WEB -. " " .-> RUNNER
-    MODEL -. " " .-> DISP
-    DISP -. " " .-> CSV
-    DISP -. " " .-> PROM
-    DISP -. " " .-> LOKI
-
-    style current fill:#1b5e20,stroke:#66bb6a,color:#ffffff
-    style planned fill:#1a237e,stroke:#5c6bc0,color:#ffffff,stroke-dasharray: 4 4
+    style UI fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style MAIN fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style RUNNER fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style MODEL fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
-    style STDOUT fill:#f57f17,stroke:#ffca28,color:#000000
-    style UI fill:#283593,stroke:#7986cb,color:#ffffff
-    style WEB fill:#283593,stroke:#7986cb,color:#ffffff
-    style DISP fill:#283593,stroke:#7986cb,color:#ffffff
-    style CSV fill:#283593,stroke:#7986cb,color:#ffffff
-    style PROM fill:#283593,stroke:#7986cb,color:#ffffff
-    style LOKI fill:#283593,stroke:#7986cb,color:#ffffff
+    style DISP fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style CSV fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style PROM fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style LOKI fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
 ```
 
 ## Project Structure
@@ -56,27 +40,32 @@ flowchart TD
 ```
 Hermes/
 ├── src/
-│   ├── main.py                        # Entry point — wires everything together,
-│   │                                  #   starts scheduler + web server
-│   ├── dispatcher.py                  # ResultDispatcher — fans out SpeedResult to exporters
+│   ├── main.py                        # Entry point — wires scheduler, dispatcher, and exporters
+│   ├── config.py                      # Static config loaded from environment variables
+│   ├── runtime_config.py              # Persistent runtime state (interval, enabled exporters)
+│   ├── result_dispatcher.py           # ResultDispatcher — fans out SpeedResult to exporters
+│   ├── streamlit_app.py               # Streamlit UI — run tests, view history, configure
 │   ├── models/
-│   │   └── speed_results.py           # SpeedResult dataclass — shared data contract
+│   │   └── speed_result.py            # SpeedResult dataclass — shared data contract
 │   ├── services/
 │   │   ├── speedtest_runner.py        # SpeedtestRunner — runs test, returns SpeedResult
 │   │   └── logging.py                 # Logging configuration
 │   ├── exporters/
-│   │   ├── base_export.py             # Abstract BaseExporter interface
-│   │   ├── csv_export.py              # CSVExporter — appends rows, serves file for download
+│   │   ├── base_exporter.py           # Abstract BaseExporter interface
+│   │   ├── csv_exporter.py            # CSVExporter — appends rows to CSV log
 │   │   ├── prometheus_exporter.py     # PrometheusExporter — updates Gauges, /metrics endpoint
 │   │   └── loki_exporter.py           # LokiExporter — ships JSON log events via HTTP push
 │   └── web/
-│       ├── app.py                     # Flask app — routes only, no business logic
-│       └── templates/
-│           └── index.html             # Frontend UI
+│       └── app.py                     # Flask app (legacy, superseded by Streamlit UI)
 ├── tests/
-│   ├── __init__.py
-│   └── test_main.py
+│   ├── test_main.py
+│   ├── test_csv_exporter.py
+│   ├── test_loki_exporter.py
+│   ├── test_result_dispatcher.py
+│   └── test_runtime_config.py
 ├── .env.example                       # Example environment variables
+├── docker-compose.yml                 # Dev compose file (builds from source)
+├── Dockerfile
 ├── requirements.txt                   # Project dependencies
 ├── pytest.ini                         # pytest configuration
 └── README.md
@@ -120,4 +109,44 @@ Or use the **Run Hermes** task in VS Code (Terminal → Run Task).
 pytest
 ```
 
-Test
+## Self-Hosting
+
+Hermes is distributed as a Docker image on GHCR.
+
+### Minimal setup
+
+Create a `docker-compose.yml` on your server:
+
+```yaml
+services:
+  hermes:
+    image: ghcr.io/fabell4/hermes:latest
+    container_name: hermes
+    restart: unless-stopped
+    ports:
+      - "8501:8501"   # Streamlit UI
+      - "8000:8000"   # Prometheus /metrics
+    volumes:
+      - hermes-logs:/app/logs
+      - hermes-data:/app/data
+    env_file:
+      - .env
+
+volumes:
+  hermes-logs:
+  hermes-data:
+```
+
+Create a `.env` alongside it. The `.env.example` in this repo lists every available variable with comments — copy it and adjust as needed:
+
+```bash
+curl -o .env https://raw.githubusercontent.com/fabell4/hermes/main/.env.example
+```
+
+Then start it:
+
+```bash
+docker compose up -d
+```
+
+The UI is available at `http://<server-ip>:8501`.
