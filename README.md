@@ -3,6 +3,7 @@
 A Python application that periodically runs internet speed tests and exports results to multiple destinations (CSV, Prometheus, Loki/OTel), with a browser-based UI to trigger runs and view results.
 
 ## Architecture
+  *Hermes is currently an alpha release. The core functionality works but the Prometheus and Loki connectors are still under development.*
 
 ### Data Flow
 
