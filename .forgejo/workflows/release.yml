@@ -77,22 +77,32 @@ jobs:
           git fetch --unshallow origin || true
           git remote add github https://${{ secrets.GH_USERNAME }}:${{ secrets.GH_PAT }}@github.com/${{ secrets.GH_USERNAME }}/hermes.git
           git push github HEAD:refs/heads/main --force
-          git push github ${{ steps.version.outputs.tag }}
+          git push github ${{ steps.version.outputs.tag }} --force
 
       - name: Create GitHub release
         run: |
           IS_PRE=${{ contains(steps.version.outputs.tag, 'alpha') || contains(steps.version.outputs.tag, 'beta') || contains(steps.version.outputs.tag, 'rc') }}
-          curl -fsSL \
+          TAG="${{ steps.version.outputs.tag }}"
+          BODY="{\"tag_name\":\"${TAG}\",\"name\":\"${TAG}\",\"prerelease\":${IS_PRE},\"body\":\"Docker image: \`docker pull ghcr.io/${{ secrets.GH_USERNAME }}/hermes:${{ steps.version.outputs.version }}\`\"}"
+          # Try to create; if 422 (already exists), update instead
+          RESPONSE=$(curl -s -o /tmp/gh_release.json -w "%{http_code}" \
             -X POST \
             -H "Authorization: Bearer ${{ secrets.GH_PAT }}" \
             -H "Content-Type: application/json" \
             https://api.github.com/repos/${{ secrets.GH_USERNAME }}/hermes/releases \
-            -d "{
-              \"tag_name\": \"${{ steps.version.outputs.tag }}\",
-              \"name\": \"${{ steps.version.outputs.tag }}\",
-              \"prerelease\": ${IS_PRE},
-              \"body\": \"Docker image: \`docker pull ghcr.io/${{ secrets.GH_USERNAME }}/hermes:${{ steps.version.outputs.version }}\`\"
-            }"
+            -d "$BODY")
+          if [ "$RESPONSE" = "422" ]; then
+            RELEASE_ID=$(curl -fsSL \
+              -H "Authorization: Bearer ${{ secrets.GH_PAT }}" \
+              https://api.github.com/repos/${{ secrets.GH_USERNAME }}/hermes/releases/tags/${TAG} \
+              | grep '"id"' | head -1 | grep -o '[0-9]*')
+            curl -fsSL \
+              -X PATCH \
+              -H "Authorization: Bearer ${{ secrets.GH_PAT }}" \
+              -H "Content-Type: application/json" \
+              https://api.github.com/repos/${{ secrets.GH_USERNAME }}/hermes/releases/${RELEASE_ID} \
+              -d "$BODY"
+          fi
 
       - name: Create Forgejo release
         uses: https://data.forgejo.org/actions/forgejo-release@v2
