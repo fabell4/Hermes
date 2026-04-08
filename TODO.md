@@ -41,8 +41,9 @@ _Goal: make the deployed instance reliable before adding features._
 _Goal: make historical data more useful and integrate with the wider observability stack._
 
 - [ ] SQLite exporter — queryable history, replaces CSV as the primary storage backend
+- [ ] InfluxDB exporter — optional time-series exporter; pairs with Grafana for long-term trend analysis and retention policy management
 - [ ] Data retention policy — auto-prune records older than N days (configurable)
-- [ ] Grafana dashboard JSON — pre-built dashboard for one-click import against Prometheus/Loki
+- [ ] Grafana dashboard JSON — pre-built dashboard for one-click import against Prometheus/Loki/InfluxDB
 - [ ] Jitter tracking — capture jitter from speedtest results when available
 - [ ] ISP detection — capture ISP name in `SpeedResult` and export it
 
