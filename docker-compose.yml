@@ -1,18 +1,15 @@
 services:
 
   hermes-scheduler:
-    build: .
+    image: ${HERMES_IMAGE:-registry.greenflametech.net/hermes:latest}
     container_name: hermes-scheduler
     restart: always
     command: ["python", "-m", "src.main"]
-
-    volumes:
-      - hermes-logs:/app/logs           # CSV result history + hermes.log
-      - hermes-data:/app/data           # runtime_config.json, .run_trigger
-
     ports:
       - "${PROMETHEUS_PORT:-8000}:8000" # Prometheus /metrics endpoint
-
+    volumes:
+      - hermes-logs:/app/logs           # CSV result history + hermes.log
+      - hermes-data:/app/data           # runtime_config.json, .run_trigger 
     environment:
       APP_ENV: "${APP_ENV:-production}"
       LOG_LEVEL: "${LOG_LEVEL:-INFO}"
@@ -24,23 +21,19 @@ services:
       PROMETHEUS_PORT: "${PROMETHEUS_PORT:-8000}"
       LOKI_URL: "${LOKI_URL:-}"
       LOKI_JOB_LABEL: "${LOKI_JOB_LABEL:-hermes_speedtest}"
-
     env_file:
       - path: .env
         required: false
 
   hermes-ui:
-    build: .
+    image: ${HERMES_IMAGE:-registry.greenflametech.net/hermes:latest}
     container_name: hermes-ui
     restart: always
-
+    ports:
+      - "${UI_PORT:-8501}:8501"         # Streamlit UI
     volumes:
       - hermes-logs:/app/logs           # Read CSV results written by scheduler
       - hermes-data:/app/data           # Shared runtime_config.json + .run_trigger
-
-    ports:
-      - "${UI_PORT:-8501}:8501"         # Streamlit UI
-
     environment:
       APP_ENV: "${APP_ENV:-production}"
       LOG_LEVEL: "${LOG_LEVEL:-INFO}"
@@ -48,11 +41,9 @@ services:
       SPEEDTEST_INTERVAL_MINUTES: "${SPEEDTEST_INTERVAL_MINUTES:-60}"
       ENABLED_EXPORTERS: "${ENABLED_EXPORTERS:-csv}"
       CSV_LOG_PATH: "logs/results.csv"
-
     env_file:
       - path: .env
         required: false
-
     depends_on:
       - hermes-scheduler
 

@@ -48,7 +48,9 @@ def test_speedtest_runner_run_success(mock_st_class):
     assert result.server_id == 1234
 
 
-def test_run_once_dispatches_result():
+@patch("src.main.runtime_config.mark_running")
+@patch("src.main.runtime_config.mark_done")
+def test_run_once_dispatches_result(mock_done, mock_running):
     service = MagicMock()
     dispatcher = MagicMock()
     result = SpeedResult(
@@ -66,9 +68,13 @@ def test_run_once_dispatches_result():
 
     service.run.assert_called_once()
     dispatcher.dispatch.assert_called_once_with(result)
+    mock_running.assert_called_once()
+    mock_done.assert_called_once()
 
 
-def test_run_once_handles_runner_error_without_dispatch():
+@patch("src.main.runtime_config.mark_running")
+@patch("src.main.runtime_config.mark_done")
+def test_run_once_handles_runner_error_without_dispatch(mock_done, mock_running):
     service = MagicMock()
     dispatcher = MagicMock()
     service.run.side_effect = RuntimeError("network error")
@@ -77,6 +83,8 @@ def test_run_once_handles_runner_error_without_dispatch():
 
     service.run.assert_called_once()
     dispatcher.dispatch.assert_not_called()
+    mock_running.assert_called_once()
+    mock_done.assert_called_once()
 
 
 def test_build_dispatcher_skips_loki_on_init_error(monkeypatch, caplog):
@@ -232,6 +240,8 @@ def test_poll_once_trigger_fires_calls_run_once(monkeypatch):
         main_module.runtime_config, "get_enabled_exporters", lambda default: ["csv"]
     )
     monkeypatch.setattr(main_module.runtime_config, "consume_run_trigger", lambda: True)
+    monkeypatch.setattr(main_module.runtime_config, "mark_running", lambda: None)
+    monkeypatch.setattr(main_module.runtime_config, "mark_done", lambda: None)
 
     result = MagicMock()
     service.run.return_value = result

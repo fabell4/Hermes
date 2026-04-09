@@ -112,3 +112,26 @@ def consume_run_trigger() -> bool:
             pass
         return True
     return False
+
+
+# --- Running state ---
+# Written by the scheduler when a test is in progress; deleted when done.
+# Lets the UI show a live "Running speedtest..." indicator.
+
+RUNNING_PATH = Path("data/.running")
+
+
+def mark_running() -> None:
+    """Creates the running sentinel file to signal an active speedtest."""
+    _ensure_dir()
+    RUNNING_PATH.touch()
+
+
+def mark_done() -> None:
+    """Removes the running sentinel file when the speedtest finishes."""
+    RUNNING_PATH.unlink(missing_ok=True)
+
+
+def is_running() -> bool:
+    """Returns True if a speedtest is currently in progress."""
+    return RUNNING_PATH.exists()

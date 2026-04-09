@@ -92,25 +92,29 @@ def run_once(service: SpeedtestRunner, dispatcher: ResultDispatcher) -> None:
     Runs a single speedtest and dispatches the result to all exporters.
     Called by the scheduler and importable by the Streamlit/web layer.
     """
-    logger.info("Starting speedtest run...")
+    runtime_config.mark_running()
     try:
-        result = service.run()
-        logger.info(
-            "Test complete — Down: %sMbps | Up: %sMbps | Ping: %sms | Server: %s",
-            result.download_mbps,
-            result.upload_mbps,
-            result.ping_ms,
-            result.server_name,
-        )
-    except RuntimeError as e:
-        logger.error("Speedtest failed: %s", e)
-        return
-    try:
-        dispatcher.dispatch(result)
-    except DispatchError as e:
-        logger.warning("Dispatch completed with failures:")
-        for name, error in e.failures.items():
-            logger.warning("  [%s] %s", name, error)
+        logger.info("Starting speedtest run...")
+        try:
+            result = service.run()
+            logger.info(
+                "Test complete — Down: %sMbps | Up: %sMbps | Ping: %sms | Server: %s",
+                result.download_mbps,
+                result.upload_mbps,
+                result.ping_ms,
+                result.server_name,
+            )
+        except RuntimeError as e:
+            logger.error("Speedtest failed: %s", e)
+            return
+        try:
+            dispatcher.dispatch(result)
+        except DispatchError as e:
+            logger.warning("Dispatch completed with failures:")
+            for name, error in e.failures.items():
+                logger.warning("  [%s] %s", name, error)
+    finally:
+        runtime_config.mark_done()
 
 
 def build_scheduler(
@@ -189,6 +193,10 @@ def main():
         config.RUN_ON_STARTUP,
         config.LOG_LEVEL,
     )
+
+    # Clean up any stale running sentinel left by a previous crash/restart.
+    runtime_config.mark_done()
+
     service = SpeedtestRunner()
     dispatcher = build_dispatcher()
 

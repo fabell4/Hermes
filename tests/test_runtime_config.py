@@ -181,3 +181,45 @@ def test_consume_run_trigger_returns_true_on_unlink_error(tmp_path, monkeypatch)
         result = runtime_config.consume_run_trigger()
 
     assert result is True
+
+
+# ---------------------------------------------------------------------------
+# mark_running() / mark_done() / is_running()
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture()
+def running_path(tmp_path, monkeypatch):
+    path = tmp_path / "data" / ".running"
+    monkeypatch.setattr(runtime_config, "RUNNING_PATH", path)
+    monkeypatch.setattr(
+        runtime_config, "RUNTIME_CONFIG_PATH", tmp_path / "data" / "runtime_config.json"
+    )
+    return path
+
+
+def test_mark_running_creates_sentinel_file(running_path):
+    runtime_config.mark_running()
+    assert running_path.exists()
+
+
+def test_mark_done_removes_sentinel_file(running_path):
+    running_path.parent.mkdir(parents=True, exist_ok=True)
+    running_path.touch()
+    runtime_config.mark_done()
+    assert not running_path.exists()
+
+
+def test_mark_done_is_noop_when_file_absent(running_path):
+    # Should not raise even if the file doesn't exist.
+    runtime_config.mark_done()
+
+
+def test_is_running_returns_true_when_file_exists(running_path):
+    running_path.parent.mkdir(parents=True, exist_ok=True)
+    running_path.touch()
+    assert runtime_config.is_running() is True
+
+
+def test_is_running_returns_false_when_file_absent(running_path):
+    assert runtime_config.is_running() is False

@@ -8,6 +8,7 @@ Validates the full pipeline before building the production web frontend.
 import streamlit as st
 import pandas as pd
 from pathlib import Path
+import time
 
 import src.config as config
 import src.runtime_config as runtime_config
@@ -55,10 +56,33 @@ with col2:
     run_button = st.button("▶ Run Now", width="stretch", type="primary")
 
 if run_button:
+    df_pre = load_csv()
+    st.session_state["pre_trigger_count"] = len(df_pre) if df_pre is not None else 0
+    st.session_state["trigger_fired"] = True
     runtime_config.trigger_run()
-    st.success(
-        "Test triggered — the scheduler will run it within seconds. Refresh this page to see the result."
-    )
+
+# Show live running state while the scheduler is executing the test.
+if runtime_config.is_running():
+    with st.spinner("🔄 Running speedtest… this takes ~30 seconds."):
+        time.sleep(2)
+    st.rerun()
+elif st.session_state.get("trigger_fired"):
+    df_now = load_csv()
+    current_count = len(df_now) if df_now is not None else 0
+    if current_count > st.session_state.get("pre_trigger_count", current_count):
+        latest = df_now.iloc[0]
+        st.success(
+            f"✅ Test complete — "
+            f"⬇ {latest['download_mbps']:.1f} Mbps | "
+            f"⬆ {latest['upload_mbps']:.1f} Mbps | "
+            f"📶 {latest['ping_ms']:.1f} ms"
+        )
+        st.session_state["trigger_fired"] = False
+    else:
+        # Trigger written but scheduler hasn't picked it up yet (within 30s poll window).
+        st.info("⏳ Waiting for the scheduler to pick up the test…")
+        time.sleep(2)
+        st.rerun()
 
 st.divider()
 
