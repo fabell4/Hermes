@@ -97,3 +97,44 @@ def test_build_dispatcher_skips_loki_on_init_error(monkeypatch, caplog):
 
     assert dispatcher.exporter_names == ["csv"]
     assert "could not be initialized" in caplog.text
+
+
+# ---------------------------------------------------------------------------
+# SpeedtestRunner — exception paths
+# ---------------------------------------------------------------------------
+
+import speedtest as speedtest_module
+
+
+@patch("src.services.speedtest_runner.speedtest.Speedtest")
+def test_speedtest_runner_raises_on_config_error(mock_st_class):
+    mock_st_class.side_effect = speedtest_module.ConfigRetrievalError
+    with pytest.raises(RuntimeError, match="speedtest.net"):
+        SpeedtestRunner().run()
+
+
+@patch("src.services.speedtest_runner.speedtest.Speedtest")
+def test_speedtest_runner_raises_on_no_matched_servers(mock_st_class):
+    mock_st = MagicMock()
+    mock_st.get_best_server.side_effect = speedtest_module.NoMatchedServers
+    mock_st_class.return_value = mock_st
+    with pytest.raises(RuntimeError, match="No speedtest servers"):
+        SpeedtestRunner().run()
+
+
+@patch("src.services.speedtest_runner.speedtest.Speedtest")
+def test_speedtest_runner_raises_on_http_error(mock_st_class):
+    mock_st = MagicMock()
+    mock_st.get_best_server.side_effect = speedtest_module.SpeedtestHTTPError
+    mock_st_class.return_value = mock_st
+    with pytest.raises(RuntimeError, match="HTTP error"):
+        SpeedtestRunner().run()
+
+
+@patch("src.services.speedtest_runner.speedtest.Speedtest")
+def test_speedtest_runner_raises_on_generic_speedtest_exception(mock_st_class):
+    mock_st = MagicMock()
+    mock_st.get_best_server.side_effect = speedtest_module.SpeedtestException("oops")
+    mock_st_class.return_value = mock_st
+    with pytest.raises(RuntimeError, match="Speedtest failed"):
+        SpeedtestRunner().run()

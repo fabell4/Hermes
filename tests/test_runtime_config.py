@@ -1,6 +1,7 @@
 """Tests for src/runtime_config.py — JSON persistence layer."""
 
 import json
+from unittest.mock import patch
 
 import pytest
 
@@ -129,3 +130,52 @@ def test_get_enabled_exporters_returns_default_on_invalid_type(config_path):
 def test_set_enabled_exporters_persists_value(config_path):
     runtime_config.set_enabled_exporters(["prometheus"])
     assert runtime_config.get_enabled_exporters([]) == ["prometheus"]
+
+
+# ---------------------------------------------------------------------------
+# trigger_run() / consume_run_trigger()
+# ---------------------------------------------------------------------------
+
+
+def test_trigger_run_creates_trigger_file(tmp_path, monkeypatch):
+    trigger_path = tmp_path / "data" / ".run_trigger"
+    monkeypatch.setattr(runtime_config, "RUN_TRIGGER_PATH", trigger_path)
+    monkeypatch.setattr(runtime_config, "RUNTIME_CONFIG_PATH", tmp_path / "data" / "runtime_config.json")
+
+    runtime_config.trigger_run()
+
+    assert trigger_path.exists()
+
+
+def test_consume_run_trigger_returns_true_and_deletes_file(tmp_path, monkeypatch):
+    trigger_path = tmp_path / "data" / ".run_trigger"
+    trigger_path.parent.mkdir(parents=True, exist_ok=True)
+    trigger_path.touch()
+    monkeypatch.setattr(runtime_config, "RUN_TRIGGER_PATH", trigger_path)
+
+    result = runtime_config.consume_run_trigger()
+
+    assert result is True
+    assert not trigger_path.exists()
+
+
+def test_consume_run_trigger_returns_false_when_no_file(tmp_path, monkeypatch):
+    trigger_path = tmp_path / "data" / ".run_trigger"
+    monkeypatch.setattr(runtime_config, "RUN_TRIGGER_PATH", trigger_path)
+
+    result = runtime_config.consume_run_trigger()
+
+    assert result is False
+
+
+def test_consume_run_trigger_returns_true_on_unlink_error(tmp_path, monkeypatch):
+    """unlink raises OSError — should still return True (file was there)."""
+    trigger_path = tmp_path / "data" / ".run_trigger"
+    trigger_path.parent.mkdir(parents=True, exist_ok=True)
+    trigger_path.touch()
+    monkeypatch.setattr(runtime_config, "RUN_TRIGGER_PATH", trigger_path)
+
+    with patch.object(type(trigger_path), "unlink", side_effect=OSError("locked")):
+        result = runtime_config.consume_run_trigger()
+
+    assert result is True

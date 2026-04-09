@@ -56,7 +56,9 @@ with col2:
 
 if run_button:
     runtime_config.trigger_run()
-    st.success("Test triggered — the scheduler will run it within seconds. Refresh this page to see the result.")
+    st.success(
+        "Test triggered — the scheduler will run it within seconds. Refresh this page to see the result."
+    )
 
 st.divider()
 
@@ -81,7 +83,9 @@ if st.button("💾 Save Schedule"):
         st.info("Interval is already set to that value.")
     else:
         runtime_config.set_interval_minutes(new_interval)
-        st.success("Schedule updated — scheduler will apply the new interval within 30 seconds.")
+        st.success(
+            "Schedule updated — scheduler will apply the new interval within 30 seconds."
+        )
         st.rerun()
 
 st.divider()

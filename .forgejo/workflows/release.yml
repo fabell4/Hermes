@@ -36,6 +36,26 @@ jobs:
           # Strip leading 'v' for image tag (v0.1.0-alpha -> 0.1.0-alpha)
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
+      - name: Extract changelog notes
+        run: |
+          python3 - <<'PYEOF'
+import re, os
+
+version = os.environ['VERSION']
+try:
+    content = open('CHANGELOG.md').read()
+    pattern = rf'## \[{re.escape(version)}\][^\n]*\n(.*?)(?=\n## \[|\Z)'
+    m = re.search(pattern, content, re.DOTALL)
+    notes = m.group(1).strip() if m else ''
+except Exception:
+    notes = ''
+
+with open('/tmp/changelog_notes.txt', 'w') as f:
+    f.write(notes)
+PYEOF
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+
       - name: Log in to private registry
         if: ${{ secrets.REGISTRY_USERNAME != '' }}
         run: |
@@ -81,28 +101,55 @@ jobs:
 
       - name: Create GitHub release
         run: |
-          IS_PRE=${{ contains(steps.version.outputs.tag, 'alpha') || contains(steps.version.outputs.tag, 'beta') || contains(steps.version.outputs.tag, 'rc') }}
-          TAG="${{ steps.version.outputs.tag }}"
-          BODY="{\"tag_name\":\"${TAG}\",\"name\":\"${TAG}\",\"prerelease\":${IS_PRE},\"body\":\"Docker image: \`docker pull ghcr.io/${{ secrets.GH_USERNAME }}/hermes:${{ steps.version.outputs.version }}\`\"}"
-          # Try to create; if 422 (already exists), update instead
-          RESPONSE=$(curl -s -o /tmp/gh_release.json -w "%{http_code}" \
-            -X POST \
-            -H "Authorization: Bearer ${{ secrets.GH_PAT }}" \
-            -H "Content-Type: application/json" \
-            https://api.github.com/repos/${{ secrets.GH_USERNAME }}/hermes/releases \
-            -d "$BODY")
-          if [ "$RESPONSE" = "422" ]; then
-            RELEASE_ID=$(curl -fsSL \
-              -H "Authorization: Bearer ${{ secrets.GH_PAT }}" \
-              https://api.github.com/repos/${{ secrets.GH_USERNAME }}/hermes/releases/tags/${TAG} \
-              | grep '"id"' | head -1 | grep -o '[0-9]*')
-            curl -fsSL \
-              -X PATCH \
-              -H "Authorization: Bearer ${{ secrets.GH_PAT }}" \
-              -H "Content-Type: application/json" \
-              https://api.github.com/repos/${{ secrets.GH_USERNAME }}/hermes/releases/${RELEASE_ID} \
-              -d "$BODY"
-          fi
+          python3 - <<'PYEOF'
+import json, os, subprocess, sys
+
+tag     = os.environ['TAG']
+version = os.environ['VERSION']
+gh_user = os.environ['GH_USERNAME']
+gh_pat  = os.environ['GH_PAT']
+is_pre  = any(x in tag for x in ('alpha', 'beta', 'rc'))
+
+try:
+    notes = open('/tmp/changelog_notes.txt').read().strip()
+except Exception:
+    notes = ''
+
+docker_line = f'**Docker image:** `docker pull ghcr.io/{gh_user}/hermes:{version}`'
+body = f'{notes}\n\n---\n\n{docker_line}' if notes else docker_line
+
+payload = {'tag_name': tag, 'name': tag, 'prerelease': is_pre, 'body': body}
+
+with open('/tmp/gh_release_payload.json', 'w') as f:
+    json.dump(payload, f)
+
+base_url = f'https://api.github.com/repos/{gh_user}/hermes/releases'
+headers  = ['-H', f'Authorization: Bearer {gh_pat}', '-H', 'Content-Type: application/json']
+
+r = subprocess.run(
+    ['curl', '-s', '-o', '/tmp/gh_response.json', '-w', '%{http_code}',
+     '-X', 'POST', *headers, base_url, '-d', '@/tmp/gh_release_payload.json'],
+    capture_output=True, text=True)
+code = r.stdout.strip()
+
+if code == '422':
+    r2 = subprocess.run(
+        ['curl', '-fsSL', *headers, f'{base_url}/tags/{tag}'],
+        capture_output=True, text=True)
+    release_id = json.loads(r2.stdout)['id']
+    subprocess.run(
+        ['curl', '-fsSL', '-X', 'PATCH', *headers,
+         f'{base_url}/{release_id}', '-d', '@/tmp/gh_release_payload.json'],
+        check=True)
+elif code not in ('200', '201'):
+    print(f'GitHub release API returned HTTP {code}', file=sys.stderr)
+    sys.exit(1)
+PYEOF
+        env:
+          TAG:         ${{ steps.version.outputs.tag }}
+          VERSION:     ${{ steps.version.outputs.version }}
+          GH_USERNAME: ${{ secrets.GH_USERNAME }}
+          GH_PAT:      ${{ secrets.GH_PAT }}
 
       - name: Create Forgejo release
         uses: https://data.forgejo.org/actions/forgejo-release@v2
