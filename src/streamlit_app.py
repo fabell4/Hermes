@@ -69,7 +69,9 @@ if runtime_config.is_running():
 elif st.session_state.get("trigger_fired"):
     df_now = load_csv()
     current_count = len(df_now) if df_now is not None else 0
-    if current_count > st.session_state.get("pre_trigger_count", current_count):
+    if df_now is not None and current_count > st.session_state.get(
+        "pre_trigger_count", current_count
+    ):
         latest = df_now.iloc[0]
         st.success(
             f"✅ Test complete — "

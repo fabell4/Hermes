@@ -10,8 +10,9 @@ import pytest
 
 import src.main as main_module
 from src.exporters.base_exporter import BaseExporter
-from src.main import build_dispatcher, run_once, _poll_once
+from src.main import build_dispatcher, build_scheduler, run_once, _poll_once
 from src.models.speed_result import SpeedResult
+from src.result_dispatcher import DispatchError
 from src.services.speedtest_runner import SpeedtestRunner
 
 
@@ -85,6 +86,55 @@ def test_run_once_handles_runner_error_without_dispatch(mock_done, mock_running)
     dispatcher.dispatch.assert_not_called()
     mock_running.assert_called_once()
     mock_done.assert_called_once()
+
+
+@patch("src.main.runtime_config.mark_running")
+@patch("src.main.runtime_config.mark_done")
+def test_run_once_logs_dispatch_errors(mock_done, mock_running, caplog):
+    service = MagicMock()
+    dispatcher = MagicMock()
+    result = SpeedResult(
+        timestamp=datetime.now(timezone.utc),
+        download_mbps=10.0,
+        upload_mbps=5.0,
+        ping_ms=20.0,
+        server_name="ISP",
+        server_location="City, DE",
+        server_id=1,
+    )
+    service.run.return_value = result
+    dispatcher.dispatch.side_effect = DispatchError({"csv": OSError("disk full")})
+
+    with caplog.at_level(logging.WARNING):
+        run_once(service, dispatcher)
+
+    assert "disk full" in caplog.text
+    mock_done.assert_called_once()
+
+
+@patch("src.main.runtime_config.mark_running")
+@patch("src.main.runtime_config.mark_done")
+def test_run_once_mark_done_called_even_on_runner_error(mock_done, mock_running):
+    """Ensure mark_done is always called via the finally block."""
+    service = MagicMock()
+    dispatcher = MagicMock()
+    service.run.side_effect = RuntimeError("fail")
+
+    run_once(service, dispatcher)
+
+    mock_done.assert_called_once()
+
+
+def test_build_scheduler_returns_scheduler_with_job(monkeypatch):
+    monkeypatch.setattr(main_module.config, "SPEEDTEST_INTERVAL_MINUTES", 60)
+    service = MagicMock()
+    dispatcher = MagicMock()
+
+    scheduler = build_scheduler(service, dispatcher)
+
+    jobs = scheduler.get_jobs()
+    assert len(jobs) == 1
+    assert jobs[0].id == "speedtest_run"
 
 
 def test_build_dispatcher_skips_loki_on_init_error(monkeypatch, caplog):
