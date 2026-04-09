@@ -140,7 +140,9 @@ def test_set_enabled_exporters_persists_value(config_path):
 def test_trigger_run_creates_trigger_file(tmp_path, monkeypatch):
     trigger_path = tmp_path / "data" / ".run_trigger"
     monkeypatch.setattr(runtime_config, "RUN_TRIGGER_PATH", trigger_path)
-    monkeypatch.setattr(runtime_config, "RUNTIME_CONFIG_PATH", tmp_path / "data" / "runtime_config.json")
+    monkeypatch.setattr(
+        runtime_config, "RUNTIME_CONFIG_PATH", tmp_path / "data" / "runtime_config.json"
+    )
 
     runtime_config.trigger_run()
 

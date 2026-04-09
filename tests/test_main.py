@@ -4,11 +4,13 @@ from datetime import datetime, timezone
 import logging
 from unittest.mock import MagicMock, patch
 
+import speedtest as speedtest_module
+
 import pytest
 
 import src.main as main_module
 from src.exporters.base_exporter import BaseExporter
-from src.main import build_dispatcher, run_once
+from src.main import build_dispatcher, run_once, _poll_once
 from src.models.speed_result import SpeedResult
 from src.services.speedtest_runner import SpeedtestRunner
 
@@ -103,8 +105,6 @@ def test_build_dispatcher_skips_loki_on_init_error(monkeypatch, caplog):
 # SpeedtestRunner — exception paths
 # ---------------------------------------------------------------------------
 
-import speedtest as speedtest_module
-
 
 @patch("src.services.speedtest_runner.speedtest.Speedtest")
 def test_speedtest_runner_raises_on_config_error(mock_st_class):
@@ -138,3 +138,104 @@ def test_speedtest_runner_raises_on_generic_speedtest_exception(mock_st_class):
     mock_st_class.return_value = mock_st
     with pytest.raises(RuntimeError, match="Speedtest failed"):
         SpeedtestRunner().run()
+
+
+# ---------------------------------------------------------------------------
+# _poll_once
+# ---------------------------------------------------------------------------
+
+
+def _make_poll_deps():
+    """Return mock scheduler, dispatcher, service for _poll_once tests."""
+    return MagicMock(), MagicMock(), MagicMock()
+
+
+def test_poll_once_no_changes_returns_same_state(monkeypatch):
+    scheduler, dispatcher, service = _make_poll_deps()
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_interval_minutes", lambda default: 60
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_enabled_exporters", lambda default: ["csv"]
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "consume_run_trigger", lambda: False
+    )
+
+    interval, exporters = _poll_once(scheduler, dispatcher, service, 60, ["csv"])
+
+    assert interval == 60
+    assert exporters == ["csv"]
+    scheduler.reschedule_job.assert_not_called()
+    dispatcher.clear.assert_not_called()
+    service.run.assert_not_called()
+
+
+def test_poll_once_interval_changed_calls_update_schedule(monkeypatch):
+    scheduler, dispatcher, service = _make_poll_deps()
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_interval_minutes", lambda default: 30
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_enabled_exporters", lambda default: ["csv"]
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "consume_run_trigger", lambda: False
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "set_interval_minutes", lambda m: None
+    )
+
+    interval, _ = _poll_once(scheduler, dispatcher, service, 60, ["csv"])
+
+    assert interval == 30
+    scheduler.reschedule_job.assert_called_once()
+
+
+def test_poll_once_exporters_changed_calls_update_exporters(monkeypatch):
+    scheduler, dispatcher, service = _make_poll_deps()
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_interval_minutes", lambda default: 60
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_enabled_exporters",
+        lambda default: ["csv", "prometheus"],
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "consume_run_trigger", lambda: False
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "set_enabled_exporters", lambda e: None
+    )
+    monkeypatch.setattr(
+        main_module,
+        "EXPORTER_REGISTRY",
+        {
+            "csv": lambda: DummyExporter(),
+            "prometheus": lambda: DummyExporter(),
+        },
+    )
+
+    _, exporters = _poll_once(scheduler, dispatcher, service, 60, ["csv"])
+
+    assert sorted(exporters) == ["csv", "prometheus"]
+    dispatcher.clear.assert_called_once()
+
+
+def test_poll_once_trigger_fires_calls_run_once(monkeypatch):
+    scheduler, dispatcher, service = _make_poll_deps()
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_interval_minutes", lambda default: 60
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_enabled_exporters", lambda default: ["csv"]
+    )
+    monkeypatch.setattr(main_module.runtime_config, "consume_run_trigger", lambda: True)
+
+    result = MagicMock()
+    service.run.return_value = result
+
+    _poll_once(scheduler, dispatcher, service, 60, ["csv"])
+
+    service.run.assert_called_once()

@@ -145,6 +145,42 @@ def update_schedule(scheduler: BackgroundScheduler, new_interval_minutes: int) -
     logger.info("Schedule updated — new interval: %s minutes.", new_interval_minutes)
 
 
+def _poll_once(
+    scheduler: BackgroundScheduler,
+    dispatcher: ResultDispatcher,
+    service: SpeedtestRunner,
+    last_interval: int,
+    last_exporters: list[str],
+) -> tuple[int, list[str]]:
+    """
+    Execute one poll cycle — checks runtime_config.json for UI-driven changes
+    and reacts accordingly. Returns the (possibly updated) interval and exporters.
+    Extracted from the main loop to make it unit-testable.
+    """
+    # --- React to interval changes written by the UI ---
+    current_interval = runtime_config.get_interval_minutes(
+        default=config.SPEEDTEST_INTERVAL_MINUTES
+    )
+    if current_interval != last_interval:
+        update_schedule(scheduler, current_interval)
+        last_interval = current_interval
+
+    # --- React to exporter changes written by the UI ---
+    current_exporters = runtime_config.get_enabled_exporters(
+        default=config.ENABLED_EXPORTERS
+    )
+    if sorted(current_exporters) != sorted(last_exporters):
+        update_exporters(dispatcher, current_exporters)
+        last_exporters = current_exporters
+
+    # --- React to "Run Now" trigger written by the UI ---
+    if runtime_config.consume_run_trigger():
+        logger.info("Run trigger detected — starting immediate test.")
+        run_once(service, dispatcher)
+
+    return last_interval, last_exporters
+
+
 def main():
     logger.info("Hermes starting...")
     logger.info(
@@ -177,32 +213,13 @@ def main():
     )
 
     # Keep the main thread alive — scheduler runs in background thread.
-    # Each cycle also polls runtime_config.json for UI-driven changes.
+    # Each cycle delegates to _poll_once for UI-driven change detection.
     try:
         while True:
             time.sleep(30)
-
-            # --- React to interval changes written by the UI ---
-            current_interval = runtime_config.get_interval_minutes(
-                default=config.SPEEDTEST_INTERVAL_MINUTES
+            last_interval, last_exporters = _poll_once(
+                scheduler, dispatcher, service, last_interval, last_exporters
             )
-            if current_interval != last_interval:
-                update_schedule(scheduler, current_interval)
-                last_interval = current_interval
-
-            # --- React to exporter changes written by the UI ---
-            current_exporters = runtime_config.get_enabled_exporters(
-                default=config.ENABLED_EXPORTERS
-            )
-            if sorted(current_exporters) != sorted(last_exporters):
-                update_exporters(dispatcher, current_exporters)
-                last_exporters = current_exporters
-
-            # --- React to "Run Now" trigger written by the UI ---
-            if runtime_config.consume_run_trigger():
-                logger.info("Run trigger detected — starting immediate test.")
-                run_once(service, dispatcher)
-
     except (KeyboardInterrupt, SystemExit):
         logger.info("Shutdown signal received — stopping scheduler...")
         scheduler.shutdown()
