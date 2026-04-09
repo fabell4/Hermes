@@ -86,3 +86,29 @@ def get_enabled_exporters(default: list[str]) -> list[str]:
 def set_enabled_exporters(exporters: list[str]) -> None:
     """Persists the enabled exporters list to disk."""
     save({"enabled_exporters": exporters})
+
+
+# --- Run trigger ---
+# Written by the UI process; consumed and deleted by the scheduler process.
+
+RUN_TRIGGER_PATH = Path("data/.run_trigger")
+
+
+def trigger_run() -> None:
+    """Signal the scheduler process to run a test immediately."""
+    _ensure_dir()
+    RUN_TRIGGER_PATH.touch()
+
+
+def consume_run_trigger() -> bool:
+    """
+    Check whether the UI requested an immediate run.
+    Deletes the trigger file and returns True if it was present.
+    """
+    if RUN_TRIGGER_PATH.exists():
+        try:
+            RUN_TRIGGER_PATH.unlink()
+        except OSError:
+            pass
+        return True
+    return False

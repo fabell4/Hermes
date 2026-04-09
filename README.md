@@ -9,22 +9,32 @@ A Python application that periodically runs internet speed tests and exports res
 
 ```mermaid
 flowchart TD
-    UI["**Streamlit UI**\nsrc/streamlit_app.py"]
-    MAIN["**main.py**\nEntry point + scheduler"]
-    RUNNER["**SpeedtestRunner**\nsrc/services/speedtest_runner.py"]
-    MODEL["**SpeedResult**\nsrc/models/speed_result.py"]
-    DISP["**ResultDispatcher**\nsrc/result_dispatcher.py"]
-    CSV["CSVExporter"]
-    PROM["PrometheusExporter"]
-    LOKI["LokiExporter"]
+    subgraph UI_CONTAINER["hermes-ui container"]
+        UI["**Streamlit UI**\nsrc/streamlit_app.py"]
+    end
 
-    UI -- "Run Now" --> RUNNER
-    MAIN -- "scheduled" --> RUNNER
+    subgraph SCHED_CONTAINER["hermes-scheduler container"]
+        MAIN["**main.py**\nEntry point + scheduler"]
+        RUNNER["**SpeedtestRunner**\nsrc/services/speedtest_runner.py"]
+        MODEL["**SpeedResult**\nsrc/models/speed_result.py"]
+        DISP["**ResultDispatcher**\nsrc/result_dispatcher.py"]
+        CSV["CSVExporter"]
+        PROM["PrometheusExporter"]
+        LOKI["LokiExporter"]
+    end
+
+    VOLUME[("**Shared Volume**\nruntime_config.json\n.run_trigger\nresults.csv")]
+
+    UI -- "writes trigger / config" --> VOLUME
+    VOLUME -- "polls every 30s" --> MAIN
+    VOLUME -- "reads results.csv" --> UI
+    MAIN -- "scheduled / triggered" --> RUNNER
     RUNNER --> MODEL
     MODEL --> DISP
     DISP --> CSV
     DISP --> PROM
     DISP --> LOKI
+    CSV -- "writes" --> VOLUME
 
     style UI fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style MAIN fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
@@ -34,6 +44,7 @@ flowchart TD
     style CSV fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style PROM fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style LOKI fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style VOLUME fill:#1565c0,stroke:#90caf9,color:#ffffff
 ```
 
 ## Project Structure
@@ -116,22 +127,36 @@ Hermes is distributed as a Docker image on GHCR.
 
 ### Minimal setup
 
-Create a `docker-compose.yml` on your server:
+Hermes runs as two containers from the same image — a scheduler and a UI. Create a `docker-compose.yml` on your server:
 
 ```yaml
 services:
-  hermes:
+  hermes-scheduler:
     image: ghcr.io/fabell4/hermes:latest
-    container_name: hermes
-    restart: unless-stopped
+    container_name: hermes-scheduler
+    restart: always
+    command: ["python", "-m", "src.main"]
     ports:
-      - "8501:8501"   # Streamlit UI
       - "8000:8000"   # Prometheus /metrics
     volumes:
       - hermes-logs:/app/logs
       - hermes-data:/app/data
     env_file:
       - .env
+
+  hermes-ui:
+    image: ghcr.io/fabell4/hermes:latest
+    container_name: hermes-ui
+    restart: always
+    ports:
+      - "8501:8501"   # Streamlit UI
+    volumes:
+      - hermes-logs:/app/logs
+      - hermes-data:/app/data
+    env_file:
+      - .env
+    depends_on:
+      - hermes-scheduler
 
 volumes:
   hermes-logs:

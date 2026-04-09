@@ -169,10 +169,40 @@ def main():
         config.SPEEDTEST_INTERVAL_MINUTES,
     )
 
-    # Keep the main thread alive — scheduler runs in background thread
+    last_interval = runtime_config.get_interval_minutes(
+        default=config.SPEEDTEST_INTERVAL_MINUTES
+    )
+    last_exporters = runtime_config.get_enabled_exporters(
+        default=config.ENABLED_EXPORTERS
+    )
+
+    # Keep the main thread alive — scheduler runs in background thread.
+    # Each cycle also polls runtime_config.json for UI-driven changes.
     try:
         while True:
             time.sleep(30)
+
+            # --- React to interval changes written by the UI ---
+            current_interval = runtime_config.get_interval_minutes(
+                default=config.SPEEDTEST_INTERVAL_MINUTES
+            )
+            if current_interval != last_interval:
+                update_schedule(scheduler, current_interval)
+                last_interval = current_interval
+
+            # --- React to exporter changes written by the UI ---
+            current_exporters = runtime_config.get_enabled_exporters(
+                default=config.ENABLED_EXPORTERS
+            )
+            if sorted(current_exporters) != sorted(last_exporters):
+                update_exporters(dispatcher, current_exporters)
+                last_exporters = current_exporters
+
+            # --- React to "Run Now" trigger written by the UI ---
+            if runtime_config.consume_run_trigger():
+                logger.info("Run trigger detected — starting immediate test.")
+                run_once(service, dispatcher)
+
     except (KeyboardInterrupt, SystemExit):
         logger.info("Shutdown signal received — stopping scheduler...")
         scheduler.shutdown()
