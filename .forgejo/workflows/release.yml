@@ -95,6 +95,22 @@ jobs:
           PAYLOAD_FILE:  /tmp/gh_release_payload.json
           RESPONSE_FILE: /tmp/gh_response.json
 
+      - name: Delete existing Forgejo release (if any)
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+          FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+        run: |
+          REPO_API="${{ github.server_url }}/api/v1/repos/${{ github.repository }}"
+          RELEASE_ID=$(curl -s -H "Authorization: token ${FORGEJO_TOKEN}" \
+            "${REPO_API}/releases/tags/${TAG}" | jq -r '.id // empty')
+          if [ -n "${RELEASE_ID}" ]; then
+            echo "Deleting existing release id=${RELEASE_ID} for tag ${TAG}"
+            curl -s -X DELETE -H "Authorization: token ${FORGEJO_TOKEN}" \
+              "${REPO_API}/releases/${RELEASE_ID}"
+          else
+            echo "No existing release found for tag ${TAG}"
+          fi
+
       - name: Create Forgejo release
         uses: https://data.forgejo.org/actions/forgejo-release@v2
         with:
