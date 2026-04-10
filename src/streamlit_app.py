@@ -45,8 +45,10 @@ def load_csv() -> pd.DataFrame | None:
     df = pd.read_csv(config.CSV_LOG_PATH)
     if df.empty:
         return None
-    df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True).dt.tz_convert(
-        _DISPLAY_TZ
+    df["timestamp"] = (
+        pd.to_datetime(df["timestamp"], utc=True)
+        .dt.tz_convert(_DISPLAY_TZ)
+        .dt.tz_localize(None)
     )
     df = df.sort_values("timestamp", ascending=False)
     return df
