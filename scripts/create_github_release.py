@@ -16,7 +16,8 @@ response_file = os.environ.get("RESPONSE_FILE", "/tmp/gh_response.json")
 is_pre = any(x in tag for x in ("alpha", "beta", "rc"))
 
 try:
-    notes = open(notes_file).read().strip()
+    with open(notes_file) as fh:
+        notes = fh.read().strip()
 except Exception:
     notes = ""
 

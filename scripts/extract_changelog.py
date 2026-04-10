@@ -10,7 +10,8 @@ if not version:
     sys.exit(1)
 
 try:
-    content = open("CHANGELOG.md").read()
+    with open("CHANGELOG.md") as fh:
+        content = fh.read()
     pattern = rf"## \[{re.escape(version)}\][^\n]*\n(.*?)(?=\n## \[|\Z)"
     m = re.search(pattern, content, re.DOTALL)
     notes = m.group(1).strip() if m else ""
