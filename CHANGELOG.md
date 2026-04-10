@@ -8,6 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+---
+
+## [0.2.0-alpha] - 2026-04-10
+
+### Added
+- `runtime_config.py` — `mark_running()`, `mark_done()`, `is_running()` sentinel file IPC between containers
+- "Run Now" UI feedback — live running indicator and metric cards (download, upload, ping) shown after test completes
+- OCI image label (`org.opencontainers.image.source`) in Dockerfile linking image to GitHub repo
+
 ### Changed
 - Scheduler now runs as a dedicated `hermes-scheduler` container, independent of the Streamlit UI
 - Both containers are built from the same image — `hermes-scheduler` overrides the entrypoint to run `src.main`
@@ -15,9 +24,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - "Run Now" button writes a trigger file (`data/.run_trigger`); the scheduler picks it up within 30 seconds
 - Schedule and exporter changes from the UI are applied by the scheduler within 30 seconds of saving
 - Both containers now use `restart: always` (was `unless-stopped`)
+- `docker-compose.yml` now uses `image: ${HERMES_IMAGE:-...}` instead of `build: .`
+- Timestamps now use `ZoneInfo(TZ)` respecting the container `TZ` environment variable
+- UI timestamp display converted to local time and stripped of UTC offset for correct Streamlit rendering
 
 ### Fixed
 - Scheduler no longer stops after a server reboot — `hermes-scheduler` starts eagerly on container start without requiring a UI page visit
+- Error message from a failed "Run Now" now clears immediately when the button is clicked again
+- Stale `.running` sentinel cleared on scheduler startup to recover from crash/restart
+- Duplicate `tzdata` entry in `requirements.txt` causing CI pip install conflict
 
 ---
 
