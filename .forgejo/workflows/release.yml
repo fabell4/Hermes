@@ -85,56 +85,15 @@ jobs:
           git push github ${{ steps.version.outputs.tag }} --force
 
       - name: Create GitHub release
-        run: |
-          python3 - <<'PYEOF'
-import json, os, subprocess, sys
-
-tag     = os.environ['TAG']
-version = os.environ['VERSION']
-gh_user = os.environ['GH_USERNAME']
-gh_pat  = os.environ['GH_PAT']
-is_pre  = any(x in tag for x in ('alpha', 'beta', 'rc'))
-
-try:
-    notes = open('/tmp/changelog_notes.txt').read().strip()
-except Exception:
-    notes = ''
-
-docker_line = f'**Docker image:** `docker pull ghcr.io/{gh_user}/hermes:{version}`'
-body = f'{notes}\n\n---\n\n{docker_line}' if notes else docker_line
-
-payload = {'tag_name': tag, 'name': tag, 'prerelease': is_pre, 'body': body}
-
-with open('/tmp/gh_release_payload.json', 'w') as f:
-    json.dump(payload, f)
-
-base_url = f'https://api.github.com/repos/{gh_user}/hermes/releases'
-headers  = ['-H', f'Authorization: Bearer {gh_pat}', '-H', 'Content-Type: application/json']
-
-r = subprocess.run(
-    ['curl', '-s', '-o', '/tmp/gh_response.json', '-w', '%{http_code}',
-     '-X', 'POST', *headers, base_url, '-d', '@/tmp/gh_release_payload.json'],
-    capture_output=True, text=True)
-code = r.stdout.strip()
-
-if code == '422':
-    r2 = subprocess.run(
-        ['curl', '-fsSL', *headers, f'{base_url}/tags/{tag}'],
-        capture_output=True, text=True)
-    release_id = json.loads(r2.stdout)['id']
-    subprocess.run(
-        ['curl', '-fsSL', '-X', 'PATCH', *headers,
-         f'{base_url}/{release_id}', '-d', '@/tmp/gh_release_payload.json'],
-        check=True)
-elif code not in ('200', '201'):
-    print(f'GitHub release API returned HTTP {code}', file=sys.stderr)
-    sys.exit(1)
-PYEOF
+        run: python3 scripts/create_github_release.py
         env:
-          TAG:         ${{ steps.version.outputs.tag }}
-          VERSION:     ${{ steps.version.outputs.version }}
-          GH_USERNAME: ${{ secrets.GH_USERNAME }}
-          GH_PAT:      ${{ secrets.GH_PAT }}
+          TAG:           ${{ steps.version.outputs.tag }}
+          VERSION:       ${{ steps.version.outputs.version }}
+          GH_USERNAME:   ${{ secrets.GH_USERNAME }}
+          GH_PAT:        ${{ secrets.GH_PAT }}
+          NOTES_FILE:    /tmp/changelog_notes.txt
+          PAYLOAD_FILE:  /tmp/gh_release_payload.json
+          RESPONSE_FILE: /tmp/gh_response.json
 
       - name: Create Forgejo release
         uses: https://data.forgejo.org/actions/forgejo-release@v2
