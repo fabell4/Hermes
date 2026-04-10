@@ -76,13 +76,22 @@ jobs:
           docker push ghcr.io/${{ secrets.GH_USERNAME }}/hermes:latest
 
       - name: Push tag to public GitHub repo
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+          GH_USERNAME: ${{ secrets.GH_USERNAME }}
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
           git config user.email "ci@greenflametech.net"
           git config user.name "Hermes CI"
           git fetch --unshallow origin || true
-          git remote add github https://${{ secrets.GH_USERNAME }}:${{ secrets.GH_PAT }}@github.com/${{ secrets.GH_USERNAME }}/hermes.git
+          GITHUB_REPO_URL="https://${GH_USERNAME}:${GH_PAT}@github.com/${GH_USERNAME}/Hermes.git"
+          git remote add github "${GITHUB_REPO_URL}"
           git push github HEAD:refs/heads/main --force
-          git push github ${{ steps.version.outputs.tag }} --force
+          # Delete the tag on GitHub first (in case it exists and is protected against overwrites)
+          curl -s -X DELETE \
+            -H "Authorization: Bearer ${GH_PAT}" \
+            "https://api.github.com/repos/${GH_USERNAME}/Hermes/git/refs/tags/${TAG}" || true
+          git push github "${TAG}"
 
       - name: Create GitHub release
         run: python3 scripts/create_github_release.py

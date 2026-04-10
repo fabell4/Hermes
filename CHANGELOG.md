@@ -10,6 +10,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.2.1-alpha] - 2026-04-10
+
+### Fixed
+- Release workflow: correct GitHub repo URL casing (`Hermes.git`) to match repository rename
+- Release workflow: delete existing GitHub tag via API before pushing to avoid protected-ref rejection
+- Release workflow: delete existing Forgejo release before recreating for idempotent re-runs
+- Release scripts: use `os.open` with mode `0o600` for temp file writes (SonarQube S5443)
+- Release scripts: replace hardcoded `/tmp/` paths with `tempfile.gettempdir()`
+
+---
+
 ## [0.2.0-alpha] - 2026-04-10
 
 ### Added
