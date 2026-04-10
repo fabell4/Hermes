@@ -5,13 +5,22 @@ Hermes — Streamlit MVP UI.
 Validates the full pipeline before building the production web frontend.
 """
 
+import os
+
 import streamlit as st
 import pandas as pd
 from pathlib import Path
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 import time
 
 import src.config as config
 import src.runtime_config as runtime_config
+
+_tz_name = os.getenv("TZ", "UTC")
+try:
+    _DISPLAY_TZ = ZoneInfo(_tz_name)
+except ZoneInfoNotFoundError:
+    _DISPLAY_TZ = ZoneInfo("UTC")
 
 # Friendly labels for the known exporters.
 # Keep in sync with EXPORTER_REGISTRY in main.py.
@@ -36,7 +45,9 @@ def load_csv() -> pd.DataFrame | None:
     df = pd.read_csv(config.CSV_LOG_PATH)
     if df.empty:
         return None
-    df["timestamp"] = pd.to_datetime(df["timestamp"])
+    df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True).dt.tz_convert(
+        _DISPLAY_TZ
+    )
     df = df.sort_values("timestamp", ascending=False)
     return df
 
