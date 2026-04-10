@@ -4,14 +4,16 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 
 tag = os.environ["TAG"]
 version = os.environ["VERSION"]
 gh_user = os.environ["GH_USERNAME"]
 gh_pat = os.environ["GH_PAT"]
-notes_file = os.environ.get("NOTES_FILE", "/tmp/changelog_notes.txt")
-payload_file = os.environ.get("PAYLOAD_FILE", "/tmp/gh_release_payload.json")
-response_file = os.environ.get("RESPONSE_FILE", "/tmp/gh_response.json")
+_tmpdir = tempfile.gettempdir()
+notes_file = os.environ.get("NOTES_FILE", os.path.join(_tmpdir, "changelog_notes.txt"))
+payload_file = os.environ.get("PAYLOAD_FILE", os.path.join(_tmpdir, "gh_release_payload.json"))
+response_file = os.environ.get("RESPONSE_FILE", os.path.join(_tmpdir, "gh_response.json"))
 
 is_pre = any(x in tag for x in ("alpha", "beta", "rc"))
 
@@ -26,7 +28,8 @@ body = f"{notes}\n\n---\n\n{docker_line}" if notes else docker_line
 
 payload = {"tag_name": tag, "name": tag, "prerelease": is_pre, "body": body}
 
-with open(payload_file, "w") as f:
+fd = os.open(payload_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+with os.fdopen(fd, "w") as f:
     json.dump(payload, f)
 
 base_url = f"https://api.github.com/repos/{gh_user}/hermes/releases"
