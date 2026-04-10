@@ -37,22 +37,7 @@ jobs:
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
       - name: Extract changelog notes
-        run: |
-          python3 - <<'PYEOF'
-import re, os
-
-version = os.environ['VERSION']
-try:
-    content = open('CHANGELOG.md').read()
-    pattern = rf'## \[{re.escape(version)}\][^\n]*\n(.*?)(?=\n## \[|\Z)'
-    m = re.search(pattern, content, re.DOTALL)
-    notes = m.group(1).strip() if m else ''
-except Exception:
-    notes = ''
-
-with open('/tmp/changelog_notes.txt', 'w') as f:
-    f.write(notes)
-PYEOF
+        run: python3 scripts/extract_changelog.py
         env:
           VERSION: ${{ steps.version.outputs.version }}
 
