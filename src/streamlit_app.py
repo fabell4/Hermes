@@ -59,12 +59,18 @@ if run_button:
     df_pre = load_csv()
     st.session_state["pre_trigger_count"] = len(df_pre) if df_pre is not None else 0
     st.session_state["trigger_fired"] = True
+    st.session_state["trigger_time"] = time.time()
     runtime_config.trigger_run()
+    st.rerun()  # Force a clean render so no stale messages remain.
 
 # Show live running state — only when this session triggered a run.
 # Gated so page-load during a scheduled test never blocks the UI.
 if st.session_state.get("trigger_fired"):
-    if runtime_config.is_running():
+    elapsed = time.time() - st.session_state.get("trigger_time", time.time())
+    if elapsed > 120:
+        st.error("⚠ Test timed out — check connection and try again.")
+        st.session_state["trigger_fired"] = False
+    elif runtime_config.is_running():
         st.write("🔄 Running speedtest… this takes ~30 seconds.")
         time.sleep(2)
         st.rerun()

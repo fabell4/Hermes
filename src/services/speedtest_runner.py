@@ -1,8 +1,10 @@
 """SpeedtestRunner — wraps speedtest-cli, runs a test, and returns a SpeedResult."""
 
+import os
 import speedtest  # type: ignore
 from datetime import datetime
 from typing import Any, cast
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from src.models.speed_result import SpeedResult
 
@@ -21,8 +23,13 @@ class SpeedtestRunner:
             download_bps = st.download(threads=None)  # type: ignore[no-untyped-call]
             upload_bps = st.upload(threads=None, pre_allocate=True)  # type: ignore[no-untyped-call]
 
+            _tz_name = os.getenv("TZ", "UTC")
+            try:
+                _tz = ZoneInfo(_tz_name)
+            except ZoneInfoNotFoundError:
+                _tz = ZoneInfo("UTC")
             return SpeedResult(
-                timestamp=datetime.now().astimezone(),
+                timestamp=datetime.now(_tz),
                 download_mbps=round(download_bps / 1_000_000, 2),
                 upload_mbps=round(upload_bps / 1_000_000, 2),
                 ping_ms=round(st.results.ping, 2),

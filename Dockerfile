@@ -1,5 +1,7 @@
 FROM python:3.13-slim
 
+LABEL org.opencontainers.image.source="https://github.com/fabell4/hermes"
+
 WORKDIR /app
 
 # Install dependencies first (cached layer unless requirements.txt changes)
