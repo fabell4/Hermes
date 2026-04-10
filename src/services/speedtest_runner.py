@@ -1,7 +1,7 @@
 """SpeedtestRunner — wraps speedtest-cli, runs a test, and returns a SpeedResult."""
 
 import speedtest  # type: ignore
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, cast
 
 from src.models.speed_result import SpeedResult
@@ -22,7 +22,7 @@ class SpeedtestRunner:
             upload_bps = st.upload(threads=None, pre_allocate=True)  # type: ignore[no-untyped-call]
 
             return SpeedResult(
-                timestamp=datetime.now(timezone.utc),
+                timestamp=datetime.now().astimezone(),
                 download_mbps=round(download_bps / 1_000_000, 2),
                 upload_mbps=round(upload_bps / 1_000_000, 2),
                 ping_ms=round(st.results.ping, 2),

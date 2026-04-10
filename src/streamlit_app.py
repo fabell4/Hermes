@@ -61,30 +61,32 @@ if run_button:
     st.session_state["trigger_fired"] = True
     runtime_config.trigger_run()
 
-# Show live running state while the scheduler is executing the test.
-if runtime_config.is_running():
-    with st.spinner("🔄 Running speedtest… this takes ~30 seconds."):
-        time.sleep(2)
-    st.rerun()
-elif st.session_state.get("trigger_fired"):
-    df_now = load_csv()
-    current_count = len(df_now) if df_now is not None else 0
-    if df_now is not None and current_count > st.session_state.get(
-        "pre_trigger_count", current_count
-    ):
-        latest = df_now.iloc[0]
-        st.success(
-            f"✅ Test complete — "
-            f"⬇ {latest['download_mbps']:.1f} Mbps | "
-            f"⬆ {latest['upload_mbps']:.1f} Mbps | "
-            f"📶 {latest['ping_ms']:.1f} ms"
-        )
-        st.session_state["trigger_fired"] = False
-    else:
-        # Trigger written but scheduler hasn't picked it up yet (within 30s poll window).
-        st.info("⏳ Waiting for the scheduler to pick up the test…")
+# Show live running state — only when this session triggered a run.
+# Gated so page-load during a scheduled test never blocks the UI.
+if st.session_state.get("trigger_fired"):
+    if runtime_config.is_running():
+        st.write("🔄 Running speedtest… this takes ~30 seconds.")
         time.sleep(2)
         st.rerun()
+    else:
+        df_now = load_csv()
+        current_count = len(df_now) if df_now is not None else 0
+        if df_now is not None and current_count > st.session_state.get(
+            "pre_trigger_count", 0
+        ):
+            latest = df_now.iloc[0]
+            st.write("✅ Test complete and logged.")
+            c1, c2, c3 = st.columns(3)
+            c1.metric("⬇ Download", f"{latest['download_mbps']:.2f} Mbps")
+            c2.metric("⬆ Upload", f"{latest['upload_mbps']:.2f} Mbps")
+            c3.metric("📶 Ping", f"{latest['ping_ms']:.2f} ms")
+            st.caption(f"Server: {latest['server_name']} — {latest['server_location']}")
+            st.session_state["trigger_fired"] = False
+        else:
+            # Trigger written but scheduler hasn't picked it up yet (within 30s poll window).
+            st.info("⏳ Waiting for the scheduler to pick up the test…")
+            time.sleep(2)
+            st.rerun()
 
 st.divider()
 
