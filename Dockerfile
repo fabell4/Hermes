@@ -1,6 +1,6 @@
 FROM python:3.13-slim
 
-LABEL org.opencontainers.image.source="https://github.com/fabell4/Hermes-dev"
+LABEL org.opencontainers.image.source="https://github.com/fabell4/hermes"
 
 WORKDIR /app
 
