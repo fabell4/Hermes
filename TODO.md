@@ -54,6 +54,7 @@ _Goal: make historical data more useful and integrate with the wider observabili
 _Goal: improve the Streamlit UI while it remains the primary frontend._
 
 - [ ] Scheduler next-run countdown
+- [ ] Version update check — compare running version against the latest published release via the GitHub/Forgejo API and show an in-UI banner when an update is available
 - [ ] Daily/weekly summary stats table (min/max/avg per day)
 - [ ] Connection quality score — weighted composite of download/upload/ping
 - [ ] Historical charts — per-metric breakdowns, not just the combined line chart

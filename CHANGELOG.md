@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Fixed
+- Streamlit UI — duplicate chart and raw data expander rendered after a manual run or schedule save due to `st.rerun()` interrupting mid-script rendering; sections now use `@st.fragment` so reruns are scoped and the History section's position in the element tree stays stable
+
 ---
 
 ## [0.2.1-alpha] - 2026-04-10

@@ -58,6 +58,20 @@ def load_csv() -> pd.DataFrame | None:
 st.title("📡 Hermes")
 st.caption("Speedtest Monitor — MVP")
 
+# Disable browser scroll-restoration and scroll to top on every full-page render.
+# Fragment reruns skip module-level code, so this does not fire on widget interactions.
+st.html(
+    """
+    <script>
+      if ('scrollRestoration' in window.parent.history) {
+        window.parent.history.scrollRestoration = 'manual';
+      }
+      var el = window.parent.document.querySelector('[data-testid="stAppViewContainer"]');
+      if (el) el.scrollTo({top: 0, behavior: 'instant'});
+    </script>
+    """
+)
+
 st.divider()
 
 
