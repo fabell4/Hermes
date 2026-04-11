@@ -60,104 +60,124 @@ st.caption("Speedtest Monitor — MVP")
 
 st.divider()
 
+
 # --- Run Test ---
-col1, col2 = st.columns([2, 1])
-with col1:
-    st.subheader("Run a Test")
-    st.write("Triggers a full download, upload, and ping test. Takes ~30 seconds.")
-with col2:
-    run_button = st.button("▶ Run Now", width="stretch", type="primary")
+@st.fragment
+def run_test_section() -> None:
+    col1, col2 = st.columns([2, 1])
+    with col1:
+        st.subheader("Run a Test")
+        st.write("Triggers a full download, upload, and ping test. Takes ~30 seconds.")
+    with col2:
+        run_button = st.button("▶ Run Now", width="stretch", type="primary")
 
-if run_button:
-    df_pre = load_csv()
-    st.session_state["pre_trigger_count"] = len(df_pre) if df_pre is not None else 0
-    st.session_state["trigger_fired"] = True
-    st.session_state["trigger_time"] = time.time()
-    runtime_config.trigger_run()
-    st.rerun()  # Force a clean render so no stale messages remain.
-
-# Show live running state — only when this session triggered a run.
-# Gated so page-load during a scheduled test never blocks the UI.
-if st.session_state.get("trigger_fired"):
-    elapsed = time.time() - st.session_state.get("trigger_time", time.time())
-    if elapsed > 120:
-        st.error("⚠ Test timed out — check connection and try again.")
-        st.session_state["trigger_fired"] = False
-    elif runtime_config.is_running():
-        st.write("🔄 Running speedtest… this takes ~30 seconds.")
-        time.sleep(2)
+    if run_button:
+        df_pre = load_csv()
+        st.session_state["pre_trigger_count"] = len(df_pre) if df_pre is not None else 0
+        st.session_state["trigger_fired"] = True
+        st.session_state["trigger_time"] = time.time()
+        runtime_config.trigger_run()
         st.rerun()
-    else:
-        df_now = load_csv()
-        current_count = len(df_now) if df_now is not None else 0
-        if df_now is not None and current_count > st.session_state.get(
-            "pre_trigger_count", 0
-        ):
-            latest = df_now.iloc[0]
-            st.write("✅ Test complete and logged.")
-            c1, c2, c3 = st.columns(3)
-            c1.metric("⬇ Download", f"{latest['download_mbps']:.2f} Mbps")
-            c2.metric("⬆ Upload", f"{latest['upload_mbps']:.2f} Mbps")
-            c3.metric("📶 Ping", f"{latest['ping_ms']:.2f} ms")
-            st.caption(f"Server: {latest['server_name']} — {latest['server_location']}")
+
+    # Show live running state — only when this session triggered a run.
+    # Gated so page-load during a scheduled test never blocks the UI.
+    if st.session_state.get("trigger_fired"):
+        elapsed = time.time() - st.session_state.get("trigger_time", time.time())
+        if elapsed > 120:
+            st.error("⚠ Test timed out — check connection and try again.")
             st.session_state["trigger_fired"] = False
-        else:
-            # Trigger written but scheduler hasn't picked it up yet (within 30s poll window).
-            st.info("⏳ Waiting for the scheduler to pick up the test…")
+        elif runtime_config.is_running():
+            st.write("🔄 Running speedtest… this takes ~30 seconds.")
             time.sleep(2)
             st.rerun()
+        else:
+            df_now = load_csv()
+            current_count = len(df_now) if df_now is not None else 0
+            if df_now is not None and current_count > st.session_state.get(
+                "pre_trigger_count", 0
+            ):
+                latest = df_now.iloc[0]
+                st.write("✅ Test complete and logged.")
+                c1, c2, c3 = st.columns(3)
+                c1.metric("⬇ Download", f"{latest['download_mbps']:.2f} Mbps")
+                c2.metric("⬆ Upload", f"{latest['upload_mbps']:.2f} Mbps")
+                c3.metric("📶 Ping", f"{latest['ping_ms']:.2f} ms")
+                st.caption(f"Server: {latest['server_name']} — {latest['server_location']}")
+                st.session_state["trigger_fired"] = False
+                # Full-page rerun so the History section refreshes with the new result.
+                st.rerun(scope="app")
+            else:
+                # Trigger written but scheduler hasn't picked it up yet (within 30s poll window).
+                st.info("⏳ Waiting for the scheduler to pick up the test…")
+                time.sleep(2)
+                st.rerun()
+
+
+run_test_section()
 
 st.divider()
+
 
 # --- Schedule Control ---
-st.subheader("Schedule")
+@st.fragment
+def schedule_section() -> None:
+    st.subheader("Schedule")
 
-current_interval = runtime_config.get_interval_minutes(
-    default=config.SPEEDTEST_INTERVAL_MINUTES
-)
-st.caption(f"Current interval: every **{current_interval} minutes**")
+    current_interval = runtime_config.get_interval_minutes(
+        default=config.SPEEDTEST_INTERVAL_MINUTES
+    )
+    st.caption(f"Current interval: every **{current_interval} minutes**")
 
-new_interval = st.number_input(
-    "New interval (minutes)",
-    min_value=1,
-    max_value=1440,
-    value=current_interval,
-    step=5,
-)
+    new_interval = st.number_input(
+        "New interval (minutes)",
+        min_value=1,
+        max_value=1440,
+        value=current_interval,
+        step=5,
+    )
 
-if st.button("💾 Save Schedule"):
-    if new_interval == current_interval:
-        st.info("Interval is already set to that value.")
-    else:
-        runtime_config.set_interval_minutes(new_interval)
-        st.success(
-            "Schedule updated — scheduler will apply the new interval within 30 seconds."
-        )
-        st.rerun()
+    if st.button("💾 Save Schedule"):
+        if new_interval == current_interval:
+            st.info("Interval is already set to that value.")
+        else:
+            runtime_config.set_interval_minutes(new_interval)
+            st.toast(
+                "Schedule updated — scheduler will apply the new interval within 30 seconds.",
+                icon="✅",
+            )
+
+
+schedule_section()
 
 st.divider()
 
+
 # --- Exporter Toggles ---
-st.subheader("Exporters")
-st.caption("Enable or disable exporters. Changes take effect within 30 seconds.")
+@st.fragment
+def exporters_section() -> None:
+    st.subheader("Exporters")
+    st.caption("Enable or disable exporters. Changes take effect within 30 seconds.")
 
-current_enabled = runtime_config.get_enabled_exporters(default=config.ENABLED_EXPORTERS)
+    current_enabled = runtime_config.get_enabled_exporters(default=config.ENABLED_EXPORTERS)
 
-new_enabled = []
-for name, label in KNOWN_EXPORTERS.items():
-    checked = st.checkbox(label, value=name in current_enabled, key=f"exporter_{name}")
-    if checked:
-        new_enabled.append(name)
+    new_enabled = []
+    for name, label in KNOWN_EXPORTERS.items():
+        checked = st.checkbox(label, value=name in current_enabled, key=f"exporter_{name}")
+        if checked:
+            new_enabled.append(name)
 
-if st.button("💾 Save Exporters"):
-    if sorted(new_enabled) == sorted(current_enabled):
-        st.info("No changes to exporter configuration.")
-    else:
-        runtime_config.set_enabled_exporters(new_enabled)
-        st.success(
-            f"Exporters updated — scheduler will apply within 30 seconds. Active: {', '.join(new_enabled) or 'none'}"
-        )
-        st.rerun()
+    if st.button("💾 Save Exporters"):
+        if sorted(new_enabled) == sorted(current_enabled):
+            st.info("No changes to exporter configuration.")
+        else:
+            runtime_config.set_enabled_exporters(new_enabled)
+            st.toast(
+                f"Exporters updated — applying within 30 seconds. Active: {', '.join(new_enabled) or 'none'}",
+                icon="✅",
+            )
+
+
+exporters_section()
 
 st.divider()
 
