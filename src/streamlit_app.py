@@ -139,7 +139,9 @@ def run_test_section() -> None:
         st.session_state["trigger_time"] = time.time()
         st.session_state.pop("last_result", None)
         runtime_config.trigger_run()
-        st.rerun()
+        # No st.rerun() here — the button press already triggered a fragment rerun.
+        # Falling through to the polling block keeps us inside the fragment context,
+        # which is required for st.rerun(scope="fragment") to be valid.
 
     # Show live running state — only when this session triggered a run.
     # Gated so page-load during a scheduled test never blocks the UI.
