@@ -67,8 +67,6 @@ Hermes/
 │   │   ├── csv_exporter.py            # CSVExporter — appends rows to CSV log
 │   │   ├── prometheus_exporter.py     # PrometheusExporter — updates Gauges, /metrics endpoint
 │   │   └── loki_exporter.py           # LokiExporter — ships JSON log events via HTTP push
-│   └── web/
-│       └── app.py                     # Flask app (legacy, superseded by Streamlit UI)
 ├── tests/
 │   ├── test_main.py
 │   ├── test_csv_exporter.py

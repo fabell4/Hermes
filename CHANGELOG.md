@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Removed
+- `src/web/` — legacy Flask stub (`app.py`, `templates/index.html`) superseded by the Streamlit UI; Flask was never listed as a dependency
+
 ---
 
 ## [0.2.2-alpha] - 2026-04-11
