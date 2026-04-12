@@ -84,8 +84,7 @@ def _poll_trigger_state() -> None:
         st.session_state["trigger_fired"] = False
     elif runtime_config.is_running():
         st.write("🔄 Running speedtest… this takes ~30 seconds.")
-        time.sleep(2)
-        st.rerun()
+        st.rerun(scope="fragment")
     else:
         df_now = load_csv()
         current_count = len(df_now) if df_now is not None else 0
@@ -93,20 +92,21 @@ def _poll_trigger_state() -> None:
             "pre_trigger_count", 0
         ):
             latest = df_now.iloc[0]
-            st.write("✅ Test complete and logged.")
-            c1, c2, c3 = st.columns(3)
-            c1.metric("⬇ Download", f"{latest['download_mbps']:.2f} Mbps")
-            c2.metric("⬆ Upload", f"{latest['upload_mbps']:.2f} Mbps")
-            c3.metric("📶 Ping", f"{latest['ping_ms']:.2f} ms")
-            st.caption(f"Server: {latest['server_name']} — {latest['server_location']}")
+            # Store result in session_state so it survives the full-page rerun.
+            st.session_state["last_result"] = {
+                "download": latest["download_mbps"],
+                "upload": latest["upload_mbps"],
+                "ping": latest["ping_ms"],
+                "server": latest["server_name"],
+                "location": latest["server_location"],
+            }
             st.session_state["trigger_fired"] = False
             # Full-page rerun so the History section refreshes with the new result.
             st.rerun(scope="app")
         else:
             # Trigger written but scheduler hasn't picked it up yet (within 30s poll window).
             st.info("⏳ Waiting for the scheduler to pick up the test…")
-            time.sleep(2)
-            st.rerun()
+            st.rerun(scope="fragment")
 
 
 @st.fragment
@@ -118,11 +118,22 @@ def run_test_section() -> None:
     with col2:
         run_button = st.button("▶ Run Now", width="stretch", type="primary")
 
+    # Show last completed result if present.
+    if st.session_state.get("last_result"):
+        result = st.session_state["last_result"]
+        st.write("✅ Test complete and logged.")
+        c1, c2, c3 = st.columns(3)
+        c1.metric("⬇ Download", f"{result['download']:.2f} Mbps")
+        c2.metric("⬆ Upload", f"{result['upload']:.2f} Mbps")
+        c3.metric("📶 Ping", f"{result['ping']:.2f} ms")
+        st.caption(f"Server: {result['server']} — {result['location']}")
+
     if run_button:
         df_pre = load_csv()
         st.session_state["pre_trigger_count"] = len(df_pre) if df_pre is not None else 0
         st.session_state["trigger_fired"] = True
         st.session_state["trigger_time"] = time.time()
+        st.session_state.pop("last_result", None)
         runtime_config.trigger_run()
         st.rerun()
 
