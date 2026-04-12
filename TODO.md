@@ -42,6 +42,7 @@ _Goal: make historical data more useful and integrate with the wider observabili
 
 - [ ] SQLite exporter — queryable history, replaces CSV as the primary storage backend
 - [ ] InfluxDB exporter — optional time-series exporter; pairs with Grafana for long-term trend analysis and retention policy management
+- [ ] **[NEXT]** Log rotation and management — rotate CSV log by size or age, configurable max file size and retention period
 - [ ] Data retention policy — auto-prune records older than N days (configurable)
 - [ ] Grafana dashboard JSON — pre-built dashboard for one-click import against Prometheus/Loki/InfluxDB
 - [ ] Jitter tracking — capture jitter from speedtest results when available
@@ -53,7 +54,8 @@ _Goal: make historical data more useful and integrate with the wider observabili
 
 _Goal: improve the Streamlit UI while it remains the primary frontend._
 
-- [ ] Scheduler next-run countdown
+- [ ] **[NEXT]** Scheduler next-run countdown — live timer showing time until the next scheduled run
+- [ ] **[NEXT]** Version tag in UI — display the running app version (from env var or package metadata) in the page header or sidebar
 - [ ] Version update check — compare running version against the latest published release via the GitHub/Forgejo API and show an in-UI banner when an update is available
 - [ ] Daily/weekly summary stats table (min/max/avg per day)
 - [ ] Connection quality score — weighted composite of download/upload/ping

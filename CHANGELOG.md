@@ -8,6 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+---
+
+## [0.2.3-alpha] - 2026-04-12
+
+### Fixed
+- Docker: `useradd --no-create-home` changed to `useradd --create-home` in Dockerfile; Streamlit needs write access to `/home/hermes` for its metrics ID file, absence of home directory caused `PermissionError` at container startup
+- Streamlit UI: `StreamlitAPIException` when calling `st.rerun(scope="fragment")` during a full-page render; `_poll_trigger_state()` now returns the required scope string and the `@st.fragment` caller invokes `st.rerun()` — ensuring the call is always made inside a fragment context
+- Streamlit UI: redundant `st.rerun()` in the "Run Now" button handler triggered a full-page render before polling began, causing the `StreamlitAPIException` on the following cycle; removed the call so polling starts and stays within the fragment context
+- Streamlit UI: whole-UI heartbeat/flicker during manual test polling replaced with `st.rerun(scope="fragment")` scoped to the Run Test section only
+- Streamlit UI: test result metrics (download / upload / ping) not displayed after run completion; result now stored in `session_state["last_result"]` before the full-page rerun so it survives the transition
+
 ### Removed
 - `src/web/` — legacy Flask stub (`app.py`, `templates/index.html`) superseded by the Streamlit UI; Flask was never listed as a dependency
 
