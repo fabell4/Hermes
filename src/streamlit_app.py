@@ -76,15 +76,20 @@ st.divider()
 
 
 # --- Run Test ---
-def _poll_trigger_state() -> None:
-    """Poll until a triggered test completes, then refresh the page."""
+def _poll_trigger_state() -> str:
+    """
+    Renders polling UI and returns the rerun scope needed, or "none".
+    Caller is responsible for calling st.rerun() so scope="fragment" is
+    invoked directly inside the @st.fragment-decorated function.
+    """
     elapsed = time.time() - st.session_state.get("trigger_time", time.time())
     if elapsed > 120:
         st.error("⚠ Test timed out — check connection and try again.")
         st.session_state["trigger_fired"] = False
+        return "none"
     elif runtime_config.is_running():
         st.write("🔄 Running speedtest… this takes ~30 seconds.")
-        st.rerun(scope="fragment")
+        return "fragment"
     else:
         df_now = load_csv()
         current_count = len(df_now) if df_now is not None else 0
@@ -101,12 +106,11 @@ def _poll_trigger_state() -> None:
                 "location": latest["server_location"],
             }
             st.session_state["trigger_fired"] = False
-            # Full-page rerun so the History section refreshes with the new result.
-            st.rerun(scope="app")
+            return "app"
         else:
             # Trigger written but scheduler hasn't picked it up yet (within 30s poll window).
             st.info("⏳ Waiting for the scheduler to pick up the test…")
-            st.rerun(scope="fragment")
+            return "fragment"
 
 
 @st.fragment
@@ -140,7 +144,11 @@ def run_test_section() -> None:
     # Show live running state — only when this session triggered a run.
     # Gated so page-load during a scheduled test never blocks the UI.
     if st.session_state.get("trigger_fired"):
-        _poll_trigger_state()
+        rerun_scope = _poll_trigger_state()
+        if rerun_scope == "fragment":
+            st.rerun(scope="fragment")
+        elif rerun_scope == "app":
+            st.rerun(scope="app")
 
 
 run_test_section()
