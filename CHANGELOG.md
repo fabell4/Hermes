@@ -8,8 +8,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+---
+
+## [0.2.2-alpha] - 2026-04-11
+
 ### Fixed
 - Streamlit UI — duplicate chart and raw data expander rendered after a manual run or schedule save due to `st.rerun()` interrupting mid-script rendering; sections now use `@st.fragment` so reruns are scoped and the History section's position in the element tree stays stable
+- Streamlit UI — page scrolled to Schedule section on refresh; replaced `components.html()` scroll-to-top with `st.html()` targeting the stable `data-testid="stAppViewContainer"` attribute and disabling browser scroll restoration
 
 ---
 
