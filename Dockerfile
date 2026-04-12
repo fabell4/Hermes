@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt \
 COPY src/ ./src/
 
 # Run as non-root user for security
-RUN useradd --no-create-home --shell /bin/false hermes \
+RUN useradd --create-home --shell /bin/false hermes \
     && chown -R hermes:hermes /app
 USER hermes
 
