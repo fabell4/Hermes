@@ -1,5 +1,7 @@
 """Tests for src/exporters/csv_exporter.py."""
 
+# pylint: disable=missing-function-docstring
+import builtins
 import csv
 from datetime import datetime, timezone, timedelta
 
@@ -94,8 +96,6 @@ def test_export_raises_on_os_error(tmp_path, monkeypatch):
     path = tmp_path / "results.csv"
     exporter = CSVExporter(path)
 
-    import builtins
-
     real_open = builtins.open
 
     def _bad_open(p, mode="r", **kwargs):
@@ -170,15 +170,17 @@ def test_prune_keeps_newest_rows_when_trimming(tmp_path):
     path = tmp_path / "results.csv"
     exporter = CSVExporter(path, max_rows=2)
     for i in range(4):
-        exporter.export(SpeedResult(
-            timestamp=datetime.now(tz=timezone.utc),
-            download_mbps=float(i * 10),
-            upload_mbps=10.0,
-            ping_ms=5.0,
-            server_name="ISP",
-            server_location="City",
-            server_id=i,
-        ))
+        exporter.export(
+            SpeedResult(
+                timestamp=datetime.now(tz=timezone.utc),
+                download_mbps=float(i * 10),
+                upload_mbps=10.0,
+                ping_ms=5.0,
+                server_name="ISP",
+                server_location="City",
+                server_id=i,
+            )
+        )
     with open(path, encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
     assert len(rows) == 2
@@ -203,8 +205,8 @@ def test_prune_removes_old_rows_by_retention_days(tmp_path):
     path = tmp_path / "results.csv"
     exporter = CSVExporter(path, retention_days=7)
     exporter.export(_sample_result(days_ago=10))  # old — should be pruned
-    exporter.export(_sample_result(days_ago=5))   # recent — should remain
-    exporter.export(_sample_result(days_ago=1))   # recent — should remain
+    exporter.export(_sample_result(days_ago=5))  # recent — should remain
+    exporter.export(_sample_result(days_ago=1))  # recent — should remain
     assert exporter.get_row_count() == 2
 
 
@@ -225,7 +227,7 @@ def test_prune_applies_both_limits(tmp_path):
     path = tmp_path / "results.csv"
     exporter = CSVExporter(path, max_rows=2, retention_days=7)
     exporter.export(_sample_result(days_ago=10))  # pruned by retention
-    exporter.export(_sample_result(days_ago=3))   # recent
-    exporter.export(_sample_result(days_ago=2))   # recent
-    exporter.export(_sample_result(days_ago=1))   # recent — only 2 kept by max_rows
+    exporter.export(_sample_result(days_ago=3))  # recent
+    exporter.export(_sample_result(days_ago=2))  # recent
+    exporter.export(_sample_result(days_ago=1))  # recent — only 2 kept by max_rows
     assert exporter.get_row_count() == 2

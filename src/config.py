@@ -63,9 +63,10 @@ RUN_ON_STARTUP: bool = _get_bool("RUN_ON_STARTUP", True)
 ENABLED_EXPORTERS: list[str] = _get_csv_list("ENABLED_EXPORTERS", ["csv"])
 
 # --- CSV Exporter ---
+# CSV_MAX_ROWS and CSV_RETENTION_DAYS default to 0, which means unlimited.
 CSV_LOG_PATH: Path = Path(os.getenv("CSV_LOG_PATH", "logs/results.csv"))
-CSV_MAX_ROWS: int = _get_int("CSV_MAX_ROWS", 0)          # 0 = unlimited
-CSV_RETENTION_DAYS: int = _get_int("CSV_RETENTION_DAYS", 0)  # 0 = unlimited
+CSV_MAX_ROWS: int = _get_int("CSV_MAX_ROWS", 0)
+CSV_RETENTION_DAYS: int = _get_int("CSV_RETENTION_DAYS", 0)
 
 # --- Prometheus Exporter ---
 PROMETHEUS_PORT: int = _get_int("PROMETHEUS_PORT", 8000)

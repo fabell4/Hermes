@@ -40,7 +40,11 @@ def _build_loki_exporter() -> LokiExporter:
 # All known exporters and how to build them.
 # Uncomment each entry as the exporter is implemented.
 EXPORTER_REGISTRY = {
-    "csv": lambda: CSVExporter(path=config.CSV_LOG_PATH, max_rows=config.CSV_MAX_ROWS, retention_days=config.CSV_RETENTION_DAYS),
+    "csv": lambda: CSVExporter(
+        path=config.CSV_LOG_PATH,
+        max_rows=config.CSV_MAX_ROWS,
+        retention_days=config.CSV_RETENTION_DAYS,
+    ),
     "prometheus": lambda: PrometheusExporter(port=config.PROMETHEUS_PORT),
     "loki": _build_loki_exporter,
 }
@@ -58,7 +62,7 @@ def build_dispatcher() -> ResultDispatcher:
         if name in EXPORTER_REGISTRY:
             try:
                 dispatcher.add_exporter(name, EXPORTER_REGISTRY[name]())
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 logger.warning("Exporter '%s' could not be initialized: %s", name, e)
         else:
             logger.warning("Unknown exporter '%s' in enabled list — skipping.", name)
@@ -78,7 +82,7 @@ def update_exporters(dispatcher: ResultDispatcher, enabled: list[str]) -> None:
         if name in EXPORTER_REGISTRY:
             try:
                 dispatcher.add_exporter(name, EXPORTER_REGISTRY[name]())
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-except
                 logger.warning("Exporter '%s' could not be initialized: %s", name, e)
         else:
             logger.warning("Unknown exporter '%s' in enabled list — skipping.", name)
@@ -191,6 +195,7 @@ def _poll_once(
 
 
 def main():
+    """Entry point — initialises the scheduler and runs the polling loop."""
     logger.info("Hermes starting...")
     logger.info(
         "Config — interval: %smin | run on startup: %s | log level: %s",
@@ -245,5 +250,5 @@ def main():
         raise
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()

@@ -140,6 +140,7 @@ def is_running() -> bool:
 # --- Next run time ---
 # Written by the scheduler each poll cycle so the UI can show a countdown.
 
+
 def get_next_run_at() -> str | None:
     """Returns the ISO-format next run timestamp, or None if not yet set."""
     return load().get("next_run_at")

@@ -1,4 +1,5 @@
 """Tests for current SpeedtestRunner and main.run_once behavior."""
+# pylint: disable=missing-function-docstring,protected-access
 
 from datetime import datetime, timezone
 import logging
@@ -10,13 +11,16 @@ import pytest
 
 import src.main as main_module
 from src.exporters.base_exporter import BaseExporter
-from src.main import build_dispatcher, build_scheduler, run_once, _poll_once
+from src.exporters.loki_exporter import LokiExporter
+from src.main import build_dispatcher, build_scheduler, run_once, update_exporters, _poll_once
 from src.models.speed_result import SpeedResult
 from src.result_dispatcher import DispatchError
 from src.services.speedtest_runner import SpeedtestRunner
 
 
 class DummyExporter(BaseExporter):
+    """Minimal no-op exporter for test isolation."""
+
     def export(self, result: SpeedResult) -> None:
         return None
 
@@ -90,7 +94,7 @@ def test_run_once_handles_runner_error_without_dispatch(mock_done, mock_running)
 
 @patch("src.main.runtime_config.mark_running")
 @patch("src.main.runtime_config.mark_done")
-def test_run_once_logs_dispatch_errors(mock_done, mock_running, caplog):
+def test_run_once_logs_dispatch_errors(mock_done, _mock_running, caplog):
     service = MagicMock()
     dispatcher = MagicMock()
     result = SpeedResult(
@@ -114,7 +118,7 @@ def test_run_once_logs_dispatch_errors(mock_done, mock_running, caplog):
 
 @patch("src.main.runtime_config.mark_running")
 @patch("src.main.runtime_config.mark_done")
-def test_run_once_mark_done_called_even_on_runner_error(mock_done, mock_running):
+def test_run_once_mark_done_called_even_on_runner_error(mock_done, _mock_running):
     """Ensure mark_done is always called via the finally block."""
     service = MagicMock()
     dispatcher = MagicMock()
@@ -147,7 +151,7 @@ def test_build_dispatcher_skips_loki_on_init_error(monkeypatch, caplog):
         main_module,
         "EXPORTER_REGISTRY",
         {
-            "csv": lambda: DummyExporter(),
+            "csv": DummyExporter,
             "loki": _raise_loki_url_required,
         },
     )
@@ -219,9 +223,7 @@ def test_poll_once_no_changes_returns_same_state(monkeypatch):
     monkeypatch.setattr(
         main_module.runtime_config, "consume_run_trigger", lambda: False
     )
-    monkeypatch.setattr(
-        main_module.runtime_config, "set_next_run_at", lambda t: None
-    )
+    monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
 
     interval, exporters = _poll_once(scheduler, dispatcher, service, 60, ["csv"])
 
@@ -246,9 +248,7 @@ def test_poll_once_interval_changed_calls_update_schedule(monkeypatch):
     monkeypatch.setattr(
         main_module.runtime_config, "set_interval_minutes", lambda m: None
     )
-    monkeypatch.setattr(
-        main_module.runtime_config, "set_next_run_at", lambda t: None
-    )
+    monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
 
     interval, _ = _poll_once(scheduler, dispatcher, service, 60, ["csv"])
 
@@ -272,15 +272,13 @@ def test_poll_once_exporters_changed_calls_update_exporters(monkeypatch):
     monkeypatch.setattr(
         main_module.runtime_config, "set_enabled_exporters", lambda e: None
     )
-    monkeypatch.setattr(
-        main_module.runtime_config, "set_next_run_at", lambda t: None
-    )
+    monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
     monkeypatch.setattr(
         main_module,
         "EXPORTER_REGISTRY",
         {
-            "csv": lambda: DummyExporter(),
-            "prometheus": lambda: DummyExporter(),
+            "csv": DummyExporter,
+            "prometheus": DummyExporter,
         },
     )
 
@@ -309,3 +307,143 @@ def test_poll_once_trigger_fires_calls_run_once(monkeypatch):
     _poll_once(scheduler, dispatcher, service, 60, ["csv"])
 
     service.run.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# _build_loki_exporter
+# ---------------------------------------------------------------------------
+
+
+def test_build_loki_exporter_raises_without_url(monkeypatch):
+    monkeypatch.setattr(main_module.config, "LOKI_URL", "")
+    with pytest.raises(ValueError, match="LOKI_URL"):
+        main_module._build_loki_exporter()
+
+
+def test_build_loki_exporter_returns_loki_exporter(monkeypatch):
+    monkeypatch.setattr(main_module.config, "LOKI_URL", "http://localhost:3100")
+    monkeypatch.setattr(main_module.config, "LOKI_JOB_LABEL", "hermes")
+
+    exporter = main_module._build_loki_exporter()
+
+    assert isinstance(exporter, LokiExporter)
+
+
+# ---------------------------------------------------------------------------
+# build_dispatcher / update_exporters — unknown exporter branch
+# ---------------------------------------------------------------------------
+
+
+def test_build_dispatcher_warns_on_unknown_exporter(monkeypatch, caplog):
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_enabled_exporters",
+        lambda default: ["nonexistent"],
+    )
+    monkeypatch.setattr(main_module, "EXPORTER_REGISTRY", {})
+
+    with caplog.at_level(logging.WARNING):
+        dispatcher = build_dispatcher()
+
+    assert "nonexistent" in caplog.text
+    assert not dispatcher.exporter_names
+
+
+def test_update_exporters_warns_on_unknown_exporter(monkeypatch, caplog):
+    monkeypatch.setattr(main_module, "EXPORTER_REGISTRY", {})
+    monkeypatch.setattr(
+        main_module.runtime_config, "set_enabled_exporters", lambda e: None
+    )
+    dispatcher = MagicMock()
+
+    with caplog.at_level(logging.WARNING):
+        update_exporters(dispatcher, ["nonexistent"])
+
+    assert "nonexistent" in caplog.text
+    dispatcher.clear.assert_called_once()
+
+
+def test_update_exporters_warns_on_init_error(monkeypatch, caplog):
+    monkeypatch.setattr(
+        main_module,
+        "EXPORTER_REGISTRY",
+        {"failing": _raise_loki_url_required},
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "set_enabled_exporters", lambda e: None
+    )
+    dispatcher = MagicMock()
+
+    with caplog.at_level(logging.WARNING):
+        update_exporters(dispatcher, ["failing"])
+
+    assert "could not be initialized" in caplog.text
+
+
+def test_main_shuts_down_cleanly_on_keyboard_interrupt(monkeypatch):
+    mock_scheduler = MagicMock()
+    mock_job = MagicMock()
+    mock_job.next_run_time = datetime.now(timezone.utc)
+    mock_scheduler.get_job.return_value = mock_job
+
+    monkeypatch.setattr(main_module.config, "RUN_ON_STARTUP", False)
+    monkeypatch.setattr(main_module.config, "SPEEDTEST_INTERVAL_MINUTES", 60)
+    monkeypatch.setattr(main_module.runtime_config, "mark_done", lambda: None)
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_interval_minutes", lambda default: 60
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_enabled_exporters", lambda default: ["csv"]
+    )
+    monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
+    monkeypatch.setattr(main_module, "SpeedtestRunner", MagicMock)
+    monkeypatch.setattr(main_module, "build_dispatcher", MagicMock)
+    monkeypatch.setattr(main_module, "build_scheduler", lambda s, d: mock_scheduler)
+    monkeypatch.setattr(
+        main_module.time, "sleep", MagicMock(side_effect=KeyboardInterrupt)
+    )
+
+    with pytest.raises(KeyboardInterrupt):
+        main_module.main()
+
+    mock_scheduler.shutdown.assert_called_once()
+
+
+def test_main_run_on_startup_and_poll_loop(monkeypatch):
+    """Covers RUN_ON_STARTUP path and the _poll_once call inside the while loop."""
+    mock_scheduler = MagicMock()
+    mock_job = MagicMock()
+    mock_job.next_run_time = datetime.now(timezone.utc)
+    mock_scheduler.get_job.return_value = mock_job
+
+    monkeypatch.setattr(main_module.config, "RUN_ON_STARTUP", True)
+    monkeypatch.setattr(main_module.config, "SPEEDTEST_INTERVAL_MINUTES", 60)
+    monkeypatch.setattr(main_module.runtime_config, "mark_done", lambda: None)
+    monkeypatch.setattr(main_module.runtime_config, "mark_running", lambda: None)
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_interval_minutes", lambda default: 60
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_enabled_exporters", lambda default: ["csv"]
+    )
+    monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
+    monkeypatch.setattr(
+        main_module.runtime_config, "consume_run_trigger", lambda: False
+    )
+    monkeypatch.setattr(main_module, "SpeedtestRunner", MagicMock)
+    monkeypatch.setattr(main_module, "build_dispatcher", MagicMock)
+    monkeypatch.setattr(main_module, "build_scheduler", lambda s, d: mock_scheduler)
+    # sleep succeeds once; _poll_once raises KeyboardInterrupt to exit the loop
+    monkeypatch.setattr(main_module.time, "sleep", lambda _: None)
+    monkeypatch.setattr(
+        main_module, "_poll_once", MagicMock(side_effect=KeyboardInterrupt)
+    )
+    # run_once needs mark_running/mark_done; service.run raises so no dispatch needed
+    mock_svc = MagicMock()
+    mock_svc.run.side_effect = RuntimeError("skip")
+    monkeypatch.setattr(main_module, "SpeedtestRunner", lambda: mock_svc)
+
+    with pytest.raises(KeyboardInterrupt):
+        main_module.main()
+
+    mock_scheduler.shutdown.assert_called_once()

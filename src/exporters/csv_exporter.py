@@ -110,12 +110,14 @@ class CSVExporter(BaseExporter):
         if self.retention_days:
             cutoff = datetime.now(tz=timezone.utc) - timedelta(days=self.retention_days)
             rows = [
-                r for r in rows
-                if datetime.fromisoformat(r["timestamp"]).astimezone(timezone.utc) >= cutoff
+                r
+                for r in rows
+                if datetime.fromisoformat(r["timestamp"]).astimezone(timezone.utc)
+                >= cutoff
             ]
 
         if self.max_rows and len(rows) > self.max_rows:
-            rows = rows[-self.max_rows:]
+            rows = rows[-self.max_rows :]
 
         removed = original_count - len(rows)
         if removed == 0:

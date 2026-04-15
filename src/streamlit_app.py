@@ -6,13 +6,13 @@ Validates the full pipeline before building the production web frontend.
 """
 
 import os
+import time
 from datetime import datetime, timezone
+from pathlib import Path
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import streamlit as st
 import pandas as pd
-from pathlib import Path
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
-import time
 
 import src.config as config
 import src.runtime_config as runtime_config
@@ -41,18 +41,19 @@ st.set_page_config(
 
 # --- Helpers ---
 def load_csv() -> pd.DataFrame | None:
+    """Load and return the CSV run history, or None if unavailable/empty."""
     if not Path(config.CSV_LOG_PATH).exists():
         return None
-    df = pd.read_csv(config.CSV_LOG_PATH)
-    if df.empty:
+    data = pd.read_csv(config.CSV_LOG_PATH)
+    if data.empty:
         return None
-    df["timestamp"] = (
-        pd.to_datetime(df["timestamp"], utc=True)
+    data["timestamp"] = (
+        pd.to_datetime(data["timestamp"], utc=True)
         .dt.tz_convert(_DISPLAY_TZ)
         .dt.tz_localize(None)
     )
-    df = df.sort_values("timestamp", ascending=False)
-    return df
+    data = data.sort_values("timestamp", ascending=False)
+    return data
 
 
 # --- UI ---
@@ -116,6 +117,7 @@ def _poll_trigger_state() -> str:
 
 @st.fragment
 def run_test_section() -> None:
+    """Renders the Run a Test card and handles trigger polling."""
     col1, col2 = st.columns([2, 1])
     with col1:
         st.subheader("Run a Test")
@@ -162,6 +164,7 @@ st.divider()
 # --- Schedule Control ---
 @st.fragment(run_every=1)
 def schedule_section() -> None:
+    """Renders the schedule control and live countdown to the next run."""
     st.subheader("Schedule")
 
     current_interval = runtime_config.get_interval_minutes(
@@ -212,6 +215,7 @@ st.divider()
 # --- Exporter Toggles ---
 @st.fragment
 def exporters_section() -> None:
+    """Renders the exporter toggle checkboxes and save button."""
     st.subheader("Exporters")
     st.caption("Enable or disable exporters. Changes take effect within 30 seconds.")
 
@@ -232,8 +236,9 @@ def exporters_section() -> None:
             st.info("No changes to exporter configuration.")
         else:
             runtime_config.set_enabled_exporters(new_enabled)
+            active = ", ".join(new_enabled) or "none"
             st.toast(
-                f"Exporters updated — applying within 30 seconds. Active: {', '.join(new_enabled) or 'none'}",
+                f"Exporters updated — applying within 30 seconds. Active: {active}",
                 icon="✅",
             )
 
