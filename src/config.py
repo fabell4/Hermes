@@ -51,7 +51,7 @@ def _get_csv_list(key: str, default: list[str]) -> list[str]:
 
 # --- Application ---
 APP_ENV: str = os.getenv("APP_ENV", "development")
-APP_VERSION: str = os.getenv("APP_VERSION", "dev")
+APP_VERSION: str = "0.1.0"
 LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
 
 # --- Scheduler ---
