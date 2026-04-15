@@ -51,6 +51,7 @@ def _get_csv_list(key: str, default: list[str]) -> list[str]:
 
 # --- Application ---
 APP_ENV: str = os.getenv("APP_ENV", "development")
+APP_VERSION: str = os.getenv("APP_VERSION", "dev")
 LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
 
 # --- Scheduler ---
@@ -63,6 +64,8 @@ ENABLED_EXPORTERS: list[str] = _get_csv_list("ENABLED_EXPORTERS", ["csv"])
 
 # --- CSV Exporter ---
 CSV_LOG_PATH: Path = Path(os.getenv("CSV_LOG_PATH", "logs/results.csv"))
+CSV_MAX_ROWS: int = _get_int("CSV_MAX_ROWS", 0)          # 0 = unlimited
+CSV_RETENTION_DAYS: int = _get_int("CSV_RETENTION_DAYS", 0)  # 0 = unlimited
 
 # --- Prometheus Exporter ---
 PROMETHEUS_PORT: int = _get_int("PROMETHEUS_PORT", 8000)

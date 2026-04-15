@@ -219,6 +219,9 @@ def test_poll_once_no_changes_returns_same_state(monkeypatch):
     monkeypatch.setattr(
         main_module.runtime_config, "consume_run_trigger", lambda: False
     )
+    monkeypatch.setattr(
+        main_module.runtime_config, "set_next_run_at", lambda t: None
+    )
 
     interval, exporters = _poll_once(scheduler, dispatcher, service, 60, ["csv"])
 
@@ -243,6 +246,9 @@ def test_poll_once_interval_changed_calls_update_schedule(monkeypatch):
     monkeypatch.setattr(
         main_module.runtime_config, "set_interval_minutes", lambda m: None
     )
+    monkeypatch.setattr(
+        main_module.runtime_config, "set_next_run_at", lambda t: None
+    )
 
     interval, _ = _poll_once(scheduler, dispatcher, service, 60, ["csv"])
 
@@ -265,6 +271,9 @@ def test_poll_once_exporters_changed_calls_update_exporters(monkeypatch):
     )
     monkeypatch.setattr(
         main_module.runtime_config, "set_enabled_exporters", lambda e: None
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "set_next_run_at", lambda t: None
     )
     monkeypatch.setattr(
         main_module,
@@ -292,6 +301,7 @@ def test_poll_once_trigger_fires_calls_run_once(monkeypatch):
     monkeypatch.setattr(main_module.runtime_config, "consume_run_trigger", lambda: True)
     monkeypatch.setattr(main_module.runtime_config, "mark_running", lambda: None)
     monkeypatch.setattr(main_module.runtime_config, "mark_done", lambda: None)
+    monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
 
     result = MagicMock()
     service.run.return_value = result

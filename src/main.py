@@ -40,7 +40,7 @@ def _build_loki_exporter() -> LokiExporter:
 # All known exporters and how to build them.
 # Uncomment each entry as the exporter is implemented.
 EXPORTER_REGISTRY = {
-    "csv": lambda: CSVExporter(path=config.CSV_LOG_PATH),
+    "csv": lambda: CSVExporter(path=config.CSV_LOG_PATH, max_rows=config.CSV_MAX_ROWS, retention_days=config.CSV_RETENTION_DAYS),
     "prometheus": lambda: PrometheusExporter(port=config.PROMETHEUS_PORT),
     "loki": _build_loki_exporter,
 }
@@ -182,6 +182,11 @@ def _poll_once(
         logger.info("Run trigger detected — starting immediate test.")
         run_once(service, dispatcher)
 
+    # --- Persist next run time for the UI countdown ---
+    job = scheduler.get_job("speedtest_run")
+    if job and job.next_run_time:
+        runtime_config.set_next_run_at(job.next_run_time.isoformat())
+
     return last_interval, last_exporters
 
 
@@ -212,6 +217,11 @@ def main():
         "Scheduler started — next run in %s minutes.",
         config.SPEEDTEST_INTERVAL_MINUTES,
     )
+
+    # Persist initial next run time immediately so the UI countdown is populated.
+    _initial_job = scheduler.get_job("speedtest_run")
+    if _initial_job and _initial_job.next_run_time:
+        runtime_config.set_next_run_at(_initial_job.next_run_time.isoformat())
 
     last_interval = runtime_config.get_interval_minutes(
         default=config.SPEEDTEST_INTERVAL_MINUTES

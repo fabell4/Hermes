@@ -3,7 +3,7 @@
 A Python application that periodically runs internet speed tests and exports results to multiple destinations (CSV, Prometheus, Loki/OTel), with a browser-based UI to trigger runs and view results.
 
 ## Architecture
-  *Hermes is currently an alpha release. The core functionality works but the Prometheus and Loki connectors are still under development.*
+  *Hermes is currently an alpha release. The core functionality works and all three exporters (CSV, Prometheus, Loki) are fully operational.*
 
 ### Data Flow
 
@@ -46,6 +46,45 @@ flowchart TD
     style LOKI fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style VOLUME fill:#1565c0,stroke:#90caf9,color:#ffffff
 ```
+
+### Deployment Topology
+
+```mermaid
+flowchart LR
+    subgraph HERMES_HOST["Hermes Host"]
+        subgraph SCHED_CONTAINER["hermes-scheduler"]
+            PROM_EP["PrometheusExporter\n:8000/metrics"]
+            LOKI_EXP["LokiExporter"]
+        end
+        subgraph UI_CONTAINER["hermes-ui"]
+            UI["Streamlit UI\n:8501"]
+        end
+    end
+
+    subgraph OBS_HOST["Observability Host"]
+        PROMETHEUS["Prometheus\n:9090"]
+        LOKI["Loki\n:3100"]
+        GRAFANA["Grafana\n:3000"]
+    end
+
+    PROMETHEUS -- "scrapes :8000/metrics\nevery 15s" --> PROM_EP
+    LOKI_EXP -- "HTTP push\n/loki/api/v1/push" --> LOKI
+    GRAFANA -- "PromQL queries" --> PROMETHEUS
+    GRAFANA -- "LogQL queries" --> LOKI
+
+    style PROM_EP fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style LOKI_EXP fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style UI fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style PROMETHEUS fill:#e65100,stroke:#ffcc80,color:#ffffff
+    style LOKI fill:#1565c0,stroke:#90caf9,color:#ffffff
+    style GRAFANA fill:#4a148c,stroke:#ce93d8,color:#ffffff
+```
+
+**Key integration notes:**
+- **Prometheus** must have a scrape job targeting `<hermes-host>:8000` — Hermes does not push metrics, it exposes them for scraping
+- **Loki URL** must be set via `LOKI_URL` env var (e.g. `http://loki:3100`) — Hermes pushes directly on each test run
+- **Grafana** datasources must point to the Prometheus and Loki servers, not to Hermes directly
+- The pre-built dashboard (`docs/grafana-dashboard.json`) can be imported via **+ → Import** and will prompt for both datasource bindings
 
 ## Project Structure
 

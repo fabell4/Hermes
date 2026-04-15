@@ -2,6 +2,7 @@
 
 import csv
 import logging
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from src.exporters.base_exporter import BaseExporter
 from src.models.speed_result import SpeedResult
@@ -26,17 +27,27 @@ class CSVExporter(BaseExporter):
 
     - Creates the file and writes headers if it doesn't exist
     - Appends one row per result
+    - Optionally prunes rows exceeding max_rows or older than retention_days
     - Provides file path for the web layer to serve as a download
     - Thread-safe for single-writer use (one scheduled runner at a time)
     """
 
-    def __init__(self, path: str | Path = "logs/results.csv"):
+    def __init__(
+        self,
+        path: str | Path = "logs/results.csv",
+        max_rows: int = 0,
+        retention_days: int = 0,
+    ):
         """
         Args:
             path: Where to write the CSV file.
                   Parent directories are created automatically.
+            max_rows: Maximum number of data rows to keep. 0 means unlimited.
+            retention_days: Delete rows older than this many days. 0 means unlimited.
         """
         self.path = Path(path)
+        self.max_rows = max_rows
+        self.retention_days = retention_days
         self._ensure_file()
 
     def _ensure_file(self) -> None:
@@ -54,8 +65,8 @@ class CSVExporter(BaseExporter):
 
     def export(self, result: SpeedResult) -> None:
         """
-        Appends a single row to the CSV file for this result.
-        Called by the dispatcher on every completed speedtest run.
+        Appends a single row to the CSV file for this result,
+        then prunes stale rows if retention limits are configured.
         """
         row = result.to_dict()
 
@@ -76,6 +87,46 @@ class CSVExporter(BaseExporter):
         except OSError as e:
             logger.error("Failed to write CSV row: %s", e)
             raise
+
+        self._prune()
+
+    def _prune(self) -> None:
+        """
+        Removes rows that exceed max_rows or are older than retention_days.
+        Rewrites the file in place if any rows are removed.
+        Both limits are applied together — whichever removes more rows wins.
+        """
+        if not self.max_rows and not self.retention_days:
+            return
+        if not self.path.exists():
+            return
+
+        with open(self.path, encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            rows = list(reader)
+
+        original_count = len(rows)
+
+        if self.retention_days:
+            cutoff = datetime.now(tz=timezone.utc) - timedelta(days=self.retention_days)
+            rows = [
+                r for r in rows
+                if datetime.fromisoformat(r["timestamp"]).astimezone(timezone.utc) >= cutoff
+            ]
+
+        if self.max_rows and len(rows) > self.max_rows:
+            rows = rows[-self.max_rows:]
+
+        removed = original_count - len(rows)
+        if removed == 0:
+            return
+
+        with open(self.path, mode="w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
+            writer.writeheader()
+            writer.writerows(rows)
+
+        logger.info("CSV pruned — removed %d row(s), %d remaining.", removed, len(rows))
 
     def get_file_path(self) -> Path:
         """

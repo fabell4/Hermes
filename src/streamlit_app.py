@@ -6,6 +6,7 @@ Validates the full pipeline before building the production web frontend.
 """
 
 import os
+from datetime import datetime, timezone
 
 import streamlit as st
 import pandas as pd
@@ -56,7 +57,7 @@ def load_csv() -> pd.DataFrame | None:
 
 # --- UI ---
 st.title("📡 Hermes")
-st.caption("Speedtest Monitor — MVP")
+st.caption(f"Speedtest Monitor — v{config.APP_VERSION}")
 
 # Disable browser scroll-restoration and scroll to top on every full-page render.
 # Fragment reruns skip module-level code, so this does not fire on widget interactions.
@@ -159,7 +160,7 @@ st.divider()
 
 
 # --- Schedule Control ---
-@st.fragment
+@st.fragment(run_every=1)
 def schedule_section() -> None:
     st.subheader("Schedule")
 
@@ -167,6 +168,22 @@ def schedule_section() -> None:
         default=config.SPEEDTEST_INTERVAL_MINUTES
     )
     st.caption(f"Current interval: every **{current_interval} minutes**")
+
+    # Countdown to next run
+    next_run_raw = runtime_config.get_next_run_at()
+    if runtime_config.is_running():
+        st.info("🔄 Speedtest running now…")
+    elif next_run_raw:
+        try:
+            next_run = datetime.fromisoformat(next_run_raw).astimezone(timezone.utc)
+            remaining = (next_run - datetime.now(tz=timezone.utc)).total_seconds()
+            if remaining > 0:
+                mins, secs = divmod(int(remaining), 60)
+                st.info(f"⏱ Next run in **{mins}m {secs:02d}s**")
+            else:
+                st.info("⏱ Next run imminent…")
+        except (ValueError, TypeError):
+            pass
 
     new_interval = st.number_input(
         "New interval (minutes)",

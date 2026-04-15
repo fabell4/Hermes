@@ -135,3 +135,16 @@ def mark_done() -> None:
 def is_running() -> bool:
     """Returns True if a speedtest is currently in progress."""
     return RUNNING_PATH.exists()
+
+
+# --- Next run time ---
+# Written by the scheduler each poll cycle so the UI can show a countdown.
+
+def get_next_run_at() -> str | None:
+    """Returns the ISO-format next run timestamp, or None if not yet set."""
+    return load().get("next_run_at")
+
+
+def set_next_run_at(iso_timestamp: str) -> None:
+    """Persists the next scheduled run time (ISO format) for the UI to read."""
+    save({"next_run_at": iso_timestamp})

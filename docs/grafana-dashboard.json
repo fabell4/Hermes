@@ -85,7 +85,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "hermes_download_mbps",
+          "expr": "max(hermes_download_mbps)",
           "instant": true,
           "legendFormat": "Download",
           "refId": "A"
@@ -125,7 +125,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "hermes_upload_mbps",
+          "expr": "max(hermes_upload_mbps)",
           "instant": true,
           "legendFormat": "Upload",
           "refId": "A"
@@ -165,7 +165,7 @@
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "hermes_ping_ms",
+          "expr": "min(hermes_ping_ms)",
           "instant": true,
           "legendFormat": "Ping",
           "refId": "A"
@@ -194,18 +194,21 @@
         "justifyMode": "center",
         "orientation": "auto",
         "reduceOptions": { "calcs": ["lastNotNull"], "fields": "/^server_name$/", "values": false },
-        "textMode": "value_and_name"
+        "textMode": "value"
       },
       "title": "🖥 Test Server",
       "type": "stat",
       "targets": [
         {
           "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
-          "expr": "hermes_download_mbps",
+          "expr": "topk(1, hermes_download_mbps)",
           "instant": true,
           "legendFormat": "{{server_name}} — {{server_location}}",
           "refId": "A"
         }
+      ],
+      "transformations": [
+        { "id": "labelsToFields", "options": { "mode": "columns" } }
       ]
     },
     {

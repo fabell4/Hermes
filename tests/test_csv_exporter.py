@@ -1,7 +1,7 @@
 """Tests for src/exporters/csv_exporter.py."""
 
 import csv
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 import pytest
 
@@ -9,9 +9,10 @@ from src.exporters.csv_exporter import CSVExporter, FIELDNAMES
 from src.models.speed_result import SpeedResult
 
 
-def _sample_result() -> SpeedResult:
+def _sample_result(days_ago: float = 0) -> SpeedResult:
+    ts = datetime.now(tz=timezone.utc) - timedelta(days=days_ago)
     return SpeedResult(
-        timestamp=datetime(2026, 4, 4, 12, 0, 0, tzinfo=timezone.utc),
+        timestamp=ts,
         download_mbps=150.0,
         upload_mbps=75.0,
         ping_ms=8.5,
@@ -142,3 +143,89 @@ def test_get_row_count_zero_when_file_missing(tmp_path):
     exporter = CSVExporter.__new__(CSVExporter)
     exporter.path = path
     assert exporter.get_row_count() == 0
+
+
+# ---------------------------------------------------------------------------
+# _prune() — max_rows
+# ---------------------------------------------------------------------------
+
+
+def test_prune_no_op_when_limits_unset(tmp_path):
+    path = tmp_path / "results.csv"
+    exporter = CSVExporter(path)
+    for _ in range(5):
+        exporter.export(_sample_result())
+    assert exporter.get_row_count() == 5
+
+
+def test_prune_trims_to_max_rows(tmp_path):
+    path = tmp_path / "results.csv"
+    exporter = CSVExporter(path, max_rows=3)
+    for _ in range(5):
+        exporter.export(_sample_result())
+    assert exporter.get_row_count() == 3
+
+
+def test_prune_keeps_newest_rows_when_trimming(tmp_path):
+    path = tmp_path / "results.csv"
+    exporter = CSVExporter(path, max_rows=2)
+    for i in range(4):
+        exporter.export(SpeedResult(
+            timestamp=datetime.now(tz=timezone.utc),
+            download_mbps=float(i * 10),
+            upload_mbps=10.0,
+            ping_ms=5.0,
+            server_name="ISP",
+            server_location="City",
+            server_id=i,
+        ))
+    with open(path, encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    assert len(rows) == 2
+    assert float(rows[0]["download_mbps"]) == pytest.approx(20.0)
+    assert float(rows[1]["download_mbps"]) == pytest.approx(30.0)
+
+
+def test_prune_no_op_when_under_max_rows(tmp_path):
+    path = tmp_path / "results.csv"
+    exporter = CSVExporter(path, max_rows=10)
+    for _ in range(3):
+        exporter.export(_sample_result())
+    assert exporter.get_row_count() == 3
+
+
+# ---------------------------------------------------------------------------
+# _prune() — retention_days
+# ---------------------------------------------------------------------------
+
+
+def test_prune_removes_old_rows_by_retention_days(tmp_path):
+    path = tmp_path / "results.csv"
+    exporter = CSVExporter(path, retention_days=7)
+    exporter.export(_sample_result(days_ago=10))  # old — should be pruned
+    exporter.export(_sample_result(days_ago=5))   # recent — should remain
+    exporter.export(_sample_result(days_ago=1))   # recent — should remain
+    assert exporter.get_row_count() == 2
+
+
+def test_prune_keeps_all_rows_within_retention(tmp_path):
+    path = tmp_path / "results.csv"
+    exporter = CSVExporter(path, retention_days=30)
+    for _ in range(4):
+        exporter.export(_sample_result(days_ago=1))
+    assert exporter.get_row_count() == 4
+
+
+# ---------------------------------------------------------------------------
+# _prune() — both limits combined
+# ---------------------------------------------------------------------------
+
+
+def test_prune_applies_both_limits(tmp_path):
+    path = tmp_path / "results.csv"
+    exporter = CSVExporter(path, max_rows=2, retention_days=7)
+    exporter.export(_sample_result(days_ago=10))  # pruned by retention
+    exporter.export(_sample_result(days_ago=3))   # recent
+    exporter.export(_sample_result(days_ago=2))   # recent
+    exporter.export(_sample_result(days_ago=1))   # recent — only 2 kept by max_rows
+    assert exporter.get_row_count() == 2
