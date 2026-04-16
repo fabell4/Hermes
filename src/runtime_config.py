@@ -149,3 +149,29 @@ def get_next_run_at() -> str | None:
 def set_next_run_at(iso_timestamp: str) -> None:
     """Persists the next scheduled run time (ISO format) for the UI to read."""
     save({"next_run_at": iso_timestamp})
+
+
+# --- Last successful run ---
+
+
+def get_last_run_at() -> str | None:
+    """Returns the ISO-format timestamp of the last successful run, or None."""
+    return load().get("last_run_at")
+
+
+def set_last_run_at(iso_timestamp: str) -> None:
+    """Persists the timestamp of the last successful speedtest run."""
+    save({"last_run_at": iso_timestamp})
+
+
+# --- Scheduler paused state ---
+
+
+def get_scheduler_paused() -> bool:
+    """Returns True if automated scans have been paused via the UI."""
+    return bool(load().get("scheduler_paused", False))
+
+
+def set_scheduler_paused(paused: bool) -> None:
+    """Persists whether automated scans are paused."""
+    save({"scheduler_paused": paused})

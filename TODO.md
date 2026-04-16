@@ -27,12 +27,12 @@
 
 _Goal: make the deployed instance reliable before adding features._
 
-- [ ] Retry logic in `SpeedtestRunner` — one retry on transient failure to address potential first-run hangs
-- [ ] Health check endpoint (`/health`) — returns scheduler status and last successful run timestamp
-- [ ] Docker `HEALTHCHECK` — use `/health` once endpoint exists
-- [ ] Environment validation on startup — warn if Loki URL is unreachable when Loki exporter is enabled
-- [ ] Multi-architecture Docker build — add `linux/arm64` for ARM server / Raspberry Pi support
-- [ ] Enable/disable automated scans toggle — UI button (default: enabled) that pauses/resumes the scheduler without changing the configured interval
+- [x] Retry logic in `SpeedtestRunner` — one retry on transient failure to address potential first-run hangs
+- [x] Health check endpoint (`/health`) — returns scheduler status and last successful run timestamp
+- [x] Docker `HEALTHCHECK` — use `/health` once endpoint exists
+- [x] Environment validation on startup — warn if Loki URL is unreachable when Loki exporter is enabled
+- [x] Multi-architecture Docker build — add `linux/arm64` for ARM server / Raspberry Pi support
+- [x] Enable/disable automated scans toggle — UI button (default: enabled) that pauses/resumes the scheduler without changing the configured interval
 
 ---
 
@@ -41,12 +41,13 @@ _Goal: make the deployed instance reliable before adding features._
 _Goal: make historical data more useful and integrate with the wider observability stack._
 
 - [ ] SQLite exporter — queryable history, replaces CSV as the primary storage backend
-- [ ] InfluxDB exporter — optional time-series exporter; pairs with Grafana for long-term trend analysis and retention policy management
 - [x] Log rotation and management — rotate CSV log by size or age, configurable max file size and retention period
 - [ ] Data retention policy — auto-prune records older than N days (configurable)
-- [x] Grafana dashboard JSON — pre-built dashboard for one-click import against Prometheus/Loki/InfluxDB
+- [x] Grafana dashboard JSON — pre-built dashboard for one-click import against Prometheus/Loki
 - [ ] Jitter tracking — capture jitter from speedtest results when available
 - [ ] ISP detection — capture ISP name in `SpeedResult` and export it
+
+> 🏁 **Alpha → Beta release gate** — all Phase 1–2 items must be complete before tagging a beta release.
 
 ---
 
@@ -55,8 +56,8 @@ _Goal: make historical data more useful and integrate with the wider observabili
 _Goal: improve the Streamlit UI while it remains the primary frontend._
 
 - [x] **[NEXT]** Scheduler next-run countdown — live timer showing time until the next scheduled run
-- [x] **[NEXT]** Version tag in UI — display the running app version (from env var or package metadata) in the page header or sidebar
-- [ ] Version update check — compare running version against the latest published release via the GitHub/Forgejo API and show an in-UI banner when an update is available
+- [x] **[NEXT]** Version tag in UI — display the running app version in the page header
+- [ ] **[NEXT]** Version update check — compare running version against the latest published release via the GitHub API and show an in-UI banner when an update is available
 - [ ] Daily/weekly summary stats table (min/max/avg per day)
 - [ ] Connection quality score — weighted composite of download/upload/ping
 - [ ] Historical charts — per-metric breakdowns, not just the combined line chart
@@ -78,12 +79,19 @@ _Goal: notify users when something goes wrong without requiring Grafana._
 
 ## Phase 5 — Production Frontend
 
-_Goal: replace Streamlit with a proper web frontend when the backend is stable._
+_Goal: replace Streamlit with a React + Vite frontend backed by a FastAPI REST layer._
 
 - [ ] REST API layer (FastAPI) — expose run, history, schedule, and exporter endpoints
-- [ ] Proper frontend (HTMX or lightweight JS) — replaces Streamlit
-- [ ] Dark mode support
+- [ ] React + Vite scaffold — project structure, Tailwind CSS, dark theme baseline
+- [ ] Dashboard page — stat cards (download, upload, ping) showing latest result
+- [ ] Performance history chart — interactive multi-series line chart with crosshair tooltip (Recharts or ApexCharts)
+- [ ] Countdown timer + Run Test button — mirrors current Streamlit functionality
+- [ ] Settings page — schedule interval and exporter toggles
+- [ ] Version banner — display running version and update notification
+- [ ] Mobile-responsive layout
 - [ ] Remove Streamlit dependency once frontend is live
+
+> 🏁 **Beta → Full release gate** — all Phase 1–5 items must be complete before tagging v1.0.
 
 ---
 
@@ -91,4 +99,12 @@ _Goal: replace Streamlit with a proper web frontend when the backend is stable._
 
 - [ ] Exporter integration tests — CSV schema validation, Prometheus metric values, Loki payload shape
 - [ ] Scheduler persistence tests — simulate restart and verify interval is restored
-- [ ] SpeedtestRunner retry tests — verify retry behaviour on transient failure
+- [x] SpeedtestRunner retry tests — verify retry behaviour on transient failure
+
+---
+
+## Post-Release Enhancements
+
+_Features planned for after v1.0. Not required for stable release._
+
+- [ ] InfluxDB exporter — optional time-series exporter; pairs with Grafana for long-term trend analysis and retention policy management

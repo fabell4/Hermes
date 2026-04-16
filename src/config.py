@@ -71,6 +71,9 @@ CSV_RETENTION_DAYS: int = _get_int("CSV_RETENTION_DAYS", 0)
 # --- Prometheus Exporter ---
 PROMETHEUS_PORT: int = _get_int("PROMETHEUS_PORT", 8000)
 
+# --- Health Endpoint ---
+HEALTH_PORT: int = _get_int("HEALTH_PORT", 8080)
+
 # --- Loki Exporter ---
 LOKI_URL: str | None = os.getenv("LOKI_URL", None)
 LOKI_JOB_LABEL: str = os.getenv("LOKI_JOB_LABEL", "hermes_speedtest")

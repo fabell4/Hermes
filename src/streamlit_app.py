@@ -162,20 +162,14 @@ st.divider()
 
 
 # --- Schedule Control ---
-@st.fragment(run_every=1)
-def schedule_section() -> None:
-    """Renders the schedule control and live countdown to the next run."""
-    st.subheader("Schedule")
 
-    current_interval = runtime_config.get_interval_minutes(
-        default=config.SPEEDTEST_INTERVAL_MINUTES
-    )
-    st.caption(f"Current interval: every **{current_interval} minutes**")
 
-    # Countdown to next run
-    next_run_raw = runtime_config.get_next_run_at()
+def _render_next_run_status(is_paused: bool, next_run_raw: str | None) -> None:
+    """Renders the countdown / paused / running-now status message."""
     if runtime_config.is_running():
         st.info("🔄 Speedtest running now…")
+    elif is_paused:
+        st.info("⏸ No next run — scans are paused.")
     elif next_run_raw:
         try:
             next_run = datetime.fromisoformat(next_run_raw).astimezone(timezone.utc)
@@ -187,6 +181,34 @@ def schedule_section() -> None:
                 st.info("⏱ Next run imminent…")
         except (ValueError, TypeError):
             pass
+
+
+@st.fragment(run_every=1)
+def schedule_section() -> None:
+    """Renders the schedule control and live countdown to the next run."""
+    st.subheader("Schedule")
+
+    current_interval = runtime_config.get_interval_minutes(
+        default=config.SPEEDTEST_INTERVAL_MINUTES
+    )
+    is_paused = runtime_config.get_scheduler_paused()
+    st.caption(f"Current interval: every **{current_interval} minutes**")
+
+    # Pause / resume toggle
+    col_status, col_toggle = st.columns([3, 1])
+    with col_status:
+        if is_paused:
+            st.warning("⏸ Automated scans are **paused**.")
+        else:
+            st.success("▶ Automated scans are **enabled**.")
+    with col_toggle:
+        label = "▶ Resume" if is_paused else "⏸ Pause"
+        if st.button(label, key="pause_toggle"):
+            runtime_config.set_scheduler_paused(not is_paused)
+            st.rerun(scope="fragment")
+
+    # Countdown to next run
+    _render_next_run_status(is_paused, runtime_config.get_next_run_at())
 
     new_interval = st.number_input(
         "New interval (minutes)",

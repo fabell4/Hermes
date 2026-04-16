@@ -12,7 +12,13 @@ import pytest
 import src.main as main_module
 from src.exporters.base_exporter import BaseExporter
 from src.exporters.loki_exporter import LokiExporter
-from src.main import build_dispatcher, build_scheduler, run_once, update_exporters, _poll_once
+from src.main import (
+    build_dispatcher,
+    build_scheduler,
+    run_once,
+    update_exporters,
+    _poll_once,
+)
 from src.models.speed_result import SpeedResult
 from src.result_dispatcher import DispatchError
 from src.services.speedtest_runner import SpeedtestRunner
@@ -202,6 +208,40 @@ def test_speedtest_runner_raises_on_generic_speedtest_exception(mock_st_class):
         SpeedtestRunner().run()
 
 
+@patch("src.services.speedtest_runner.speedtest.Speedtest")
+def test_speedtest_runner_retries_once_on_transient_failure(mock_st_class):
+    """First attempt raises; second attempt succeeds — run() should return result."""
+    mock_st_fail = MagicMock()
+    mock_st_fail.get_best_server.side_effect = speedtest_module.ConfigRetrievalError
+
+    mock_st_ok = MagicMock()
+    mock_st_ok.get_best_server.return_value = {
+        "sponsor": "Test ISP",
+        "name": "City",
+        "country": "Country",
+        "id": "1",
+    }
+    mock_st_ok.download.return_value = 100_000_000
+    mock_st_ok.upload.return_value = 50_000_000
+    mock_st_ok.results.ping = 10.0
+
+    mock_st_class.side_effect = [mock_st_fail, mock_st_ok]
+
+    result = SpeedtestRunner().run()
+    assert result.download_mbps == pytest.approx(100.0)
+    assert result.upload_mbps == pytest.approx(50.0)
+    assert mock_st_class.call_count == 2
+
+
+@patch("src.services.speedtest_runner.speedtest.Speedtest")
+def test_speedtest_runner_raises_after_two_failures(mock_st_class):
+    """Both attempts fail — run() should raise RuntimeError."""
+    mock_st_class.side_effect = speedtest_module.ConfigRetrievalError
+    with pytest.raises(RuntimeError, match="speedtest.net"):
+        SpeedtestRunner().run()
+    assert mock_st_class.call_count == 2
+
+
 # ---------------------------------------------------------------------------
 # _poll_once
 # ---------------------------------------------------------------------------
@@ -223,12 +263,18 @@ def test_poll_once_no_changes_returns_same_state(monkeypatch):
     monkeypatch.setattr(
         main_module.runtime_config, "consume_run_trigger", lambda: False
     )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_scheduler_paused", lambda: False
+    )
     monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
 
-    interval, exporters = _poll_once(scheduler, dispatcher, service, 60, ["csv"])
+    interval, exporters, paused = _poll_once(
+        scheduler, dispatcher, service, 60, ["csv"]
+    )
 
     assert interval == 60
     assert exporters == ["csv"]
+    assert paused is False
     scheduler.reschedule_job.assert_not_called()
     dispatcher.clear.assert_not_called()
     service.run.assert_not_called()
@@ -248,9 +294,12 @@ def test_poll_once_interval_changed_calls_update_schedule(monkeypatch):
     monkeypatch.setattr(
         main_module.runtime_config, "set_interval_minutes", lambda m: None
     )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_scheduler_paused", lambda: False
+    )
     monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
 
-    interval, _ = _poll_once(scheduler, dispatcher, service, 60, ["csv"])
+    interval, _, _ = _poll_once(scheduler, dispatcher, service, 60, ["csv"])
 
     assert interval == 30
     scheduler.reschedule_job.assert_called_once()
@@ -272,6 +321,9 @@ def test_poll_once_exporters_changed_calls_update_exporters(monkeypatch):
     monkeypatch.setattr(
         main_module.runtime_config, "set_enabled_exporters", lambda e: None
     )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_scheduler_paused", lambda: False
+    )
     monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
     monkeypatch.setattr(
         main_module,
@@ -282,7 +334,7 @@ def test_poll_once_exporters_changed_calls_update_exporters(monkeypatch):
         },
     )
 
-    _, exporters = _poll_once(scheduler, dispatcher, service, 60, ["csv"])
+    _, exporters, _ = _poll_once(scheduler, dispatcher, service, 60, ["csv"])
 
     assert sorted(exporters) == ["csv", "prometheus"]
     dispatcher.clear.assert_called_once()
@@ -299,7 +351,11 @@ def test_poll_once_trigger_fires_calls_run_once(monkeypatch):
     monkeypatch.setattr(main_module.runtime_config, "consume_run_trigger", lambda: True)
     monkeypatch.setattr(main_module.runtime_config, "mark_running", lambda: None)
     monkeypatch.setattr(main_module.runtime_config, "mark_done", lambda: None)
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_scheduler_paused", lambda: False
+    )
     monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
+    monkeypatch.setattr(main_module.runtime_config, "set_last_run_at", lambda t: None)
 
     result = MagicMock()
     service.run.return_value = result
@@ -307,6 +363,58 @@ def test_poll_once_trigger_fires_calls_run_once(monkeypatch):
     _poll_once(scheduler, dispatcher, service, 60, ["csv"])
 
     service.run.assert_called_once()
+
+
+def test_poll_once_pause_calls_pause_job(monkeypatch):
+    """When scheduler_paused transitions to True, pause_job is called."""
+    scheduler, dispatcher, service = _make_poll_deps()
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_interval_minutes", lambda default: 60
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_enabled_exporters", lambda default: ["csv"]
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "consume_run_trigger", lambda: False
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_scheduler_paused", lambda: True
+    )
+    monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
+
+    _, _, paused = _poll_once(
+        scheduler, dispatcher, service, 60, ["csv"], last_paused=False
+    )
+
+    scheduler.pause_job.assert_called_once_with("speedtest_run")
+    scheduler.resume_job.assert_not_called()
+    assert paused is True
+
+
+def test_poll_once_resume_calls_resume_job(monkeypatch):
+    """When scheduler_paused transitions to False, resume_job is called."""
+    scheduler, dispatcher, service = _make_poll_deps()
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_interval_minutes", lambda default: 60
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_enabled_exporters", lambda default: ["csv"]
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "consume_run_trigger", lambda: False
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_scheduler_paused", lambda: False
+    )
+    monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
+
+    _, _, paused = _poll_once(
+        scheduler, dispatcher, service, 60, ["csv"], last_paused=True
+    )
+
+    scheduler.resume_job.assert_called_once_with("speedtest_run")
+    scheduler.pause_job.assert_not_called()
+    assert paused is False
 
 
 # ---------------------------------------------------------------------------

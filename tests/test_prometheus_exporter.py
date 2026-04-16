@@ -1,4 +1,5 @@
 """Tests for src/exporters/prometheus_exporter.py."""
+
 # pylint: disable=missing-function-docstring,protected-access
 from datetime import datetime, timezone
 from unittest.mock import patch

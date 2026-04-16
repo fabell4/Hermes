@@ -7,11 +7,14 @@ Wires all components together, starts the scheduler, and runs the application.
 import logging
 import sys
 import time
+import urllib.error
+import urllib.request
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from . import config
 from . import runtime_config
 from .runtime_config import set_interval_minutes, set_enabled_exporters
+from .services.health_server import HealthServer
 from .services.speedtest_runner import SpeedtestRunner
 from .result_dispatcher import ResultDispatcher, DispatchError
 from .exporters.csv_exporter import CSVExporter
@@ -113,10 +116,12 @@ def run_once(service: SpeedtestRunner, dispatcher: ResultDispatcher) -> None:
             return
         try:
             dispatcher.dispatch(result)
+            runtime_config.set_last_run_at(result.timestamp.isoformat())
         except DispatchError as e:
             logger.warning("Dispatch completed with failures:")
             for name, error in e.failures.items():
                 logger.warning("  [%s] %s", name, error)
+            runtime_config.set_last_run_at(result.timestamp.isoformat())
     finally:
         runtime_config.mark_done()
 
@@ -159,10 +164,12 @@ def _poll_once(
     service: SpeedtestRunner,
     last_interval: int,
     last_exporters: list[str],
-) -> tuple[int, list[str]]:
+    last_paused: bool = False,
+) -> tuple[int, list[str], bool]:
     """
     Execute one poll cycle — checks runtime_config.json for UI-driven changes
-    and reacts accordingly. Returns the (possibly updated) interval and exporters.
+    and reacts accordingly. Returns the (possibly updated) interval, exporters,
+    and paused state.
     Extracted from the main loop to make it unit-testable.
     """
     # --- React to interval changes written by the UI ---
@@ -186,12 +193,72 @@ def _poll_once(
         logger.info("Run trigger detected — starting immediate test.")
         run_once(service, dispatcher)
 
+    # --- React to pause/resume toggle written by the UI ---
+    current_paused = runtime_config.get_scheduler_paused()
+    if current_paused != last_paused:
+        job = scheduler.get_job("speedtest_run")
+        if job:
+            if current_paused:
+                scheduler.pause_job("speedtest_run")
+                logger.info("Automated scans paused.")
+            else:
+                scheduler.resume_job("speedtest_run")
+                logger.info("Automated scans resumed.")
+        last_paused = current_paused
+
     # --- Persist next run time for the UI countdown ---
     job = scheduler.get_job("speedtest_run")
     if job and job.next_run_time:
         runtime_config.set_next_run_at(job.next_run_time.isoformat())
 
-    return last_interval, last_exporters
+    return last_interval, last_exporters, last_paused
+
+
+def _build_health_status(scheduler: BackgroundScheduler) -> dict:
+    """Return a status dict for the /health endpoint."""
+    paused = runtime_config.get_scheduler_paused()
+    if paused:
+        scheduler_state = "paused"
+    elif scheduler.running:
+        scheduler_state = "running"
+    else:
+        scheduler_state = "stopped"
+    return {
+        "status": "ok" if scheduler.running else "degraded",
+        "scheduler": scheduler_state,
+        "last_run_at": runtime_config.get_last_run_at(),
+        "next_run_at": runtime_config.get_next_run_at(),
+        "is_running": runtime_config.is_running(),
+        "scans_paused": paused,
+    }
+
+
+def _validate_environment() -> None:
+    """Warn about misconfigured or unreachable services at startup."""
+    enabled = runtime_config.get_enabled_exporters(default=config.ENABLED_EXPORTERS)
+    if "loki" in enabled:
+        loki_url = config.LOKI_URL
+        if not loki_url:
+            logger.warning(
+                "Environment: Loki exporter is enabled but LOKI_URL is not set."
+            )
+        else:
+            try:
+                req = urllib.request.Request(loki_url, method="HEAD")
+                urllib.request.urlopen(req, timeout=5)  # noqa: S310
+            except urllib.error.URLError as e:
+                logger.warning(
+                    "Environment: Loki URL '%s' is unreachable — %s. "
+                    "Loki exports will fail until the server is available.",
+                    loki_url,
+                    e.reason,
+                )
+            except Exception as e:  # pylint: disable=broad-except
+                logger.warning(
+                    "Environment: Could not verify Loki URL '%s' — %s.",
+                    loki_url,
+                    e,
+                )
 
 
 def main():
@@ -207,6 +274,8 @@ def main():
     # Clean up any stale running sentinel left by a previous crash/restart.
     runtime_config.mark_done()
 
+    _validate_environment()
+
     service = SpeedtestRunner()
     dispatcher = build_dispatcher()
 
@@ -218,6 +287,14 @@ def main():
     # Start the background scheduler
     scheduler = build_scheduler(service, dispatcher)
     scheduler.start()
+
+    # Start the health endpoint
+    health = HealthServer(
+        port=config.HEALTH_PORT,
+        get_status=lambda: _build_health_status(scheduler),
+    )
+    health.start()
+
     logger.info(
         "Scheduler started — next run in %s minutes.",
         config.SPEEDTEST_INTERVAL_MINUTES,
@@ -235,13 +312,24 @@ def main():
         default=config.ENABLED_EXPORTERS
     )
 
+    # Restore paused state persisted from before a restart.
+    last_paused = runtime_config.get_scheduler_paused()
+    if last_paused:
+        scheduler.pause_job("speedtest_run")
+        logger.info("Automated scans are paused (restored from runtime config).")
+
     # Keep the main thread alive — scheduler runs in background thread.
     # Each cycle delegates to _poll_once for UI-driven change detection.
     try:
         while True:
             time.sleep(30)
-            last_interval, last_exporters = _poll_once(
-                scheduler, dispatcher, service, last_interval, last_exporters
+            last_interval, last_exporters, last_paused = _poll_once(
+                scheduler,
+                dispatcher,
+                service,
+                last_interval,
+                last_exporters,
+                last_paused,
             )
     except (KeyboardInterrupt, SystemExit):
         logger.info("Shutdown signal received — stopping scheduler...")

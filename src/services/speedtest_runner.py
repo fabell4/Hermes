@@ -1,25 +1,44 @@
 """SpeedtestRunner — wraps speedtest-cli, runs a test, and returns a SpeedResult."""
 
+import logging
 import os
-import speedtest  # type: ignore
 from datetime import datetime
 from typing import Any, cast
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
+import speedtest  # type: ignore
+
 from src.models.speed_result import SpeedResult
+
+_log = logging.getLogger(__name__)  # type: ignore
 
 
 class SpeedtestRunner:
     """
     Runs a speed test and returns the results as a SpeedResult dataclass.
-    Raises SpeedtestException on network or server errors.
+    Retries once on transient failure before raising.
     """
 
     def run(self) -> SpeedResult:
-        """Run the speed test and return the results."""
+        """Run the speed test, retrying once on transient failure."""
+        last_exc: Exception | None = None
+        for attempt in range(2):
+            try:
+                return self._attempt()
+            except RuntimeError as exc:
+                last_exc = exc
+                if attempt == 0:
+                    _log.warning("Speedtest attempt 1 failed (%s) — retrying.", exc)
+        assert last_exc is not None
+        raise last_exc
+
+    def _attempt(self) -> SpeedResult:
+        """Execute a single speed test attempt."""
         try:
             st = speedtest.Speedtest()
-            best: dict[str, Any] = cast(dict[str, Any], st.get_best_server())  # type: ignore[no-untyped-call]
+            best: dict[str, Any] = cast(  # type: ignore[no-untyped-call]
+                dict[str, Any], st.get_best_server()
+            )
             download_bps = st.download(threads=None)  # type: ignore[no-untyped-call]
             upload_bps = st.upload(threads=None, pre_allocate=True)  # type: ignore[no-untyped-call]
 
@@ -38,19 +57,18 @@ class SpeedtestRunner:
                 server_id=int(str(best["id"])) if best.get("id") is not None else None,
             )
 
-        except speedtest.ConfigRetrievalError:
-            # Can't reach speedtest.net config endpoint — likely no internet
+        except speedtest.ConfigRetrievalError as exc:
             raise RuntimeError(
                 "Could not reach speedtest.net — check network connectivity."
-            )
+            ) from exc
 
-        except speedtest.NoMatchedServers:
-            # Happens if you manually filter servers and none match
-            raise RuntimeError("No speedtest servers matched the selection criteria.")
+        except speedtest.NoMatchedServers as exc:
+            raise RuntimeError(
+                "No speedtest servers matched the selection criteria."
+            ) from exc
 
         except speedtest.SpeedtestHTTPError as e:
-            raise RuntimeError(f"HTTP error during speedtest: {e}")
+            raise RuntimeError(f"HTTP error during speedtest: {e}") from e
 
         except speedtest.SpeedtestException as e:
-            # Base exception — catches anything else the library raises
-            raise RuntimeError(f"Speedtest failed: {e}")
+            raise RuntimeError(f"Speedtest failed: {e}") from e
