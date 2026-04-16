@@ -41,6 +41,11 @@ htmlcov/
 # Exports / data output
 *.csv
 
+# Runtime state — generated at runtime, not part of source
+data/runtime_config.json
+data/.run_trigger
+data/.running
+
 # OS
 .DS_Store
 Thumbs.db

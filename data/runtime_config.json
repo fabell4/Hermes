@@ -1,6 +1,0 @@
-{
-  "interval_minutes": 30,
-  "enabled_exporters": [
-    "failing"
-  ]
-}
