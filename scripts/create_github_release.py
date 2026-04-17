@@ -12,8 +12,12 @@ gh_user = os.environ["GH_USERNAME"]
 gh_pat = os.environ["GH_PAT"]
 _tmpdir = tempfile.gettempdir()
 notes_file = os.environ.get("NOTES_FILE", os.path.join(_tmpdir, "changelog_notes.txt"))
-payload_file = os.environ.get("PAYLOAD_FILE", os.path.join(_tmpdir, "gh_release_payload.json"))
-response_file = os.environ.get("RESPONSE_FILE", os.path.join(_tmpdir, "gh_response.json"))
+payload_file = os.environ.get(
+    "PAYLOAD_FILE", os.path.join(_tmpdir, "gh_release_payload.json")
+)
+response_file = os.environ.get(
+    "RESPONSE_FILE", os.path.join(_tmpdir, "gh_response.json")
+)
 
 is_pre = any(x in tag for x in ("alpha", "beta", "rc"))
 

@@ -19,7 +19,9 @@ try:
 except Exception:
     notes = ""
 
-out_path = os.environ.get("NOTES_FILE", os.path.join(tempfile.gettempdir(), "changelog_notes.txt"))
+out_path = os.environ.get(
+    "NOTES_FILE", os.path.join(tempfile.gettempdir(), "changelog_notes.txt")
+)
 fd = os.open(out_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
 with os.fdopen(fd, "w") as f:
     f.write(notes)
