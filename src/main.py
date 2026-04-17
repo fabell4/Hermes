@@ -19,6 +19,7 @@ from .result_dispatcher import ResultDispatcher, DispatchError
 from .exporters.csv_exporter import CSVExporter
 from .exporters.prometheus_exporter import PrometheusExporter
 from .exporters.loki_exporter import LokiExporter
+from .exporters.sqlite_exporter import SQLiteExporter
 
 # --- Logging setup ---
 logging.basicConfig(
@@ -49,6 +50,11 @@ EXPORTER_REGISTRY = {
     ),
     "prometheus": lambda: PrometheusExporter(port=config.PROMETHEUS_PORT),
     "loki": _build_loki_exporter,
+    "sqlite": lambda: SQLiteExporter(
+        path=config.SQLITE_DB_PATH,
+        max_rows=config.SQLITE_MAX_ROWS,
+        retention_days=config.SQLITE_RETENTION_DAYS,
+    ),
 }
 
 

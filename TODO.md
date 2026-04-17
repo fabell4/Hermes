@@ -40,7 +40,7 @@ _Goal: make the deployed instance reliable before adding features._
 
 _Goal: make historical data more useful and integrate with the wider observability stack._
 
-- [ ] SQLite exporter — queryable history, replaces CSV as the primary storage backend
+- [x] SQLite exporter — queryable history, replaces CSV as the primary storage backend
 - [x] Log rotation and management — rotate CSV log by size or age, configurable max file size and retention period
 - [ ] Data retention policy — auto-prune records older than N days (configurable)
 - [x] Grafana dashboard JSON — pre-built dashboard for one-click import against Prometheus/Loki

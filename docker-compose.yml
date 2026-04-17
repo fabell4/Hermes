@@ -18,6 +18,7 @@ services:
       RUN_ON_STARTUP: "${RUN_ON_STARTUP:-true}"
       ENABLED_EXPORTERS: "${ENABLED_EXPORTERS:-csv}"
       CSV_LOG_PATH: "logs/results.csv"
+      SQLITE_DB_PATH: "data/hermes.db"
       PROMETHEUS_PORT: "${PROMETHEUS_PORT:-8000}"
       LOKI_URL: "${LOKI_URL:-}"
       LOKI_JOB_LABEL: "${LOKI_JOB_LABEL:-hermes_speedtest}"
@@ -41,6 +42,7 @@ services:
       SPEEDTEST_INTERVAL_MINUTES: "${SPEEDTEST_INTERVAL_MINUTES:-60}"
       ENABLED_EXPORTERS: "${ENABLED_EXPORTERS:-csv}"
       CSV_LOG_PATH: "logs/results.csv"
+      SQLITE_DB_PATH: "data/hermes.db"
     env_file:
       - path: .env
         required: false

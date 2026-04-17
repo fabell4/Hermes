@@ -6,6 +6,7 @@ Validates the full pipeline before building the production web frontend.
 """
 
 import os
+import sqlite3
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -27,6 +28,7 @@ except ZoneInfoNotFoundError:
 # Keep in sync with EXPORTER_REGISTRY in main.py.
 KNOWN_EXPORTERS: dict[str, str] = {
     "csv": "CSV — log results to file",
+    "sqlite": "SQLite — queryable local database",
     "prometheus": "Prometheus — expose /metrics endpoint",
     "loki": "Loki — ship structured logs",
 }
@@ -54,6 +56,37 @@ def load_csv() -> pd.DataFrame | None:
     )
     data = data.sort_values("timestamp", ascending=False)
     return data
+
+
+def load_sqlite() -> pd.DataFrame | None:
+    """Load and return the SQLite run history, or None if unavailable/empty."""
+    db_path = Path(config.SQLITE_DB_PATH)
+    if not db_path.exists():
+        return None
+    try:
+        conn = sqlite3.connect(db_path)
+        data = pd.read_sql_query("SELECT * FROM results ORDER BY timestamp DESC", conn)
+        conn.close()
+    except Exception:  # pylint: disable=broad-except
+        return None
+    if data.empty:
+        return None
+    data["timestamp"] = (
+        pd.to_datetime(data["timestamp"], utc=True)
+        .dt.tz_convert(_DISPLAY_TZ)
+        .dt.tz_localize(None)
+    )
+    return data
+
+
+def load_history() -> pd.DataFrame | None:
+    """Load run history — prefers SQLite when enabled, falls back to CSV."""
+    enabled = runtime_config.get_enabled_exporters(default=config.ENABLED_EXPORTERS)
+    if "sqlite" in enabled:
+        df = load_sqlite()
+        if df is not None:
+            return df
+    return load_csv()
 
 
 # --- UI ---
@@ -109,7 +142,7 @@ def _poll_trigger_state() -> str:
                 pass
 
         if completed:
-            df_now = load_csv()
+            df_now = load_history()
             if df_now is not None:
                 latest = df_now.iloc[0]
                 # Store result in session_state so it survives the full-page rerun.
@@ -283,7 +316,7 @@ st.divider()
 # --- History ---
 st.subheader("Run History")
 
-df = load_csv()
+df = load_history()
 
 if df is None:
     st.info("No runs logged yet. Hit 'Run Now' to start.")
