@@ -93,20 +93,33 @@ def _poll_trigger_state() -> str:
         st.write("🔄 Running speedtest… this takes ~30 seconds.")
         return "fragment"
     else:
-        df_now = load_csv()
-        current_count = len(df_now) if df_now is not None else 0
-        if df_now is not None and current_count > st.session_state.get(
-            "pre_trigger_count", 0
-        ):
-            latest = df_now.iloc[0]
-            # Store result in session_state so it survives the full-page rerun.
-            st.session_state["last_result"] = {
-                "download": latest["download_mbps"],
-                "upload": latest["upload_mbps"],
-                "ping": latest["ping_ms"],
-                "server": latest["server_name"],
-                "location": latest["server_location"],
-            }
+        # Compare last_run_at against the moment the button was pressed.
+        # set_last_run_at() is called inside run_once() before mark_done(),
+        # so by the time is_running() returns False the timestamp is already
+        # written — no race condition with the CSV file.
+        last_run_raw = runtime_config.get_last_run_at()
+        trigger_time: float = st.session_state.get("trigger_time", 0.0)
+        completed = False
+        if last_run_raw:
+            try:
+                completed = (
+                    datetime.fromisoformat(last_run_raw).timestamp() > trigger_time
+                )
+            except (ValueError, TypeError):
+                pass
+
+        if completed:
+            df_now = load_csv()
+            if df_now is not None:
+                latest = df_now.iloc[0]
+                # Store result in session_state so it survives the full-page rerun.
+                st.session_state["last_result"] = {
+                    "download": latest["download_mbps"],
+                    "upload": latest["upload_mbps"],
+                    "ping": latest["ping_ms"],
+                    "server": latest["server_name"],
+                    "location": latest["server_location"],
+                }
             st.session_state["trigger_fired"] = False
             return "app"
         else:
@@ -136,8 +149,6 @@ def run_test_section() -> None:
         st.caption(f"Server: {result['server']} — {result['location']}")
 
     if run_button:
-        df_pre = load_csv()
-        st.session_state["pre_trigger_count"] = len(df_pre) if df_pre is not None else 0
         st.session_state["trigger_fired"] = True
         st.session_state["trigger_time"] = time.time()
         st.session_state.pop("last_result", None)
