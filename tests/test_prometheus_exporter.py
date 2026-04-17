@@ -6,7 +6,6 @@ from unittest.mock import patch
 
 import pytest
 
-import src.exporters.prometheus_exporter as prom_module
 from src.exporters.prometheus_exporter import PrometheusExporter
 from src.models.speed_result import SpeedResult
 
@@ -25,23 +24,23 @@ def _sample_result() -> SpeedResult:
 
 @pytest.fixture(autouse=True)
 def reset_server_started():
-    """Reset the module-level _server_started guard between tests."""
-    original = prom_module._server_started
-    prom_module._server_started = False
+    """Reset the class-level _server_started guard between tests."""
+    original = PrometheusExporter._server_started
+    PrometheusExporter._server_started = False
     yield
-    prom_module._server_started = original
+    PrometheusExporter._server_started = original
 
 
 @patch("src.exporters.prometheus_exporter.start_http_server")
 def test_init_starts_server_on_first_instantiation(mock_start):
     PrometheusExporter(port=9191)
     mock_start.assert_called_once_with(9191)
-    assert prom_module._server_started is True
+    assert PrometheusExporter._server_started is True
 
 
 @patch("src.exporters.prometheus_exporter.start_http_server")
 def test_init_skips_server_when_already_started(mock_start):
-    prom_module._server_started = True
+    PrometheusExporter._server_started = True
     PrometheusExporter(port=9191)
     mock_start.assert_not_called()
 

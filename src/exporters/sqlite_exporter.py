@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS results (
     download_mbps   REAL    NOT NULL,
     upload_mbps     REAL    NOT NULL,
     ping_ms         REAL    NOT NULL,
+    jitter_ms       REAL,
+    isp_name        TEXT,
     server_name     TEXT    NOT NULL,
     server_location TEXT    NOT NULL,
     server_id       INTEGER
@@ -27,10 +29,10 @@ CREATE TABLE IF NOT EXISTS results (
 
 _INSERT = """
 INSERT INTO results
-    (timestamp, download_mbps, upload_mbps, ping_ms,
+    (timestamp, download_mbps, upload_mbps, ping_ms, jitter_ms, isp_name,
      server_name, server_location, server_id)
 VALUES
-    (:timestamp, :download_mbps, :upload_mbps, :ping_ms,
+    (:timestamp, :download_mbps, :upload_mbps, :ping_ms, :jitter_ms, :isp_name,
      :server_name, :server_location, :server_id)"""
 
 
@@ -92,6 +94,8 @@ class SQLiteExporter(BaseExporter):
             "download_mbps": result.download_mbps,
             "upload_mbps": result.upload_mbps,
             "ping_ms": result.ping_ms,
+            "jitter_ms": result.jitter_ms,
+            "isp_name": result.isp_name,
             "server_name": result.server_name,
             "server_location": result.server_location,
             "server_id": result.server_id,

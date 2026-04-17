@@ -15,6 +15,8 @@ FIELDNAMES = [
     "download_mbps",
     "upload_mbps",
     "ping_ms",
+    "jitter_ms",
+    "isp_name",
     "server_name",
     "server_location",
     "server_id",

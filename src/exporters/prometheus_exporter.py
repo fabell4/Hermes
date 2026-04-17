@@ -6,8 +6,8 @@ import logging
 
 from prometheus_client import Gauge, start_http_server
 
-from ..models.speed_result import SpeedResult
-from .base_exporter import BaseExporter
+from src.exporters.base_exporter import BaseExporter
+from src.models.speed_result import SpeedResult
 
 logger = logging.getLogger(__name__)
 
@@ -17,21 +17,23 @@ logger = logging.getLogger(__name__)
 _DOWNLOAD = Gauge(
     "hermes_download_mbps",
     "Last measured download speed in Mbit/s",
-    ["server_name", "server_location"],
+    ["server_name", "server_location", "isp_name"],
 )
 _UPLOAD = Gauge(
     "hermes_upload_mbps",
     "Last measured upload speed in Mbit/s",
-    ["server_name", "server_location"],
+    ["server_name", "server_location", "isp_name"],
 )
 _PING = Gauge(
     "hermes_ping_ms",
     "Last measured latency in milliseconds",
-    ["server_name", "server_location"],
+    ["server_name", "server_location", "isp_name"],
 )
-
-# Guard so the HTTP server is started at most once per process.
-_server_started: bool = False
+_JITTER = Gauge(
+    "hermes_jitter_ms",
+    "Last measured jitter in milliseconds (None when not reported by server)",
+    ["server_name", "server_location", "isp_name"],
+)
 
 
 class PrometheusExporter(BaseExporter):
@@ -42,12 +44,14 @@ class PrometheusExporter(BaseExporter):
     Prometheus) to collect the data.
     """
 
+    # Guard so the HTTP server is started at most once per process.
+    _server_started: bool = False
+
     def __init__(self, port: int = 8000) -> None:
-        global _server_started
         self._port = port
-        if not _server_started:
+        if not PrometheusExporter._server_started:
             start_http_server(port)
-            _server_started = True
+            PrometheusExporter._server_started = True
             logger.info("Prometheus metrics server started on port %d", port)
         else:
             logger.debug(
@@ -64,16 +68,20 @@ class PrometheusExporter(BaseExporter):
         labels = {
             "server_name": result.server_name or "",
             "server_location": result.server_location or "",
+            "isp_name": result.isp_name or "",
         }
         try:
             _DOWNLOAD.labels(**labels).set(result.download_mbps)
             _UPLOAD.labels(**labels).set(result.upload_mbps)
             _PING.labels(**labels).set(result.ping_ms)
+            if result.jitter_ms is not None:
+                _JITTER.labels(**labels).set(result.jitter_ms)
             logger.debug(
-                "Prometheus gauges updated — down=%.2f up=%.2f ping=%.2f",
+                "Prometheus gauges updated — down=%.2f up=%.2f ping=%.2f jitter=%s",
                 result.download_mbps,
                 result.upload_mbps,
                 result.ping_ms,
+                result.jitter_ms,
             )
         except Exception as exc:  # pragma: no cover
             logger.error("Failed to update Prometheus gauges: %s", exc)

@@ -56,6 +56,10 @@ class SpeedtestRunner:
                 server_name=str(best.get("sponsor", "Unknown")),
                 server_location=f"{best.get('name', '')}, {best.get('country', '')}",
                 server_id=int(str(best["id"])) if best.get("id") is not None else None,
+                jitter_ms=round(float(getattr(st.results, "jitter")), 2)
+                if getattr(st.results, "jitter", None) is not None
+                else None,
+                isp_name=str(st.results.client.get("isp", "")) or None,
             )
 
         except speedtest.ConfigRetrievalError as exc:

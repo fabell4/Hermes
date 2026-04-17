@@ -321,14 +321,21 @@ df = load_history()
 if df is None:
     st.info("No runs logged yet. Hit 'Run Now' to start.")
 else:
-    m1, m2, m3, m4 = st.columns(4)
+    m1, m2, m3, m4, m5 = st.columns(5)
     m1.metric("Total Runs", len(df))
     m2.metric("Avg Download", f"{df['download_mbps'].mean():.1f} Mbps")
     m3.metric("Avg Upload", f"{df['upload_mbps'].mean():.1f} Mbps")
     m4.metric("Avg Ping", f"{df['ping_ms'].mean():.1f} ms")
+    if "jitter_ms" in df.columns and df["jitter_ms"].notna().any():
+        m5.metric("Avg Jitter", f"{df['jitter_ms'].mean():.1f} ms")
+    else:
+        m5.metric("Avg Jitter", "N/A")
 
+    chart_cols = ["download_mbps", "upload_mbps"]
+    if "jitter_ms" in df.columns and df["jitter_ms"].notna().any():
+        chart_cols.append("jitter_ms")
     st.line_chart(
-        df.set_index("timestamp")[["download_mbps", "upload_mbps"]],
+        df.set_index("timestamp")[chart_cols],
         width="stretch",
     )
 

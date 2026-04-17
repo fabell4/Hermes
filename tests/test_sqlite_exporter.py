@@ -167,3 +167,47 @@ def test_wal_journal_mode_enabled(db_path: Path) -> None:
     with exp._transaction() as conn:  # pylint: disable=protected-access
         mode = conn.execute("PRAGMA journal_mode").fetchone()[0]
     assert mode == "wal"
+
+
+def test_jitter_ms_stored_when_present(db_path: Path) -> None:
+    """jitter_ms should be stored when provided."""
+    exp = SQLiteExporter(path=db_path)
+    result = _make_result()
+    result.jitter_ms = 4.2
+    exp.export(result)
+    conn = sqlite3.connect(db_path)
+    jitter = conn.execute("SELECT jitter_ms FROM results").fetchone()[0]
+    conn.close()
+    assert jitter == pytest.approx(4.2)
+
+
+def test_jitter_ms_stored_as_null_when_none(db_path: Path) -> None:
+    """jitter_ms=None should be stored as SQL NULL."""
+    exp = SQLiteExporter(path=db_path)
+    exp.export(_make_result())  # jitter_ms defaults to None
+    conn = sqlite3.connect(db_path)
+    jitter = conn.execute("SELECT jitter_ms FROM results").fetchone()[0]
+    conn.close()
+    assert jitter is None
+
+
+def test_isp_name_stored_when_present(db_path: Path) -> None:
+    """isp_name should be stored when provided."""
+    exp = SQLiteExporter(path=db_path)
+    result = _make_result()
+    result.isp_name = "Comcast"
+    exp.export(result)
+    conn = sqlite3.connect(db_path)
+    isp = conn.execute("SELECT isp_name FROM results").fetchone()[0]
+    conn.close()
+    assert isp == "Comcast"
+
+
+def test_isp_name_stored_as_null_when_none(db_path: Path) -> None:
+    """isp_name=None should be stored as SQL NULL."""
+    exp = SQLiteExporter(path=db_path)
+    exp.export(_make_result())  # isp_name defaults to None
+    conn = sqlite3.connect(db_path)
+    isp = conn.execute("SELECT isp_name FROM results").fetchone()[0]
+    conn.close()
+    assert isp is None

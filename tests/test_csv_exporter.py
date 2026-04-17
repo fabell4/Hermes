@@ -231,3 +231,53 @@ def test_prune_applies_both_limits(tmp_path):
     exporter.export(_sample_result(days_ago=2))  # recent
     exporter.export(_sample_result(days_ago=1))  # recent — only 2 kept by max_rows
     assert exporter.get_row_count() == 2
+
+
+# ---------------------------------------------------------------------------
+# jitter_ms
+# ---------------------------------------------------------------------------
+
+
+def test_jitter_ms_written_when_present(tmp_path):
+    path = tmp_path / "results.csv"
+    exporter = CSVExporter(path)
+    result = _sample_result()
+    result.jitter_ms = 3.7
+    exporter.export(result)
+    with open(path, encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    assert float(rows[0]["jitter_ms"]) == pytest.approx(3.7)
+
+
+def test_jitter_ms_empty_when_none(tmp_path):
+    path = tmp_path / "results.csv"
+    exporter = CSVExporter(path)
+    exporter.export(_sample_result())  # jitter_ms defaults to None
+    with open(path, encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    assert rows[0]["jitter_ms"] == ""
+
+
+# ---------------------------------------------------------------------------
+# isp_name
+# ---------------------------------------------------------------------------
+
+
+def test_isp_name_written_when_present(tmp_path):
+    path = tmp_path / "results.csv"
+    exporter = CSVExporter(path)
+    result = _sample_result()
+    result.isp_name = "Comcast"
+    exporter.export(result)
+    with open(path, encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    assert rows[0]["isp_name"] == "Comcast"
+
+
+def test_isp_name_empty_when_none(tmp_path):
+    path = tmp_path / "results.csv"
+    exporter = CSVExporter(path)
+    exporter.export(_sample_result())  # isp_name defaults to None
+    with open(path, encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+    assert rows[0]["isp_name"] == ""
