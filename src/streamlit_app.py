@@ -83,9 +83,9 @@ def load_history() -> pd.DataFrame | None:
     """Load run history — prefers SQLite when enabled, falls back to CSV."""
     enabled = runtime_config.get_enabled_exporters(default=config.ENABLED_EXPORTERS)
     if "sqlite" in enabled:
-        df = load_sqlite()
-        if df is not None:
-            return df
+        _df = load_sqlite()
+        if _df is not None:
+            return _df
     return load_csv()
 
 
