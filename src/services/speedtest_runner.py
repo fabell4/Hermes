@@ -29,7 +29,8 @@ class SpeedtestRunner:
                 last_exc = exc
                 if attempt == 0:
                     _log.warning("Speedtest attempt 1 failed (%s) — retrying.", exc)
-        assert last_exc is not None
+        if last_exc is None:  # pragma: no cover
+            raise RuntimeError("Speedtest failed with no recorded exception.")
         raise last_exc
 
     def _attempt(self) -> SpeedResult:

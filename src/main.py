@@ -7,8 +7,7 @@ Wires all components together, starts the scheduler, and runs the application.
 import logging
 import sys
 import time
-import urllib.error
-import urllib.request
+import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from . import config
@@ -244,14 +243,13 @@ def _validate_environment() -> None:
             )
         else:
             try:
-                req = urllib.request.Request(loki_url, method="HEAD")
-                urllib.request.urlopen(req, timeout=5)  # noqa: S310
-            except urllib.error.URLError as e:
+                requests.head(loki_url, timeout=5)
+            except requests.exceptions.ConnectionError as e:
                 logger.warning(
                     "Environment: Loki URL '%s' is unreachable — %s. "
                     "Loki exports will fail until the server is available.",
                     loki_url,
-                    e.reason,
+                    e,
                 )
             except Exception as e:  # pylint: disable=broad-except
                 logger.warning(
