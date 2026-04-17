@@ -507,6 +507,7 @@ def test_main_shuts_down_cleanly_on_keyboard_interrupt(monkeypatch):
     monkeypatch.setattr(main_module, "SpeedtestRunner", MagicMock)
     monkeypatch.setattr(main_module, "build_dispatcher", MagicMock)
     monkeypatch.setattr(main_module, "build_scheduler", lambda s, d: mock_scheduler)
+    monkeypatch.setattr(main_module, "HealthServer", MagicMock)
     monkeypatch.setattr(
         main_module.time, "sleep", MagicMock(side_effect=KeyboardInterrupt)
     )
@@ -541,6 +542,7 @@ def test_main_run_on_startup_and_poll_loop(monkeypatch):
     monkeypatch.setattr(main_module, "SpeedtestRunner", MagicMock)
     monkeypatch.setattr(main_module, "build_dispatcher", MagicMock)
     monkeypatch.setattr(main_module, "build_scheduler", lambda s, d: mock_scheduler)
+    monkeypatch.setattr(main_module, "HealthServer", MagicMock)
     # sleep succeeds once; _poll_once raises KeyboardInterrupt to exit the loop
     monkeypatch.setattr(main_module.time, "sleep", lambda _: None)
     monkeypatch.setattr(
