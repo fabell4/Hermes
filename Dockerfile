@@ -4,8 +4,10 @@ LABEL org.opencontainers.image.source="https://github.com/fabell4/hermes"
 
 WORKDIR /app
 
-# Install dependencies first (cached layer unless requirements.txt changes)
-# Create persistent directories in the same layer to avoid a separate RUN step
+# Install sqlite3 CLI + dependencies; create persistent dirs in same layer
+RUN apt-get update && apt-get install -y --no-install-recommends sqlite3 \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt \
     && mkdir -p /app/logs /app/data
