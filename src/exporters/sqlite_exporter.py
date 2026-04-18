@@ -80,11 +80,28 @@ class SQLiteExporter(BaseExporter):
         finally:
             conn.close()
 
+    # Columns added after initial release; migrated automatically on startup.
+    _MIGRATIONS: list[tuple[str, str]] = [
+        ("jitter_ms", "ALTER TABLE results ADD COLUMN jitter_ms REAL"),
+        ("isp_name", "ALTER TABLE results ADD COLUMN isp_name TEXT"),
+    ]
+
     def _init_db(self) -> None:
-        """Creates the database file and results table if they do not exist."""
+        """Creates the database file and results table if they do not exist.
+
+        Also runs lightweight column-addition migrations so that databases
+        created by older versions of Hermes gain new columns automatically.
+        """
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self._transaction() as conn:
             conn.execute(_CREATE_TABLE)
+            existing = {
+                row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()
+            }
+            for column, ddl in self._MIGRATIONS:
+                if column not in existing:
+                    conn.execute(ddl)
+                    logger.info("Migrated SQLite schema: added column '%s'", column)
         logger.info("SQLite database ready at: %s", self.path)
 
     def export(self, result: SpeedResult) -> None:
