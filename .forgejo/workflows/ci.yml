@@ -692,7 +692,7 @@ jobs:
 
       - name: Publish docs to hub
         run: |
-          CID=$(docker run -d -v marion_mkdocs_content:/docs alpine sleep 30)
+          CID=$(docker run -d -v marion_mkdocs_content:/docs registry.greenflametech.net/alpine sleep 30)
           docker exec "$CID" mkdir -p /docs/docs/hermes
           docker cp README.md "$CID:/docs/docs/hermes/index.md"
           docker cp docs/zeniscal.yml "$CID:/docs/docs/hermes/zeniscal.yml"
