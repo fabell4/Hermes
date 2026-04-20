@@ -516,7 +516,9 @@ jobs:
 
       - name: Build image
         run: |
+          SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           docker build \
+            --build-arg APP_VERSION="${SHA}" \
             -t "${{ steps.tags.outputs.sha_tag }}" \
             -t "${{ steps.tags.outputs.latest_tag }}" \
             .
