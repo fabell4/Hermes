@@ -310,6 +310,7 @@ def write_report(pairs, output_path):
 
 
 def main():
+    """Entry point: parse CLI args and run conversions."""
     parser = argparse.ArgumentParser(
         description="Convert tool reports to SonarQube Generic Issue format"
     )
