@@ -84,14 +84,38 @@ jobs:
           git config user.email "ci@greenflametech.net"
           git config user.name "Hermes CI"
           git fetch --unshallow origin || true
+
+          # Create a sanitized branch — strips internal infra before pushing to the public repo
+          git checkout -b public-release
+
+          # Remove internal-only files/directories not suitable for public consumption
+          rm -rf .forgejo/
+          rm -f renovate.json
+
+          # Rewrite Dockerfile — restore public Docker Hub base image
+          sed -i 's|FROM registry\.greenflametech\.net/python:3\.13-slim|FROM python:3.13-slim|g' Dockerfile
+
+          # Strip internal sonar.host.url (sonar-project.properties is otherwise useful as a reference)
+          sed -i '/^sonar\.host\.url=/d' sonar-project.properties
+
+          # Commit the sanitized state
+          git add -A
+          git commit -m "chore: prepare public release ${TAG} (strip internal infra config)"
+
           GITHUB_REPO_URL="https://${GH_USERNAME}:${GH_PAT}@github.com/${GH_USERNAME}/Hermes.git"
           git remote add github "${GITHUB_REPO_URL}"
-          git push github HEAD:refs/heads/main --force
-          # Delete the tag on GitHub first (in case it exists and is protected against overwrites)
+          git push github public-release:refs/heads/main --force
+
+          # Tag the sanitized commit and push to GitHub
+          git tag -f "${TAG}"
           curl -s -X DELETE \
             -H "Authorization: Bearer ${GH_PAT}" \
             "https://api.github.com/repos/${GH_USERNAME}/Hermes/git/refs/tags/${TAG}" || true
           git push github "${TAG}"
+
+          # Return to main so subsequent steps work normally
+          git checkout main
+          git branch -D public-release
 
       - name: Create GitHub release
         run: python3 scripts/create_github_release.py
