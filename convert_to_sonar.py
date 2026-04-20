@@ -293,18 +293,9 @@ def convert_semgrep(report_path, base_dir):
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
-def write_report(pairs, output_path):
-    """
-    Accept a list of (rule_def, issue) tuples, deduplicate rules by id,
-    and write a compliant new-format SonarQube Generic Issue Import JSON file.
-    """
-    seen_rules: dict = {}
-    issues = []
-    for rule, issue in pairs:
-        seen_rules.setdefault(rule["id"], rule)
-        issues.append(issue)
-    payload = {"rules": list(seen_rules.values()), "issues": issues}
-    with open(output_path, "w", encoding="utf-8") as f:
+def write_report(issues, output_path):
+    payload = {"rules": [], "issues": issues}
+    with open(output_path, "w") as f:
         json.dump(payload, f, indent=2)
     print(f"  → written: {output_path} ({len(issues)} issues)")
 
