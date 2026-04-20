@@ -293,9 +293,16 @@ def convert_semgrep(report_path, base_dir):
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
-def write_report(issues, output_path):
-    payload = {"rules": [], "issues": issues}
-    with open(output_path, "w") as f:
+def write_report(pairs, output_path):
+    """Write the SonarQube Generic Issue payload to *output_path*."""
+    seen_rules: dict = {}
+    issues = []
+    for rule, issue in pairs:
+        if rule["id"] not in seen_rules:
+            seen_rules[rule["id"]] = rule
+        issues.append(issue)
+    payload = {"rules": list(seen_rules.values()), "issues": issues}
+    with open(output_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)
     print(f"  → written: {output_path} ({len(issues)} issues)")
 
