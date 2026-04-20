@@ -2,6 +2,11 @@ FROM python:3.13-slim
 
 LABEL org.opencontainers.image.source="https://github.com/fabell4/hermes"
 
+# Injected by the CI build pipeline from the git tag (e.g. v0.3.0 → 0.3.0).
+# Falls back to "dev" for local builds.
+ARG APP_VERSION=dev
+ENV APP_VERSION=${APP_VERSION}
+
 WORKDIR /app
 
 # Install sqlite3 CLI + dependencies; create persistent dirs in same layer
