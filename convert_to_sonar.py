@@ -29,13 +29,55 @@ import os
 from pathlib import Path
 
 
+def _map_to_new_format(severity: str, type_: str) -> tuple:
+    """
+    Map old-format severity + type to new SonarQube format fields.
+    Returns (software_quality, impact_severity, clean_code_attribute).
+    """
+    quality_map = {
+        "BUG": "RELIABILITY",
+        "VULNERABILITY": "SECURITY",
+        "CODE_SMELL": "MAINTAINABILITY",
+    }
+    clean_code_map = {
+        "BUG": "LOGICAL",
+        "VULNERABILITY": "TRUSTWORTHY",
+        "CODE_SMELL": "CONVENTIONAL",
+    }
+    impact_map = {
+        "INFO": "LOW",
+        "MINOR": "LOW",
+        "MAJOR": "MEDIUM",
+        "CRITICAL": "HIGH",
+        "BLOCKER": "HIGH",
+    }
+    return (
+        quality_map.get(type_, "MAINTAINABILITY"),
+        impact_map.get(severity, "MEDIUM"),
+        clean_code_map.get(type_, "CONVENTIONAL"),
+    )
+
+
 def make_issue(engine_id, rule_id, severity, type_, file_path, line, message):
-    """Build a single SonarQube generic issue dict."""
-    return {
+    """
+    Build a (rule_definition, issue) pair in the new SonarQube Generic Issue
+    Import format.  The rule carries engineId / cleanCodeAttribute / impacts;
+    the issue carries only ruleId and primaryLocation.
+    """
+    software_quality, impact_severity, clean_code_attr = _map_to_new_format(
+        severity, type_
+    )
+    rule = {
+        "id": rule_id,
+        "name": rule_id,
         "engineId": engine_id,
+        "cleanCodeAttribute": clean_code_attr,
+        "impacts": [
+            {"softwareQuality": software_quality, "severity": impact_severity}
+        ],
+    }
+    issue = {
         "ruleId": rule_id,
-        "severity": severity,  # INFO | MINOR | MAJOR | CRITICAL | BLOCKER
-        "type": type_,  # BUG | VULNERABILITY | CODE_SMELL
         "primaryLocation": {
             "message": message,
             "filePath": file_path,
@@ -47,6 +89,7 @@ def make_issue(engine_id, rule_id, severity, type_, file_path, line, message):
             },
         },
     }
+    return rule, issue
 
 
 def normalise_path(raw_path, base_dir):
@@ -101,10 +144,10 @@ def convert_vulture(report_path, base_dir):
     Parse vulture plain-text output.
     Format: path/to/file.py:LINE: unused <thing> '<name>' (<confidence>% confidence)
     """
-    issues = []
+    pairs = []
     if not os.path.exists(report_path):
         print(f"  [skip] vulture report not found: {report_path}")
-        return issues
+        return pairs
 
     with open(report_path) as f:
         for line in f:
@@ -116,7 +159,7 @@ def convert_vulture(report_path, base_dir):
             confidence = _extract_vulture_confidence(message)
 
             severity = "MAJOR" if confidence >= 90 else "MINOR"
-            issues.append(
+            pairs.append(
                 make_issue(
                     engine_id="vulture",
                     rule_id="vulture:unused-code",
@@ -128,8 +171,8 @@ def convert_vulture(report_path, base_dir):
                 )
             )
 
-    print(f"  vulture: {len(issues)} issues")
-    return issues
+    print(f"  vulture: {len(pairs)} issues")
+    return pairs
 
 
 # ---------------------------------------------------------------------------
@@ -140,17 +183,17 @@ def convert_radon(cc_report_path, base_dir):
     Parse radon cc JSON output.
     Only imports functions/methods rated C or worse (MAJOR) and E/F (CRITICAL).
     """
-    issues = []
+    pairs = []
     if not os.path.exists(cc_report_path):
         print(f"  [skip] radon cc report not found: {cc_report_path}")
-        return issues
+        return pairs
 
     with open(cc_report_path) as f:
         try:
             data = json.load(f)
         except json.JSONDecodeError:
             print("  [skip] radon report is not valid JSON")
-            return issues
+            return pairs
 
     rank_severity = {
         "A": None,  # skip
@@ -175,7 +218,7 @@ def convert_radon(cc_report_path, base_dir):
                 f"{block_type} '{name}' has cyclomatic complexity {complexity} "
                 f"(rank {rank})"
             )
-            issues.append(
+            pairs.append(
                 make_issue(
                     engine_id="radon",
                     rule_id=f"radon:complexity-{rank}",
@@ -187,8 +230,8 @@ def convert_radon(cc_report_path, base_dir):
                 )
             )
 
-    print(f"  radon: {len(issues)} issues")
-    return issues
+    print(f"  radon: {len(pairs)} issues")
+    return pairs
 
 
 # ---------------------------------------------------------------------------
@@ -198,17 +241,17 @@ def convert_semgrep(report_path, base_dir):
     """
     Parse semgrep JSON output.
     """
-    issues = []
+    pairs = []
     if not os.path.exists(report_path):
         print(f"  [skip] semgrep report not found: {report_path}")
-        return issues
+        return pairs
 
     with open(report_path) as f:
         try:
             data = json.load(f)
         except json.JSONDecodeError:
             print("  [skip] semgrep report is not valid JSON")
-            return issues
+            return pairs
 
     severity_map = {
         "ERROR": "CRITICAL",
@@ -231,7 +274,7 @@ def convert_semgrep(report_path, base_dir):
         rule_id = result.get("check_id", "semgrep:unknown")
         message = result.get("extra", {}).get("message", "Semgrep finding").strip()
 
-        issues.append(
+        pairs.append(
             make_issue(
                 engine_id="semgrep",
                 rule_id=rule_id,
@@ -243,15 +286,24 @@ def convert_semgrep(report_path, base_dir):
             )
         )
 
-    print(f"  semgrep: {len(issues)} issues")
-    return issues
+    print(f"  semgrep: {len(pairs)} issues")
+    return pairs
 
 
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
-def write_report(issues, output_path):
-    payload = {"rules": [], "issues": issues}
+def write_report(pairs, output_path):
+    """
+    Accept a list of (rule_def, issue) tuples, deduplicate rules by id,
+    and write a compliant new-format SonarQube Generic Issue Import JSON file.
+    """
+    seen_rules: dict = {}
+    issues = []
+    for rule, issue in pairs:
+        seen_rules.setdefault(rule["id"], rule)
+        issues.append(issue)
+    payload = {"rules": list(seen_rules.values()), "issues": issues}
     with open(output_path, "w") as f:
         json.dump(payload, f, indent=2)
     print(f"  → written: {output_path} ({len(issues)} issues)")
