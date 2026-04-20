@@ -83,7 +83,7 @@ jobs:
         run: |
           git config user.email "ci@greenflametech.net"
           git config user.name "Hermes CI"
-          git fetch --unshallow origin || true
+          git fetch --unshallow origin 2>/dev/null || true
 
           # Create a sanitized branch — strips internal infra before pushing to the public repo
           git checkout -b public-release
@@ -113,9 +113,9 @@ jobs:
             "https://api.github.com/repos/${GH_USERNAME}/Hermes/git/refs/tags/${TAG}" || true
           git push github "${TAG}"
 
-          # Return to main so subsequent steps work normally
-          git checkout main
-          git branch -D public-release
+          # Clean up — remove the github remote and temp branch (detached HEAD, no need to re-checkout main)
+          git remote remove github || true
+          git branch -D public-release || true
 
       - name: Create GitHub release
         run: python3 scripts/create_github_release.py
