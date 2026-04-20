@@ -1,9 +1,9 @@
 # Hermes
 
-A Python application that periodically runs internet speed tests and exports results to multiple destinations (CSV, Prometheus, Loki/OTel), with a browser-based UI to trigger runs and view results.
+A Python application that periodically runs internet speed tests and exports results to multiple destinations (CSV, SQLite, Prometheus, and Loki), with a browser-based UI to trigger runs and view results. Each result captures download, upload, ping, jitter, and ISP name.
 
 ## Architecture
-  *Hermes is currently an alpha release. The core functionality works and all three exporters (CSV, Prometheus, Loki) are fully operational.*
+  *Hermes is currently an alpha release. All four exporters (CSV, SQLite, Prometheus, Loki) are fully operational.*
 
 ### Data Flow
 
@@ -19,22 +19,27 @@ flowchart TD
         MODEL["**SpeedResult**\nsrc/models/speed_result.py"]
         DISP["**ResultDispatcher**\nsrc/result_dispatcher.py"]
         CSV["CSVExporter"]
+        SQLITE["SQLiteExporter"]
         PROM["PrometheusExporter"]
         LOKI["LokiExporter"]
     end
 
-    VOLUME[("**Shared Volume**\nruntime_config.json\n.run_trigger\nresults.csv")]
+    SHARED_VOL[("**Shared Volume**\nruntime_config.json\n.run_trigger\nresults.csv")]
+    DATA_VOL[("**Data Volume**\nhermes.db")]
 
-    UI -- "writes trigger / config" --> VOLUME
-    VOLUME -- "polls every 30s" --> MAIN
-    VOLUME -- "reads results.csv" --> UI
+    UI -- "writes trigger / config" --> SHARED_VOL
+    SHARED_VOL -- "polls every 30s" --> MAIN
+    UI -- "reads history\n(prefers SQLite)" --> DATA_VOL
+    UI -- "fallback: reads CSV" --> SHARED_VOL
     MAIN -- "scheduled / triggered" --> RUNNER
     RUNNER --> MODEL
     MODEL --> DISP
     DISP --> CSV
+    DISP --> SQLITE
     DISP --> PROM
     DISP --> LOKI
-    CSV -- "writes" --> VOLUME
+    CSV -- "writes" --> SHARED_VOL
+    SQLITE -- "writes" --> DATA_VOL
 
     style UI fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style MAIN fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
@@ -42,9 +47,11 @@ flowchart TD
     style MODEL fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style DISP fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style CSV fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style SQLITE fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style PROM fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style LOKI fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
-    style VOLUME fill:#1565c0,stroke:#90caf9,color:#ffffff
+    style SHARED_VOL fill:#1565c0,stroke:#90caf9,color:#ffffff
+    style DATA_VOL fill:#1565c0,stroke:#90caf9,color:#ffffff
 ```
 
 ### Deployment Topology
@@ -100,18 +107,22 @@ Hermes/
 │   │   └── speed_result.py            # SpeedResult dataclass — shared data contract
 │   ├── services/
 │   │   ├── speedtest_runner.py        # SpeedtestRunner — runs test, returns SpeedResult
+│   │   ├── health_server.py           # HealthServer — GET /health endpoint on HEALTH_PORT
 │   │   └── logging.py                 # Logging configuration
 │   ├── exporters/
 │   │   ├── base_exporter.py           # Abstract BaseExporter interface
 │   │   ├── csv_exporter.py            # CSVExporter — appends rows to CSV log
 │   │   ├── prometheus_exporter.py     # PrometheusExporter — updates Gauges, /metrics endpoint
-│   │   └── loki_exporter.py           # LokiExporter — ships JSON log events via HTTP push
+│   │   ├── loki_exporter.py           # LokiExporter — ships JSON log events via HTTP push
+│   │   └── sqlite_exporter.py         # SQLiteExporter — stores results in hermes.db (WAL mode)
 ├── tests/
 │   ├── test_main.py
 │   ├── test_csv_exporter.py
 │   ├── test_loki_exporter.py
+│   ├── test_prometheus_exporter.py
 │   ├── test_result_dispatcher.py
-│   └── test_runtime_config.py
+│   ├── test_runtime_config.py
+│   └── test_sqlite_exporter.py
 ├── .env.example                       # Example environment variables
 ├── docker-compose.yml                 # Dev compose file (builds from source)
 ├── Dockerfile
@@ -175,6 +186,7 @@ services:
     command: ["python", "-m", "src.main"]
     ports:
       - "8000:8000"   # Prometheus /metrics
+      - "8080:8080"   # Health endpoint GET /health
     volumes:
       - hermes-logs:/app/logs
       - hermes-data:/app/data
@@ -213,3 +225,19 @@ docker compose up -d
 ```
 
 The UI is available at `http://<server-ip>:8501`.
+
+**Key `.env` variables for self-hosting:**
+
+| Variable | Default | Description |
+|---|---|---|
+| `ENABLED_EXPORTERS` | `csv` | Comma-separated list: `csv`, `sqlite`, `prometheus`, `loki` |
+| `SPEEDTEST_INTERVAL_MINUTES` | `60` | How often to run a speed test |
+| `RUN_ON_STARTUP` | `true` | Run a test immediately on container start |
+| `SQLITE_DB_PATH` | `data/hermes.db` | Path to the SQLite database file |
+| `SQLITE_RETENTION_DAYS` | `0` (unlimited) | Prune rows older than N days |
+| `SQLITE_MAX_ROWS` | `0` (unlimited) | Keep only the N most recent rows |
+| `PROMETHEUS_PORT` | `8000` | Port for the `/metrics` scrape endpoint |
+| `HEALTH_PORT` | `8080` | Port for the `GET /health` endpoint |
+| `LOKI_URL` | *(unset)* | Full Loki push URL, e.g. `http://loki:3100` |
+
+Enable SQLite for the best UI experience — the Streamlit dashboard reads from `hermes.db` when available and falls back to `results.csv` otherwise.

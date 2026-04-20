@@ -251,7 +251,7 @@ def convert_semgrep(report_path, base_dir):
 # Main
 # ---------------------------------------------------------------------------
 def write_report(issues, output_path):
-    payload = {"issues": issues}
+    payload = {"rules": [], "issues": issues}
     with open(output_path, "w") as f:
         json.dump(payload, f, indent=2)
     print(f"  → written: {output_path} ({len(issues)} issues)")
