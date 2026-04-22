@@ -4,6 +4,7 @@ Run with:
     uvicorn src.api.main:app --port 8080 --reload
 """
 
+import logging
 import os
 import time
 from pathlib import Path
@@ -17,6 +18,8 @@ from starlette.responses import FileResponse
 
 from src.api.routes import config, results, trigger
 from src import runtime_config as rc
+
+logger = logging.getLogger(__name__)
 
 _START_TIME = time.time()
 
@@ -80,6 +83,7 @@ if _DIST.is_dir():
     )
 
     @app.get("/{full_path:path}", include_in_schema=False)
-    def spa_fallback(_full_path: str) -> FileResponse:
+    def spa_fallback(full_path: str) -> FileResponse:
         """Return index.html for all non-API paths to support client-side routing."""
+        logger.debug("SPA fallback: /%s", full_path)
         return FileResponse(str(_DIST / "index.html"))
