@@ -1,3 +1,17 @@
+# ---------------------------------------------------------------------------
+# Stage 1 — Build the React/Vite frontend
+# ---------------------------------------------------------------------------
+FROM node:20-slim AS frontend-builder
+
+WORKDIR /frontend
+COPY frontend/package*.json ./
+RUN npm ci
+COPY frontend/ ./
+RUN npm run build
+
+# ---------------------------------------------------------------------------
+# Stage 2 — Python application image
+# ---------------------------------------------------------------------------
 FROM registry.greenflametech.net/python:3.13-slim
 
 LABEL org.opencontainers.image.source="https://github.com/fabell4/hermes"
@@ -19,6 +33,9 @@ RUN pip install --no-cache-dir -r requirements.txt \
 
 # Copy source
 COPY src/ ./src/
+
+# Copy the pre-built React frontend (served by FastAPI at runtime)
+COPY --from=frontend-builder /frontend/dist ./frontend/dist
 
 # Run as non-root user for security
 RUN useradd --create-home --shell /bin/false hermes \

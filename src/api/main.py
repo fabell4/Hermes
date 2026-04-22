@@ -5,16 +5,22 @@ Run with:
 """
 
 import time
+from pathlib import Path
 from typing import Literal, Optional
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from starlette.responses import FileResponse
 
 from src.api.routes import config, results, trigger
 from src import runtime_config as rc
 
 _START_TIME = time.time()
+
+# Path to the pre-built Vite output — present in Docker, absent in dev.
+_DIST = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
 
 app = FastAPI(
     title="Hermes API",
@@ -56,3 +62,21 @@ def health() -> HealthResponse:
         next_run=data.get("next_run_at"),
         uptime_seconds=round(time.time() - _START_TIME, 1),
     )
+
+
+# ---------------------------------------------------------------------------
+# SPA static file serving — only active when the Vite dist folder exists
+# (i.e. in the Docker image). In development the Vite dev server handles this.
+# API routes registered above take precedence; this catch-all serves the SPA.
+# ---------------------------------------------------------------------------
+if _DIST.is_dir():
+    app.mount(
+        "/assets",
+        StaticFiles(directory=str(_DIST / "assets")),
+        name="assets",
+    )
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def spa_fallback(full_path: str) -> FileResponse:  # noqa: ARG001
+        """Return index.html for all non-API paths to support client-side routing."""
+        return FileResponse(str(_DIST / "index.html"))

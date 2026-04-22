@@ -4,7 +4,7 @@ import { ChevronDown, ChevronUp, Download } from 'lucide-react'
 import type { SpeedResult } from '@/types'
 
 interface ResultsTableProps {
-  data: SpeedResult[]
+  readonly data: SpeedResult[]
 }
 
 export function ResultsTable({ data }: ResultsTableProps) {
@@ -42,8 +42,9 @@ export function ResultsTable({ data }: ResultsTableProps) {
 
   return (
     <div className="border border-slate-800 rounded-xl bg-slate-900/30 overflow-hidden">
-      <div
-        className="p-4 flex items-center justify-between cursor-pointer hover:bg-slate-800/30 transition-colors"
+      <button
+        type="button"
+        className="w-full p-4 flex items-center justify-between cursor-pointer hover:bg-slate-800/30 transition-colors"
         onClick={() => setOpen((o) => !o)}
       >
         <div className="flex items-center gap-2">
@@ -66,7 +67,7 @@ export function ResultsTable({ data }: ResultsTableProps) {
             <ChevronDown size={18} className="text-slate-500" />
           )}
         </div>
-      </div>
+      </button>
 
       <AnimatePresence>
         {open && (
@@ -108,7 +109,7 @@ export function ResultsTable({ data }: ResultsTableProps) {
                         {row.ping_ms.toFixed(1)} ms
                       </td>
                       <td className="px-4 py-3 text-emerald-400 font-medium">
-                        {row.jitter_ms != null ? `${row.jitter_ms.toFixed(1)} ms` : '—'}
+                        {row.jitter_ms == null ? '—' : `${row.jitter_ms.toFixed(1)} ms`}
                       </td>
                       <td className="px-4 py-3 text-slate-400 truncate max-w-[120px]">
                         {row.isp_name ?? '—'}

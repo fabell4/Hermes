@@ -1,0 +1,97 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Python — lint, type-check, security scan, tests with coverage gate
+  # ---------------------------------------------------------------------------
+  python:
+    name: Python checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Ruff (lint + format check)
+        run: ruff check src tests
+
+      - name: mypy (type checking)
+        run: mypy src
+
+      - name: Bandit (security scan)
+        run: bandit -r src -ll
+
+      - name: Semgrep (SAST)
+        run: semgrep scan --config auto src --error
+
+      - name: pytest (unit tests + coverage gate ≥85%)
+        run: >
+          pytest
+          --cov=src
+          --cov-report=xml:coverage.xml
+          --cov-report=term-missing
+          --cov-fail-under=85
+          -q
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-coverage
+          path: coverage.xml
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Frontend — type-check, lint, production build
+  # ---------------------------------------------------------------------------
+  frontend:
+    name: Frontend checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type-check
+        run: npm run type-check
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Vite production build
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+          retention-days: 7

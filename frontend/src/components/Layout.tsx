@@ -8,7 +8,7 @@ const NAV_ITEMS = [
   { to: '/settings', label: 'Settings', icon: Settings },
 ]
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export function Layout({ children }: { readonly children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>

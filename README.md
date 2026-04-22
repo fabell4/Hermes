@@ -1,6 +1,6 @@
 # Hermes
 
-A Python application that periodically runs internet speed tests and exports results to multiple destinations (CSV, SQLite, Prometheus, and Loki), with a browser-based UI to trigger runs and view results. Each result captures download, upload, ping, jitter, and ISP name.
+A Python application that periodically runs internet speed tests and exports results to multiple destinations (CSV, SQLite, Prometheus, and Loki). Results are surfaced through a React + Vite frontend backed by a FastAPI REST layer, and a legacy Streamlit UI is retained for compatibility. Each result captures download, upload, ping, jitter, and ISP name.
 
 ## Architecture
   *Hermes is currently an alpha release. All four exporters (CSV, SQLite, Prometheus, Loki) are fully operational.*
@@ -11,6 +11,8 @@ A Python application that periodically runs internet speed tests and exports res
 flowchart TD
     subgraph UI_CONTAINER["hermes-ui container"]
         UI["**Streamlit UI**\nsrc/streamlit_app.py"]
+        API["**FastAPI**\nsrc/api/main.py\n:8080"]
+        REACT["**React Frontend**\nfrontend/dist (served by FastAPI)"]
     end
 
     subgraph SCHED_CONTAINER["hermes-scheduler container"]
@@ -155,18 +157,42 @@ Hermes/
    copy .env.example .env
    ```
 
+4. **Install frontend dependencies**
+
+   ```bash
+   cd frontend && npm install
+   ```
+
 ## Running the App
+
+**Backend (scheduler):**
 
 ```bash
 python -m src.main
 ```
 
-Or use the **Run Hermes** task in VS Code (Terminal → Run Task).
+**REST API:**
+
+```bash
+uvicorn src.api.main:app --port 8080 --reload
+```
+
+**Frontend dev server** (proxies API calls to `:8080` automatically):
+
+```bash
+cd frontend && npm run dev
+```
+
+Or use the **Run Hermes** / **Run Hermes UI** tasks in VS Code (Terminal → Run Task).
 
 ## Running Tests
 
 ```bash
+# Python tests (with coverage report)
 pytest
+
+# Frontend type-check + lint
+cd frontend && npm run type-check && npm run lint
 ```
 
 ## Self-Hosting
@@ -186,7 +212,7 @@ services:
     command: ["python", "-m", "src.main"]
     ports:
       - "8000:8000"   # Prometheus /metrics
-      - "8080:8080"   # Health endpoint GET /health
+      - "8080:8080"   # FastAPI REST + React UI
     volumes:
       - hermes-logs:/app/logs
       - hermes-data:/app/data
@@ -198,7 +224,7 @@ services:
     container_name: hermes-ui
     restart: always
     ports:
-      - "8501:8501"   # Streamlit UI
+      - "8501:8501"   # Streamlit UI (legacy)
     volumes:
       - hermes-logs:/app/logs
       - hermes-data:/app/data
@@ -224,7 +250,8 @@ Then start it:
 docker compose up -d
 ```
 
-The UI is available at `http://<server-ip>:8501`.
+The React UI is available at `http://<server-ip>:8080`.
+The legacy Streamlit UI remains available at `http://<server-ip>:8501`.
 
 **Key `.env` variables for self-hosting:**
 
