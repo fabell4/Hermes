@@ -74,7 +74,7 @@ class ResultDispatcher:
                 logger.debug("Dispatching to exporter: %s", name)
                 exporter.export(result)
                 logger.info("Exporter '%s' completed successfully.", name)
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 logger.error("Exporter '%s' failed: %s", name, e, exc_info=True)
                 failures[name] = e
 

@@ -23,6 +23,40 @@
 			"group": "build"
 		},
 		{
+			"label": "Run Hermes API",
+			"type": "shell",
+			"command": "c:/Users/psywa/source/repos/projects/Hermes/.venv/Scripts/python.exe",
+			"args": [
+				"-m",
+				"uvicorn",
+				"src.api.main:app",
+				"--port",
+				"8080",
+				"--reload"
+			],
+			"isBackground": true,
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			}
+		},
+		{
+			"label": "Run Hermes Frontend (dev)",
+			"type": "shell",
+			"command": "npm",
+			"args": ["run", "dev"],
+			"options": {
+				"cwd": "${workspaceFolder}/frontend"
+			},
+			"isBackground": true,
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated"
+			}
+		},
+		{
 			"label": "Stop Hermes UI",
 			"type": "shell",
 			"command": "pwsh",

@@ -11,6 +11,10 @@ tzlocal==5.3.1
 # --- Exporters ---
 prometheus_client==0.24.1
 
+# --- REST API ---
+fastapi==0.115.14
+uvicorn[standard]==0.34.3
+
 # --- Web UI ---
 streamlit==1.55.0
 pandas==2.3.3
