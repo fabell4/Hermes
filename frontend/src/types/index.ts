@@ -27,6 +27,7 @@ export interface HealthStatus {
   last_run: string | null
   next_run: string | null
   uptime_seconds: number
+  version: string
 }
 
 export interface TriggerResponse {

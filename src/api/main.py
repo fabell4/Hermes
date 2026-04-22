@@ -4,6 +4,7 @@ Run with:
     uvicorn src.api.main:app --port 8080 --reload
 """
 
+import os
 import time
 from pathlib import Path
 from typing import Literal, Optional
@@ -49,6 +50,7 @@ class HealthResponse(BaseModel):
     last_run: Optional[str] = None
     next_run: Optional[str] = None
     uptime_seconds: float
+    version: str
 
 
 @app.get("/api/health", tags=["health"])
@@ -61,6 +63,7 @@ def health() -> HealthResponse:
         last_run=data.get("last_run_at"),
         next_run=data.get("next_run_at"),
         uptime_seconds=round(time.time() - _START_TIME, 1),
+        version=os.environ.get("APP_VERSION", "dev"),
     )
 
 

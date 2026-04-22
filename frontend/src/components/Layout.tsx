@@ -1,7 +1,34 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Activity, LayoutDashboard, Settings, Menu, X, Zap } from 'lucide-react'
+import { Activity, LayoutDashboard, Settings, Menu, X, Zap, ArrowUpCircle } from 'lucide-react'
+import { useHermes } from '@/hooks/useHermes'
+
+const GITHUB_REPO = 'fabell4/hermes'
+
+function useUpdateCheck(currentVersion: string | undefined) {
+  const [latestVersion, setLatestVersion] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!currentVersion || currentVersion === 'dev') return
+    fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`, {
+      headers: { Accept: 'application/vnd.github+json' },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.tag_name) setLatestVersion(data.tag_name.replace(/^v/, ''))
+      })
+      .catch(() => null)
+  }, [currentVersion])
+
+  const updateAvailable =
+    latestVersion != null &&
+    currentVersion != null &&
+    currentVersion !== 'dev' &&
+    latestVersion !== currentVersion
+
+  return { latestVersion, updateAvailable }
+}
 
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -10,6 +37,9 @@ const NAV_ITEMS = [
 
 export function Layout({ children }: { readonly children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { health } = useHermes()
+  const currentVersion = health?.version
+  const { latestVersion, updateAvailable } = useUpdateCheck(currentVersion)
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
@@ -58,6 +88,23 @@ export function Layout({ children }: { readonly children: React.ReactNode }) {
             <Zap size={10} className="inline mr-1 text-cyan-400" />
             Speed Monitor
           </span>
+          {currentVersion && (
+            <span className="hidden sm:inline text-xs px-2 py-0.5 rounded-full bg-slate-800/60 text-slate-500 border border-slate-700/50 font-mono">
+              v{currentVersion}
+            </span>
+          )}
+          {updateAvailable && (
+            <a
+              href={`https://github.com/${GITHUB_REPO}/releases/latest`}
+              target="_blank"
+              rel="noreferrer"
+              className="hidden sm:flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 hover:bg-cyan-500/20 transition-colors"
+              title={`v${latestVersion} available`}
+            >
+              <ArrowUpCircle size={11} />
+              Update available
+            </a>
+          )}
         </div>
       </header>
 

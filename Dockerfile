@@ -42,17 +42,13 @@ RUN useradd --create-home --shell /bin/false hermes \
     && chown -R hermes:hermes /app
 USER hermes
 
-# Streamlit UI port + Prometheus /metrics port + Health endpoint
-EXPOSE 8501
+# Prometheus /metrics port + Health/API endpoint
 EXPOSE 8000
 EXPOSE 8080
 
 # Health check — polls /health every 30s; 3 failures = unhealthy
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-    CMD python -c "import urllib.request, sys; urllib.request.urlopen('http://localhost:8080/health', timeout=4); sys.exit(0)" || exit 1
+    CMD python -c "import urllib.request, sys; urllib.request.urlopen('http://localhost:8080/api/health', timeout=4); sys.exit(0)" || exit 1
 
-# Run the Streamlit UI
-# --server.headless=true suppresses browser-open attempts inside the container
-CMD ["python", "-m", "streamlit", "run", "src/streamlit_app.py", \
-     "--server.address=0.0.0.0", \
-     "--server.headless=true"]
+# Run the FastAPI server (serves the React SPA + REST API)
+CMD ["python", "-m", "uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8080"]

@@ -26,17 +26,18 @@ services:
       - path: .env
         required: false
 
-  hermes-ui:
+  hermes-api:
     image: ${HERMES_IMAGE:-registry.greenflametech.net/hermes:latest}
-    container_name: hermes-ui
+    container_name: hermes-api
     restart: always
     ports:
-      - "${UI_PORT:-8501}:8501"         # Streamlit UI
+      - "${API_PORT:-8080}:8080"        # FastAPI REST + React SPA
     volumes:
-      - hermes-logs:/app/logs           # Read CSV results written by scheduler
-      - hermes-data:/app/data           # Shared runtime_config.json + .run_trigger
+      - hermes-logs:/app/logs
+      - hermes-data:/app/data
     environment:
       APP_ENV: "${APP_ENV:-production}"
+      APP_VERSION: "${APP_VERSION:-dev}"
       LOG_LEVEL: "${LOG_LEVEL:-INFO}"
       TZ: "${TZ:-UTC}"
       SPEEDTEST_INTERVAL_MINUTES: "${SPEEDTEST_INTERVAL_MINUTES:-60}"

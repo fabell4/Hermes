@@ -58,7 +58,11 @@ def populated_db(tmp_path):
     conn = sqlite3.connect(db)
     conn.execute(_CREATE)
     for i in range(3):
-        row = {**_SAMPLE_ROW, "timestamp": f"2026-04-22T12:0{i}:00", "download_mbps": 100.0 + i}
+        row = {
+            **_SAMPLE_ROW,
+            "timestamp": f"2026-04-22T12:0{i}:00",
+            "download_mbps": 100.0 + i,
+        }
         conn.execute(
             """INSERT INTO results
                (timestamp, download_mbps, upload_mbps, ping_ms, jitter_ms, isp_name,
@@ -77,6 +81,7 @@ def populated_db(tmp_path):
 # GET /api/results — 503 when no DB
 # ---------------------------------------------------------------------------
 
+
 def test_results_503_when_no_db():
     missing = Path("/nonexistent/hermes.db")
     with patch("src.api.routes.results.DB_PATH", missing):
@@ -94,6 +99,7 @@ def test_results_latest_503_when_no_db():
 # ---------------------------------------------------------------------------
 # GET /api/results — empty database
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.usefixtures("empty_db")
 def test_results_empty_db_returns_200():
@@ -118,6 +124,7 @@ def test_results_page_defaults():
 # ---------------------------------------------------------------------------
 # GET /api/results — with data
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.usefixtures("populated_db")
 def test_results_returns_correct_count():
@@ -150,7 +157,14 @@ def test_results_page_2():
 @pytest.mark.usefixtures("populated_db")
 def test_results_contains_expected_fields():
     result = client.get("/api/results").json()["results"][0]
-    for field in ("id", "timestamp", "download_mbps", "upload_mbps", "ping_ms", "server_name"):
+    for field in (
+        "id",
+        "timestamp",
+        "download_mbps",
+        "upload_mbps",
+        "ping_ms",
+        "server_name",
+    ):
         assert field in result
 
 
@@ -163,6 +177,7 @@ def test_results_isp_name_present():
 # ---------------------------------------------------------------------------
 # GET /api/results/latest
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.usefixtures("empty_db")
 def test_latest_returns_null_on_empty_db():
@@ -180,8 +195,14 @@ def test_latest_returns_most_recent_row():
 @pytest.mark.usefixtures("populated_db")
 def test_latest_contains_all_fields():
     body = client.get("/api/results/latest").json()
-    for field in ("id", "download_mbps", "upload_mbps", "ping_ms",
-                  "server_name", "server_location"):
+    for field in (
+        "id",
+        "download_mbps",
+        "upload_mbps",
+        "ping_ms",
+        "server_name",
+        "server_location",
+    ):
         assert field in body
 
 

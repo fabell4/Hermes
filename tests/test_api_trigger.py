@@ -35,6 +35,7 @@ def _make_mock_result():
 # threading.Thread.start globally would block starlette's own internal threads.
 # ---------------------------------------------------------------------------
 
+
 def test_trigger_returns_200():
     with patch("src.api.routes.trigger._run_test"):
         resp = client.post("/api/trigger")
@@ -57,6 +58,7 @@ def test_trigger_returns_already_running_when_lock_held():
 # _run_test — unit tests (lock pre-acquired to mirror the real call path)
 # ---------------------------------------------------------------------------
 
+
 def test_run_test_dispatches_result():
     result = _make_mock_result()
     mock_runner = MagicMock()
@@ -64,9 +66,14 @@ def test_run_test_dispatches_result():
     mock_dispatcher = MagicMock()
 
     trigger_module._test_lock.acquire()  # pylint: disable=protected-access
-    with patch("src.api.routes.trigger.SpeedtestRunner", mock_runner), \
-         patch("src.api.routes.trigger.ResultDispatcher", mock_dispatcher), \
-         patch("src.api.routes.trigger.runtime_config.get_enabled_exporters", return_value=[]):
+    with (
+        patch("src.api.routes.trigger.SpeedtestRunner", mock_runner),
+        patch("src.api.routes.trigger.ResultDispatcher", mock_dispatcher),
+        patch(
+            "src.api.routes.trigger.runtime_config.get_enabled_exporters",
+            return_value=[],
+        ),
+    ):
         trigger_module._run_test()
 
     mock_dispatcher.return_value.dispatch.assert_called_once_with(result)
@@ -78,9 +85,14 @@ def test_run_test_releases_lock_on_success():
     mock_runner.return_value.run.return_value = result
 
     trigger_module._test_lock.acquire()  # pylint: disable=protected-access
-    with patch("src.api.routes.trigger.SpeedtestRunner", mock_runner), \
-         patch("src.api.routes.trigger.ResultDispatcher"), \
-         patch("src.api.routes.trigger.runtime_config.get_enabled_exporters", return_value=[]):
+    with (
+        patch("src.api.routes.trigger.SpeedtestRunner", mock_runner),
+        patch("src.api.routes.trigger.ResultDispatcher"),
+        patch(
+            "src.api.routes.trigger.runtime_config.get_enabled_exporters",
+            return_value=[],
+        ),
+    ):
         trigger_module._run_test()
 
     acquired = trigger_module._test_lock.acquire(blocking=False)  # pylint: disable=protected-access
@@ -92,9 +104,14 @@ def test_run_test_releases_lock_on_exception():
     mock_runner.return_value.run.side_effect = RuntimeError("network failure")
 
     trigger_module._test_lock.acquire()  # pylint: disable=protected-access
-    with patch("src.api.routes.trigger.SpeedtestRunner", mock_runner), \
-         patch("src.api.routes.trigger.runtime_config.get_enabled_exporters", return_value=[]), \
-         patch("src.api.routes.trigger.ResultDispatcher"):
+    with (
+        patch("src.api.routes.trigger.SpeedtestRunner", mock_runner),
+        patch(
+            "src.api.routes.trigger.runtime_config.get_enabled_exporters",
+            return_value=[],
+        ),
+        patch("src.api.routes.trigger.ResultDispatcher"),
+    ):
         trigger_module._run_test()
 
     acquired = trigger_module._test_lock.acquire(blocking=False)  # pylint: disable=protected-access
@@ -108,10 +125,14 @@ def test_run_test_skips_unknown_exporter_name():
     mock_dispatcher = MagicMock()
 
     trigger_module._test_lock.acquire()  # pylint: disable=protected-access
-    with patch("src.api.routes.trigger.SpeedtestRunner", mock_runner), \
-         patch("src.api.routes.trigger.runtime_config.get_enabled_exporters",
-               return_value=["influxdb"]), \
-         patch("src.api.routes.trigger.ResultDispatcher", mock_dispatcher):
+    with (
+        patch("src.api.routes.trigger.SpeedtestRunner", mock_runner),
+        patch(
+            "src.api.routes.trigger.runtime_config.get_enabled_exporters",
+            return_value=["influxdb"],
+        ),
+        patch("src.api.routes.trigger.ResultDispatcher", mock_dispatcher),
+    ):
         trigger_module._run_test()
 
     mock_dispatcher.return_value.add_exporter.assert_not_called()
@@ -125,11 +146,15 @@ def test_run_test_registers_csv_exporter():
     mock_csv = MagicMock()
 
     trigger_module._test_lock.acquire()  # pylint: disable=protected-access
-    with patch("src.api.routes.trigger.SpeedtestRunner", mock_runner), \
-         patch("src.api.routes.trigger.runtime_config.get_enabled_exporters",
-               return_value=["csv"]), \
-         patch("src.api.routes.trigger.ResultDispatcher", mock_dispatcher), \
-         patch("src.api.routes.trigger.CSVExporter", mock_csv):
+    with (
+        patch("src.api.routes.trigger.SpeedtestRunner", mock_runner),
+        patch(
+            "src.api.routes.trigger.runtime_config.get_enabled_exporters",
+            return_value=["csv"],
+        ),
+        patch("src.api.routes.trigger.ResultDispatcher", mock_dispatcher),
+        patch("src.api.routes.trigger.CSVExporter", mock_csv),
+    ):
         trigger_module._run_test()
 
     call_args = mock_dispatcher.return_value.add_exporter.call_args
@@ -144,11 +169,15 @@ def test_run_test_no_loki_when_url_not_set():
     mock_dispatcher = MagicMock()
 
     trigger_module._test_lock.acquire()  # pylint: disable=protected-access
-    with patch("src.api.routes.trigger.SpeedtestRunner", mock_runner), \
-         patch("src.api.routes.trigger.runtime_config.get_enabled_exporters",
-               return_value=["loki"]), \
-         patch("src.api.routes.trigger.ResultDispatcher", mock_dispatcher), \
-         patch("src.api.routes.trigger.config.LOKI_URL", ""):
+    with (
+        patch("src.api.routes.trigger.SpeedtestRunner", mock_runner),
+        patch(
+            "src.api.routes.trigger.runtime_config.get_enabled_exporters",
+            return_value=["loki"],
+        ),
+        patch("src.api.routes.trigger.ResultDispatcher", mock_dispatcher),
+        patch("src.api.routes.trigger.config.LOKI_URL", ""),
+    ):
         trigger_module._run_test()
 
     mock_dispatcher.return_value.add_exporter.assert_not_called()

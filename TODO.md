@@ -57,26 +57,28 @@ _Goal: complete the Streamlit UI improvements, then replace Streamlit with a Rea
 
 ### Phase 3a — Streamlit Polish (pre-beta)
 
+_Superseded by Phase 3b. Streamlit decommissioned — remaining items below were not implemented and are no longer applicable._
+
 - [x] Scheduler next-run countdown — live timer showing time until the next scheduled run
 - [x] Version tag in UI — display the running app version in the page header
-- [ ] **[NEXT]** Version update check — compare running version against the latest published release via the GitHub API and show an in-UI banner when an update is available
-- [ ] Daily/weekly summary stats table (min/max/avg per day)
-- [ ] Connection quality score — weighted composite of download/upload/ping
-- [ ] Historical charts — per-metric breakdowns, not just the combined line chart
-- [ ] Result anomaly flagging — highlight runs >2 std dev from the rolling mean
-- [ ] Mobile-friendly layout (Streamlit)
+- [~] Version update check — implemented in React frontend (Layout.tsx) instead of Streamlit
+- [~] Daily/weekly summary stats table — superseded; to be added to React frontend if needed
+- [~] Connection quality score — superseded; to be added to React frontend if needed
+- [~] Historical charts — superseded; React dashboard already has multi-series Recharts chart
+- [~] Result anomaly flagging — superseded; to be added to React frontend if needed
+- [~] Mobile-friendly layout (Streamlit) — superseded; React frontend is mobile-responsive
 
 ### Phase 3b — Production Frontend (beta target)
 
-- [ ] REST API layer (FastAPI) — expose run, history, schedule, and exporter endpoints
-- [ ] React + Vite scaffold — project structure, Tailwind CSS, dark theme baseline
-- [ ] Dashboard page — stat cards (download, upload, ping) showing latest result
-- [ ] Performance history chart — interactive multi-series line chart with crosshair tooltip (Recharts or ApexCharts)
-- [ ] Countdown timer + Run Test button — mirrors current Streamlit functionality
-- [ ] Settings page — schedule interval and exporter toggles
-- [ ] Version banner — display running version and update notification
-- [ ] Mobile-responsive layout
-- [ ] Remove Streamlit dependency once frontend is live
+- [x] REST API layer (FastAPI) — expose run, history, schedule, and exporter endpoints
+- [x] React + Vite scaffold — project structure, Tailwind CSS, dark theme baseline
+- [x] Dashboard page — stat cards (download, upload, ping) showing latest result
+- [x] Performance history chart — interactive multi-series line chart with crosshair tooltip (Recharts)
+- [x] Countdown timer + Run Test button — mirrors current Streamlit functionality
+- [x] Settings page — schedule interval and exporter toggles
+- [x] Version banner — display running version and update notification (GitHub API)
+- [x] Mobile-responsive layout
+- [x] Remove Streamlit dependency once frontend is live
 
 > 🏁 **Alpha → Beta release gate** — all Phase 1–3 items must be complete before tagging a beta release.
 

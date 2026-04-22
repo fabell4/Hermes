@@ -46,11 +46,11 @@ def _run_test() -> None:
             retention_days=config.SQLITE_RETENTION_DAYS,
         ),
         "prometheus": lambda: PrometheusExporter(port=config.PROMETHEUS_PORT),
-        "loki": lambda: LokiExporter(
-            url=config.LOKI_URL, job_label=config.LOKI_JOB_LABEL
-        )
-        if config.LOKI_URL
-        else None,
+        "loki": lambda: (
+            LokiExporter(url=config.LOKI_URL, job_label=config.LOKI_JOB_LABEL)
+            if config.LOKI_URL
+            else None
+        ),
     }
 
     enabled = runtime_config.get_enabled_exporters(config.ENABLED_EXPORTERS)
