@@ -1,9 +1,9 @@
 # Hermes
 
-A Python application that periodically runs internet speed tests and exports results to multiple destinations (CSV, SQLite, Prometheus, and Loki). Results are surfaced through a React + Vite frontend backed by a FastAPI REST layer, and a legacy Streamlit UI is retained for compatibility. Each result captures download, upload, ping, jitter, and ISP name.
+A Python application that periodically runs internet speed tests and exports results to multiple destinations (CSV, SQLite, Prometheus, and Loki). Results are surfaced through a React + Vite frontend backed by a FastAPI REST layer. Each result captures download, upload, ping, jitter, and ISP name.
 
 ## Architecture
-  *Hermes is currently an alpha release. All four exporters (CSV, SQLite, Prometheus, Loki) are fully operational.*
+  *Hermes is currently in beta. All four exporters (CSV, SQLite, Prometheus, Loki) are fully operational.*
 
 ### Data Flow
 
@@ -104,21 +104,34 @@ Hermes/
 │   ├── config.py                      # Static config loaded from environment variables
 │   ├── runtime_config.py              # Persistent runtime state (interval, enabled exporters)
 │   ├── result_dispatcher.py           # ResultDispatcher — fans out SpeedResult to exporters
-│   ├── streamlit_app.py               # Streamlit UI — run tests, view history, configure
+│   ├── api/
+│   │   ├── main.py                    # FastAPI app — REST API + React frontend serving
+│   │   ├── auth.py                    # API key authentication and rate limiting
+│   │   └── routes/                    # API endpoint modules
 │   ├── models/
 │   │   └── speed_result.py            # SpeedResult dataclass — shared data contract
 │   ├── services/
 │   │   ├── speedtest_runner.py        # SpeedtestRunner — runs test, returns SpeedResult
-│   │   ├── health_server.py           # HealthServer — GET /health endpoint on HEALTH_PORT
-│   │   └── logging.py                 # Logging configuration
+│   │   ├── health_server.py           # Health check endpoint
+│   │   └── log_service.py             # Logging configuration
 │   ├── exporters/
 │   │   ├── base_exporter.py           # Abstract BaseExporter interface
 │   │   ├── csv_exporter.py            # CSVExporter — appends rows to CSV log
 │   │   ├── prometheus_exporter.py     # PrometheusExporter — updates Gauges, /metrics endpoint
 │   │   ├── loki_exporter.py           # LokiExporter — ships JSON log events via HTTP push
 │   │   └── sqlite_exporter.py         # SQLiteExporter — stores results in hermes.db (WAL mode)
+├── frontend/
+│   ├── src/
+│   │   ├── main.tsx                   # React app entry point
+│   │   ├── pages/                     # Dashboard and Settings pages
+│   │   ├── components/                # Reusable UI components
+│   │   ├── context/                   # React context for global state
+│   │   └── lib/                       # API client and utilities
+│   ├── package.json                   # Frontend dependencies
+│   └── vite.config.ts                 # Vite build configuration
 ├── tests/
 │   ├── test_main.py
+│   ├── test_api_*.py                  # FastAPI endpoint tests
 │   ├── test_csv_exporter.py
 │   ├── test_loki_exporter.py
 │   ├── test_prometheus_exporter.py
@@ -126,9 +139,9 @@ Hermes/
 │   ├── test_runtime_config.py
 │   └── test_sqlite_exporter.py
 ├── .env.example                       # Example environment variables
-├── docker-compose.yml                 # Dev compose file (builds from source)
-├── Dockerfile
-├── requirements.txt                   # Project dependencies
+├── docker-compose.yml                 # Production deployment (two-container architecture)
+├── Dockerfile                         # Multi-stage build (Python + Node.js)
+├── requirements.txt                   # Python dependencies
 ├── pytest.ini                         # pytest configuration
 └── README.md
 ```
