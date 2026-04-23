@@ -24,28 +24,44 @@ export function HermesProvider({ children }: HermesProviderProps) {
     api.getConfig().then(setConfig).catch(() => null)
   }, [])
 
-  const runTest = useCallback(async () => {
-    if (isTesting) return
-    setIsTesting(true)
-    try {
-      await api.triggerTest()
-      // Poll until a new result appears (up to 30 s)
-      let attempts = 0
-      const latestTs = latest?.timestamp ?? null
-      const poll = setInterval(async () => {
-        attempts++
-        const newLatest = await api.getLatestResult()
-        const hasNewResult = newLatest != null && newLatest.timestamp !== latestTs
-        if (hasNewResult || attempts >= 30) {
-          clearInterval(poll)
-          setIsTesting(false)
+  // Poll test status every 2 seconds to detect scheduler-triggered tests
+  // Also refresh results when test completes
+  useEffect(() => {
+    let wasRunning = false
+    const interval = setInterval(async () => {
+      try {
+        const { is_running } = await api.getTestStatus()
+        setIsTesting(is_running)
+        
+        // If test just completed, refresh data
+        if (wasRunning && !is_running) {
           refresh()
         }
-      }, 1000)
-    } catch {
-      setIsTesting(false)
+        wasRunning = is_running
+      } catch {
+        // Ignore errors
+      }
+    }, 2000)
+    return () => clearInterval(interval)
+  }, [refresh])
+
+  const runTest = useCallback(async () => {
+    if (isTesting) return
+    try {
+      const response = await api.triggerTest()
+      if (response.status === 'started') {
+        setIsTesting(true)
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to trigger test'
+      console.error('Failed to trigger test:', message)
+      
+      // Show authentication errors to the user
+      if (message.includes('401') || message.includes('403')) {
+        alert('Authentication required. Please set your API key in Settings.')
+      }
     }
-  }, [isTesting, latest, refresh])
+  }, [isTesting])
 
   const updateConfig = useCallback(
     async (patch: Partial<RuntimeConfig>) => {

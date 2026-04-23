@@ -79,6 +79,12 @@ def _run_test() -> None:
         _test_lock.release()
 
 
+@router.get("/trigger/status")
+def get_test_status() -> dict[str, bool]:
+    """Check if a speed test is currently running."""
+    return {"is_running": _test_lock.locked()}
+
+
 @router.post("/trigger", dependencies=[Depends(require_api_key)])
 def trigger_test() -> TriggerResponse:
     """Kick off a speed test if one is not already running."""

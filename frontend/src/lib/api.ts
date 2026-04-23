@@ -54,6 +54,11 @@ export const api = {
     return request('/trigger', { method: 'POST' })
   },
 
+  /** Check if a test is currently running. */
+  getTestStatus(): Promise<{ is_running: boolean }> {
+    return request('/trigger/status')
+  },
+
   /** Read current runtime config. */
   getConfig(): Promise<RuntimeConfig> {
     return request('/config')
