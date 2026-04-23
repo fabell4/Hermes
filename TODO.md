@@ -96,6 +96,7 @@ _Goal: notify users when something goes wrong without requiring Grafana._
 
 ## Post-Release Enhancements
 
+- [ ] InfluxDB exporter — optional time-series exporter; pairs with Grafana for long-term trend analysis and retention policy management
 
 ---
 
@@ -116,4 +117,3 @@ _Items that were completed but are no longer part of the active codebase._
 - Mobile-friendly layout — completed in Streamlit, reimplemented in React with Tailwind responsive design
 _Features planned for after v1.0. Not required for stable release._
 
-- [ ] InfluxDB exporter — optional time-series exporter; pairs with Grafana for long-term trend analysis and retention policy management
