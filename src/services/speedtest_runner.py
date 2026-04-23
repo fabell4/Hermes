@@ -13,6 +13,37 @@ from src.models.speed_result import SpeedResult
 _log = logging.getLogger(__name__)
 
 
+def _parse_server_id(raw: object) -> int | None:
+    """Return the server id as an int, or None if absent or non-numeric."""
+    if raw is None:
+        return None
+    try:
+        return int(str(raw))
+    except (ValueError, TypeError):
+        _log.warning(
+            "Unexpected non-numeric server id from speedtest.net: %r — skipping.", raw
+        )
+        return None
+
+
+def _parse_isp(client: object) -> str | None:
+    """Return the ISP name from the client dict, or None if unavailable."""
+    if not isinstance(client, dict):
+        return None
+    return str(client.get("isp", "")) or None
+
+
+def _parse_jitter(raw: object) -> float | None:
+    """Return jitter in ms as a float, or None if absent or non-numeric."""
+    if raw is None:
+        return None
+    try:
+        return round(float(raw), 2)  # type: ignore[arg-type]
+    except (ValueError, TypeError):
+        _log.warning("Unexpected jitter value from speedtest.net: %r — skipping.", raw)
+        return None
+
+
 class SpeedtestRunner:
     """
     Runs a speed test and returns the results as a SpeedResult dataclass.
@@ -49,36 +80,9 @@ class SpeedtestRunner:
             except ZoneInfoNotFoundError:
                 _tz = ZoneInfo("UTC")
 
-            # --- Defensive parsing of fields from the external speedtest.net response ---
-            # Any of these may be absent, null, or an unexpected type on schema changes.
-            _raw_id = best.get("id")
-            server_id: int | None = None
-            if _raw_id is not None:
-                try:
-                    server_id = int(str(_raw_id))
-                except (ValueError, TypeError):
-                    _log.warning(
-                        "Unexpected non-numeric server id from speedtest.net: %r — skipping.",
-                        _raw_id,
-                    )
-
-            _client = st.results.client
-            isp_name: str | None = (
-                str(_client.get("isp", "")) or None
-                if isinstance(_client, dict)
-                else None
-            )
-
-            _raw_jitter = getattr(st.results, "jitter", None)
-            jitter_ms: float | None = None
-            if _raw_jitter is not None:
-                try:
-                    jitter_ms = round(float(_raw_jitter), 2)
-                except (ValueError, TypeError):
-                    _log.warning(
-                        "Unexpected jitter value from speedtest.net: %r — skipping.",
-                        _raw_jitter,
-                    )
+            server_id = _parse_server_id(best.get("id"))
+            isp_name = _parse_isp(st.results.client)
+            jitter_ms = _parse_jitter(getattr(st.results, "jitter", None))
 
             return SpeedResult(
                 timestamp=datetime.now(_tz),

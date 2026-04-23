@@ -108,8 +108,10 @@ def consume_run_trigger() -> bool:
     if RUN_TRIGGER_PATH.exists():
         try:
             RUN_TRIGGER_PATH.unlink()
-        except OSError:
-            pass
+        except OSError as exc:
+            logger.warning(
+                "Could not remove run-trigger file %s: %s", RUN_TRIGGER_PATH, exc
+            )
         return True
     return False
 

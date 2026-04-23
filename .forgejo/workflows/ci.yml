@@ -163,7 +163,8 @@ jobs:
     container:
       image: registry.greenflametech.net/gft-python-runner:latest
     timeout-minutes: 10
-    continue-on-error: true
+    # continue-on-error removed — bandit feeds sonar.python.bandit.reportPaths;
+    # if the tool crashes the security gate loses coverage silently.
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -171,7 +172,7 @@ jobs:
       - name: Run Bandit
         run: |
           pip install bandit
-          bandit -r src -f json -o bandit-report.json --exit-zero || true
+          bandit -r src -f json -o bandit-report.json --exit-zero
 
       - name: Upload Bandit report
         if: always()
@@ -186,7 +187,9 @@ jobs:
     container:
       image: registry.greenflametech.net/gft-python-runner:latest
     timeout-minutes: 15
-    continue-on-error: true
+    # continue-on-error removed — semgrep feeds sonar-semgrep.json; a tool crash
+    # would silently drop security coverage. The run step uses || true so
+    # findings never fail the job, only unrecoverable setup failures do.
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -433,7 +436,7 @@ jobs:
     container:
       image: registry.greenflametech.net/gft-python-runner:latest
     timeout-minutes: 20
-    needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-deps, frontend]
+    needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-config, trivy-deps, frontend]
     if: ${{ secrets.SONAR_TOKEN != '' && secrets.SONAR_HOST_URL != '' }}
     steps:
       - name: Checkout
@@ -614,11 +617,16 @@ jobs:
           chmod +x /usr/local/bin/cosign
 
       - name: Sign image with cosign
-        if: ${{ secrets.COSIGN_PRIVATE_KEY != '' }}
+        # No conditional — if COSIGN_PRIVATE_KEY is absent this step fails
+        # loudly rather than silently skipping image signing.
         env:
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
         run: |
+          if [ -z "${COSIGN_PRIVATE_KEY}" ]; then
+            echo "ERROR: COSIGN_PRIVATE_KEY secret is not set. Image signing is required."
+            exit 1
+          fi
           cosign sign --key env://COSIGN_PRIVATE_KEY \
             --yes \
             "${{ steps.tags.outputs.sha_tag }}"
@@ -754,7 +762,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: [trivy-image]
     timeout-minutes: 20
-    continue-on-error: true
+    # continue-on-error removed — HIGH severity findings now block the pipeline.
     env:
       REGISTRY: registry.greenflametech.net
       IMAGE_NAME: hermes
@@ -798,7 +806,7 @@ jobs:
             -t http://localhost:8080/openapi.json \
             -f openapi \
             -r zap-report.html \
-            -z "-addoninstall communityScripts" || true
+            -z "-addoninstall communityScripts -config rules.status.FAIL=HIGH"
 
       - name: Stop Hermes container
         if: always()
