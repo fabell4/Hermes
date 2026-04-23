@@ -34,6 +34,7 @@ app = FastAPI(
     version="0.1.0",
 )
 
+
 # Allow the Vite dev server (localhost:5173) and any same-origin requests.
 class _SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):

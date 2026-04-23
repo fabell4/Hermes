@@ -17,6 +17,9 @@ _503: dict[int | str, dict[str, Any]] = {
     503: {"description": "Database not yet available."}
 }
 
+# Module-level DB path for test mocking
+DB_PATH = Path(_cfg.SQLITE_DB_PATH)
+
 
 class SpeedResultSchema(BaseModel):
     """Schema for a single speed-test result row."""
@@ -43,10 +46,9 @@ class ResultsPage(BaseModel):
 
 
 def _connect() -> sqlite3.Connection:
-    db_path = Path(_cfg.SQLITE_DB_PATH)
-    if not db_path.exists():
+    if not DB_PATH.exists():
         raise HTTPException(status_code=503, detail="No database found yet.")
-    conn = sqlite3.connect(db_path, check_same_thread=False)
+    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
     conn.execute("PRAGMA journal_mode=WAL")
     conn.row_factory = sqlite3.Row
     return conn
