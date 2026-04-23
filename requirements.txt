@@ -27,4 +27,5 @@ pytest==9.0.2
 iniconfig==2.3.0
 pluggy==1.6.0
 Pygments==2.19.2
-ruff==0.15.8hypothesis==6.152.1
+ruff==0.15.8
+hypothesis==6.152.1
