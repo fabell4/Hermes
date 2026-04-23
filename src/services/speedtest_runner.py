@@ -10,7 +10,7 @@ import speedtest  # type: ignore
 
 from src.models.speed_result import SpeedResult
 
-_log = logging.getLogger(__name__)  # type: ignore
+_log = logging.getLogger(__name__)
 
 
 class SpeedtestRunner:

@@ -356,12 +356,48 @@ jobs:
           path: pip-audit-report.json
           retention-days: 7
 
+  frontend:
+    runs-on: docker
+    container:
+      image: node:20-slim
+    timeout-minutes: 15
+    continue-on-error: true
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type-check
+        run: npm run type-check
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Vitest (unit tests + coverage)
+        run: npm run test:coverage
+
+      - name: Upload frontend coverage
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: frontend-coverage
+          path: frontend/coverage/lcov.info
+          retention-days: 7
+
+      - name: Vite production build
+        run: npm run build
+
   sonarqube:
     runs-on: docker
     container:
       image: registry.greenflametech.net/gft-python-runner:latest
     timeout-minutes: 20
-    needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-deps]
+    needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-deps, frontend]
     if: ${{ secrets.SONAR_TOKEN != '' && secrets.SONAR_HOST_URL != '' }}
     steps:
       - name: Checkout
@@ -405,6 +441,13 @@ jobs:
         with:
           name: semgrep-report
           path: .
+
+      - name: Download frontend coverage
+        continue-on-error: true
+        uses: https://data.forgejo.org/actions/download-artifact@v3
+        with:
+          name: frontend-coverage
+          path: frontend/coverage
 
       # mypy is no longer converted — it is passed directly to SonarQube via
       # sonar.python.mypy.reportPaths in sonar-project.properties, which uses

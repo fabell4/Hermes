@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import sqlite3
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated, Any, Optional
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
@@ -13,7 +13,7 @@ DB_PATH = Path("data/hermes.db")
 
 router = APIRouter(tags=["results"])
 
-_503 = {503: {"description": "Database not yet available."}}
+_503: dict[int | str, dict[str, Any]] = {503: {"description": "Database not yet available."}}
 
 
 class SpeedResultSchema(BaseModel):

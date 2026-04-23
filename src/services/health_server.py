@@ -8,7 +8,7 @@ import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Callable
 
-logger = logging.getLogger(__name__)  # type: ignore
+logger = logging.getLogger(__name__)
 
 
 class _HealthHandler(BaseHTTPRequestHandler):
