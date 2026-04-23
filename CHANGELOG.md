@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+---
+
+## [0.3.0-beta] - 2026-04-23
+
 ### Added
 - **React + Vite frontend** — modern SPA with Tailwind CSS, Framer Motion animations, and TypeScript
 - **FastAPI REST API** — replaces file-based IPC with proper HTTP endpoints for triggering tests, reading results, and managing configuration
