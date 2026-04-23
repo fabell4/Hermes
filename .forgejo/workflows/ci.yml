@@ -766,6 +766,8 @@ jobs:
     needs: [trivy-image]
     timeout-minutes: 20
     # continue-on-error removed — HIGH severity findings now block the pipeline.
+    container:
+      image: registry.greenflametech.net/gft-ci-runner:latest
     env:
       REGISTRY: registry.greenflametech.net
       IMAGE_NAME: hermes
