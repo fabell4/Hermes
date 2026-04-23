@@ -9,10 +9,9 @@ A Python application that periodically runs internet speed tests and exports res
 
 ```mermaid
 flowchart TD
-    subgraph UI_CONTAINER["hermes-ui container"]
-        UI["**Streamlit UI**\nsrc/streamlit_app.py"]
-        API["**FastAPI**\nsrc/api/main.py\n:8080"]
-        REACT["**React Frontend**\nfrontend/dist (served by FastAPI)"]
+    subgraph API_CONTAINER["hermes-api container"]
+        API["**FastAPI REST API**\nsrc/api/main.py\n:8080"]
+        REACT["**React Frontend**\nfrontend/dist\n(served by FastAPI)"]
     end
 
     subgraph SCHED_CONTAINER["hermes-scheduler container"]
@@ -22,17 +21,17 @@ flowchart TD
         DISP["**ResultDispatcher**\nsrc/result_dispatcher.py"]
         CSV["CSVExporter"]
         SQLITE["SQLiteExporter"]
-        PROM["PrometheusExporter"]
+        PROM["PrometheusExporter\n:8000/metrics"]
         LOKI["LokiExporter"]
     end
 
     SHARED_VOL[("**Shared Volume**\nruntime_config.json\n.run_trigger\nresults.csv")]
     DATA_VOL[("**Data Volume**\nhermes.db")]
 
-    UI -- "writes trigger / config" --> SHARED_VOL
+    REACT -- "HTTP GET/POST" --> API
+    API -- "POST /api/trigger\nPUT /api/config" --> SHARED_VOL
+    API -- "GET /api/results" --> DATA_VOL
     SHARED_VOL -- "polls every 30s" --> MAIN
-    UI -- "reads history\n(prefers SQLite)" --> DATA_VOL
-    UI -- "fallback: reads CSV" --> SHARED_VOL
     MAIN -- "scheduled / triggered" --> RUNNER
     RUNNER --> MODEL
     MODEL --> DISP
@@ -43,7 +42,8 @@ flowchart TD
     CSV -- "writes" --> SHARED_VOL
     SQLITE -- "writes" --> DATA_VOL
 
-    style UI fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style API fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style REACT fill:#1565c0,stroke:#90caf9,color:#ffffff
     style MAIN fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style RUNNER fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style MODEL fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
@@ -52,8 +52,8 @@ flowchart TD
     style SQLITE fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style PROM fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style LOKI fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
-    style SHARED_VOL fill:#1565c0,stroke:#90caf9,color:#ffffff
-    style DATA_VOL fill:#1565c0,stroke:#90caf9,color:#ffffff
+    style SHARED_VOL fill:#f57c00,stroke:#ffb74d,color:#ffffff
+    style DATA_VOL fill:#f57c00,stroke:#ffb74d,color:#ffffff
 ```
 
 ### Deployment Topology
@@ -65,8 +65,8 @@ flowchart LR
             PROM_EP["PrometheusExporter\n:8000/metrics"]
             LOKI_EXP["LokiExporter"]
         end
-        subgraph UI_CONTAINER["hermes-ui"]
-            UI["Streamlit UI\n:8501"]
+        subgraph API_CONTAINER["hermes-api"]
+            API["FastAPI + React UI\n:8080"]
         end
     end
 
@@ -83,7 +83,7 @@ flowchart LR
 
     style PROM_EP fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style LOKI_EXP fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
-    style UI fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style API fill:#1565c0,stroke:#90caf9,color:#ffffff
     style PROMETHEUS fill:#e65100,stroke:#ffcc80,color:#ffffff
     style LOKI fill:#1565c0,stroke:#90caf9,color:#ffffff
     style GRAFANA fill:#4a148c,stroke:#ce93d8,color:#ffffff
@@ -201,7 +201,7 @@ Hermes is distributed as a Docker image on GHCR.
 
 ### Minimal setup
 
-Hermes runs as two containers from the same image — a scheduler and a UI. Create a `docker-compose.yml` on your server:
+Hermes runs as two containers from the same image — a scheduler (background worker) and an API server (REST + React frontend). Create a `docker-compose.yml` on your server:
 
 ```yaml
 services:
@@ -211,31 +211,57 @@ services:
     restart: always
     command: ["python", "-m", "src.main"]
     ports:
-      - "8000:8000"   # Prometheus /metrics
-      - "8080:8080"   # FastAPI REST + React UI
+      - "${PROMETHEUS_PORT:-8000}:8000" # Prometheus /metrics endpoint
     volumes:
-      - hermes-logs:/app/logs
-      - hermes-data:/app/data
+      - hermes-logs:/app/logs           # CSV result history + hermes.log
+      - hermes-data:/app/data           # runtime_config.json, .run_trigger, hermes.db
+    environment:
+      APP_ENV: "${APP_ENV:-production}"
+      LOG_LEVEL: "${LOG_LEVEL:-INFO}"
+      TZ: "${TZ:-UTC}"
+      SPEEDTEST_INTERVAL_MINUTES: "${SPEEDTEST_INTERVAL_MINUTES:-60}"
+      RUN_ON_STARTUP: "${RUN_ON_STARTUP:-true}"
+      ENABLED_EXPORTERS: "${ENABLED_EXPORTERS:-csv}"
+      CSV_LOG_PATH: "logs/results.csv"
+      SQLITE_DB_PATH: "data/hermes.db"
+      PROMETHEUS_PORT: "${PROMETHEUS_PORT:-8000}"
+      LOKI_URL: "${LOKI_URL:-}"
+      LOKI_JOB_LABEL: "${LOKI_JOB_LABEL:-hermes_speedtest}"
     env_file:
-      - .env
+      - path: .env
+        required: false
 
-  hermes-ui:
+  hermes-api:
     image: ghcr.io/fabell4/hermes:latest
-    container_name: hermes-ui
+    container_name: hermes-api
     restart: always
     ports:
-      - "8501:8501"   # Streamlit UI (legacy)
+      - "${API_PORT:-8080}:8080"        # FastAPI REST + React SPA
     volumes:
       - hermes-logs:/app/logs
       - hermes-data:/app/data
+    environment:
+      APP_ENV: "${APP_ENV:-production}"
+      APP_VERSION: "${APP_VERSION:-dev}"
+      LOG_LEVEL: "${LOG_LEVEL:-INFO}"
+      TZ: "${TZ:-UTC}"
+      SPEEDTEST_INTERVAL_MINUTES: "${SPEEDTEST_INTERVAL_MINUTES:-60}"
+      ENABLED_EXPORTERS: "${ENABLED_EXPORTERS:-csv}"
+      CSV_LOG_PATH: "logs/results.csv"
+      SQLITE_DB_PATH: "data/hermes.db"
+      API_KEY: "${API_KEY:-}"
+      RATE_LIMIT_PER_MINUTE: "${RATE_LIMIT_PER_MINUTE:-60}"
     env_file:
-      - .env
+      - path: .env
+        required: false
     depends_on:
       - hermes-scheduler
 
 volumes:
   hermes-logs:
+    driver: local
   hermes-data:
+    driver: local
 ```
 
 Create a `.env` alongside it. The `.env.example` in this repo lists every available variable with comments — copy it and adjust as needed:
@@ -250,21 +276,93 @@ Then start it:
 docker compose up -d
 ```
 
-The React UI is available at `http://<server-ip>:8080`.
-The legacy Streamlit UI remains available at `http://<server-ip>:8501`.
+The **React UI** is available at `http://<server-ip>:8080`.
 
 **Key `.env` variables for self-hosting:**
 
 | Variable | Default | Description |
 |---|---|---|
+| `TZ` | `UTC` | IANA timezone name for log timestamps |
 | `ENABLED_EXPORTERS` | `csv` | Comma-separated list: `csv`, `sqlite`, `prometheus`, `loki` |
 | `SPEEDTEST_INTERVAL_MINUTES` | `60` | How often to run a speed test |
 | `RUN_ON_STARTUP` | `true` | Run a test immediately on container start |
+| `CSV_LOG_PATH` | `logs/results.csv` | Path to the CSV results file |
+| `CSV_MAX_ROWS` | `0` (unlimited) | Maximum CSV rows to keep (oldest removed first) |
+| `CSV_RETENTION_DAYS` | `0` (unlimited) | Delete CSV rows older than N days |
 | `SQLITE_DB_PATH` | `data/hermes.db` | Path to the SQLite database file |
-| `SQLITE_RETENTION_DAYS` | `0` (unlimited) | Prune rows older than N days |
-| `SQLITE_MAX_ROWS` | `0` (unlimited) | Keep only the N most recent rows |
+| `SQLITE_MAX_ROWS` | `0` (unlimited) | Maximum SQLite rows to keep (oldest removed first) |
+| `SQLITE_RETENTION_DAYS` | `0` (unlimited) | Delete SQLite rows older than N days |
 | `PROMETHEUS_PORT` | `8000` | Port for the `/metrics` scrape endpoint |
-| `HEALTH_PORT` | `8080` | Port for the `GET /health` endpoint |
 | `LOKI_URL` | *(unset)* | Full Loki push URL, e.g. `http://loki:3100` |
+| `LOKI_JOB_LABEL` | `hermes_speedtest` | Job label for Loki log entries |
+| `API_PORT` | `8080` | Host port to expose the FastAPI + React frontend on |
+| `API_KEY` | *(unset)* | API key for authentication (disables auth if unset) |
+| `RATE_LIMIT_PER_MINUTE` | `60` | Maximum write requests per API key per 60-second window |
 
-Enable SQLite for the best UI experience — the Streamlit dashboard reads from `hermes.db` when available and falls back to `results.csv` otherwise.
+**Enable SQLite for the best UI experience** — the React dashboard reads from `hermes.db` when available and falls back to `results.csv` otherwise. Add `sqlite` to `ENABLED_EXPORTERS`:
+
+```bash
+ENABLED_EXPORTERS=csv,sqlite
+```
+
+## API Endpoints
+
+The FastAPI server (`hermes-api` container) exposes the following REST endpoints on port `8080`:
+
+### Public Endpoints (no authentication required)
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/api/health` | Health check and scheduler status |
+| `GET` | `/api/results` | Paginated speed test results (newest first) |
+| `GET` | `/api/results/latest` | Most recent speed test result |
+| `GET` | `/api/config` | Current runtime configuration |
+| `GET` | `/api/trigger/status` | Check if a speed test is currently running |
+
+### Protected Endpoints (require `X-Api-Key` header when `API_KEY` is set)
+
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/api/trigger` | Manually trigger a speed test |
+| `PUT` | `/api/config` | Update runtime configuration |
+
+**Authentication:**
+
+When `API_KEY` is set in `.env`, protected endpoints require an `X-Api-Key` header with the matching value:
+
+```bash
+curl -X POST http://localhost:8080/api/trigger \
+  -H "X-Api-Key: your-api-key-here"
+```
+
+Generate a secure API key:
+```bash
+openssl rand -hex 32
+```
+
+**Rate Limiting:**
+
+When authentication is enabled, write endpoints are rate-limited per API key (default: 60 requests per 60-second window). Adjust with `RATE_LIMIT_PER_MINUTE` in `.env`.
+
+**Example API Calls:**
+
+```bash
+# Get latest result
+curl http://localhost:8080/api/results/latest
+
+# Get paginated results (page 1, 50 items)
+curl http://localhost:8080/api/results?page=1&page_size=50
+
+# Check if test is running
+curl http://localhost:8080/api/trigger/status
+
+# Trigger a manual test (requires API key if auth enabled)
+curl -X POST http://localhost:8080/api/trigger \
+  -H "X-Api-Key: your-api-key-here"
+
+# Update configuration (requires API key if auth enabled)
+curl -X PUT http://localhost:8080/api/config \
+  -H "X-Api-Key: your-api-key-here" \
+  -H "Content-Type: application/json" \
+  -d '{"speedtest_interval_minutes": 30}'
+```

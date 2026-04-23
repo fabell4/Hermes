@@ -8,6 +8,36 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- **React + Vite frontend** — modern SPA with Tailwind CSS, Framer Motion animations, and TypeScript
+- **FastAPI REST API** — replaces file-based IPC with proper HTTP endpoints for triggering tests, reading results, and managing configuration
+- **Two-container architecture** — `hermes-scheduler` (background worker) and `hermes-api` (REST + React frontend) for better separation of concerns
+- **API authentication** — optional `API_KEY` environment variable protects write endpoints (`POST /api/trigger`, `PUT /api/config`)
+- **Rate limiting** — per-API-key rate limiting with configurable `RATE_LIMIT_PER_MINUTE` (default: 60 requests/minute)
+- **Visual test indicator** — React UI shows "Test Running" badge when a speed test is in progress (detects both manual and scheduler-triggered tests)
+- **Real-time test status polling** — `GET /api/trigger/status` endpoint allows UI to detect when tests are running
+- **Automatic result refresh** — UI automatically refreshes data when a test completes
+- **Timezone configuration** — `TZ` environment variable controls log timestamps inside containers (default: UTC)
+- **Data retention policies** — configurable `CSV_MAX_ROWS`, `CSV_RETENTION_DAYS`, `SQLITE_MAX_ROWS`, `SQLITE_RETENTION_DAYS` for automatic cleanup
+- **Animated speed gauges** — React UI shows randomized values during test execution for visual feedback
+- **Countdown timer** — displays time until next scheduled test in React UI
+- **Vitest test suite** — frontend unit tests with 100% coverage of critical components
+
+### Changed
+- **Primary UI** is now React + FastAPI on port `:8080` (Streamlit remains available but is considered legacy)
+- **Docker compose structure** — `hermes-ui` container renamed to `hermes-api` and serves FastAPI + React instead of Streamlit
+- **API results endpoint** — returns paginated results from SQLite with fallback to CSV when database doesn't exist yet
+- **Improved error handling** — 503 status with helpful message when database doesn't exist, authentication errors shown to user
+- **Environment variable structure** — added `API_PORT` for docker-compose host port binding, removed `HEALTH_PORT` (health endpoint is part of FastAPI)
+
+### Fixed
+- **Database initialization** — SQLite exporter must be enabled in `ENABLED_EXPORTERS` for database to be created
+- **Test result freshness** — results refresh immediately after test completion instead of relying on 10-second polling interval
+- **Race condition in test triggering** — simplified polling logic to avoid conflicts between manual trigger and status polling
+
+### Deprecated
+- **Streamlit UI** (`src/streamlit_app.py`) — still functional but deprecated in favor of React frontend
+
 ---
 
 ## [0.2.3-alpha] - 2026-04-12

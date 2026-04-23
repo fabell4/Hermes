@@ -14,7 +14,6 @@
 - [x] `main.py` — entry point with scheduler, `update_schedule()`, `update_exporters()`, `EXPORTER_REGISTRY`
 - [x] `config.py` — centralised env config
 - [x] `runtime_config.py` — JSON persistence for interval and enabled exporters
-- [~] `streamlit_app.py` — decommissioned; replaced by React + FastAPI (Phase 3b)
 - [x] `Dockerfile` + `docker-compose.yml` — containerised with volume mounts
 - [x] `.dockerignore` — optimised Docker build context
 - [x] `requirements.txt` — pinned dependencies
@@ -56,20 +55,7 @@ _Goal: make historical data more useful and integrate with the wider observabili
 
 _Goal: complete the Streamlit UI improvements, then replace Streamlit with a React + Vite frontend backed by a FastAPI REST layer._
 
-### Phase 3a — Streamlit Polish (pre-beta)
-
-_Superseded by Phase 3b. Streamlit decommissioned — remaining items below were not implemented and are no longer applicable._
-
-- [x] Scheduler next-run countdown — live timer showing time until the next scheduled run
-- [x] Version tag in UI — display the running app version in the page header
-- [~] Version update check — implemented in React frontend (Layout.tsx) instead of Streamlit
-- [~] Daily/weekly summary stats table — superseded; to be added to React frontend if needed
-- [~] Connection quality score — superseded; to be added to React frontend if needed
-- [~] Historical charts — superseded; React dashboard already has multi-series Recharts chart
-- [~] Result anomaly flagging — superseded; to be added to React frontend if needed
-- [~] Mobile-friendly layout (Streamlit) — superseded; React frontend is mobile-responsive
-
-### Phase 3b — Production Frontend (beta target)
+### Phase 3 — Production Frontend (beta target)
 
 - [x] REST API layer (FastAPI) — expose run, history, schedule, and exporter endpoints
 - [x] React + Vite scaffold — project structure, Tailwind CSS, dark theme baseline
@@ -110,6 +96,24 @@ _Goal: notify users when something goes wrong without requiring Grafana._
 
 ## Post-Release Enhancements
 
+
+---
+
+## Archived (Deprecated/Superseded)
+
+_Items that were completed but are no longer part of the active codebase._
+
+### Streamlit UI (replaced by React + FastAPI)
+
+- `streamlit_app.py` — original web UI; decommissioned in favor of React frontend
+- Scheduler next-run countdown — completed in Streamlit, reimplemented in React
+- Version tag in UI — completed in Streamlit, reimplemented in React (Layout.tsx)
+- Version update check — completed in Streamlit, reimplemented in React frontend (Layout.tsx)
+- Daily/weekly summary stats table — planned for Streamlit but not implemented; may be added to React if needed
+- Connection quality score — planned for Streamlit but not implemented; may be added to React if needed
+- Historical charts — completed in Streamlit, reimplemented in React dashboard with Recharts
+- Result anomaly flagging — planned for Streamlit but not implemented; may be added to React if needed
+- Mobile-friendly layout — completed in Streamlit, reimplemented in React with Tailwind responsive design
 _Features planned for after v1.0. Not required for stable release._
 
 - [ ] InfluxDB exporter — optional time-series exporter; pairs with Grafana for long-term trend analysis and retention policy management
