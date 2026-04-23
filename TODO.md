@@ -14,12 +14,13 @@
 - [x] `main.py` — entry point with scheduler, `update_schedule()`, `update_exporters()`, `EXPORTER_REGISTRY`
 - [x] `config.py` — centralised env config
 - [x] `runtime_config.py` — JSON persistence for interval and enabled exporters
-- [x] `streamlit_app.py` — UI with run button, schedule control, exporter toggles, history chart
+- [~] `streamlit_app.py` — decommissioned; replaced by React + FastAPI (Phase 3b)
 - [x] `Dockerfile` + `docker-compose.yml` — containerised with volume mounts
 - [x] `.dockerignore` — optimised Docker build context
 - [x] `requirements.txt` — pinned dependencies
-- [x] CI pipeline — ruff, mypy, bandit, semgrep, pytest with 80% coverage gate
+- [x] CI pipeline — ruff, mypy, bandit, semgrep, pytest with 95% coverage; Vitest frontend tests; Safety, pip-audit, Trivy, npm-audit supply-chain scans
 - [x] Release workflow — builds and pushes to private registry + GHCR, creates GitHub + Forgejo releases
+- [x] Renovate — automated dependency PRs (Python, npm, Docker base images) every weekend
 
 ---
 
@@ -81,6 +82,8 @@ _Superseded by Phase 3b. Streamlit decommissioned — remaining items below were
 - [x] Remove Streamlit dependency once frontend is live
 
 > 🏁 **Alpha → Beta release gate** — all Phase 1–3 items must be complete before tagging a beta release.
+>
+> ✅ All Phase 1–3 items complete. Ready for beta tagging.
 
 ---
 

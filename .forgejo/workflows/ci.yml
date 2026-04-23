@@ -389,6 +389,17 @@ jobs:
           path: frontend/coverage/lcov.info
           retention-days: 7
 
+      - name: npm audit
+        run: npm audit --audit-level=moderate --json > npm-audit-report.json || true
+
+      - name: Upload npm audit report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: npm-audit-report
+          path: frontend/npm-audit-report.json
+          retention-days: 7
+
       - name: Vite production build
         run: npm run build
 
