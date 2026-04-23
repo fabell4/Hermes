@@ -52,3 +52,7 @@ Thumbs.db
 
 # Local-only notes (not for public repo)
 RELEASE-SETUP.md
+
+# Cosign — private key and local binary must never be committed
+cosign.key
+cosign.exe
