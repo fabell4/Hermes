@@ -621,7 +621,7 @@ jobs:
         # loudly rather than silently skipping image signing.
         # continue-on-error: true while the secret is not yet provisioned;
         # remove this once COSIGN_PRIVATE_KEY is set in Forgejo repo secrets.
-        continue-on-error: true
+        continue-on-error: false
         env:
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
