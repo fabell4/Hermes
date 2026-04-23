@@ -194,7 +194,7 @@ jobs:
       - name: Run Semgrep
         run: |
           pip install semgrep
-          semgrep scan --config=auto --json --output=semgrep-report.json src || true
+          semgrep scan --config=auto --config=.semgrep/rules --json --output=semgrep-report.json src || true
 
       - name: Upload Semgrep report
         if: always()
@@ -303,6 +303,31 @@ jobs:
         with:
           name: vulture-report
           path: vulture-report.txt
+          retention-days: 7
+
+  trivy-config:
+    runs-on: docker
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Trivy config scan (Dockerfile + docker-compose)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: config
+          scan-ref: .
+          format: json
+          output: trivy-config-report.json
+          exit-code: 0
+
+      - name: Upload config scan report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: trivy-config-report
+          path: trivy-config-report.json
           retention-days: 7
 
   trivy-deps:
@@ -506,8 +531,8 @@ jobs:
                           ce_task_id = line.strip().split("=", 1)[1]
 
           if not ce_task_id:
-              print("No CE task ID found — skipping quality gate check.")
-              sys.exit(0)
+              print("No CE task ID found — scanner may have failed to write report-task.txt.")
+              sys.exit(1)
 
           headers = {"Authorization": f"Basic {auth}"}
 
@@ -581,6 +606,22 @@ jobs:
         run: |
           docker push "${{ steps.tags.outputs.sha_tag }}"
           docker push "${{ steps.tags.outputs.latest_tag }}"
+
+      - name: Install cosign
+        run: |
+          COSIGN_VERSION="v2.4.3"
+          wget -q "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64" -O /usr/local/bin/cosign
+          chmod +x /usr/local/bin/cosign
+
+      - name: Sign image with cosign
+        if: ${{ secrets.COSIGN_PRIVATE_KEY != '' }}
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          cosign sign --key env://COSIGN_PRIVATE_KEY \
+            --yes \
+            "${{ steps.tags.outputs.sha_tag }}"
 
       - name: Summary
         run: |
@@ -708,28 +749,67 @@ jobs:
           path: trivy-report.json
           retention-days: 30
 
-  # ZAP scan is commented out until a running Hermes instance is available
-  # zap:
-  #   runs-on: docker
-  #   if: github.ref == 'refs/heads/main'
-  #   needs: [trivy-image]
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: ZAP API Scan
-  #       run: |
-  #         docker run --rm \
-  #           -v $(pwd):/zap/wrk:rw \
-  #           ghcr.io/zaproxy/zaproxy:stable \
-  #           zap-api-scan.py \
-  #           -t https://hermes.greenflametech.net/openapi.json \
-  #           -f openapi \
-  #           -r zap-report.html \
-  #           -z "-addoninstall communityScripts" || true
-  #     - uses: https://data.forgejo.org/actions/upload-artifact@v3
-  #       with:
-  #         name: zap-report
-  #         path: zap-report.html
-  #         retention-days: 7
+  zap:
+    runs-on: docker
+    if: github.ref == 'refs/heads/main'
+    needs: [trivy-image]
+    timeout-minutes: 20
+    continue-on-error: true
+    env:
+      REGISTRY: registry.greenflametech.net
+      IMAGE_NAME: hermes
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start Hermes container
+        run: |
+          SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          TAG="${REGISTRY}/${IMAGE_NAME}:${SHA}"
+          docker pull "$TAG"
+          docker run -d --name hermes-zap \
+            -p 8080:8080 \
+            -e APP_ENV=ci \
+            -e LOG_LEVEL=WARNING \
+            -e ENABLED_EXPORTERS=sqlite \
+            -e SQLITE_DB_PATH=/tmp/hermes-ci.db \
+            "$TAG"
+
+      - name: Wait for Hermes to be healthy
+        run: |
+          for i in $(seq 1 20); do
+            if curl -sf http://localhost:8080/api/health > /dev/null; then
+              echo "Hermes is up"
+              exit 0
+            fi
+            echo "Waiting... ($i/20)"
+            sleep 3
+          done
+          echo "Hermes did not become healthy in time"
+          docker logs hermes-zap
+          exit 1
+
+      - name: ZAP API Scan
+        run: |
+          docker run --rm \
+            --network host \
+            -v $(pwd):/zap/wrk:rw \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-api-scan.py \
+            -t http://localhost:8080/openapi.json \
+            -f openapi \
+            -r zap-report.html \
+            -z "-addoninstall communityScripts" || true
+
+      - name: Stop Hermes container
+        if: always()
+        run: docker rm -f hermes-zap || true
+
+      - uses: https://data.forgejo.org/actions/upload-artifact@v3
+        if: always()
+        with:
+          name: zap-report
+          path: zap-report.html
+          retention-days: 7
 
 
   publish-docs:
@@ -755,7 +835,7 @@ jobs:
   notify:
     runs-on: docker
     if: always()
-    needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-deps, sonarqube, docker-publish, trivy-image, publish-docs]
+    needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-config, trivy-deps, sonarqube, docker-publish, trivy-image, publish-docs]
     container:
       image: registry.greenflametech.net/gft-ci-runner:latest
     steps:

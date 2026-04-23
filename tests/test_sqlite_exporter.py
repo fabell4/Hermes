@@ -211,3 +211,70 @@ def test_isp_name_stored_as_null_when_none(db_path: Path) -> None:
     isp = conn.execute("SELECT isp_name FROM results").fetchone()[0]
     conn.close()
     assert isp is None
+
+
+# ---------------------------------------------------------------------------
+# Boundary values — all optional fields None
+# ---------------------------------------------------------------------------
+
+
+def test_export_with_all_optional_fields_none(db_path: Path) -> None:
+    """A result with jitter_ms, isp_name, and server_id all None must store without error."""
+    exp = SQLiteExporter(path=db_path)
+    result = _make_result()
+    result.jitter_ms = None
+    result.isp_name = None
+    result.server_id = None
+    exp.export(result)
+    conn = sqlite3.connect(db_path)
+    row = conn.execute("SELECT jitter_ms, isp_name, server_id FROM results").fetchone()
+    conn.close()
+    assert row == (None, None, None)
+
+
+def test_export_with_all_zero_numeric_values(db_path: Path) -> None:
+    """Zero values for download, upload, and ping are valid boundary inputs."""
+    exp = SQLiteExporter(path=db_path)
+    exp.export(_make_result(download_mbps=0.0, upload_mbps=0.0, ping_ms=0.0))
+    conn = sqlite3.connect(db_path)
+    row = conn.execute(
+        "SELECT download_mbps, upload_mbps, ping_ms FROM results"
+    ).fetchone()
+    conn.close()
+    assert row == (0.0, 0.0, 0.0)
+
+
+def test_export_with_very_large_float_values(db_path: Path) -> None:
+    """Extremely large (but valid) floats must be stored and retrieved without truncation."""
+    exp = SQLiteExporter(path=db_path)
+    large = 9_999.99
+    exp.export(_make_result(download_mbps=large, upload_mbps=large, ping_ms=large))
+    conn = sqlite3.connect(db_path)
+    row = conn.execute(
+        "SELECT download_mbps, upload_mbps, ping_ms FROM results"
+    ).fetchone()
+    conn.close()
+    assert row[0] == pytest.approx(large)
+    assert row[1] == pytest.approx(large)
+    assert row[2] == pytest.approx(large)
+
+
+def test_export_empty_string_server_fields(db_path: Path) -> None:
+    """Empty strings for server_name and server_location are valid — NOT SQL NULL."""
+    exp = SQLiteExporter(path=db_path)
+    exp.export(_make_result(server_name="", server_location=""))
+    conn = sqlite3.connect(db_path)
+    row = conn.execute("SELECT server_name, server_location FROM results").fetchone()
+    conn.close()
+    assert row == ("", "")
+
+
+def test_export_raises_on_missing_table(db_path: Path) -> None:
+    """Exporting after the results table is dropped must raise RuntimeError, not swallow."""
+    exp = SQLiteExporter(path=db_path)
+    conn = sqlite3.connect(db_path)
+    conn.execute("DROP TABLE results")
+    conn.commit()
+    conn.close()
+    with pytest.raises(RuntimeError, match="SQLite write failed"):
+        exp.export(_make_result())

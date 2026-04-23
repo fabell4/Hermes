@@ -13,13 +13,23 @@ import type {
 
 const BASE = '/api'
 
+/** Read the API key stored by the Settings page. Returns empty object if not set. */
+function apiKeyHeader(): Record<string, string> {
+  const key = localStorage.getItem('hermes_api_key')
+  return key ? { 'X-Api-Key': key } : {}
+}
+
 async function request<T>(
   path: string,
   options?: RequestInit
 ): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
     ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...apiKeyHeader(),
+      ...(options?.headers as Record<string, string> | undefined),
+    },
   })
   if (!res.ok) {
     const text = await res.text()

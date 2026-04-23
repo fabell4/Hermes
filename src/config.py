@@ -54,6 +54,16 @@ APP_ENV: str = os.getenv("APP_ENV", "development")
 APP_VERSION: str = os.getenv("APP_VERSION", "dev")
 LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
 
+# --- Authentication ---
+# If set, all write endpoints (POST /api/trigger, PUT /api/config) require
+# an X-Api-Key header whose value matches this key.
+# Leave unset to disable authentication (local dev / trusted network).
+API_KEY: str | None = os.getenv("API_KEY") or None
+
+# Maximum requests per API key per 60-second window on protected endpoints.
+# Set to 0 to disable rate limiting while keeping auth on.
+RATE_LIMIT_PER_MINUTE: int = _get_int("RATE_LIMIT_PER_MINUTE", 60)
+
 # --- Scheduler ---
 # Runtime config takes priority over env var
 _env_interval: int = _get_int("SPEEDTEST_INTERVAL_MINUTES", 60)

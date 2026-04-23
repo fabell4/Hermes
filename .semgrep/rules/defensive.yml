@@ -1,0 +1,66 @@
+rules:
+  # ---------------------------------------------------------------------------
+  # Rule 1: Bare except: clause
+  # Catches BaseException, including SystemExit and KeyboardInterrupt.
+  # This is almost always a mistake and suppresses OS-level signals.
+  # ---------------------------------------------------------------------------
+  - id: hermes-bare-except
+    pattern: |
+      try:
+        ...
+      except:
+        ...
+    message: >
+      Bare `except:` catches BaseException, including SystemExit and KeyboardInterrupt.
+      Catch a specific exception type (e.g., `except ValueError:`) or use
+      `except Exception:` at minimum. See docs/suppression-decisions.md for
+      intentional broad-catch decisions.
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: defensive-coding
+      technology: [python]
+      references:
+        - https://docs.python.org/3/tutorial/errors.html#handling-exceptions
+
+  # ---------------------------------------------------------------------------
+  # Rule 2: Silent exception swallow — except ...: pass
+  # Discarding an exception without logging or re-raising hides failures
+  # and violates the "fail loudly" principle.
+  # ---------------------------------------------------------------------------
+  - id: hermes-silent-exception-swallow
+    pattern: |
+      try:
+        ...
+      except ...:
+        pass
+    message: >
+      Exception is silently discarded. This hides failures and makes bugs
+      extremely difficult to diagnose. At minimum, log the error with
+      `logger.exception(...)` before continuing, or re-raise it.
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: defensive-coding
+      technology: [python]
+
+  # ---------------------------------------------------------------------------
+  # Rule 3: Broad except with only a pass-through return
+  # `except Exception: return` is a softer form of swallowing —
+  # the caller gets no indication that anything went wrong.
+  # ---------------------------------------------------------------------------
+  - id: hermes-except-silent-return
+    pattern: |
+      try:
+        ...
+      except Exception:
+        return
+    message: >
+      Returning silently from inside a bare `except Exception:` hides the
+      failure from the caller. Log the exception or propagate it as a
+      domain-specific error type.
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: defensive-coding
+      technology: [python]

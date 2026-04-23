@@ -6,10 +6,11 @@ import logging
 import threading
 from typing import Literal
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 
 from src import config, runtime_config
+from src.api.auth import require_api_key
 from src.exporters.csv_exporter import CSVExporter
 from src.exporters.loki_exporter import LokiExporter
 from src.exporters.prometheus_exporter import PrometheusExporter
@@ -78,7 +79,7 @@ def _run_test() -> None:
         _test_lock.release()
 
 
-@router.post("/trigger")
+@router.post("/trigger", dependencies=[Depends(require_api_key)])
 def trigger_test() -> TriggerResponse:
     """Kick off a speed test if one is not already running."""
     acquired = _test_lock.acquire(blocking=False)

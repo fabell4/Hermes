@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from src import config as app_config
 from src import runtime_config
+from src.api.auth import require_api_key
 
 router = APIRouter(tags=["config"])
 
@@ -37,6 +38,7 @@ def get_config() -> RuntimeConfigSchema:
 
 @router.put(
     "/config",
+    dependencies=[Depends(require_api_key)],
     responses={422: {"description": "One or more unknown exporter names supplied."}},
 )
 def update_config(body: RuntimeConfigSchema) -> RuntimeConfigSchema:

@@ -101,6 +101,41 @@ def test_put_config_returns_200_on_valid_body():
     assert resp.status_code == 200
 
 
+# ---------------------------------------------------------------------------
+# PUT /api/config — authentication
+# ---------------------------------------------------------------------------
+
+
+def test_put_config_returns_401_when_key_required_but_missing():
+    with patch("src.api.auth.config.API_KEY", "secret"):
+        resp = client.put("/api/config", json=_BASE_CONFIG)
+    assert resp.status_code == 401
+
+
+def test_put_config_returns_403_when_wrong_key():
+    with patch("src.api.auth.config.API_KEY", "secret"):
+        resp = client.put(
+            "/api/config", json=_BASE_CONFIG, headers={"X-Api-Key": "wrong"}
+        )
+    assert resp.status_code == 403
+
+
+def test_put_config_accepts_correct_key():
+    mock_save = MagicMock()
+    p1, p2, p3 = _patch_config_reads()
+    with (
+        patch("src.api.auth.config.API_KEY", "secret"),
+        patch("src.api.routes.config.runtime_config.save", mock_save),
+        p1,
+        p2,
+        p3,
+    ):
+        resp = client.put(
+            "/api/config", json=_BASE_CONFIG, headers={"X-Api-Key": "secret"}
+        )
+    assert resp.status_code == 200
+
+
 def test_put_config_persists_via_save():
     mock_save = MagicMock()
     p1, p2, p3 = _patch_config_reads()

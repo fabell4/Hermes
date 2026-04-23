@@ -48,18 +48,48 @@ class SpeedtestRunner:
                 _tz = ZoneInfo(_tz_name)
             except ZoneInfoNotFoundError:
                 _tz = ZoneInfo("UTC")
+
+            # --- Defensive parsing of fields from the external speedtest.net response ---
+            # Any of these may be absent, null, or an unexpected type on schema changes.
+            _raw_id = best.get("id")
+            server_id: int | None = None
+            if _raw_id is not None:
+                try:
+                    server_id = int(str(_raw_id))
+                except (ValueError, TypeError):
+                    _log.warning(
+                        "Unexpected non-numeric server id from speedtest.net: %r — skipping.",
+                        _raw_id,
+                    )
+
+            _client = st.results.client
+            isp_name: str | None = (
+                str(_client.get("isp", "")) or None
+                if isinstance(_client, dict)
+                else None
+            )
+
+            _raw_jitter = getattr(st.results, "jitter", None)
+            jitter_ms: float | None = None
+            if _raw_jitter is not None:
+                try:
+                    jitter_ms = round(float(_raw_jitter), 2)
+                except (ValueError, TypeError):
+                    _log.warning(
+                        "Unexpected jitter value from speedtest.net: %r — skipping.",
+                        _raw_jitter,
+                    )
+
             return SpeedResult(
                 timestamp=datetime.now(_tz),
-                download_mbps=round(download_bps / 1_000_000, 2),
-                upload_mbps=round(upload_bps / 1_000_000, 2),
-                ping_ms=round(st.results.ping, 2),
+                download_mbps=round(float(download_bps) / 1_000_000, 2),
+                upload_mbps=round(float(upload_bps) / 1_000_000, 2),
+                ping_ms=round(float(st.results.ping), 2),
                 server_name=str(best.get("sponsor", "Unknown")),
                 server_location=f"{best.get('name', '')}, {best.get('country', '')}",
-                server_id=int(str(best["id"])) if best.get("id") is not None else None,
-                jitter_ms=round(float(getattr(st.results, "jitter")), 2)
-                if getattr(st.results, "jitter", None) is not None
-                else None,
-                isp_name=str(st.results.client.get("isp", "")) or None,
+                server_id=server_id,
+                jitter_ms=jitter_ms,
+                isp_name=isp_name,
             )
 
         except speedtest.ConfigRetrievalError as exc:

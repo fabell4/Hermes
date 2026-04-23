@@ -1,0 +1,16 @@
+[MASTER]
+# Run pylint inside the project virtual environment so all installed packages
+# (hypothesis, fastapi, speedtest-cli, etc.) are importable without errors.
+init-hook=
+    import sys, os
+    venv = os.path.join(os.path.dirname(__file__), ".venv")
+    site_packages = os.path.join(venv, "Lib", "site-packages")
+    if os.path.isdir(site_packages) and site_packages not in sys.path:
+        sys.path.insert(0, site_packages)
+
+[TYPECHECK]
+# Packages that are available in the venv but pylint's own interpreter might
+# not find.  Listing them here suppresses false E0401 import-error reports.
+ignored-modules=speedtest
+extension-pkg-whitelist=
+known-third-party=hypothesis,fastapi,pydantic,uvicorn,httpx,starlette,APScheduler,speedtest,prometheus_client,requests,aiofiles,dotenv
