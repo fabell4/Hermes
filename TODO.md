@@ -73,16 +73,25 @@ _Goal: complete the Streamlit UI improvements, then replace Streamlit with a Rea
 
 ---
 
-## Phase 4 — Alerting
+## Phase 4 — Alerting & Quality Assurance
 
-_Goal: notify users when something goes wrong without requiring Grafana._
+_Goal: notify users when something goes wrong and ensure code quality before v1.0._
 
+### Alerting
 - [ ] Consecutive failure detection — track N consecutive speedtest failures
 - [ ] Webhook alerting — POST to a configurable URL on consecutive failure
 - [ ] Gotify / ntfy support — push notification on failure
 - [ ] Alert cooldown — don't re-alert within a configurable window
 
-> 🏁 **Beta → Full release gate** — all Phase 1–4 items must be complete before tagging v1.0.
+### Quality Assurance
+- [ ] Full code review — comprehensive review of all modules before v1.0 release
+  - Security audit (authentication, rate limiting, input validation)
+  - Error handling completeness
+  - Test coverage gaps
+  - Documentation accuracy
+  - Performance optimization opportunities
+
+> 🏁 **Beta → Full release gate** — all Phase 4 items must be complete before tagging v1.0.
 
 ---
 
@@ -96,7 +105,38 @@ _Goal: notify users when something goes wrong without requiring Grafana._
 
 ## Post-Release Enhancements
 
+_Features planned for after v1.0. Not required for stable release._
+
+### Enhanced Diagnostics (v1.1 candidates)
+- [ ] Packet loss tracking — capture and log packet loss percentage from speedtest results
+- [ ] Server selection — allow pinning to specific server ID for consistent baseline testing
+- [ ] SLA monitoring — define speed thresholds (e.g., "download ≥100 Mbps") and track compliance percentage
+- [ ] Connection quality score — aggregate metric combining speed, latency, jitter, and packet loss
+
+### Data & Integration
 - [ ] InfluxDB exporter — optional time-series exporter; pairs with Grafana for long-term trend analysis and retention policy management
+- [ ] Data export API — bulk export historical data (CSV dump, JSON export for migration/backup)
+- [ ] Result annotations — add notes to specific test results (e.g., "ISP maintenance", "router reboot", "storm")
+
+### Testing Improvements
+- [ ] Alternative test providers — support fast.com (Netflix), Google speed test, or custom endpoints as backup when Ookla is down
+- [ ] IPv4/IPv6 selection — force tests over specific protocol to isolate dual-stack issues
+- [ ] Custom test parameters — configure test duration, number of connections, chunk size
+- [ ] Multi-server testing — run tests against multiple servers and compare/aggregate results
+
+### Analysis & Insights
+- [ ] Result validation — flag suspicious results (impossibly high speeds, timeouts, inconsistent values)
+- [ ] Anomaly detection — automatically flag results that deviate significantly from baseline
+- [ ] Time-of-day analysis — show average speeds by hour/day to identify congestion patterns
+- [ ] Trend analysis — month-over-month comparison, degradation detection
+- [ ] Outage detection — detect and log complete connectivity loss (different from slow speeds)
+
+### UI/UX Enhancements
+- [ ] Light theme toggle — add light mode option to React UI
+- [ ] Result filtering — filter history by date range, speed threshold, server
+- [ ] Dashboard customization — choose which metrics to display, rearrange cards
+- [ ] Export charts — download charts as PNG/SVG for reports
+- [ ] Scheduled test windows — only run tests during specific hours (avoid counting against data caps)
 
 ---
 
@@ -115,5 +155,4 @@ _Items that were completed but are no longer part of the active codebase._
 - Historical charts — completed in Streamlit, reimplemented in React dashboard with Recharts
 - Result anomaly flagging — planned for Streamlit but not implemented; may be added to React if needed
 - Mobile-friendly layout — completed in Streamlit, reimplemented in React with Tailwind responsive design
-_Features planned for after v1.0. Not required for stable release._
 
