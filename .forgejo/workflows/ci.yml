@@ -779,8 +779,11 @@ jobs:
           SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           TAG="${REGISTRY}/${IMAGE_NAME}:${SHA}"
           docker pull "$TAG"
+          # Run on marion_internal so the CI runner container can reach it by
+          # name. Port publishing (-p) maps to the Docker host, not to this
+          # runner container, so we use container-to-container networking.
           docker run -d --name hermes-zap \
-            -p 8080:8080 \
+            --network marion_internal \
             -e APP_ENV=ci \
             -e LOG_LEVEL=WARNING \
             -e ENABLED_EXPORTERS=sqlite \
@@ -790,7 +793,7 @@ jobs:
       - name: Wait for Hermes to be healthy
         run: |
           for i in $(seq 1 20); do
-            if curl -sf http://localhost:8080/api/health > /dev/null; then
+            if curl -sf http://hermes-zap:8080/api/health > /dev/null; then
               echo "Hermes is up"
               exit 0
             fi
@@ -804,11 +807,11 @@ jobs:
       - name: ZAP API Scan
         run: |
           docker run --rm \
-            --network host \
+            --network marion_internal \
             -v $(pwd):/zap/wrk:rw \
             ghcr.io/zaproxy/zaproxy:stable \
             zap-api-scan.py \
-            -t http://localhost:8080/openapi.json \
+            -t http://hermes-zap:8080/openapi.json \
             -f openapi \
             -r zap-report.html \
             -z "-addoninstall communityScripts -config rules.status.FAIL=HIGH"
