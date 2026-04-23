@@ -44,6 +44,8 @@ services:
       ENABLED_EXPORTERS: "${ENABLED_EXPORTERS:-csv}"
       CSV_LOG_PATH: "logs/results.csv"
       SQLITE_DB_PATH: "data/hermes.db"
+      API_KEY: "${API_KEY:-}"
+      RATE_LIMIT_PER_MINUTE: "${RATE_LIMIT_PER_MINUTE:-60}"
     env_file:
       - path: .env
         required: false
