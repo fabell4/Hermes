@@ -13,7 +13,9 @@ DB_PATH = Path("data/hermes.db")
 
 router = APIRouter(tags=["results"])
 
-_503: dict[int | str, dict[str, Any]] = {503: {"description": "Database not yet available."}}
+_503: dict[int | str, dict[str, Any]] = {
+    503: {"description": "Database not yet available."}
+}
 
 
 class SpeedResultSchema(BaseModel):
