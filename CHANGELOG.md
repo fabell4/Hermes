@@ -10,6 +10,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.1-beta] - 2026-04-24
+
+### Changed
+- **README.md** — updated release status from alpha to beta, removed all Streamlit UI references (deprecated in v0.3.0)
+- **Project structure documentation** — corrected file paths (log_service.py), added frontend/ and api/ directory structure
+- **Frontend package.json** — version synced to 0.3.1 to match project release
+- **.env.example** — enabled API_KEY and RATE_LIMIT_PER_MINUTE by default (uncommented) to reflect standard feature status
+
+---
+
 ## [0.3.0-beta] - 2026-04-23
 
 ### Added
