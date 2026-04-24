@@ -10,6 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.4-beta] - 2026-04-24
+
+### Fixed
+- **mypy configuration** — added mypy.ini to allow untyped imports from third-party packages without type stubs (fixes APScheduler import errors in CI)
+
+---
+
 ## [0.3.3-beta] - 2026-04-24
 
 ### Fixed
