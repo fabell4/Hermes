@@ -10,6 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.2-beta] - 2026-04-24
+
+### Fixed
+- **CI dependencies** — added mypy, pytest-cov, bandit, and semgrep to requirements.txt (required by GitHub Actions CI workflow)
+
+---
+
 ## [0.3.1-beta] - 2026-04-24
 
 ### Changed
