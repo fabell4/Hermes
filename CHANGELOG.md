@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.7-beta] - 2026-04-25
+
+### Fixed
+- Added setuptools to requirements.txt for Python 3.13 compatibility (semgrep dependency)
+
 ## [0.3.6-beta] - 2026-04-25
 
 ### Fixed
