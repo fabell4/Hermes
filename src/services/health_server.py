@@ -6,7 +6,7 @@ import json
 import logging
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Callable
+from typing import Any, Callable
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +33,9 @@ class _HealthHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def log_message(self, *args: object) -> None:
-        logger.debug("health request: %s", args)
+    def log_message(self, format: str, *args: Any) -> None:
+        """Suppress default HTTP request logging; log at debug level instead."""
+        logger.debug("health request: %s", format % args)
 
 
 class HealthServer:
