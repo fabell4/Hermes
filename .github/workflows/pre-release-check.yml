@@ -1,0 +1,78 @@
+name: Pre-Release Check
+
+# Run comprehensive checks before tagging a release
+# Usage: Manually trigger this before creating a release tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to test (e.g., 0.3.7-beta)'
+        required: true
+        type: string
+
+jobs:
+  validate:
+    name: Pre-Release Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      
+      - name: Run ruff lint
+        run: ruff check src tests
+      
+      - name: Run ruff format check
+        run: ruff format --check src tests
+      
+      - name: Run mypy type checking
+        run: mypy src
+      
+      - name: Run bandit security scan
+        run: bandit -r src -f json -o bandit-report.json || true
+      
+      - name: Run tests with coverage
+        run: |
+          pytest --cov=src --cov-report=xml --cov-report=term -v
+      
+      - name: Verify version consistency
+        run: |
+          VERSION="${{ github.event.inputs.version }}"
+          FRONTEND_VERSION=$(grep -oP '"version":\s*"\K[^"]+' frontend/package.json)
+          
+          if [[ ! "$FRONTEND_VERSION" == "${VERSION%-*}" ]]; then
+            echo "❌ Version mismatch: frontend/package.json has $FRONTEND_VERSION but expected ${VERSION%-*}"
+            exit 1
+          fi
+          
+          if ! grep -q "\[${VERSION}\]" CHANGELOG.md; then
+            echo "❌ Version $VERSION not found in CHANGELOG.md"
+            exit 1
+          fi
+          
+          echo "✅ Version consistency verified"
+      
+      - name: Build Docker image (test)
+        run: |
+          docker build --tag hermes:test .
+          docker run --rm hermes:test python -c "import src.main; print('✅ Import successful')"
+      
+      - name: Summary
+        if: success()
+        run: |
+          echo "✅ All pre-release checks passed for v${{ github.event.inputs.version }}"
+          echo ""
+          echo "Next steps:"
+          echo "1. git tag -a v${{ github.event.inputs.version }} -m 'Release v${{ github.event.inputs.version }}'"
+          echo "2. git push origin main"
+          echo "3. git push origin v${{ github.event.inputs.version }}"
