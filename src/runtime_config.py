@@ -8,6 +8,7 @@ Stored as a JSON file mapped as a Docker volume.
 import json
 import logging
 from pathlib import Path
+from typing import cast
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ def load() -> dict:
         return {}
     try:
         with open(RUNTIME_CONFIG_PATH, encoding="utf-8") as f:
-            return json.load(f)
+            return cast(dict, json.load(f))
     except (json.JSONDecodeError, OSError) as e:
         logger.warning("Could not read runtime config: %s — using defaults.", e)
         return {}

@@ -10,6 +10,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.5-beta] - 2026-04-24
+
+### Fixed
+- **SonarQube Quality Gate** — removed unused type: ignore comments flagged by code quality analysis
+- **mypy configuration** — refined mypy.ini to properly handle untyped third-party libraries without false positives
+- **runtime_config type safety** — added explicit cast for json.load() return value
+
+---
+
 ## [0.3.4-beta] - 2026-04-24
 
 ### Fixed

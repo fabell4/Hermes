@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Any, cast
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
-import speedtest  # type: ignore
+import speedtest
 
 from src.models.speed_result import SpeedResult
 
@@ -68,11 +68,11 @@ class SpeedtestRunner:
         """Execute a single speed test attempt."""
         try:
             st = speedtest.Speedtest()
-            best: dict[str, Any] = cast(  # type: ignore[no-untyped-call]
+            best: dict[str, Any] = cast(
                 dict[str, Any], st.get_best_server()
             )
-            download_bps = st.download(threads=None)  # type: ignore[no-untyped-call]
-            upload_bps = st.upload(threads=None, pre_allocate=True)  # type: ignore[no-untyped-call]
+            download_bps = st.download(threads=None)
+            upload_bps = st.upload(threads=None, pre_allocate=True)
 
             _tz_name = os.getenv("TZ", "UTC")
             try:

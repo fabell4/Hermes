@@ -33,7 +33,7 @@ class _HealthHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def log_message(self, *args: object) -> None:  # type: ignore[override]
+    def log_message(self, *args: object) -> None:
         logger.debug("health request: %s", args)
 
 
