@@ -68,9 +68,7 @@ class SpeedtestRunner:
         """Execute a single speed test attempt."""
         try:
             st = speedtest.Speedtest()
-            best: dict[str, Any] = cast(
-                dict[str, Any], st.get_best_server()
-            )
+            best: dict[str, Any] = cast(dict[str, Any], st.get_best_server())
             download_bps = st.download(threads=None)
             upload_bps = st.upload(threads=None, pre_allocate=True)
 
