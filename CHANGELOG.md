@@ -10,6 +10,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.6-beta] - 2026-04-25
+
+### Fixed
+- **health_server log_message signature** — corrected method signature to match BaseHTTPRequestHandler parent class (format parameter was missing)
+- **ruff formatting** — applied code formatting to speedtest_runner.py
+
+---
+
 ## [0.3.5-beta] - 2026-04-24
 
 ### Fixed
