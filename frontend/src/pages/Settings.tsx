@@ -435,6 +435,25 @@ export function Settings() {
                       className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                     />
                     <input
+                      type="password"
+                      placeholder="Access token (optional)"
+                      value={alertsDraft.providers.ntfy.token}
+                      onChange={(e) =>
+                        setAlertsDraft((d) =>
+                          d
+                            ? {
+                                ...d,
+                                providers: {
+                                  ...d.providers,
+                                  ntfy: { ...d.providers.ntfy, token: e.target.value },
+                                },
+                              }
+                            : d
+                        )
+                      }
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                    />
+                    <input
                       type="url"
                       placeholder="https://ntfy.sh (optional)"
                       value={alertsDraft.providers.ntfy.url}

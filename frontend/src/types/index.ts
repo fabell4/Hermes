@@ -57,6 +57,7 @@ export interface NtfyProviderConfig {
   enabled: boolean
   url: string
   topic: string
+  token: string
   priority: number
   tags: string[]
 }

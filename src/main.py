@@ -179,6 +179,7 @@ def _register_ntfy_provider(manager: AlertManager, providers_config: dict) -> No
                     or config.ALERT_NTFY_URL
                     or "https://ntfy.sh",
                     topic=ntfy_topic,
+                    token=ntfy_config.get("token") or config.ALERT_NTFY_TOKEN,
                     priority=ntfy_config.get("priority", config.ALERT_NTFY_PRIORITY),
                     tags=ntfy_config.get("tags", config.ALERT_NTFY_TAGS),
                 ),

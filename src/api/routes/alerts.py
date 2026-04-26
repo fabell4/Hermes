@@ -33,6 +33,7 @@ class NtfyProviderConfig(BaseModel):
     enabled: bool = False
     url: str = "https://ntfy.sh"
     topic: str = ""
+    token: str = ""
     priority: int = Field(default=3, ge=1, le=5)
     tags: list[str] = Field(default_factory=lambda: ["warning", "rotating_light"])
 

@@ -109,6 +109,7 @@ ALERT_GOTIFY_PRIORITY: int = _get_int("ALERT_GOTIFY_PRIORITY", 5)
 # ntfy alerting
 ALERT_NTFY_URL: str | None = os.getenv("ALERT_NTFY_URL") or None
 ALERT_NTFY_TOPIC: str | None = os.getenv("ALERT_NTFY_TOPIC") or None
+ALERT_NTFY_TOKEN: str | None = os.getenv("ALERT_NTFY_TOKEN") or None
 ALERT_NTFY_PRIORITY: int = _get_int("ALERT_NTFY_PRIORITY", 3)
 ALERT_NTFY_TAGS: list[str] = _get_csv_list(
     "ALERT_NTFY_TAGS", ["warning", "rotating_light"]

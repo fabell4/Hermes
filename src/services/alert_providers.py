@@ -147,6 +147,7 @@ class NtfyProvider(AlertProvider):
         self,
         url: str = "https://ntfy.sh",
         topic: str = "",
+        token: str | None = None,
         priority: int = 3,
         tags: list[str] | None = None,
         timeout: int = 10,
@@ -157,6 +158,7 @@ class NtfyProvider(AlertProvider):
         Args:
             url: ntfy server URL (default: https://ntfy.sh)
             topic: Topic name to publish to
+            token: Optional access token for authentication
             priority: Message priority (1-5, default 3)
             tags: List of tags/emojis for the notification
             timeout: Request timeout in seconds
@@ -166,6 +168,7 @@ class NtfyProvider(AlertProvider):
 
         self.url = url.rstrip("/")
         self.topic = topic
+        self.token = token
         self.priority = max(1, min(5, priority))  # Clamp to 1-5
         self.tags = tags or ["warning", "rotating_light"]
         self.timeout = timeout
@@ -186,6 +189,9 @@ class NtfyProvider(AlertProvider):
             "Priority": str(self.priority),
             "Tags": ",".join(self.tags),
         }
+
+        if self.token:
+            headers["Authorization"] = f"Bearer {self.token}"
 
         try:
             response = requests.post(
