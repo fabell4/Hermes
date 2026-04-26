@@ -133,9 +133,8 @@ def build_alert_manager() -> AlertManager:
     return manager
 
 
-def _register_alert_providers(manager: AlertManager, providers_config: dict) -> None:
-    """Register alert providers based on configuration."""
-    # Webhook provider
+def _register_webhook_provider(manager: AlertManager, providers_config: dict) -> None:
+    """Register webhook alert provider if configured."""
     webhook_url = (
         providers_config.get("webhook", {}).get("url") or config.ALERT_WEBHOOK_URL
     )
@@ -145,7 +144,9 @@ def _register_alert_providers(manager: AlertManager, providers_config: dict) -> 
         except Exception as e:  # pylint: disable=broad-except
             logger.warning("Could not initialize webhook alert provider: %s", e)
 
-    # Gotify provider
+
+def _register_gotify_provider(manager: AlertManager, providers_config: dict) -> None:
+    """Register Gotify alert provider if configured."""
     gotify_config = providers_config.get("gotify", {})
     gotify_url = gotify_config.get("url") or config.ALERT_GOTIFY_URL
     gotify_token = gotify_config.get("token") or config.ALERT_GOTIFY_TOKEN
@@ -164,7 +165,9 @@ def _register_alert_providers(manager: AlertManager, providers_config: dict) -> 
         except Exception as e:  # pylint: disable=broad-except
             logger.warning("Could not initialize Gotify alert provider: %s", e)
 
-    # ntfy provider
+
+def _register_ntfy_provider(manager: AlertManager, providers_config: dict) -> None:
+    """Register ntfy alert provider if configured."""
     ntfy_config = providers_config.get("ntfy", {})
     ntfy_topic = ntfy_config.get("topic") or config.ALERT_NTFY_TOPIC
     if ntfy_topic:
@@ -182,6 +185,13 @@ def _register_alert_providers(manager: AlertManager, providers_config: dict) -> 
             )
         except Exception as e:  # pylint: disable=broad-except
             logger.warning("Could not initialize ntfy alert provider: %s", e)
+
+
+def _register_alert_providers(manager: AlertManager, providers_config: dict) -> None:
+    """Register alert providers based on configuration."""
+    _register_webhook_provider(manager, providers_config)
+    _register_gotify_provider(manager, providers_config)
+    _register_ntfy_provider(manager, providers_config)
 
 
 def update_alert_providers(manager: AlertManager, alert_config: dict) -> None:
@@ -333,14 +343,7 @@ def _poll_once(
     # --- React to pause/resume toggle written by the UI ---
     current_paused = runtime_config.get_scheduler_paused()
     if current_paused != last_paused:
-        job = scheduler.get_job("speedtest_run")
-        if job:
-            if current_paused:
-                scheduler.pause_job("speedtest_run")
-                logger.info("Automated scans paused.")
-            else:
-                scheduler.resume_job("speedtest_run")
-                logger.info("Automated scans resumed.")
+        _handle_scheduler_pause_toggle(scheduler, current_paused)
         last_paused = current_paused
 
     # --- Persist next run time for the UI countdown ---
@@ -349,6 +352,22 @@ def _poll_once(
         runtime_config.set_next_run_at(job.next_run_time.isoformat())
 
     return last_interval, last_exporters, last_paused, last_alert_config
+
+
+def _handle_scheduler_pause_toggle(
+    scheduler: BackgroundScheduler, should_pause: bool
+) -> None:
+    """Handle pausing or resuming the scheduler job."""
+    job = scheduler.get_job("speedtest_run")
+    if not job:
+        return
+
+    if should_pause:
+        scheduler.pause_job("speedtest_run")
+        logger.info("Automated scans paused.")
+    else:
+        scheduler.resume_job("speedtest_run")
+        logger.info("Automated scans resumed.")
 
 
 def _build_health_status(scheduler: BackgroundScheduler) -> dict:
