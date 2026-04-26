@@ -90,6 +90,9 @@ _Goal: notify users when something goes wrong and ensure code quality before v1.
 ### Quality Assurance
 - [ ] Full code review — comprehensive review of all modules before v1.0 release
   - Security audit (authentication, rate limiting, input validation)
+  - Review for defensive coding practices
+  - Review for best practices, and possible code simplification
+  - Review for modernization, remediate deprecated items
   - Error handling completeness
   - Test coverage gaps
   - Documentation accuracy
