@@ -92,3 +92,22 @@ SQLITE_RETENTION_DAYS: int = _get_int("SQLITE_RETENTION_DAYS", 0)
 # --- Loki Exporter ---
 LOKI_URL: str | None = os.getenv("LOKI_URL", None)
 LOKI_JOB_LABEL: str = os.getenv("LOKI_JOB_LABEL", "hermes_speedtest")
+
+# --- Alerting ---
+# Alerting is disabled by default. Enable by setting failure threshold > 0.
+ALERT_FAILURE_THRESHOLD: int = _get_int("ALERT_FAILURE_THRESHOLD", 0)
+ALERT_COOLDOWN_MINUTES: int = _get_int("ALERT_COOLDOWN_MINUTES", 60)
+
+# Webhook alerting
+ALERT_WEBHOOK_URL: str | None = os.getenv("ALERT_WEBHOOK_URL") or None
+
+# Gotify alerting
+ALERT_GOTIFY_URL: str | None = os.getenv("ALERT_GOTIFY_URL") or None
+ALERT_GOTIFY_TOKEN: str | None = os.getenv("ALERT_GOTIFY_TOKEN") or None
+ALERT_GOTIFY_PRIORITY: int = _get_int("ALERT_GOTIFY_PRIORITY", 5)
+
+# ntfy alerting
+ALERT_NTFY_URL: str | None = os.getenv("ALERT_NTFY_URL") or None
+ALERT_NTFY_TOPIC: str | None = os.getenv("ALERT_NTFY_TOPIC") or None
+ALERT_NTFY_PRIORITY: int = _get_int("ALERT_NTFY_PRIORITY", 3)
+ALERT_NTFY_TAGS: list[str] = _get_csv_list("ALERT_NTFY_TAGS", ["warning", "rotating_light"])

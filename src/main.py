@@ -15,6 +15,12 @@ from . import runtime_config
 from .runtime_config import set_interval_minutes, set_enabled_exporters
 from .services.health_server import HealthServer
 from .services.speedtest_runner import SpeedtestRunner
+from .services.alert_manager import AlertManager
+from .services.alert_providers import (
+    WebhookProvider,
+    GotifyProvider,
+    NtfyProvider,
+)
 from .result_dispatcher import ResultDispatcher, DispatchError
 from .exporters.csv_exporter import CSVExporter
 from .exporters.prometheus_exporter import PrometheusExporter
@@ -95,11 +101,108 @@ def update_exporters(dispatcher: ResultDispatcher, enabled: list[str]) -> None:
         else:
             logger.warning("Unknown exporter '%s' in enabled list — skipping.", name)
 
+    logger.info("Updated enabled exporters: %s", enabled)
     set_enabled_exporters(enabled)
-    logger.info("Exporters updated — active: %s", dispatcher.exporter_names)
 
 
-def run_once(service: SpeedtestRunner, dispatcher: ResultDispatcher) -> None:
+def build_alert_manager() -> AlertManager:
+    """
+    Instantiates AlertManager and registers alert providers based on configuration.
+    Priority: runtime_config.json → environment variables.
+    """
+    alert_config = runtime_config.get_alert_config()
+
+    # Use runtime config or fall back to environment
+    failure_threshold = alert_config.get("failure_threshold", config.ALERT_FAILURE_THRESHOLD)
+    cooldown_minutes = alert_config.get("cooldown_minutes", config.ALERT_COOLDOWN_MINUTES)
+
+    # Create manager (even if disabled, for potential runtime enable)
+    manager = AlertManager(
+        failure_threshold=max(1, failure_threshold),  # Minimum threshold of 1
+        cooldown_minutes=cooldown_minutes,
+    )
+
+    # Only register providers if alerting is enabled
+    if alert_config.get("enabled", False) or failure_threshold > 0:
+        _register_alert_providers(manager, alert_config.get("providers", {}))
+
+    return manager
+
+
+def _register_alert_providers(manager: AlertManager, providers_config: dict) -> None:
+    """Register alert providers based on configuration."""
+    # Webhook provider
+    webhook_url = providers_config.get("webhook", {}).get("url") or config.ALERT_WEBHOOK_URL
+    if webhook_url:
+        try:
+            manager.add_provider("webhook", WebhookProvider(url=webhook_url))
+        except Exception as e:  # pylint: disable=broad-except
+            logger.warning("Could not initialize webhook alert provider: %s", e)
+
+    # Gotify provider
+    gotify_config = providers_config.get("gotify", {})
+    gotify_url = gotify_config.get("url") or config.ALERT_GOTIFY_URL
+    gotify_token = gotify_config.get("token") or config.ALERT_GOTIFY_TOKEN
+    if gotify_url and gotify_token:
+        try:
+            manager.add_provider(
+                "gotify",
+                GotifyProvider(
+                    url=gotify_url,
+                    token=gotify_token,
+                    priority=gotify_config.get("priority", config.ALERT_GOTIFY_PRIORITY),
+                ),
+            )
+        except Exception as e:  # pylint: disable=broad-except
+            logger.warning("Could not initialize Gotify alert provider: %s", e)
+
+    # ntfy provider
+    ntfy_config = providers_config.get("ntfy", {})
+    ntfy_topic = ntfy_config.get("topic") or config.ALERT_NTFY_TOPIC
+    if ntfy_topic:
+        try:
+            manager.add_provider(
+                "ntfy",
+                NtfyProvider(
+                    url=ntfy_config.get("url") or config.ALERT_NTFY_URL or "https://ntfy.sh",
+                    topic=ntfy_topic,
+                    priority=ntfy_config.get("priority", config.ALERT_NTFY_PRIORITY),
+                    tags=ntfy_config.get("tags", config.ALERT_NTFY_TAGS),
+                ),
+            )
+        except Exception as e:  # pylint: disable=broad-except
+            logger.warning("Could not initialize ntfy alert provider: %s", e)
+
+
+def update_alert_providers(manager: AlertManager, alert_config: dict) -> None:
+    """
+    Updates the active alert providers at runtime and persists the change.
+    Called by the UI when the user updates alert configuration.
+    """
+    # Update manager configuration
+    if "failure_threshold" in alert_config:
+        manager.failure_threshold = max(1, alert_config["failure_threshold"])
+    if "cooldown_minutes" in alert_config:
+        manager.cooldown_minutes = alert_config["cooldown_minutes"]
+
+    # Clear and re-register providers
+    manager.clear_providers()
+
+    if alert_config.get("enabled", False):
+        _register_alert_providers(manager, alert_config.get("providers", {}))
+        logger.info("Alert providers updated and enabled.")
+    else:
+        logger.info("Alerting disabled — providers cleared.")
+
+    # Persist configuration
+    runtime_config.set_alert_config(alert_config)
+
+
+def run_once(
+    service: SpeedtestRunner,
+    dispatcher: ResultDispatcher,
+    alert_manager: AlertManager | None = None,
+) -> None:
     """
     Runs a single speedtest and dispatches the result to all exporters.
     Called by the scheduler and importable by the Streamlit/web layer.
@@ -116,8 +219,14 @@ def run_once(service: SpeedtestRunner, dispatcher: ResultDispatcher) -> None:
                 result.ping_ms,
                 result.server_name,
             )
+            # Record success with alert manager
+            if alert_manager:
+                alert_manager.record_success()
         except RuntimeError as e:
             logger.error("Speedtest failed: %s", e)
+            # Record failure with alert manager
+            if alert_manager:
+                alert_manager.record_failure(str(e))
             return
         try:
             dispatcher.dispatch(result)
@@ -132,7 +241,9 @@ def run_once(service: SpeedtestRunner, dispatcher: ResultDispatcher) -> None:
 
 
 def build_scheduler(
-    service: SpeedtestRunner, dispatcher: ResultDispatcher
+    service: SpeedtestRunner,
+    dispatcher: ResultDispatcher,
+    alert_manager: AlertManager | None = None,
 ) -> BackgroundScheduler:
     """
     Configures and returns the background scheduler.
@@ -140,7 +251,7 @@ def build_scheduler(
     """
     scheduler = BackgroundScheduler()
     scheduler.add_job(
-        func=lambda: run_once(service, dispatcher),
+        func=lambda: run_once(service, dispatcher, alert_manager),
         trigger=IntervalTrigger(minutes=config.SPEEDTEST_INTERVAL_MINUTES),
         id="speedtest_run",
         name="Scheduled speedtest run",
@@ -167,16 +278,21 @@ def _poll_once(
     scheduler: BackgroundScheduler,
     dispatcher: ResultDispatcher,
     service: SpeedtestRunner,
+    alert_manager: AlertManager,
     last_interval: int,
     last_exporters: list[str],
     last_paused: bool = False,
-) -> tuple[int, list[str], bool]:
+    last_alert_config: dict | None = None,
+) -> tuple[int, list[str], bool, dict]:
     """
     Execute one poll cycle — checks runtime_config.json for UI-driven changes
     and reacts accordingly. Returns the (possibly updated) interval, exporters,
-    and paused state.
+    paused state, and alert config.
     Extracted from the main loop to make it unit-testable.
     """
+    if last_alert_config is None:
+        last_alert_config = {}
+
     # --- React to interval changes written by the UI ---
     current_interval = runtime_config.get_interval_minutes(
         default=config.SPEEDTEST_INTERVAL_MINUTES
@@ -193,10 +309,16 @@ def _poll_once(
         update_exporters(dispatcher, current_exporters)
         last_exporters = current_exporters
 
+    # --- React to alert configuration changes written by the UI ---
+    current_alert_config = runtime_config.get_alert_config()
+    if current_alert_config != last_alert_config:
+        update_alert_providers(alert_manager, current_alert_config)
+        last_alert_config = current_alert_config
+
     # --- React to "Run Now" trigger written by the UI ---
     if runtime_config.consume_run_trigger():
         logger.info("Run trigger detected — starting immediate test.")
-        run_once(service, dispatcher)
+        run_once(service, dispatcher, alert_manager)
 
     # --- React to pause/resume toggle written by the UI ---
     current_paused = runtime_config.get_scheduler_paused()
@@ -216,7 +338,7 @@ def _poll_once(
     if job and job.next_run_time:
         runtime_config.set_next_run_at(job.next_run_time.isoformat())
 
-    return last_interval, last_exporters, last_paused
+    return last_interval, last_exporters, last_paused, last_alert_config
 
 
 def _build_health_status(scheduler: BackgroundScheduler) -> dict:
@@ -282,14 +404,15 @@ def main():
 
     service = SpeedtestRunner()
     dispatcher = build_dispatcher()
+    alert_manager = build_alert_manager()
 
     # Run immediately on startup if configured
     if config.RUN_ON_STARTUP:
         logger.info("RUN_ON_STARTUP is set — running initial test...")
-        run_once(service, dispatcher)
+        run_once(service, dispatcher, alert_manager)
 
     # Start the background scheduler
-    scheduler = build_scheduler(service, dispatcher)
+    scheduler = build_scheduler(service, dispatcher, alert_manager)
     scheduler.start()
 
     # Start the health endpoint
@@ -315,6 +438,7 @@ def main():
     last_exporters = runtime_config.get_enabled_exporters(
         default=config.ENABLED_EXPORTERS
     )
+    last_alert_config = runtime_config.get_alert_config()
 
     # Restore paused state persisted from before a restart.
     last_paused = runtime_config.get_scheduler_paused()
@@ -327,13 +451,15 @@ def main():
     try:
         while True:
             time.sleep(30)
-            last_interval, last_exporters, last_paused = _poll_once(
+            last_interval, last_exporters, last_paused, last_alert_config = _poll_once(
                 scheduler,
                 dispatcher,
                 service,
+                alert_manager,
                 last_interval,
                 last_exporters,
                 last_paused,
+                last_alert_config,
             )
     except (KeyboardInterrupt, SystemExit):
         logger.info("Shutdown signal received — stopping scheduler...")

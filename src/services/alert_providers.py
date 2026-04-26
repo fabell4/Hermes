@@ -1,0 +1,244 @@
+"""Alert providers — send notifications via different channels (webhook, Gotify, ntfy)."""
+
+from __future__ import annotations
+
+import logging
+from abc import ABC, abstractmethod
+from datetime import datetime
+from typing import Any
+
+import requests
+
+logger = logging.getLogger(__name__)
+
+
+class AlertProvider(ABC):
+    """Base class for alert notification providers."""
+
+    @abstractmethod
+    def send_alert(
+        self,
+        failure_count: int,
+        last_error: str,
+        timestamp: datetime,
+    ) -> None:
+        """
+        Send an alert notification.
+
+        Args:
+            failure_count: Number of consecutive failures
+            last_error: Error message from the last failed attempt
+            timestamp: When the last failure occurred
+        """
+
+
+class WebhookProvider(AlertProvider):
+    """Sends alerts via HTTP POST to a configured webhook URL."""
+
+    def __init__(self, url: str, timeout: int = 10) -> None:
+        """
+        Initialize webhook provider.
+
+        Args:
+            url: The webhook URL to POST to
+            timeout: Request timeout in seconds
+        """
+        if not url:
+            raise ValueError("Webhook URL cannot be empty")
+        self.url = url
+        self.timeout = timeout
+
+    def send_alert(
+        self,
+        failure_count: int,
+        last_error: str,
+        timestamp: datetime,
+    ) -> None:
+        """Send alert via webhook POST request."""
+        payload = {
+            "type": "speedtest_failure",
+            "consecutive_failures": failure_count,
+            "error": last_error,
+            "timestamp": timestamp.isoformat(),
+        }
+
+        try:
+            response = requests.post(
+                self.url,
+                json=payload,
+                timeout=self.timeout,
+                headers={"Content-Type": "application/json"},
+            )
+            response.raise_for_status()
+            logger.info(
+                "Webhook alert sent to %s (status: %d)", self.url, response.status_code
+            )
+        except requests.exceptions.RequestException as e:
+            logger.error("Failed to send webhook alert to %s: %s", self.url, e)
+            raise
+
+
+class GotifyProvider(AlertProvider):
+    """Sends alerts via Gotify push notification service."""
+
+    def __init__(self, url: str, token: str, priority: int = 5, timeout: int = 10) -> None:
+        """
+        Initialize Gotify provider.
+
+        Args:
+            url: Gotify server URL (e.g., https://gotify.example.com)
+            token: Application token for authentication
+            priority: Message priority (0-10, default 5)
+            timeout: Request timeout in seconds
+        """
+        if not url:
+            raise ValueError("Gotify URL cannot be empty")
+        if not token:
+            raise ValueError("Gotify token cannot be empty")
+
+        self.url = url.rstrip("/")
+        self.token = token
+        self.priority = max(0, min(10, priority))  # Clamp to 0-10
+        self.timeout = timeout
+
+    def send_alert(
+        self,
+        failure_count: int,
+        last_error: str,
+        timestamp: datetime,
+    ) -> None:
+        """Send alert via Gotify push notification."""
+        endpoint = f"{self.url}/message"
+        title = f"⚠️ Speedtest Failure ({failure_count} consecutive)"
+        message = f"**Error:** {last_error}\n\n**Time:** {timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
+
+        payload = {
+            "title": title,
+            "message": message,
+            "priority": self.priority,
+            "extras": {
+                "client::display": {"contentType": "text/markdown"},
+                "hermes::failure_count": failure_count,
+            },
+        }
+
+        try:
+            response = requests.post(
+                endpoint,
+                json=payload,
+                params={"token": self.token},
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+            logger.info("Gotify alert sent to %s (status: %d)", self.url, response.status_code)
+        except requests.exceptions.RequestException as e:
+            logger.error("Failed to send Gotify alert to %s: %s", self.url, e)
+            raise
+
+
+class NtfyProvider(AlertProvider):
+    """Sends alerts via ntfy.sh push notification service."""
+
+    def __init__(
+        self,
+        url: str = "https://ntfy.sh",
+        topic: str = "",
+        priority: int = 3,
+        tags: list[str] | None = None,
+        timeout: int = 10,
+    ) -> None:
+        """
+        Initialize ntfy provider.
+
+        Args:
+            url: ntfy server URL (default: https://ntfy.sh)
+            topic: Topic name to publish to
+            priority: Message priority (1-5, default 3)
+            tags: List of tags/emojis for the notification
+            timeout: Request timeout in seconds
+        """
+        if not topic:
+            raise ValueError("ntfy topic cannot be empty")
+
+        self.url = url.rstrip("/")
+        self.topic = topic
+        self.priority = max(1, min(5, priority))  # Clamp to 1-5
+        self.tags = tags or ["warning", "rotating_light"]
+        self.timeout = timeout
+
+    def send_alert(
+        self,
+        failure_count: int,
+        last_error: str,
+        timestamp: datetime,
+    ) -> None:
+        """Send alert via ntfy push notification."""
+        endpoint = f"{self.url}/{self.topic}"
+        title = f"Speedtest Failure ({failure_count} consecutive)"
+        message = f"{last_error}\n\nTime: {timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
+
+        headers = {
+            "Title": title,
+            "Priority": str(self.priority),
+            "Tags": ",".join(self.tags),
+        }
+
+        try:
+            response = requests.post(
+                endpoint,
+                data=message.encode("utf-8"),
+                headers=headers,
+                timeout=self.timeout,
+            )
+            response.raise_for_status()
+            logger.info(
+                "ntfy alert sent to %s/%s (status: %d)",
+                self.url,
+                self.topic,
+                response.status_code,
+            )
+        except requests.exceptions.RequestException as e:
+            logger.error(
+                "Failed to send ntfy alert to %s/%s: %s", self.url, self.topic, e
+            )
+            raise
+
+
+def create_provider(provider_type: str, config: dict[str, Any]) -> AlertProvider:
+    """
+    Factory function to create an alert provider based on type.
+
+    Args:
+        provider_type: Type of provider ("webhook", "gotify", "ntfy")
+        config: Provider-specific configuration dictionary
+
+    Returns:
+        Configured AlertProvider instance
+
+    Raises:
+        ValueError: If provider type is unknown or config is invalid
+    """
+    provider_type = provider_type.lower()
+
+    if provider_type == "webhook":
+        return WebhookProvider(
+            url=config["url"],
+            timeout=config.get("timeout", 10),
+        )
+    elif provider_type == "gotify":
+        return GotifyProvider(
+            url=config["url"],
+            token=config["token"],
+            priority=config.get("priority", 5),
+            timeout=config.get("timeout", 10),
+        )
+    elif provider_type == "ntfy":
+        return NtfyProvider(
+            url=config.get("url", "https://ntfy.sh"),
+            topic=config["topic"],
+            priority=config.get("priority", 3),
+            tags=config.get("tags"),
+            timeout=config.get("timeout", 10),
+        )
+    else:
+        raise ValueError(f"Unknown alert provider type: {provider_type}")

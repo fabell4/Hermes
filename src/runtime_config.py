@@ -178,3 +178,37 @@ def get_scheduler_paused() -> bool:
 def set_scheduler_paused(paused: bool) -> None:
     """Persists whether automated scans are paused."""
     save({"scheduler_paused": paused})
+
+
+# --- Alert configuration ---
+
+
+def get_alert_config() -> dict:
+    """
+    Returns the alert configuration with defaults.
+
+    Returns a dict with keys:
+    - enabled: bool
+    - failure_threshold: int
+    - cooldown_minutes: int
+    - providers: dict[str, dict] (webhook, gotify, ntfy configurations)
+    """
+    data = load().get("alert_config", {})
+
+    # Provide defaults
+    return {
+        "enabled": data.get("enabled", False),
+        "failure_threshold": data.get("failure_threshold", 3),
+        "cooldown_minutes": data.get("cooldown_minutes", 60),
+        "providers": data.get("providers", {}),
+    }
+
+
+def set_alert_config(config: dict) -> None:
+    """
+    Persists alert configuration to disk.
+
+    Args:
+        config: Dict with keys: enabled, failure_threshold, cooldown_minutes, providers
+    """
+    save({"alert_config": config})

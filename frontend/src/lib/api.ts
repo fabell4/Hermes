@@ -9,6 +9,7 @@ import type {
   HealthStatus,
   TriggerResponse,
   ResultsPage,
+  AlertConfig,
 } from '@/types'
 
 const BASE = '/api'
@@ -75,5 +76,18 @@ export const api = {
   /** Health / scheduler status. */
   getHealth(): Promise<HealthStatus> {
     return request('/health')
+  },
+
+  /** Read current alert configuration. */
+  getAlerts(): Promise<AlertConfig> {
+    return request('/alerts')
+  },
+
+  /** Persist updated alert configuration. */
+  updateAlerts(config: AlertConfig): Promise<AlertConfig> {
+    return request('/alerts', {
+      method: 'PUT',
+      body: JSON.stringify(config),
+    })
   },
 }

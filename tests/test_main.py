@@ -248,12 +248,12 @@ def test_speedtest_runner_raises_after_two_failures(mock_st_class):
 
 
 def _make_poll_deps():
-    """Return mock scheduler, dispatcher, service for _poll_once tests."""
-    return MagicMock(), MagicMock(), MagicMock()
+    """Return mock scheduler, dispatcher, service, alert_manager for _poll_once tests."""
+    return MagicMock(), MagicMock(), MagicMock(), MagicMock()
 
 
 def test_poll_once_no_changes_returns_same_state(monkeypatch):
-    scheduler, dispatcher, service = _make_poll_deps()
+    scheduler, dispatcher, service, alert_manager = _make_poll_deps()
     monkeypatch.setattr(
         main_module.runtime_config, "get_interval_minutes", lambda default: 60
     )
@@ -266,10 +266,13 @@ def test_poll_once_no_changes_returns_same_state(monkeypatch):
     monkeypatch.setattr(
         main_module.runtime_config, "get_scheduler_paused", lambda: False
     )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_alert_config", lambda: {"enabled": False}
+    )
     monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
 
-    interval, exporters, paused = _poll_once(
-        scheduler, dispatcher, service, 60, ["csv"]
+    interval, exporters, paused, _ = _poll_once(
+        scheduler, dispatcher, service, alert_manager, 60, ["csv"]
     )
 
     assert interval == 60
@@ -281,7 +284,7 @@ def test_poll_once_no_changes_returns_same_state(monkeypatch):
 
 
 def test_poll_once_interval_changed_calls_update_schedule(monkeypatch):
-    scheduler, dispatcher, service = _make_poll_deps()
+    scheduler, dispatcher, service, alert_manager = _make_poll_deps()
     monkeypatch.setattr(
         main_module.runtime_config, "get_interval_minutes", lambda default: 30
     )
@@ -297,16 +300,19 @@ def test_poll_once_interval_changed_calls_update_schedule(monkeypatch):
     monkeypatch.setattr(
         main_module.runtime_config, "get_scheduler_paused", lambda: False
     )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_alert_config", lambda: {"enabled": False}
+    )
     monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
 
-    interval, _, _ = _poll_once(scheduler, dispatcher, service, 60, ["csv"])
+    interval, _, _, _ = _poll_once(scheduler, dispatcher, service, alert_manager, 60, ["csv"])
 
     assert interval == 30
     scheduler.reschedule_job.assert_called_once()
 
 
 def test_poll_once_exporters_changed_calls_update_exporters(monkeypatch):
-    scheduler, dispatcher, service = _make_poll_deps()
+    scheduler, dispatcher, service, alert_manager = _make_poll_deps()
     monkeypatch.setattr(
         main_module.runtime_config, "get_interval_minutes", lambda default: 60
     )
@@ -324,6 +330,9 @@ def test_poll_once_exporters_changed_calls_update_exporters(monkeypatch):
     monkeypatch.setattr(
         main_module.runtime_config, "get_scheduler_paused", lambda: False
     )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_alert_config", lambda: {"enabled": False}
+    )
     monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
     monkeypatch.setattr(
         main_module,
@@ -334,14 +343,14 @@ def test_poll_once_exporters_changed_calls_update_exporters(monkeypatch):
         },
     )
 
-    _, exporters, _ = _poll_once(scheduler, dispatcher, service, 60, ["csv"])
+    _, exporters, _, _ = _poll_once(scheduler, dispatcher, service, alert_manager, 60, ["csv"])
 
     assert sorted(exporters) == ["csv", "prometheus"]
     dispatcher.clear.assert_called_once()
 
 
 def test_poll_once_trigger_fires_calls_run_once(monkeypatch):
-    scheduler, dispatcher, service = _make_poll_deps()
+    scheduler, dispatcher, service, alert_manager = _make_poll_deps()
     monkeypatch.setattr(
         main_module.runtime_config, "get_interval_minutes", lambda default: 60
     )
@@ -354,20 +363,23 @@ def test_poll_once_trigger_fires_calls_run_once(monkeypatch):
     monkeypatch.setattr(
         main_module.runtime_config, "get_scheduler_paused", lambda: False
     )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_alert_config", lambda: {"enabled": False}
+    )
     monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
     monkeypatch.setattr(main_module.runtime_config, "set_last_run_at", lambda t: None)
 
     result = MagicMock()
     service.run.return_value = result
 
-    _poll_once(scheduler, dispatcher, service, 60, ["csv"])
+    _poll_once(scheduler, dispatcher, service, alert_manager, 60, ["csv"])
 
     service.run.assert_called_once()
 
 
 def test_poll_once_pause_calls_pause_job(monkeypatch):
     """When scheduler_paused transitions to True, pause_job is called."""
-    scheduler, dispatcher, service = _make_poll_deps()
+    scheduler, dispatcher, service, alert_manager = _make_poll_deps()
     monkeypatch.setattr(
         main_module.runtime_config, "get_interval_minutes", lambda default: 60
     )
@@ -380,10 +392,13 @@ def test_poll_once_pause_calls_pause_job(monkeypatch):
     monkeypatch.setattr(
         main_module.runtime_config, "get_scheduler_paused", lambda: True
     )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_alert_config", lambda: {"enabled": False}
+    )
     monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
 
-    _, _, paused = _poll_once(
-        scheduler, dispatcher, service, 60, ["csv"], last_paused=False
+    _, _, paused, _ = _poll_once(
+        scheduler, dispatcher, service, alert_manager, 60, ["csv"], last_paused=False
     )
 
     scheduler.pause_job.assert_called_once_with("speedtest_run")
@@ -393,7 +408,7 @@ def test_poll_once_pause_calls_pause_job(monkeypatch):
 
 def test_poll_once_resume_calls_resume_job(monkeypatch):
     """When scheduler_paused transitions to False, resume_job is called."""
-    scheduler, dispatcher, service = _make_poll_deps()
+    scheduler, dispatcher, service, alert_manager = _make_poll_deps()
     monkeypatch.setattr(
         main_module.runtime_config, "get_interval_minutes", lambda default: 60
     )
@@ -406,10 +421,13 @@ def test_poll_once_resume_calls_resume_job(monkeypatch):
     monkeypatch.setattr(
         main_module.runtime_config, "get_scheduler_paused", lambda: False
     )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_alert_config", lambda: {"enabled": False}
+    )
     monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
 
-    _, _, paused = _poll_once(
-        scheduler, dispatcher, service, 60, ["csv"], last_paused=True
+    _, _, paused, _ = _poll_once(
+        scheduler, dispatcher, service, alert_manager, 60, ["csv"], last_paused=True
     )
 
     scheduler.resume_job.assert_called_once_with("speedtest_run")
@@ -506,7 +524,8 @@ def test_main_shuts_down_cleanly_on_keyboard_interrupt(monkeypatch):
     monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
     monkeypatch.setattr(main_module, "SpeedtestRunner", MagicMock)
     monkeypatch.setattr(main_module, "build_dispatcher", MagicMock)
-    monkeypatch.setattr(main_module, "build_scheduler", lambda s, d: mock_scheduler)
+    monkeypatch.setattr(main_module, "build_alert_manager", MagicMock)
+    monkeypatch.setattr(main_module, "build_scheduler", lambda s, d, a: mock_scheduler)
     monkeypatch.setattr(main_module, "HealthServer", MagicMock)
     monkeypatch.setattr(
         main_module.time, "sleep", MagicMock(side_effect=KeyboardInterrupt)
@@ -539,9 +558,13 @@ def test_main_run_on_startup_and_poll_loop(monkeypatch):
     monkeypatch.setattr(
         main_module.runtime_config, "consume_run_trigger", lambda: False
     )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_alert_config", lambda: {"enabled": False}
+    )
     monkeypatch.setattr(main_module, "SpeedtestRunner", MagicMock)
     monkeypatch.setattr(main_module, "build_dispatcher", MagicMock)
-    monkeypatch.setattr(main_module, "build_scheduler", lambda s, d: mock_scheduler)
+    monkeypatch.setattr(main_module, "build_alert_manager", MagicMock)
+    monkeypatch.setattr(main_module, "build_scheduler", lambda s, d, a: mock_scheduler)
     monkeypatch.setattr(main_module, "HealthServer", MagicMock)
     # sleep succeeds once; _poll_once raises KeyboardInterrupt to exit the loop
     monkeypatch.setattr(main_module.time, "sleep", lambda _: None)

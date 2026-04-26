@@ -2,6 +2,8 @@
 
 A Python application that periodically runs internet speed tests and exports results to multiple destinations (CSV, SQLite, Prometheus, and Loki). Results are surfaced through a React + Vite frontend backed by a FastAPI REST layer. Each result captures download, upload, ping, jitter, and ISP name.
 
+**Alert notifications** can be configured to send alerts via webhook, Gotify, or ntfy.sh when consecutive speedtest failures occur, with configurable thresholds and cooldown periods.
+
 ## Architecture
   *Hermes is currently in beta. All four exporters (CSV, SQLite, Prometheus, Loki) are fully operational.*
 
@@ -330,6 +332,7 @@ The FastAPI server (`hermes-api` container) exposes the following REST endpoints
 | `GET` | `/api/results` | Paginated speed test results (newest first) |
 | `GET` | `/api/results/latest` | Most recent speed test result |
 | `GET` | `/api/config` | Current runtime configuration |
+| `GET` | `/api/alerts` | Current alert configuration |
 | `GET` | `/api/trigger/status` | Check if a speed test is currently running |
 
 ### Protected Endpoints (require `X-Api-Key` header when `API_KEY` is set)
@@ -338,6 +341,7 @@ The FastAPI server (`hermes-api` container) exposes the following REST endpoints
 |---|---|---|
 | `POST` | `/api/trigger` | Manually trigger a speed test |
 | `PUT` | `/api/config` | Update runtime configuration |
+| `PUT` | `/api/alerts` | Update alert configuration |
 
 **Authentication:**
 

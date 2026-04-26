@@ -78,10 +78,14 @@ _Goal: complete the Streamlit UI improvements, then replace Streamlit with a Rea
 _Goal: notify users when something goes wrong and ensure code quality before v1.0._
 
 ### Alerting
-- [ ] Consecutive failure detection — track N consecutive speedtest failures
-- [ ] Webhook alerting — POST to a configurable URL on consecutive failure
-- [ ] Gotify / ntfy support — push notification on failure
-- [ ] Alert cooldown — don't re-alert within a configurable window
+- [x] Consecutive failure detection — track N consecutive speedtest failures
+- [x] Webhook alerting — POST to a configurable URL on consecutive failure
+- [x] Gotify / ntfy support — push notification on failure
+- [x] Alert cooldown — don't re-alert within a configurable window
+- [x] Alert API endpoints — `GET /api/alerts` and `PUT /api/alerts` with authentication
+- [x] Alert UI configuration — frontend settings page for alert providers
+- [x] Comprehensive alert tests — 48 tests covering providers, manager, and API
+- [x] Alert documentation — README and environment variable examples
 
 ### Quality Assurance
 - [ ] Full code review — comprehensive review of all modules before v1.0 release

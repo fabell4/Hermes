@@ -18,7 +18,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import FileResponse
 
-from src.api.routes import config, results, trigger
+from src.api.routes import config, results, trigger, alerts
 from src import runtime_config as rc
 
 logger = logging.getLogger(__name__)
@@ -56,6 +56,7 @@ app.add_middleware(
 app.include_router(results.router, prefix="/api")
 app.include_router(trigger.router, prefix="/api")
 app.include_router(config.router, prefix="/api")
+app.include_router(alerts.router, prefix="/api")
 
 
 class HealthResponse(BaseModel):

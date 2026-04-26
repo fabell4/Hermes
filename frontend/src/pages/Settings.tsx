@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Clock, Database, Eye, EyeOff, Key, Save, CheckCircle } from 'lucide-react'
+import { Clock, Database, Eye, EyeOff, Key, Save, CheckCircle, Bell } from 'lucide-react'
 import { useHermes } from '@/hooks/useHermes'
-import type { RuntimeConfig } from '@/types'
+import type { RuntimeConfig, AlertConfig } from '@/types'
 
 const ALL_EXPORTERS = [
   { id: 'csv', label: 'CSV Export', desc: 'Append results to a local CSV file' },
@@ -12,18 +12,23 @@ const ALL_EXPORTERS = [
 ]
 
 export function Settings() {
-  const { config, updateConfig } = useHermes()
+  const { config, alerts, updateConfig, updateAlerts } = useHermes()
   const [draft, setDraft] = useState<RuntimeConfig | null>(null)
+  const [alertsDraft, setAlertsDraft] = useState<AlertConfig | null>(null)
   const [saved, setSaved] = useState(false)
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('hermes_api_key') ?? '')
   const [showKey, setShowKey] = useState(false)
 
-  // Keep local draft in sync when config loads
+  // Keep local drafts in sync when config/alerts load
   useEffect(() => {
     if (config) setDraft({ ...config })
   }, [config])
 
-  if (!draft) {
+  useEffect(() => {
+    if (alerts) setAlertsDraft({ ...alerts })
+  }, [alerts])
+
+  if (!draft || !alertsDraft) {
     return (
       <div className="text-slate-500 text-sm py-10 text-center">
         Loading configuration…
@@ -42,13 +47,16 @@ export function Settings() {
   }
 
   const handleSave = async () => {
-    if (!draft) return
+    if (!draft || !alertsDraft) return
     if (apiKey) {
       localStorage.setItem('hermes_api_key', apiKey)
     } else {
       localStorage.removeItem('hermes_api_key')
     }
-    await updateConfig(draft)
+    await Promise.all([
+      updateConfig(draft),
+      updateAlerts(alertsDraft),
+    ])
     setSaved(true)
     setTimeout(() => setSaved(false), 2500)
   }
@@ -148,6 +156,310 @@ export function Settings() {
           </div>
         </div>
       </div>
+
+      {/* Alerts */}
+      {alertsDraft && (
+        <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Bell size={18} className="text-orange-400" />
+              <h2 className="text-base font-semibold text-slate-200">Alerts</h2>
+            </div>
+            <button
+              onClick={() =>
+                setAlertsDraft((d) => (d ? { ...d, enabled: !d.enabled } : d))
+              }
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                alertsDraft.enabled ? 'bg-orange-500' : 'bg-slate-700'
+              }`}
+              aria-pressed={alertsDraft.enabled}
+            >
+              <span
+                className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                  alertsDraft.enabled ? 'translate-x-5' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+          
+          <p className="text-xs text-slate-500">
+            Get notified when speed tests fail consecutively.
+          </p>
+
+          {alertsDraft.enabled && (
+            <div className="space-y-4 pt-2">
+              {/* Threshold and Cooldown */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="failure-threshold" className="block text-sm font-medium text-slate-300 mb-2">
+                    Failure Threshold
+                  </label>
+                  <input
+                    id="failure-threshold"
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={alertsDraft.failure_threshold}
+                    onChange={(e) =>
+                      setAlertsDraft((d) =>
+                        d
+                          ? {
+                              ...d,
+                              failure_threshold: Math.max(
+                                1,
+                                Number.parseInt(e.target.value, 10) || 3
+                              ),
+                            }
+                          : d
+                      )
+                    }
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">
+                    Alert after N failures
+                  </p>
+                </div>
+                <div>
+                  <label htmlFor="cooldown-minutes" className="block text-sm font-medium text-slate-300 mb-2">
+                    Cooldown Period (minutes)
+                  </label>
+                  <input
+                    id="cooldown-minutes"
+                    type="number"
+                    min={0}
+                    max={1440}
+                    value={alertsDraft.cooldown_minutes}
+                    onChange={(e) =>
+                      setAlertsDraft((d) =>
+                        d
+                          ? {
+                              ...d,
+                              cooldown_minutes: Math.max(
+                                0,
+                                Number.parseInt(e.target.value, 10) || 60
+                              ),
+                            }
+                          : d
+                      )
+                    }
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">
+                    Time between alerts
+                  </p>
+                </div>
+              </div>
+
+              {/* Webhook Provider */}
+              <div className="border-t border-slate-700 pt-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-medium text-slate-300">Webhook</h3>
+                  <button
+                    onClick={() =>
+                      setAlertsDraft((d) =>
+                        d
+                          ? {
+                              ...d,
+                              providers: {
+                                ...d.providers,
+                                webhook: {
+                                  ...d.providers.webhook,
+                                  enabled: !d.providers.webhook.enabled,
+                                },
+                              },
+                            }
+                          : d
+                      )
+                    }
+                    className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors ${
+                      alertsDraft.providers.webhook.enabled ? 'bg-cyan-500' : 'bg-slate-700'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-2.5 w-2.5 transform rounded-full bg-white transition-transform ${
+                        alertsDraft.providers.webhook.enabled ? 'translate-x-4.5' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+                {alertsDraft.providers.webhook.enabled && (
+                  <input
+                    type="url"
+                    placeholder="https://webhook.example.com/alerts"
+                    value={alertsDraft.providers.webhook.url}
+                    onChange={(e) =>
+                      setAlertsDraft((d) =>
+                        d
+                          ? {
+                              ...d,
+                              providers: {
+                                ...d.providers,
+                                webhook: { ...d.providers.webhook, url: e.target.value },
+                              },
+                            }
+                          : d
+                      )
+                    }
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                  />
+                )}
+              </div>
+
+              {/* Gotify Provider */}
+              <div className="border-t border-slate-700 pt-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-medium text-slate-300">Gotify</h3>
+                  <button
+                    onClick={() =>
+                      setAlertsDraft((d) =>
+                        d
+                          ? {
+                              ...d,
+                              providers: {
+                                ...d.providers,
+                                gotify: {
+                                  ...d.providers.gotify,
+                                  enabled: !d.providers.gotify.enabled,
+                                },
+                              },
+                            }
+                          : d
+                      )
+                    }
+                    className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors ${
+                      alertsDraft.providers.gotify.enabled ? 'bg-cyan-500' : 'bg-slate-700'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-2.5 w-2.5 transform rounded-full bg-white transition-transform ${
+                        alertsDraft.providers.gotify.enabled ? 'translate-x-4.5' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+                {alertsDraft.providers.gotify.enabled && (
+                  <div className="space-y-2">
+                    <input
+                      type="url"
+                      placeholder="https://gotify.example.com"
+                      value={alertsDraft.providers.gotify.url}
+                      onChange={(e) =>
+                        setAlertsDraft((d) =>
+                          d
+                            ? {
+                                ...d,
+                                providers: {
+                                  ...d.providers,
+                                  gotify: { ...d.providers.gotify, url: e.target.value },
+                                },
+                              }
+                            : d
+                        )
+                      }
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                    />
+                    <input
+                      type="password"
+                      placeholder="App token"
+                      value={alertsDraft.providers.gotify.token}
+                      onChange={(e) =>
+                        setAlertsDraft((d) =>
+                          d
+                            ? {
+                                ...d,
+                                providers: {
+                                  ...d.providers,
+                                  gotify: { ...d.providers.gotify, token: e.target.value },
+                                },
+                              }
+                            : d
+                        )
+                      }
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* ntfy Provider */}
+              <div className="border-t border-slate-700 pt-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-medium text-slate-300">ntfy</h3>
+                  <button
+                    onClick={() =>
+                      setAlertsDraft((d) =>
+                        d
+                          ? {
+                              ...d,
+                              providers: {
+                                ...d.providers,
+                                ntfy: {
+                                  ...d.providers.ntfy,
+                                  enabled: !d.providers.ntfy.enabled,
+                                },
+                              },
+                            }
+                          : d
+                      )
+                    }
+                    className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors ${
+                      alertsDraft.providers.ntfy.enabled ? 'bg-cyan-500' : 'bg-slate-700'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-2.5 w-2.5 transform rounded-full bg-white transition-transform ${
+                        alertsDraft.providers.ntfy.enabled ? 'translate-x-4.5' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+                {alertsDraft.providers.ntfy.enabled && (
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      placeholder="Topic name"
+                      value={alertsDraft.providers.ntfy.topic}
+                      onChange={(e) =>
+                        setAlertsDraft((d) =>
+                          d
+                            ? {
+                                ...d,
+                                providers: {
+                                  ...d.providers,
+                                  ntfy: { ...d.providers.ntfy, topic: e.target.value },
+                                },
+                              }
+                            : d
+                        )
+                      }
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                    />
+                    <input
+                      type="url"
+                      placeholder="https://ntfy.sh (optional)"
+                      value={alertsDraft.providers.ntfy.url}
+                      onChange={(e) =>
+                        setAlertsDraft((d) =>
+                          d
+                            ? {
+                                ...d,
+                                providers: {
+                                  ...d.providers,
+                                  ntfy: { ...d.providers.ntfy, url: e.target.value },
+                                },
+                              }
+                            : d
+                        )
+                      }
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* API Key */}
       <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 space-y-4">

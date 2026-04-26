@@ -8,7 +8,7 @@ import {
 import { api } from '@/lib/api'
 import { useSpeedData } from '@/hooks/useSpeedData'
 import { HermesContext } from '@/context/hermesContextDef'
-import type { RuntimeConfig } from '@/types'
+import type { RuntimeConfig, AlertConfig } from '@/types'
 
 interface HermesProviderProps {
   readonly children: ReactNode
@@ -17,11 +17,13 @@ interface HermesProviderProps {
 export function HermesProvider({ children }: HermesProviderProps) {
   const { results, latest, health, loading, error, refresh } = useSpeedData()
   const [config, setConfig] = useState<RuntimeConfig | null>(null)
+  const [alerts, setAlerts] = useState<AlertConfig | null>(null)
   const [isTesting, setIsTesting] = useState(false)
 
-  // Load config once on mount
+  // Load config and alerts once on mount
   useEffect(() => {
     api.getConfig().then(setConfig).catch(() => null)
+    api.getAlerts().then(setAlerts).catch(() => null)
   }, [])
 
   // Poll test status every 2 seconds to detect scheduler-triggered tests
@@ -71,20 +73,30 @@ export function HermesProvider({ children }: HermesProviderProps) {
     []
   )
 
+  const updateAlerts = useCallback(
+    async (config: AlertConfig) => {
+      const updated = await api.updateAlerts(config)
+      setAlerts(updated)
+    },
+    []
+  )
+
   const contextValue = useMemo(
     () => ({
       results,
       latest,
       health,
       config,
+      alerts,
       loading,
       isTesting,
       error,
       runTest,
       updateConfig,
+      updateAlerts,
       refresh,
     }),
-    [results, latest, health, config, loading, isTesting, error, runTest, updateConfig, refresh]
+    [results, latest, health, config, alerts, loading, isTesting, error, runTest, updateConfig, updateAlerts, refresh]
   )
 
   return (

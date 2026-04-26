@@ -40,3 +40,36 @@ export interface ResultsPage {
   page: number
   page_size: number
 }
+
+export interface WebhookProviderConfig {
+  enabled: boolean
+  url: string
+}
+
+export interface GotifyProviderConfig {
+  enabled: boolean
+  url: string
+  token: string
+  priority: number
+}
+
+export interface NtfyProviderConfig {
+  enabled: boolean
+  url: string
+  topic: string
+  priority: number
+  tags: string[]
+}
+
+export interface AlertProvidersConfig {
+  webhook: WebhookProviderConfig
+  gotify: GotifyProviderConfig
+  ntfy: NtfyProviderConfig
+}
+
+export interface AlertConfig {
+  enabled: boolean
+  failure_threshold: number
+  cooldown_minutes: number
+  providers: AlertProvidersConfig
+}
