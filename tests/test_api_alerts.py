@@ -49,16 +49,25 @@ def test_put_alerts_requires_auth_when_key_set():
     """PUT /api/alerts requires API key when authentication is enabled."""
     key = "test-api-key"
     with patch("src.api.auth.config.API_KEY", key):
-        response = client.put("/api/alerts", json={
-            "enabled": True,
-            "failure_threshold": 3,
-            "cooldown_minutes": 60,
-            "providers": {
-                "webhook": {"enabled": False, "url": ""},
-                "gotify": {"enabled": False, "url": "", "token": "", "priority": 5},
-                "ntfy": {"enabled": False, "url": "https://ntfy.sh", "topic": "", "priority": 3, "tags": []},
+        response = client.put(
+            "/api/alerts",
+            json={
+                "enabled": True,
+                "failure_threshold": 3,
+                "cooldown_minutes": 60,
+                "providers": {
+                    "webhook": {"enabled": False, "url": ""},
+                    "gotify": {"enabled": False, "url": "", "token": "", "priority": 5},
+                    "ntfy": {
+                        "enabled": False,
+                        "url": "https://ntfy.sh",
+                        "topic": "",
+                        "priority": 3,
+                        "tags": [],
+                    },
+                },
             },
-        })
+        )
         assert response.status_code == 401
 
 
@@ -109,7 +118,13 @@ def test_put_alerts_validates_failure_threshold():
         "providers": {
             "webhook": {"enabled": False, "url": ""},
             "gotify": {"enabled": False, "url": "", "token": "", "priority": 5},
-            "ntfy": {"enabled": False, "url": "https://ntfy.sh", "topic": "", "priority": 3, "tags": []},
+            "ntfy": {
+                "enabled": False,
+                "url": "https://ntfy.sh",
+                "topic": "",
+                "priority": 3,
+                "tags": [],
+            },
         },
     }
 
@@ -126,7 +141,13 @@ def test_put_alerts_validates_cooldown_range():
         "providers": {
             "webhook": {"enabled": False, "url": ""},
             "gotify": {"enabled": False, "url": "", "token": "", "priority": 5},
-            "ntfy": {"enabled": False, "url": "https://ntfy.sh", "topic": "", "priority": 3, "tags": []},
+            "ntfy": {
+                "enabled": False,
+                "url": "https://ntfy.sh",
+                "topic": "",
+                "priority": 3,
+                "tags": [],
+            },
         },
     }
 
@@ -148,7 +169,13 @@ def test_put_alerts_validates_gotify_priority():
                 "token": "token",
                 "priority": 15,  # Above max
             },
-            "ntfy": {"enabled": False, "url": "https://ntfy.sh", "topic": "", "priority": 3, "tags": []},
+            "ntfy": {
+                "enabled": False,
+                "url": "https://ntfy.sh",
+                "topic": "",
+                "priority": 3,
+                "tags": [],
+            },
         },
     }
 
@@ -212,7 +239,7 @@ def test_put_alerts_only_persists_enabled_providers():
     # Verify persisted config via GET
     get_response = client.get("/api/alerts")
     data = get_response.json()
-    
+
     # Webhook should be saved
     assert data["providers"]["webhook"]["enabled"] is True
     # Gotify was disabled, might not be fully persisted
@@ -232,7 +259,13 @@ def test_put_alerts_requires_url_for_webhook():
                 "url": "",  # Missing URL
             },
             "gotify": {"enabled": False, "url": "", "token": "", "priority": 5},
-            "ntfy": {"enabled": False, "url": "https://ntfy.sh", "topic": "", "priority": 3, "tags": []},
+            "ntfy": {
+                "enabled": False,
+                "url": "https://ntfy.sh",
+                "topic": "",
+                "priority": 3,
+                "tags": [],
+            },
         },
     }
 
@@ -254,7 +287,13 @@ def test_put_alerts_requires_token_for_gotify():
                 "token": "",  # Missing token
                 "priority": 5,
             },
-            "ntfy": {"enabled": False, "url": "https://ntfy.sh", "topic": "", "priority": 3, "tags": []},
+            "ntfy": {
+                "enabled": False,
+                "url": "https://ntfy.sh",
+                "topic": "",
+                "priority": 3,
+                "tags": [],
+            },
         },
     }
 

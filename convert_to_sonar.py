@@ -72,9 +72,7 @@ def make_issue(engine_id, rule_id, severity, type_, file_path, line, message):
         "name": rule_id,
         "engineId": engine_id,
         "cleanCodeAttribute": clean_code_attr,
-        "impacts": [
-            {"softwareQuality": software_quality, "severity": impact_severity}
-        ],
+        "impacts": [{"softwareQuality": software_quality, "severity": impact_severity}],
     }
     issue = {
         "ruleId": rule_id,

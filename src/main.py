@@ -113,8 +113,12 @@ def build_alert_manager() -> AlertManager:
     alert_config = runtime_config.get_alert_config()
 
     # Use runtime config or fall back to environment
-    failure_threshold = alert_config.get("failure_threshold", config.ALERT_FAILURE_THRESHOLD)
-    cooldown_minutes = alert_config.get("cooldown_minutes", config.ALERT_COOLDOWN_MINUTES)
+    failure_threshold = alert_config.get(
+        "failure_threshold", config.ALERT_FAILURE_THRESHOLD
+    )
+    cooldown_minutes = alert_config.get(
+        "cooldown_minutes", config.ALERT_COOLDOWN_MINUTES
+    )
 
     # Create manager (even if disabled, for potential runtime enable)
     manager = AlertManager(
@@ -132,7 +136,9 @@ def build_alert_manager() -> AlertManager:
 def _register_alert_providers(manager: AlertManager, providers_config: dict) -> None:
     """Register alert providers based on configuration."""
     # Webhook provider
-    webhook_url = providers_config.get("webhook", {}).get("url") or config.ALERT_WEBHOOK_URL
+    webhook_url = (
+        providers_config.get("webhook", {}).get("url") or config.ALERT_WEBHOOK_URL
+    )
     if webhook_url:
         try:
             manager.add_provider("webhook", WebhookProvider(url=webhook_url))
@@ -150,7 +156,9 @@ def _register_alert_providers(manager: AlertManager, providers_config: dict) -> 
                 GotifyProvider(
                     url=gotify_url,
                     token=gotify_token,
-                    priority=gotify_config.get("priority", config.ALERT_GOTIFY_PRIORITY),
+                    priority=gotify_config.get(
+                        "priority", config.ALERT_GOTIFY_PRIORITY
+                    ),
                 ),
             )
         except Exception as e:  # pylint: disable=broad-except
@@ -164,7 +172,9 @@ def _register_alert_providers(manager: AlertManager, providers_config: dict) -> 
             manager.add_provider(
                 "ntfy",
                 NtfyProvider(
-                    url=ntfy_config.get("url") or config.ALERT_NTFY_URL or "https://ntfy.sh",
+                    url=ntfy_config.get("url")
+                    or config.ALERT_NTFY_URL
+                    or "https://ntfy.sh",
                     topic=ntfy_topic,
                     priority=ntfy_config.get("priority", config.ALERT_NTFY_PRIORITY),
                     tags=ntfy_config.get("tags", config.ALERT_NTFY_TAGS),

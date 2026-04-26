@@ -82,7 +82,9 @@ def get_alerts() -> AlertConfigSchema:
                 url=providers_data.get("ntfy", {}).get("url", "https://ntfy.sh"),
                 topic=providers_data.get("ntfy", {}).get("topic", ""),
                 priority=providers_data.get("ntfy", {}).get("priority", 3),
-                tags=providers_data.get("ntfy", {}).get("tags", ["warning", "rotating_light"]),
+                tags=providers_data.get("ntfy", {}).get(
+                    "tags", ["warning", "rotating_light"]
+                ),
             ),
         ),
     )
@@ -104,7 +106,11 @@ def update_alerts(body: AlertConfigSchema) -> AlertConfigSchema:
             "url": body.providers.webhook.url,
         }
 
-    if body.providers.gotify.enabled and body.providers.gotify.url and body.providers.gotify.token:
+    if (
+        body.providers.gotify.enabled
+        and body.providers.gotify.url
+        and body.providers.gotify.token
+    ):
         providers_dict["gotify"] = {
             "enabled": True,
             "url": body.providers.gotify.url,

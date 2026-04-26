@@ -81,7 +81,9 @@ class WebhookProvider(AlertProvider):
 class GotifyProvider(AlertProvider):
     """Sends alerts via Gotify push notification service."""
 
-    def __init__(self, url: str, token: str, priority: int = 5, timeout: int = 10) -> None:
+    def __init__(
+        self, url: str, token: str, priority: int = 5, timeout: int = 10
+    ) -> None:
         """
         Initialize Gotify provider.
 
@@ -130,7 +132,9 @@ class GotifyProvider(AlertProvider):
                 timeout=self.timeout,
             )
             response.raise_for_status()
-            logger.info("Gotify alert sent to %s (status: %d)", self.url, response.status_code)
+            logger.info(
+                "Gotify alert sent to %s (status: %d)", self.url, response.status_code
+            )
         except requests.exceptions.RequestException as e:
             logger.error("Failed to send Gotify alert to %s: %s", self.url, e)
             raise
