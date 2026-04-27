@@ -288,7 +288,7 @@ export function Settings() {
           </div>
           
           <p className="text-xs text-slate-500">
-            Get notified when speed tests fail consecutively.
+            Get notified when speed tests fail consecutively. Configure providers below or via environment variables (restart required).
           </p>
 
           {alertsDraft.enabled && (

@@ -82,6 +82,9 @@ def get_alerts() -> AlertConfigSchema:
     # Convert runtime config dict to structured schema
     providers_data = config.get("providers", {})
 
+    # Helper to get provider value with env var fallback
+    from src import config as app_config
+
     return AlertConfigSchema(
         enabled=config.get("enabled", False),
         failure_threshold=config.get("failure_threshold", 3),
@@ -89,27 +92,35 @@ def get_alerts() -> AlertConfigSchema:
         providers=AlertProvidersConfig(
             webhook=WebhookProviderConfig(
                 enabled=providers_data.get("webhook", {}).get("enabled", False),
-                url=providers_data.get("webhook", {}).get("url", ""),
+                url=providers_data.get("webhook", {}).get("url", "")
+                or (app_config.ALERT_WEBHOOK_URL or ""),
             ),
             gotify=GotifyProviderConfig(
                 enabled=providers_data.get("gotify", {}).get("enabled", False),
-                url=providers_data.get("gotify", {}).get("url", ""),
-                token=providers_data.get("gotify", {}).get("token", ""),
-                priority=providers_data.get("gotify", {}).get("priority", 5),
+                url=providers_data.get("gotify", {}).get("url", "")
+                or (app_config.ALERT_GOTIFY_URL or ""),
+                token=providers_data.get("gotify", {}).get("token", "")
+                or (app_config.ALERT_GOTIFY_TOKEN or ""),
+                priority=providers_data.get("gotify", {}).get("priority", 5)
+                or app_config.ALERT_GOTIFY_PRIORITY,
             ),
             ntfy=NtfyProviderConfig(
                 enabled=providers_data.get("ntfy", {}).get("enabled", False),
-                url=providers_data.get("ntfy", {}).get("url", "https://ntfy.sh"),
-                topic=providers_data.get("ntfy", {}).get("topic", ""),
-                token=providers_data.get("ntfy", {}).get("token", ""),
-                priority=providers_data.get("ntfy", {}).get("priority", 3),
-                tags=providers_data.get("ntfy", {}).get(
-                    "tags", ["warning", "rotating_light"]
-                ),
+                url=providers_data.get("ntfy", {}).get("url", "")
+                or (app_config.ALERT_NTFY_URL or "https://ntfy.sh"),
+                topic=providers_data.get("ntfy", {}).get("topic", "")
+                or (app_config.ALERT_NTFY_TOPIC or ""),
+                token=providers_data.get("ntfy", {}).get("token", "")
+                or (app_config.ALERT_NTFY_TOKEN or ""),
+                priority=providers_data.get("ntfy", {}).get("priority", 3)
+                or app_config.ALERT_NTFY_PRIORITY,
+                tags=providers_data.get("ntfy", {}).get("tags", [])
+                or app_config.ALERT_NTFY_TAGS,
             ),
             apprise=AppriseProviderConfig(
                 enabled=providers_data.get("apprise", {}).get("enabled", False),
-                url=providers_data.get("apprise", {}).get("url", ""),
+                url=providers_data.get("apprise", {}).get("url", "")
+                or (app_config.ALERT_APPRISE_URL or ""),
             ),
         ),
     )
