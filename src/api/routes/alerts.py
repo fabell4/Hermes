@@ -74,56 +74,131 @@ class AlertConfigSchema(BaseModel):
     providers: AlertProvidersConfig = Field(default_factory=AlertProvidersConfig)
 
 
+def _build_webhook_config(providers_data: dict) -> WebhookProviderConfig:
+    """Build webhook provider config with env var fallback."""
+    from src import config as app_config
+
+    webhook_data = providers_data.get("webhook", {})
+    return WebhookProviderConfig(
+        enabled=webhook_data.get("enabled", False),
+        url=webhook_data.get("url", "") or (app_config.ALERT_WEBHOOK_URL or ""),
+    )
+
+
+def _build_gotify_config(providers_data: dict) -> GotifyProviderConfig:
+    """Build Gotify provider config with env var fallback."""
+    from src import config as app_config
+
+    gotify_data = providers_data.get("gotify", {})
+    return GotifyProviderConfig(
+        enabled=gotify_data.get("enabled", False),
+        url=gotify_data.get("url", "") or (app_config.ALERT_GOTIFY_URL or ""),
+        token=gotify_data.get("token", "") or (app_config.ALERT_GOTIFY_TOKEN or ""),
+        priority=gotify_data.get("priority", 5) or app_config.ALERT_GOTIFY_PRIORITY,
+    )
+
+
+def _build_ntfy_config(providers_data: dict) -> NtfyProviderConfig:
+    """Build ntfy provider config with env var fallback."""
+    from src import config as app_config
+
+    ntfy_data = providers_data.get("ntfy", {})
+    return NtfyProviderConfig(
+        enabled=ntfy_data.get("enabled", False),
+        url=ntfy_data.get("url", "")
+        or (app_config.ALERT_NTFY_URL or "https://ntfy.sh"),
+        topic=ntfy_data.get("topic", "") or (app_config.ALERT_NTFY_TOPIC or ""),
+        token=ntfy_data.get("token", "") or (app_config.ALERT_NTFY_TOKEN or ""),
+        priority=ntfy_data.get("priority", 3) or app_config.ALERT_NTFY_PRIORITY,
+        tags=ntfy_data.get("tags", []) or app_config.ALERT_NTFY_TAGS,
+    )
+
+
+def _build_apprise_config(providers_data: dict) -> AppriseProviderConfig:
+    """Build Apprise provider config with env var fallback."""
+    from src import config as app_config
+
+    apprise_data = providers_data.get("apprise", {})
+    return AppriseProviderConfig(
+        enabled=apprise_data.get("enabled", False),
+        url=apprise_data.get("url", "") or (app_config.ALERT_APPRISE_URL or ""),
+    )
+
+
 @router.get("/alerts")
 def get_alerts() -> AlertConfigSchema:
     """Return the current alert configuration."""
     config = runtime_config.get_alert_config()
-
-    # Convert runtime config dict to structured schema
     providers_data = config.get("providers", {})
-
-    # Helper to get provider value with env var fallback
-    from src import config as app_config
 
     return AlertConfigSchema(
         enabled=config.get("enabled", False),
         failure_threshold=config.get("failure_threshold", 3),
         cooldown_minutes=config.get("cooldown_minutes", 60),
         providers=AlertProvidersConfig(
-            webhook=WebhookProviderConfig(
-                enabled=providers_data.get("webhook", {}).get("enabled", False),
-                url=providers_data.get("webhook", {}).get("url", "")
-                or (app_config.ALERT_WEBHOOK_URL or ""),
-            ),
-            gotify=GotifyProviderConfig(
-                enabled=providers_data.get("gotify", {}).get("enabled", False),
-                url=providers_data.get("gotify", {}).get("url", "")
-                or (app_config.ALERT_GOTIFY_URL or ""),
-                token=providers_data.get("gotify", {}).get("token", "")
-                or (app_config.ALERT_GOTIFY_TOKEN or ""),
-                priority=providers_data.get("gotify", {}).get("priority", 5)
-                or app_config.ALERT_GOTIFY_PRIORITY,
-            ),
-            ntfy=NtfyProviderConfig(
-                enabled=providers_data.get("ntfy", {}).get("enabled", False),
-                url=providers_data.get("ntfy", {}).get("url", "")
-                or (app_config.ALERT_NTFY_URL or "https://ntfy.sh"),
-                topic=providers_data.get("ntfy", {}).get("topic", "")
-                or (app_config.ALERT_NTFY_TOPIC or ""),
-                token=providers_data.get("ntfy", {}).get("token", "")
-                or (app_config.ALERT_NTFY_TOKEN or ""),
-                priority=providers_data.get("ntfy", {}).get("priority", 3)
-                or app_config.ALERT_NTFY_PRIORITY,
-                tags=providers_data.get("ntfy", {}).get("tags", [])
-                or app_config.ALERT_NTFY_TAGS,
-            ),
-            apprise=AppriseProviderConfig(
-                enabled=providers_data.get("apprise", {}).get("enabled", False),
-                url=providers_data.get("apprise", {}).get("url", "")
-                or (app_config.ALERT_APPRISE_URL or ""),
-            ),
+            webhook=_build_webhook_config(providers_data),
+            gotify=_build_gotify_config(providers_data),
+            ntfy=_build_ntfy_config(providers_data),
+            apprise=_build_apprise_config(providers_data),
         ),
     )
+
+
+def _should_save_webhook(provider: WebhookProviderConfig) -> bool:
+    """Check if webhook provider has any data to save."""
+    return provider.enabled or bool(provider.url)
+
+
+def _should_save_gotify(provider: GotifyProviderConfig) -> bool:
+    """Check if Gotify provider has any data to save."""
+    return provider.enabled or bool(provider.url) or bool(provider.token)
+
+
+def _should_save_ntfy(provider: NtfyProviderConfig) -> bool:
+    """Check if ntfy provider has any data to save."""
+    return provider.enabled or bool(provider.topic)
+
+
+def _should_save_apprise(provider: AppriseProviderConfig) -> bool:
+    """Check if Apprise provider has any data to save."""
+    return provider.enabled or bool(provider.url)
+
+
+def _build_providers_dict(providers: AlertProvidersConfig) -> dict:
+    """Build providers dictionary from schema for storage."""
+    providers_dict = {}
+
+    if _should_save_webhook(providers.webhook):
+        providers_dict["webhook"] = {
+            "enabled": providers.webhook.enabled,
+            "url": providers.webhook.url,
+        }
+
+    if _should_save_gotify(providers.gotify):
+        providers_dict["gotify"] = {
+            "enabled": providers.gotify.enabled,
+            "url": providers.gotify.url,
+            "token": providers.gotify.token,
+            "priority": providers.gotify.priority,
+        }
+
+    if _should_save_ntfy(providers.ntfy):
+        providers_dict["ntfy"] = {
+            "enabled": providers.ntfy.enabled,
+            "url": providers.ntfy.url,
+            "topic": providers.ntfy.topic,
+            "token": providers.ntfy.token,
+            "priority": providers.ntfy.priority,
+            "tags": providers.ntfy.tags,
+        }
+
+    if _should_save_apprise(providers.apprise):
+        providers_dict["apprise"] = {
+            "enabled": providers.apprise.enabled,
+            "url": providers.apprise.url,
+        }
+
+    return providers_dict
 
 
 @router.put(
@@ -132,54 +207,11 @@ def get_alerts() -> AlertConfigSchema:
 )
 def update_alerts(body: AlertConfigSchema) -> AlertConfigSchema:
     """Persist updated alert configuration."""
-    # Convert schema to dict for storage
-    # Save all provider configurations, even if disabled or incomplete
-    # This preserves user's partial configurations while they're editing
-    providers_dict = {}
-
-    # Webhook provider - save if any data is present
-    if body.providers.webhook.enabled or body.providers.webhook.url:
-        providers_dict["webhook"] = {
-            "enabled": body.providers.webhook.enabled,
-            "url": body.providers.webhook.url,
-        }
-
-    # Gotify provider - save if any data is present
-    if (
-        body.providers.gotify.enabled
-        or body.providers.gotify.url
-        or body.providers.gotify.token
-    ):
-        providers_dict["gotify"] = {
-            "enabled": body.providers.gotify.enabled,
-            "url": body.providers.gotify.url,
-            "token": body.providers.gotify.token,
-            "priority": body.providers.gotify.priority,
-        }
-
-    # ntfy provider - save if any data is present
-    if body.providers.ntfy.enabled or body.providers.ntfy.topic:
-        providers_dict["ntfy"] = {
-            "enabled": body.providers.ntfy.enabled,
-            "url": body.providers.ntfy.url,
-            "topic": body.providers.ntfy.topic,
-            "token": body.providers.ntfy.token,
-            "priority": body.providers.ntfy.priority,
-            "tags": body.providers.ntfy.tags,
-        }
-
-    # Apprise provider - save if any data is present
-    if body.providers.apprise.enabled or body.providers.apprise.url:
-        providers_dict["apprise"] = {
-            "enabled": body.providers.apprise.enabled,
-            "url": body.providers.apprise.url,
-        }
-
     alert_config = {
         "enabled": body.enabled,
         "failure_threshold": body.failure_threshold,
         "cooldown_minutes": body.cooldown_minutes,
-        "providers": providers_dict,
+        "providers": _build_providers_dict(body.providers),
     }
 
     runtime_config.set_alert_config(alert_config)
