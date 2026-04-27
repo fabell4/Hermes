@@ -1,4 +1,4 @@
-"""Alert providers — send notifications via different channels (webhook, Gotify, ntfy)."""
+"""Alert providers — send notifications via different channels (webhook, Gotify, ntfy, Apprise)."""
 
 from __future__ import annotations
 
@@ -214,12 +214,65 @@ class NtfyProvider(AlertProvider):
             raise
 
 
+class AppriseProvider(AlertProvider):
+    """Sends alerts via Apprise API service (separate container)."""
+
+    def __init__(self, url: str, timeout: int = 10) -> None:
+        """
+        Initialize Apprise provider.
+
+        Args:
+            url: Apprise API URL (e.g., http://apprise:8000/notify)
+            timeout: Request timeout in seconds
+
+        Raises:
+            ValueError: If URL is empty
+        """
+        if not url:
+            raise ValueError("Apprise API URL cannot be empty")
+
+        self.url = url.rstrip("/")
+        self.timeout = timeout
+
+    def send_alert(
+        self,
+        failure_count: int,
+        last_error: str,
+        timestamp: datetime,
+    ) -> None:
+        """Send alert via Apprise API POST request."""
+        endpoint = f"{self.url}/notify"
+        title = f"⚠️ Speedtest Failure ({failure_count} consecutive)"
+        body = f"{last_error}\n\nTime: {timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
+
+        payload = {
+            "title": title,
+            "body": body,
+            "type": "warning",
+        }
+
+        try:
+            response = requests.post(
+                endpoint,
+                json=payload,
+                timeout=self.timeout,
+                headers={"Content-Type": "application/json"},
+            )
+            response.raise_for_status()
+            logger.info(
+                "Apprise alert sent to %s (status: %d)", self.url, response.status_code
+            )
+        except requests.exceptions.RequestException as e:
+            logger.error("Failed to send Apprise alert to %s: %s", self.url, e)
+            raise
+
+
 def create_provider(provider_type: str, config: dict[str, Any]) -> AlertProvider:
     """
     Factory function to create an alert provider based on type.
 
     Args:
-        provider_type: Type of provider ("webhook", "gotify", "ntfy")
+        provider_type: Type of provider ("webhook", "gotify", "ntfy", "apprise")
         config: Provider-specific configuration dictionary
 
     Returns:
@@ -246,8 +299,14 @@ def create_provider(provider_type: str, config: dict[str, Any]) -> AlertProvider
         return NtfyProvider(
             url=config.get("url", "https://ntfy.sh"),
             topic=config["topic"],
+            token=config.get("token"),
             priority=config.get("priority", 3),
             tags=config.get("tags"),
+            timeout=config.get("timeout", 10),
+        )
+    elif provider_type == "apprise":
+        return AppriseProvider(
+            url=config["url"],
             timeout=config.get("timeout", 10),
         )
     else:

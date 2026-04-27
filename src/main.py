@@ -12,6 +12,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 from . import config
 from . import runtime_config
+from . import shared_state
 from .runtime_config import set_interval_minutes, set_enabled_exporters
 from .services.health_server import HealthServer
 from .services.speedtest_runner import SpeedtestRunner
@@ -20,6 +21,7 @@ from .services.alert_providers import (
     WebhookProvider,
     GotifyProvider,
     NtfyProvider,
+    AppriseProvider,
 )
 from .result_dispatcher import ResultDispatcher, DispatchError
 from .exporters.csv_exporter import CSVExporter
@@ -188,11 +190,26 @@ def _register_ntfy_provider(manager: AlertManager, providers_config: dict) -> No
             logger.warning("Could not initialize ntfy alert provider: %s", e)
 
 
+def _register_apprise_provider(manager: AlertManager, providers_config: dict) -> None:
+    """Register Apprise alert provider if configured."""
+    apprise_config = providers_config.get("apprise", {})
+    apprise_url = apprise_config.get("url") or config.ALERT_APPRISE_URL
+    if apprise_url:
+        try:
+            manager.add_provider(
+                "apprise",
+                AppriseProvider(url=apprise_url),
+            )
+        except Exception as e:  # pylint: disable=broad-except
+            logger.warning("Could not initialize Apprise alert provider: %s", e)
+
+
 def _register_alert_providers(manager: AlertManager, providers_config: dict) -> None:
     """Register alert providers based on configuration."""
     _register_webhook_provider(manager, providers_config)
     _register_gotify_provider(manager, providers_config)
     _register_ntfy_provider(manager, providers_config)
+    _register_apprise_provider(manager, providers_config)
 
 
 def update_alert_providers(manager: AlertManager, alert_config: dict) -> None:
@@ -435,6 +452,9 @@ def main():
     service = SpeedtestRunner()
     dispatcher = build_dispatcher()
     alert_manager = build_alert_manager()
+
+    # Make alert_manager accessible to API routes
+    shared_state.set_alert_manager(alert_manager)
 
     # Run immediately on startup if configured
     if config.RUN_ON_STARTUP:

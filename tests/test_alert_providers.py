@@ -9,6 +9,7 @@ from src.services.alert_providers import (
     WebhookProvider,
     GotifyProvider,
     NtfyProvider,
+    AppriseProvider,
     create_provider,
 )
 
@@ -176,6 +177,54 @@ def test_ntfy_provider_default_url():
 
 
 # ---------------------------------------------------------------------------
+# AppriseProvider
+# ---------------------------------------------------------------------------
+
+
+def test_apprise_provider_raises_on_empty_url():
+    with pytest.raises(ValueError, match="cannot be empty"):
+        AppriseProvider(url="")
+
+
+@patch("src.services.alert_providers.requests.post")
+def test_apprise_provider_sends_notification(mock_post):
+    """AppriseProvider sends notification via HTTP POST."""
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_post.return_value = mock_response
+
+    provider = AppriseProvider(url="http://apprise:8000")  # NOSONAR
+    timestamp = datetime(2026, 4, 26, 12, 0, 0, tzinfo=timezone.utc)
+
+    provider.send_alert(
+        failure_count=3,
+        last_error="Connection timeout",
+        timestamp=timestamp,
+    )
+
+    mock_post.assert_called_once()
+    call_args = mock_post.call_args
+    assert call_args.args[0] == "http://apprise:8000/notify"  # NOSONAR
+    assert "3 consecutive" in call_args.kwargs["json"]["title"]
+    assert "Connection timeout" in call_args.kwargs["json"]["body"]
+    assert call_args.kwargs["json"]["type"] == "warning"
+
+
+@patch("src.services.alert_providers.requests.post")
+def test_apprise_provider_raises_on_request_error(mock_post):
+    """AppriseProvider raises on HTTP error."""
+    import requests
+
+    mock_post.side_effect = requests.exceptions.RequestException("Service unavailable")
+
+    provider = AppriseProvider(url="http://apprise:8000")  # NOSONAR
+    timestamp = datetime(2026, 4, 26, 12, 0, 0, tzinfo=timezone.utc)
+
+    with pytest.raises(requests.exceptions.RequestException):
+        provider.send_alert(3, "Error", timestamp)
+
+
+# ---------------------------------------------------------------------------
 # create_provider()
 # ---------------------------------------------------------------------------
 
@@ -216,6 +265,16 @@ def test_create_provider_ntfy():
     assert provider.topic == "alerts"
     assert provider.priority == 4
     assert provider.tags == ["warning"]
+
+
+def test_create_provider_apprise():
+    """Factory creates apprise provider."""
+    config = {
+        "url": "http://apprise:8000",  # NOSONAR
+    }
+    provider = create_provider("apprise", config)
+    assert isinstance(provider, AppriseProvider)
+    assert provider.url == "http://apprise:8000"  # NOSONAR
 
 
 def test_create_provider_unknown_type():

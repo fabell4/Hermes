@@ -10,6 +10,7 @@ import type {
   TriggerResponse,
   ResultsPage,
   AlertConfig,
+  TestAlertResponse,
 } from '@/types'
 
 const BASE = '/api'
@@ -89,5 +90,10 @@ export const api = {
       method: 'PUT',
       body: JSON.stringify(config),
     })
+  },
+
+  /** Send test alerts to all configured providers. */
+  testAlerts(): Promise<TestAlertResponse> {
+    return request('/alerts/test', { method: 'POST' })
   },
 }

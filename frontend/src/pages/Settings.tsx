@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Clock, Database, Eye, EyeOff, Key, Save, CheckCircle, Bell } from 'lucide-react'
+import { Clock, Database, Eye, EyeOff, Key, Save, CheckCircle, Bell, Send } from 'lucide-react'
 import { useHermes } from '@/hooks/useHermes'
 import type { RuntimeConfig, AlertConfig } from '@/types'
+import { api } from '@/lib/api'
 
 const ALL_EXPORTERS = [
   { id: 'csv', label: 'CSV Export', desc: 'Append results to a local CSV file' },
@@ -11,6 +12,127 @@ const ALL_EXPORTERS = [
   { id: 'loki', label: 'Loki', desc: 'Ship structured logs to a Grafana Loki endpoint' },
 ]
 
+type TestAlertStatus = 'idle' | 'sending' | 'success' | 'error'
+
+function getTestButtonClassName(status: TestAlertStatus): string {
+  if (status === 'sending') {
+    return 'bg-slate-700 text-slate-400 cursor-not-allowed'
+  }
+  if (status === 'success') {
+    return 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+  }
+  if (status === 'error') {
+    return 'bg-red-500/20 text-red-400 border border-red-500/30'
+  }
+  return 'bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+}
+
+function renderTestButtonContent(status: TestAlertStatus) {
+  if (status === 'sending') {
+    return (
+      <>
+        <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin" />
+        Sending...
+      </>
+    )
+  }
+  if (status === 'success') {
+    return (
+      <>
+        <CheckCircle size={16} />
+        Test Sent Successfully
+      </>
+    )
+  }
+  if (status === 'error') {
+    return (
+      <>
+        <span className="text-red-400">\u26a0</span>
+        {' '}
+        Test Failed
+      </>
+    )
+  }
+  return (
+    <>
+      <Send size={16} />
+      Send Test Notification
+    </>
+  )
+}
+
+function toggleExporterInConfig(draft: RuntimeConfig, id: string): RuntimeConfig {
+  const enabled = draft.enabled_exporters.includes(id)
+    ? draft.enabled_exporters.filter((e) => e !== id)
+    : [...draft.enabled_exporters, id]
+  return { ...draft, enabled_exporters: enabled }
+}
+
+function renderExporterItem(exp: typeof ALL_EXPORTERS[number], enabled: boolean, onToggle: () => void) {
+  return (
+    <div
+      key={exp.id}
+      className="flex items-center justify-between p-3 rounded-lg bg-slate-800/30 border border-slate-700/50"
+    >
+      <div>
+        <div className="text-sm font-medium text-slate-200">
+          {exp.label}
+        </div>
+        <div className="text-xs text-slate-500">{exp.desc}</div>
+      </div>
+      <button
+        onClick={onToggle}
+        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+          enabled ? 'bg-cyan-500' : 'bg-slate-700'
+        }`}
+        aria-pressed={enabled}
+      >
+        <span
+          className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+            enabled ? 'translate-x-5' : 'translate-x-1'
+          }`}
+        />
+      </button>
+    </div>
+  )
+}
+
+function renderSaveButton(saved: boolean, onClick: () => void) {
+  const className = saved
+    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+    : 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-500/20'
+  const icon = saved ? <CheckCircle size={17} /> : <Save size={17} />
+  const label = saved ? 'Saved' : 'Save Changes'
+  
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all ${className}`}
+    >
+      {icon}
+      {label}
+    </button>
+  )
+}
+
+async function saveSettings(
+  draft: RuntimeConfig,
+  alertsDraft: AlertConfig,
+  apiKey: string,
+  updateConfig: (config: RuntimeConfig) => Promise<void>,
+  updateAlerts: (alerts: AlertConfig) => Promise<void>,
+  setSaved: (saved: boolean) => void
+) {
+  if (apiKey) {
+    localStorage.setItem('hermes_api_key', apiKey)
+  } else {
+    localStorage.removeItem('hermes_api_key')
+  }
+  await Promise.all([updateConfig(draft), updateAlerts(alertsDraft)])
+  setSaved(true)
+  setTimeout(() => setSaved(false), 2500)
+}
+
 export function Settings() {
   const { config, alerts, updateConfig, updateAlerts } = useHermes()
   const [draft, setDraft] = useState<RuntimeConfig | null>(null)
@@ -18,15 +140,18 @@ export function Settings() {
   const [saved, setSaved] = useState(false)
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('hermes_api_key') ?? '')
   const [showKey, setShowKey] = useState(false)
+  const [testStatus, setTestStatus] = useState<TestAlertStatus>('idle')
+  const [testMessage, setTestMessage] = useState('')
 
   // Keep local drafts in sync when config/alerts load
   useEffect(() => {
-    if (config) setDraft({ ...config })
-  }, [config])
-
-  useEffect(() => {
-    if (alerts) setAlertsDraft({ ...alerts })
-  }, [alerts])
+    if (config) {
+      setDraft({ ...config })
+    }
+    if (alerts) {
+      setAlertsDraft({ ...alerts })
+    }
+  }, [config, alerts])
 
   if (!draft || !alertsDraft) {
     return (
@@ -36,29 +161,31 @@ export function Settings() {
     )
   }
 
-  const toggleExporter = (id: string) => {
-    setDraft((d) => {
-      if (!d) return d
-      const enabled = d.enabled_exporters.includes(id)
-        ? d.enabled_exporters.filter((e) => e !== id)
-        : [...d.enabled_exporters, id]
-      return { ...d, enabled_exporters: enabled }
-    })
+  const handleSave = () => saveSettings(draft, alertsDraft, apiKey, updateConfig, updateAlerts, setSaved)
+
+  const handleTestAlerts = async () => {
+    setTestStatus('sending')
+    setTestMessage('')
+    try {
+      const response = await api.testAlerts()
+      setTestStatus('success')
+      setTestMessage(response.message)
+      setTimeout(() => {
+        setTestStatus('idle')
+        setTestMessage('')
+      }, 5000)
+    } catch (error) {
+      setTestStatus('error')
+      setTestMessage(error instanceof Error ? error.message : 'Failed to send test alerts')
+      setTimeout(() => {
+        setTestStatus('idle')
+        setTestMessage('')
+      }, 5000)
+    }
   }
 
-  const handleSave = async () => {
-    if (!draft || !alertsDraft) return
-    if (apiKey) {
-      localStorage.setItem('hermes_api_key', apiKey)
-    } else {
-      localStorage.removeItem('hermes_api_key')
-    }
-    await Promise.all([
-      updateConfig(draft),
-      updateAlerts(alertsDraft),
-    ])
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2500)
+  const toggleExporter = (id: string) => {
+    setDraft(toggleExporterInConfig(draft, id))
   }
 
   return (
@@ -124,35 +251,13 @@ export function Settings() {
             </h2>
           </div>
           <div className="space-y-3">
-            {ALL_EXPORTERS.map((exp) => {
-              const enabled = draft.enabled_exporters.includes(exp.id)
-              return (
-                <div
-                  key={exp.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-slate-800/30 border border-slate-700/50"
-                >
-                  <div>
-                    <div className="text-sm font-medium text-slate-200">
-                      {exp.label}
-                    </div>
-                    <div className="text-xs text-slate-500">{exp.desc}</div>
-                  </div>
-                  <button
-                    onClick={() => toggleExporter(exp.id)}
-                    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                      enabled ? 'bg-cyan-500' : 'bg-slate-700'
-                    }`}
-                    aria-pressed={enabled}
-                  >
-                    <span
-                      className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
-                        enabled ? 'translate-x-5' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
-                </div>
+            {ALL_EXPORTERS.map((exp) =>
+              renderExporterItem(
+                exp,
+                draft.enabled_exporters.includes(exp.id),
+                () => toggleExporter(exp.id)
               )
-            })}
+            )}
           </div>
         </div>
       </div>
@@ -475,6 +580,99 @@ export function Settings() {
                   </div>
                 )}
               </div>
+
+              {/* Apprise Provider */}
+              <div className="border-t border-slate-800 pt-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <span className="text-sm font-medium text-slate-300">Apprise</span>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      100+ services (Discord, Telegram, Slack, etc.)
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setAlertsDraft((d) =>
+                        d
+                          ? {
+                              ...d,
+                              providers: {
+                                ...d.providers,
+                                apprise: {
+                                  ...d.providers.apprise,
+                                  enabled: !d.providers.apprise.enabled,
+                                },
+                              },
+                            }
+                          : d
+                      )
+                    }
+                    className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors ${
+                      alertsDraft.providers.apprise.enabled ? 'bg-cyan-500' : 'bg-slate-700'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-2.5 w-2.5 transform rounded-full bg-white transition-transform ${
+                        alertsDraft.providers.apprise.enabled ? 'translate-x-4.5' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+                {alertsDraft.providers.apprise.enabled && (
+                  <div className="space-y-2">
+                    <input
+                      type="url"
+                      placeholder="http://apprise:8000" // NOSONAR: example for local Docker service
+                      value={alertsDraft.providers.apprise.url}
+                      onChange={(e) =>
+                        setAlertsDraft((d) =>
+                          d
+                            ? {
+                                ...d,
+                                providers: {
+                                  ...d.providers,
+                                  apprise: { ...d.providers.apprise, url: e.target.value },
+                                },
+                              }
+                            : d
+                        )
+                      }
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                    />
+                    <p className="text-xs text-slate-500">
+                      URL to Apprise API service. See{' '}
+                      <a
+                        href="https://github.com/caronc/apprise-api"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-cyan-400 hover:underline"
+                      >
+                        Apprise API
+                      </a>{' '}
+                      for setup instructions
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Test Alert Button */}
+              <div className="pt-4 border-t border-slate-700/50">
+                <button
+                  onClick={handleTestAlerts}
+                  disabled={testStatus === 'sending'}
+                  className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-all ${getTestButtonClassName(testStatus)}`}
+                >
+                  {renderTestButtonContent(testStatus)}
+                </button>
+                {testMessage && (
+                  <p className={`text-xs mt-2 ${
+                    testStatus === 'success' ? 'text-emerald-400' : 'text-red-400'
+                  }`}>
+                    {testMessage}
+                  </p>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -513,26 +711,7 @@ export function Settings() {
 
       {/* Save */}
       <div className="flex justify-end">
-        <button
-          onClick={handleSave}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-medium transition-all ${
-            saved
-              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-              : 'bg-cyan-500 hover:bg-cyan-400 text-slate-950 shadow-lg shadow-cyan-500/20'
-          }`}
-        >
-          {saved ? (
-            <>
-              <CheckCircle size={17} />
-              Saved
-            </>
-          ) : (
-            <>
-              <Save size={17} />
-              Save Changes
-            </>
-          )}
-        </button>
+        {renderSaveButton(saved, handleSave)}
       </div>
     </motion.div>
   )

@@ -33,6 +33,7 @@ services:
       ALERT_NTFY_TOKEN: "${ALERT_NTFY_TOKEN:-}"
       ALERT_NTFY_PRIORITY: "${ALERT_NTFY_PRIORITY:-3}"
       ALERT_NTFY_TAGS: "${ALERT_NTFY_TAGS:-warning,rotating_light}"
+      ALERT_APPRISE_URL: "${ALERT_APPRISE_URL:-}"
     env_file:
       - path: .env
         required: false

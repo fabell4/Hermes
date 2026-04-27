@@ -109,9 +109,9 @@ def test_record_failure_stores_error_and_time():
 def test_record_failure_without_timestamp_uses_now():
     """Recording a failure without timestamp uses current time."""
     manager = AlertManager()
-    before = datetime.now()
+    before = datetime.now(timezone.utc)
     manager.record_failure("Error")
-    after = datetime.now()
+    after = datetime.now(timezone.utc)
 
     assert manager.last_failure_time is not None
     assert before <= manager.last_failure_time <= after
@@ -304,3 +304,52 @@ def test_reset_clears_all_state():
     assert manager.last_error is None
     assert manager.last_failure_time is None
     assert manager.last_alert_time is None
+
+
+# ---------------------------------------------------------------------------
+# Test Alerts
+# ---------------------------------------------------------------------------
+
+
+def test_send_test_alert_with_no_providers():
+    """send_test_alert returns empty dict when no providers registered."""
+    manager = AlertManager()
+    results = manager.send_test_alert()
+    assert results == {}
+
+
+def test_send_test_alert_sends_to_all_providers():
+    """send_test_alert sends test notification to all registered providers."""
+    manager = AlertManager()
+    provider1 = MockProvider()
+    provider2 = MockProvider()
+    manager.add_provider("p1", provider1)
+    manager.add_provider("p2", provider2)
+
+    results = manager.send_test_alert()
+
+    assert results == {"p1": True, "p2": True}
+    assert len(provider1.alerts_sent) == 1
+    assert len(provider2.alerts_sent) == 1
+
+    # Check test alert content
+    count, error, _ = provider1.alerts_sent[0]
+    assert count == 0
+    assert error == "This is a test notification from Hermes"
+
+
+def test_send_test_alert_handles_provider_failure():
+    """send_test_alert reports failures but continues to other providers."""
+    manager = AlertManager()
+    good_provider = MockProvider()
+    bad_provider = Mock(spec=AlertProvider)
+    bad_provider.send_alert.side_effect = RuntimeError("Provider error")
+
+    manager.add_provider("good", good_provider)
+    manager.add_provider("bad", bad_provider)
+
+    results = manager.send_test_alert()
+
+    assert results == {"good": True, "bad": False}
+    assert len(good_provider.alerts_sent) == 1
+    bad_provider.send_alert.assert_called_once()

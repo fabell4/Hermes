@@ -62,10 +62,16 @@ export interface NtfyProviderConfig {
   tags: string[]
 }
 
+export interface AppriseProviderConfig {
+  enabled: boolean
+  url: string
+}
+
 export interface AlertProvidersConfig {
   webhook: WebhookProviderConfig
   gotify: GotifyProviderConfig
   ntfy: NtfyProviderConfig
+  apprise: AppriseProviderConfig
 }
 
 export interface AlertConfig {
@@ -73,4 +79,10 @@ export interface AlertConfig {
   failure_threshold: number
   cooldown_minutes: number
   providers: AlertProvidersConfig
+}
+
+export interface TestAlertResponse {
+  status: 'success' | 'failed' | 'partial' | 'no_providers'
+  results: Record<string, boolean>
+  message: string
 }

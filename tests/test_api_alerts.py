@@ -322,3 +322,120 @@ def test_put_alerts_requires_topic_for_ntfy():
 
     response = client.put("/api/alerts", json=payload)
     assert response.status_code == 200  # Request succeeds but ntfy not saved
+
+
+# ---------------------------------------------------------------------------
+# POST /api/alerts/test
+# ---------------------------------------------------------------------------
+
+
+def test_post_alerts_test_requires_auth_when_key_set():
+    """POST /api/alerts/test requires API key when authentication is enabled."""
+    from src import shared_state
+    from src.services.alert_manager import AlertManager
+
+    key = "test-api-key"
+    manager = AlertManager()
+
+    # Save current state
+    original_manager = shared_state.get_alert_manager()
+
+    try:
+        # Set up manager for test
+        shared_state.set_alert_manager(manager)
+
+        with patch("src.api.auth.config.API_KEY", key):
+            # Without key - rejected
+            response = client.post("/api/alerts/test")
+            assert response.status_code == 401
+
+            # With key - allowed
+            response = client.post("/api/alerts/test", headers={"X-Api-Key": key})
+            assert response.status_code == 200
+    finally:
+        # Restore original state
+        if original_manager:
+            shared_state.set_alert_manager(original_manager)
+
+
+def test_post_alerts_test_returns_503_when_manager_not_initialized():
+    """POST /api/alerts/test returns 503 if alert manager not available."""
+    from src import shared_state
+
+    # Save current state
+    original_manager = shared_state.get_alert_manager()
+
+    try:
+        # Clear the alert manager
+        shared_state.set_alert_manager(None)
+
+        response = client.post("/api/alerts/test")
+        assert response.status_code == 503
+        assert "not initialized" in response.json()["detail"].lower()
+    finally:
+        # Restore original state
+        if original_manager:
+            shared_state.set_alert_manager(original_manager)
+
+
+def test_post_alerts_test_succeeds_with_configured_providers():
+    """POST /api/alerts/test returns success when providers configured."""
+    from src import shared_state
+    from src.services.alert_manager import AlertManager
+    from unittest.mock import Mock
+
+    # Create test manager with mock provider
+    manager = AlertManager()
+    mock_provider = Mock()
+    mock_provider.send_alert = Mock()
+    manager.add_provider("test_provider", mock_provider)
+
+    # Save current state
+    original_manager = shared_state.get_alert_manager()
+
+    try:
+        # Set test manager
+        shared_state.set_alert_manager(manager)
+
+        response = client.post("/api/alerts/test")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["status"] == "success"
+        assert "test_provider" in data["results"]
+        assert data["results"]["test_provider"] is True
+        assert "successfully" in data["message"].lower()
+
+        # Verify provider was called
+        mock_provider.send_alert.assert_called_once()
+    finally:
+        # Restore original state
+        if original_manager:
+            shared_state.set_alert_manager(original_manager)
+
+
+def test_post_alerts_test_returns_no_providers_when_none_configured():
+    """POST /api/alerts/test indicates when no providers configured."""
+    from src import shared_state
+    from src.services.alert_manager import AlertManager
+
+    # Create manager with no providers
+    manager = AlertManager()
+
+    # Save current state
+    original_manager = shared_state.get_alert_manager()
+
+    try:
+        # Set test manager
+        shared_state.set_alert_manager(manager)
+
+        response = client.post("/api/alerts/test")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert data["status"] == "no_providers"
+        assert "no alert providers" in data["message"].lower()
+    finally:
+        # Restore original state
+        if original_manager:
+            shared_state.set_alert_manager(original_manager)

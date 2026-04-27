@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -87,7 +87,7 @@ class AlertManager:
             timestamp: When the failure occurred (defaults to now)
         """
         if timestamp is None:
-            timestamp = datetime.now()
+            timestamp = datetime.now(timezone.utc)
 
         self._consecutive_failures += 1
         self._last_error = error
@@ -179,6 +179,40 @@ class AlertManager:
     def provider_names(self) -> list[str]:
         """Names of all registered alert providers."""
         return list(self._providers.keys())
+
+    def send_test_alert(self) -> dict[str, bool]:
+        """Send a test alert to all registered providers.
+
+        Returns:
+            Dictionary mapping provider names to success status.
+        """
+        if not self._providers:
+            logger.warning("Test alert requested but no providers registered.")
+            return {}
+
+        logger.info(
+            "Sending test alert to %d provider(s): %s",
+            len(self._providers),
+            ", ".join(self._providers.keys()),
+        )
+
+        results: dict[str, bool] = {}
+        timestamp = datetime.now(timezone.utc)
+
+        for name, provider in self._providers.items():
+            try:
+                provider.send_alert(
+                    failure_count=0,
+                    last_error="This is a test notification from Hermes",
+                    timestamp=timestamp,
+                )
+                logger.info("Test alert sent successfully via %s", name)
+                results[name] = True
+            except Exception as e:  # pylint: disable=broad-exception-caught
+                logger.error("Test alert failed via %s: %s", name, e, exc_info=True)
+                results[name] = False
+
+        return results
 
     def reset(self) -> None:
         """Reset all failure tracking and alert state (for testing)."""

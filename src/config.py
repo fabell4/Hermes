@@ -114,3 +114,6 @@ ALERT_NTFY_PRIORITY: int = _get_int("ALERT_NTFY_PRIORITY", 3)
 ALERT_NTFY_TAGS: list[str] = _get_csv_list(
     "ALERT_NTFY_TAGS", ["warning", "rotating_light"]
 )
+
+# Apprise alerting (API service endpoint)
+ALERT_APPRISE_URL: str | None = os.getenv("ALERT_APPRISE_URL") or None

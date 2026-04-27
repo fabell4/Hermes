@@ -2,13 +2,24 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+import logging
+
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from src import runtime_config
 from src.api.auth import require_api_key
+from src import shared_state
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["alerts"])
+
+# Test alert status constants
+TEST_ALERT_STATUS_SUCCESS = "success"
+TEST_ALERT_STATUS_FAILED = "failed"
+TEST_ALERT_STATUS_PARTIAL = "partial"
+TEST_ALERT_STATUS_NO_PROVIDERS = "no_providers"
 
 
 class WebhookProviderConfig(BaseModel):
@@ -38,12 +49,20 @@ class NtfyProviderConfig(BaseModel):
     tags: list[str] = Field(default_factory=lambda: ["warning", "rotating_light"])
 
 
+class AppriseProviderConfig(BaseModel):
+    """Apprise alert provider configuration (API service endpoint)."""
+
+    enabled: bool = False
+    url: str = ""
+
+
 class AlertProvidersConfig(BaseModel):
     """Alert providers configuration."""
 
     webhook: WebhookProviderConfig = Field(default_factory=WebhookProviderConfig)
     gotify: GotifyProviderConfig = Field(default_factory=GotifyProviderConfig)
     ntfy: NtfyProviderConfig = Field(default_factory=NtfyProviderConfig)
+    apprise: AppriseProviderConfig = Field(default_factory=AppriseProviderConfig)
 
 
 class AlertConfigSchema(BaseModel):
@@ -82,10 +101,15 @@ def get_alerts() -> AlertConfigSchema:
                 enabled=providers_data.get("ntfy", {}).get("enabled", False),
                 url=providers_data.get("ntfy", {}).get("url", "https://ntfy.sh"),
                 topic=providers_data.get("ntfy", {}).get("topic", ""),
+                token=providers_data.get("ntfy", {}).get("token", ""),
                 priority=providers_data.get("ntfy", {}).get("priority", 3),
                 tags=providers_data.get("ntfy", {}).get(
                     "tags", ["warning", "rotating_light"]
                 ),
+            ),
+            apprise=AppriseProviderConfig(
+                enabled=providers_data.get("apprise", {}).get("enabled", False),
+                url=providers_data.get("apprise", {}).get("url", ""),
             ),
         ),
     )
@@ -124,8 +148,15 @@ def update_alerts(body: AlertConfigSchema) -> AlertConfigSchema:
             "enabled": True,
             "url": body.providers.ntfy.url,
             "topic": body.providers.ntfy.topic,
+            "token": body.providers.ntfy.token,
             "priority": body.providers.ntfy.priority,
             "tags": body.providers.ntfy.tags,
+        }
+
+    if body.providers.apprise.enabled and body.providers.apprise.url:
+        providers_dict["apprise"] = {
+            "enabled": True,
+            "url": body.providers.apprise.url,
         }
 
     alert_config = {
@@ -137,3 +168,60 @@ def update_alerts(body: AlertConfigSchema) -> AlertConfigSchema:
 
     runtime_config.set_alert_config(alert_config)
     return get_alerts()
+
+
+class TestAlertResponse(BaseModel):
+    """Response schema for test alert endpoint."""
+
+    status: str
+    results: dict[str, bool] = Field(default_factory=dict)
+    message: str = ""
+
+
+@router.post(
+    "/alerts/test",
+    dependencies=[Depends(require_api_key)],
+    responses={
+        503: {
+            "description": "Alert manager not initialized. Ensure scheduler is running."
+        },
+    },
+)
+def test_alerts() -> TestAlertResponse:
+    """Send a test notification to all configured and enabled alert providers."""
+    alert_manager = shared_state.get_alert_manager()
+
+    if alert_manager is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Alert manager not initialized. Ensure the scheduler is running.",
+        )
+
+    results = alert_manager.send_test_alert()
+
+    if not results:
+        return TestAlertResponse(
+            status=TEST_ALERT_STATUS_NO_PROVIDERS,
+            message="No alert providers are configured or enabled.",
+        )
+
+    success_count = sum(1 for v in results.values() if v)
+    total_count = len(results)
+
+    if success_count == total_count:
+        status = TEST_ALERT_STATUS_SUCCESS
+        message = f"Test alerts sent successfully to all {total_count} provider(s)."
+    elif success_count == 0:
+        status = TEST_ALERT_STATUS_FAILED
+        message = f"Test alerts failed for all {total_count} provider(s)."
+    else:
+        status = TEST_ALERT_STATUS_PARTIAL
+        message = f"Test alerts sent to {success_count}/{total_count} provider(s)."
+
+    logger.info("Test alert completed: %s", message)
+
+    return TestAlertResponse(
+        status=status,
+        results=results,
+        message=message,
+    )
