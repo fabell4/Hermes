@@ -183,35 +183,18 @@ def set_scheduler_paused(paused: bool) -> None:
 # --- Alert configuration ---
 
 
-def get_alert_config() -> dict:
+def _load_alert_config_from_env() -> dict:
     """
-    Returns the alert configuration with defaults.
-
-    Priority order:
-    1. Runtime config file (user has saved settings in UI)
-    2. Environment variables (initial configuration)
-    3. Hard-coded defaults
+    Load alert configuration from environment variables.
 
     Returns a dict with keys:
     - enabled: bool
     - failure_threshold: int
     - cooldown_minutes: int
-    - providers: dict[str, dict] (webhook, gotify, ntfy configurations)
+    - providers: dict[str, dict]
     """
     from . import config  # Import here to avoid circular dependency
 
-    data = load().get("alert_config")
-
-    # If runtime config exists, use it (user has customized via UI)
-    if data is not None:
-        return {
-            "enabled": data.get("enabled", False),
-            "failure_threshold": data.get("failure_threshold", 3),
-            "cooldown_minutes": data.get("cooldown_minutes", 60),
-            "providers": data.get("providers", {}),
-        }
-
-    # Otherwise, load from environment variables
     providers = {}
 
     # Webhook provider
@@ -259,6 +242,36 @@ def get_alert_config() -> dict:
         "cooldown_minutes": config.ALERT_COOLDOWN_MINUTES,
         "providers": providers,
     }
+
+
+def get_alert_config() -> dict:
+    """
+    Returns the alert configuration with defaults.
+
+    Priority order:
+    1. Runtime config file (user has saved settings in UI)
+    2. Environment variables (initial configuration)
+    3. Hard-coded defaults
+
+    Returns a dict with keys:
+    - enabled: bool
+    - failure_threshold: int
+    - cooldown_minutes: int
+    - providers: dict[str, dict] (webhook, gotify, ntfy configurations)
+    """
+    data = load().get("alert_config")
+
+    # If runtime config exists, use it (user has customized via UI)
+    if data is not None:
+        return {
+            "enabled": data.get("enabled", False),
+            "failure_threshold": data.get("failure_threshold", 3),
+            "cooldown_minutes": data.get("cooldown_minutes", 60),
+            "providers": data.get("providers", {}),
+        }
+
+    # Otherwise, load from environment variables
+    return _load_alert_config_from_env()
 
 
 def set_alert_config(config: dict) -> None:
