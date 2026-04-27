@@ -207,7 +207,7 @@ def test_put_alerts_validates_ntfy_priority():
 
 
 def test_put_alerts_only_persists_enabled_providers():
-    """PUT /api/alerts only persists providers that are enabled and configured."""
+    """PUT /api/alerts persists all provider configurations, even if disabled."""
     payload = {
         "enabled": True,
         "failure_threshold": 3,
@@ -218,7 +218,7 @@ def test_put_alerts_only_persists_enabled_providers():
                 "url": "https://webhook.example.com",
             },
             "gotify": {
-                "enabled": False,  # Disabled - should not be persisted
+                "enabled": False,  # Disabled but config should be preserved
                 "url": "https://gotify.example.com",
                 "token": "token",
                 "priority": 5,
@@ -240,11 +240,18 @@ def test_put_alerts_only_persists_enabled_providers():
     get_response = client.get("/api/alerts")
     data = get_response.json()
 
-    # Webhook should be saved
+    # Webhook should be saved as enabled
     assert data["providers"]["webhook"]["enabled"] is True
-    # Gotify was disabled, might not be fully persisted
-    # ntfy should be saved
+    assert data["providers"]["webhook"]["url"] == "https://webhook.example.com"
+
+    # Gotify was disabled but configuration should be preserved
+    assert data["providers"]["gotify"]["enabled"] is False
+    assert data["providers"]["gotify"]["url"] == "https://gotify.example.com"
+    assert data["providers"]["gotify"]["token"] == "token"
+
+    # ntfy should be saved as enabled
     assert data["providers"]["ntfy"]["enabled"] is True
+    assert data["providers"]["ntfy"]["topic"] == "alerts"
 
 
 def test_put_alerts_requires_url_for_webhook():

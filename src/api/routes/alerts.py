@@ -122,30 +122,34 @@ def get_alerts() -> AlertConfigSchema:
 def update_alerts(body: AlertConfigSchema) -> AlertConfigSchema:
     """Persist updated alert configuration."""
     # Convert schema to dict for storage
+    # Save all provider configurations, even if disabled or incomplete
+    # This preserves user's partial configurations while they're editing
     providers_dict = {}
 
-    # Only include providers that are actually configured
-    if body.providers.webhook.enabled and body.providers.webhook.url:
+    # Webhook provider - save if any data is present
+    if body.providers.webhook.enabled or body.providers.webhook.url:
         providers_dict["webhook"] = {
-            "enabled": True,
+            "enabled": body.providers.webhook.enabled,
             "url": body.providers.webhook.url,
         }
 
+    # Gotify provider - save if any data is present
     if (
         body.providers.gotify.enabled
-        and body.providers.gotify.url
-        and body.providers.gotify.token
+        or body.providers.gotify.url
+        or body.providers.gotify.token
     ):
         providers_dict["gotify"] = {
-            "enabled": True,
+            "enabled": body.providers.gotify.enabled,
             "url": body.providers.gotify.url,
             "token": body.providers.gotify.token,
             "priority": body.providers.gotify.priority,
         }
 
-    if body.providers.ntfy.enabled and body.providers.ntfy.topic:
+    # ntfy provider - save if any data is present
+    if body.providers.ntfy.enabled or body.providers.ntfy.topic:
         providers_dict["ntfy"] = {
-            "enabled": True,
+            "enabled": body.providers.ntfy.enabled,
             "url": body.providers.ntfy.url,
             "topic": body.providers.ntfy.topic,
             "token": body.providers.ntfy.token,
@@ -153,9 +157,10 @@ def update_alerts(body: AlertConfigSchema) -> AlertConfigSchema:
             "tags": body.providers.ntfy.tags,
         }
 
-    if body.providers.apprise.enabled and body.providers.apprise.url:
+    # Apprise provider - save if any data is present
+    if body.providers.apprise.enabled or body.providers.apprise.url:
         providers_dict["apprise"] = {
-            "enabled": True,
+            "enabled": body.providers.apprise.enabled,
             "url": body.providers.apprise.url,
         }
 

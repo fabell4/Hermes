@@ -187,20 +187,77 @@ def get_alert_config() -> dict:
     """
     Returns the alert configuration with defaults.
 
+    Priority order:
+    1. Runtime config file (user has saved settings in UI)
+    2. Environment variables (initial configuration)
+    3. Hard-coded defaults
+
     Returns a dict with keys:
     - enabled: bool
     - failure_threshold: int
     - cooldown_minutes: int
     - providers: dict[str, dict] (webhook, gotify, ntfy configurations)
     """
-    data = load().get("alert_config", {})
+    from . import config  # Import here to avoid circular dependency
 
-    # Provide defaults
+    data = load().get("alert_config")
+
+    # If runtime config exists, use it (user has customized via UI)
+    if data is not None:
+        return {
+            "enabled": data.get("enabled", False),
+            "failure_threshold": data.get("failure_threshold", 3),
+            "cooldown_minutes": data.get("cooldown_minutes", 60),
+            "providers": data.get("providers", {}),
+        }
+
+    # Otherwise, load from environment variables
+    providers = {}
+
+    # Webhook provider
+    if config.ALERT_WEBHOOK_URL:
+        providers["webhook"] = {
+            "enabled": True,
+            "url": config.ALERT_WEBHOOK_URL,
+        }
+
+    # Gotify provider
+    if config.ALERT_GOTIFY_URL and config.ALERT_GOTIFY_TOKEN:
+        providers["gotify"] = {
+            "enabled": True,
+            "url": config.ALERT_GOTIFY_URL,
+            "token": config.ALERT_GOTIFY_TOKEN,
+            "priority": config.ALERT_GOTIFY_PRIORITY,
+        }
+
+    # ntfy provider
+    if config.ALERT_NTFY_TOPIC:
+        providers["ntfy"] = {
+            "enabled": True,
+            "url": config.ALERT_NTFY_URL or "https://ntfy.sh",
+            "topic": config.ALERT_NTFY_TOPIC,
+            "token": config.ALERT_NTFY_TOKEN or "",
+            "priority": config.ALERT_NTFY_PRIORITY,
+            "tags": config.ALERT_NTFY_TAGS,
+        }
+
+    # Apprise provider
+    if config.ALERT_APPRISE_URL:
+        providers["apprise"] = {
+            "enabled": True,
+            "url": config.ALERT_APPRISE_URL,
+        }
+
+    # Determine if alerting is enabled (threshold > 0 OR any providers configured)
+    enabled = config.ALERT_FAILURE_THRESHOLD > 0 or len(providers) > 0
+
     return {
-        "enabled": data.get("enabled", False),
-        "failure_threshold": data.get("failure_threshold", 3),
-        "cooldown_minutes": data.get("cooldown_minutes", 60),
-        "providers": data.get("providers", {}),
+        "enabled": enabled,
+        "failure_threshold": max(config.ALERT_FAILURE_THRESHOLD, 1)
+        if config.ALERT_FAILURE_THRESHOLD > 0
+        else 3,
+        "cooldown_minutes": config.ALERT_COOLDOWN_MINUTES,
+        "providers": providers,
     }
 
 
