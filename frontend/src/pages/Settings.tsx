@@ -633,7 +633,7 @@ export function Settings() {
                   <div className="space-y-2">
                     <input
                       type="url"
-                      placeholder="http://apprise:8000/notify/myconfig"
+                      placeholder="http://apprise:8000/notify/myconfig" // NOSONAR: example for local Docker service
                       value={alertsDraft.providers.apprise.url}
                       onChange={(e) =>
                         setAlertsDraft((d) =>
