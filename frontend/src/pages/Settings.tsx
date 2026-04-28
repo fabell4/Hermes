@@ -633,7 +633,7 @@ export function Settings() {
                   <div className="space-y-2">
                     <input
                       type="url"
-                      placeholder="http://apprise:8000" // NOSONAR: example for local Docker service
+                      placeholder="http://apprise:8000/notify/myconfig"
                       value={alertsDraft.providers.apprise.url}
                       onChange={(e) =>
                         setAlertsDraft((d) =>
@@ -651,7 +651,7 @@ export function Settings() {
                       className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                     />
                     <p className="text-xs text-slate-500">
-                      URL to Apprise API service. See{' '}
+                      Full URL to Apprise notify endpoint (with config key if using persistent config). See{' '}
                       <a
                         href="https://github.com/caronc/apprise-api"
                         target="_blank"
@@ -659,8 +659,7 @@ export function Settings() {
                         className="text-cyan-400 hover:underline"
                       >
                         Apprise API
-                      </a>{' '}
-                      for setup instructions
+                      </a>
                     </p>
                   </div>
                 )}

@@ -240,8 +240,18 @@ class AppriseProvider(AlertProvider):
         last_error: str,
         timestamp: datetime,
     ) -> None:
-        """Send alert via Apprise API POST request."""
-        endpoint = f"{self.url}/notify"
+        """Send alert via Apprise API POST request.
+
+        URL can be:
+        - Base URL (e.g., http://apprise:8000) - will append /notify
+        - Full endpoint (e.g., http://apprise:8000/notify/myconfig) - used as-is
+        """
+        # If URL already contains /notify, use it as-is, otherwise append /notify
+        if "/notify" in self.url:
+            endpoint = self.url
+        else:
+            endpoint = f"{self.url}/notify"
+
         title = f"⚠️ Speedtest Failure ({failure_count} consecutive)"
         body = f"{last_error}\n\nTime: {timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
 
