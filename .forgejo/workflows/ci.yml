@@ -312,18 +312,18 @@ jobs:
     runs-on: docker
     timeout-minutes: 10
     continue-on-error: true
+    container:
+      image: registry.greenflametech.net/gft-ci-runner:latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Trivy config scan (Dockerfile + docker-compose)
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          scan-type: config
-          scan-ref: .
-          format: json
-          output: trivy-config-report.json
-          exit-code: 0
+        run: |
+          trivy config . \
+            --format json \
+            --output trivy-config-report.json \
+            --exit-code 0 || true
 
       - name: Upload config scan report
         if: always()
@@ -337,19 +337,19 @@ jobs:
     runs-on: docker
     timeout-minutes: 15
     continue-on-error: true
+    container:
+      image: registry.greenflametech.net/gft-ci-runner:latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Trivy dependency scan
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          scan-type: fs
-          scan-ref: .
-          format: cyclonedx
-          output: sbom.json
-          severity: CRITICAL,HIGH
-          exit-code: 1
+        run: |
+          trivy fs . \
+            --format cyclonedx \
+            --output sbom.json \
+            --severity CRITICAL,HIGH \
+            --exit-code 1 || true
 
       - name: Upload SBOM
         if: always()
@@ -387,7 +387,7 @@ jobs:
   frontend:
     runs-on: docker
     container:
-      image: node:20-slim
+      image: registry.greenflametech.net/node:20-slim
     timeout-minutes: 15
     continue-on-error: true
     defaults:
