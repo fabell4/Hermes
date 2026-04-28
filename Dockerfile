@@ -46,9 +46,5 @@ USER hermes
 EXPOSE 8000
 EXPOSE 8080
 
-# Health check — polls /health every 30s; 3 failures = unhealthy
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-    CMD python -c "import urllib.request, sys; urllib.request.urlopen('http://localhost:8080/api/health', timeout=4); sys.exit(0)" || exit 1
-
 # Run the FastAPI server (serves the React SPA + REST API)
 CMD ["python", "-m", "uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8080"]

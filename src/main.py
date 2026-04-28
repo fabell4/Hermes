@@ -321,11 +321,12 @@ def _poll_once(
     last_exporters: list[str],
     last_paused: bool = False,
     last_alert_config: dict | None = None,
-) -> tuple[int, list[str], bool, dict]:
+    last_next_run_time: str | None = None,
+) -> tuple[int, list[str], bool, dict, str | None]:
     """
     Execute one poll cycle — checks runtime_config.json for UI-driven changes
     and reacts accordingly. Returns the (possibly updated) interval, exporters,
-    paused state, and alert config.
+    paused state, alert config, and next run time.
     Extracted from the main loop to make it unit-testable.
     """
     if last_alert_config is None:
@@ -364,12 +365,22 @@ def _poll_once(
         _handle_scheduler_pause_toggle(scheduler, current_paused)
         last_paused = current_paused
 
-    # --- Persist next run time for the UI countdown ---
+    # --- Persist next run time for the UI countdown (only if changed) ---
     job = scheduler.get_job("speedtest_run")
+    current_next_run_time = None
     if job and job.next_run_time:
-        runtime_config.set_next_run_at(job.next_run_time.isoformat())
+        current_next_run_time = job.next_run_time.isoformat()
+        if current_next_run_time != last_next_run_time:
+            runtime_config.set_next_run_at(current_next_run_time)
+            last_next_run_time = current_next_run_time
 
-    return last_interval, last_exporters, last_paused, last_alert_config
+    return (
+        last_interval,
+        last_exporters,
+        last_paused,
+        last_alert_config,
+        last_next_run_time,
+    )
 
 
 def _handle_scheduler_pause_toggle(
@@ -489,6 +500,7 @@ def main():
         default=config.ENABLED_EXPORTERS
     )
     last_alert_config = runtime_config.get_alert_config()
+    last_next_run_time = None
 
     # Restore paused state persisted from before a restart.
     last_paused = runtime_config.get_scheduler_paused()
@@ -501,7 +513,13 @@ def main():
     try:
         while True:
             time.sleep(30)
-            last_interval, last_exporters, last_paused, last_alert_config = _poll_once(
+            (
+                last_interval,
+                last_exporters,
+                last_paused,
+                last_alert_config,
+                last_next_run_time,
+            ) = _poll_once(
                 scheduler,
                 dispatcher,
                 service,
@@ -510,6 +528,7 @@ def main():
                 last_exporters,
                 last_paused,
                 last_alert_config,
+                last_next_run_time,
             )
     except (KeyboardInterrupt, SystemExit):
         logger.info("Shutdown signal received — stopping scheduler...")

@@ -58,9 +58,9 @@ def _build_alert_manager_for_api() -> AlertManager:
         cooldown_minutes=cooldown_minutes,
     )
 
-    # Register providers if alerting is enabled
-    if alert_config.get("enabled", False) or failure_threshold > 0:
-        _register_alert_providers(manager, alert_config.get("providers", {}))
+    # Always register providers for API (used for test notifications)
+    # Individual providers check their own enabled flag
+    _register_alert_providers(manager, alert_config.get("providers", {}))
 
     return manager
 

@@ -271,7 +271,7 @@ def test_poll_once_no_changes_returns_same_state(monkeypatch):
     )
     monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
 
-    interval, exporters, paused, _ = _poll_once(
+    interval, exporters, paused, _, _ = _poll_once(
         scheduler, dispatcher, service, alert_manager, 60, ["csv"]
     )
 
@@ -305,7 +305,7 @@ def test_poll_once_interval_changed_calls_update_schedule(monkeypatch):
     )
     monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
 
-    interval, _, _, _ = _poll_once(
+    interval, _, _, _, _ = _poll_once(
         scheduler, dispatcher, service, alert_manager, 60, ["csv"]
     )
 
@@ -345,7 +345,7 @@ def test_poll_once_exporters_changed_calls_update_exporters(monkeypatch):
         },
     )
 
-    _, exporters, _, _ = _poll_once(
+    _, exporters, _, _, _ = _poll_once(
         scheduler, dispatcher, service, alert_manager, 60, ["csv"]
     )
 
@@ -401,7 +401,7 @@ def test_poll_once_pause_calls_pause_job(monkeypatch):
     )
     monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
 
-    _, _, paused, _ = _poll_once(
+    _, _, paused, _, _ = _poll_once(
         scheduler, dispatcher, service, alert_manager, 60, ["csv"], last_paused=False
     )
 
@@ -430,7 +430,7 @@ def test_poll_once_resume_calls_resume_job(monkeypatch):
     )
     monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
 
-    _, _, paused, _ = _poll_once(
+    _, _, paused, _, _ = _poll_once(
         scheduler, dispatcher, service, alert_manager, 60, ["csv"], last_paused=True
     )
 

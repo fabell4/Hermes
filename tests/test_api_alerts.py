@@ -365,84 +365,64 @@ def test_post_alerts_test_requires_auth_when_key_set():
             shared_state.set_alert_manager(original_manager)
 
 
-def test_post_alerts_test_returns_503_when_manager_not_initialized():
-    """POST /api/alerts/test returns 503 if alert manager not available."""
-    from src import shared_state
-
-    # Save current state
-    original_manager = shared_state.get_alert_manager()
-
-    try:
-        # Clear the alert manager
-        shared_state.set_alert_manager(None)
-
-        response = client.post("/api/alerts/test")
-        assert response.status_code == 503
-        assert "not initialized" in response.json()["detail"].lower()
-    finally:
-        # Restore original state
-        if original_manager:
-            shared_state.set_alert_manager(original_manager)
-
-
 def test_post_alerts_test_succeeds_with_configured_providers():
     """POST /api/alerts/test returns success when providers configured."""
-    from src import shared_state
-    from src.services.alert_manager import AlertManager
-    from unittest.mock import Mock
+    from unittest.mock import patch, Mock
 
-    # Create test manager with mock provider
-    manager = AlertManager()
-    mock_provider = Mock()
-    mock_provider.send_alert = Mock()
-    manager.add_provider("test_provider", mock_provider)
+    # Mock config to return enabled webhook provider
+    mock_config = {
+        "enabled": True,
+        "failure_threshold": 3,
+        "cooldown_minutes": 60,
+        "providers": {
+            "webhook": {
+                "enabled": True,
+                "url": "http://test.example.com/webhook",  # NOSONAR: test fixture
+            },
+        },
+    }
 
-    # Save current state
-    original_manager = shared_state.get_alert_manager()
+    # Mock the HTTP request to prevent actual network call
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_response.raise_for_status = Mock()
 
-    try:
-        # Set test manager
-        shared_state.set_alert_manager(manager)
+    with patch("src.runtime_config.get_alert_config", return_value=mock_config):
+        with patch("requests.post", return_value=mock_response) as mock_post:
+            response = client.post("/api/alerts/test")
+            assert response.status_code == 200
 
-        response = client.post("/api/alerts/test")
-        assert response.status_code == 200
+            data = response.json()
+            assert data["status"] == "success"
+            assert "webhook" in data["results"]
+            assert data["results"]["webhook"] is True
+            assert "successfully" in data["message"].lower()
 
-        data = response.json()
-        assert data["status"] == "success"
-        assert "test_provider" in data["results"]
-        assert data["results"]["test_provider"] is True
-        assert "successfully" in data["message"].lower()
-
-        # Verify provider was called
-        mock_provider.send_alert.assert_called_once()
-    finally:
-        # Restore original state
-        if original_manager:
-            shared_state.set_alert_manager(original_manager)
+            # Verify HTTP request was made
+            mock_post.assert_called_once()
 
 
 def test_post_alerts_test_returns_no_providers_when_none_configured():
     """POST /api/alerts/test indicates when no providers configured."""
-    from src import shared_state
-    from src.services.alert_manager import AlertManager
+    from unittest.mock import patch
 
-    # Create manager with no providers
-    manager = AlertManager()
+    # Mock config with no enabled providers
+    mock_config = {
+        "enabled": True,
+        "failure_threshold": 3,
+        "cooldown_minutes": 60,
+        "providers": {
+            "webhook": {"enabled": False, "url": ""},
+            "gotify": {"enabled": False, "url": "", "token": ""},
+            "ntfy": {"enabled": False, "url": "", "topic": ""},
+            "apprise": {"enabled": False, "url": ""},
+        },
+    }
 
-    # Save current state
-    original_manager = shared_state.get_alert_manager()
-
-    try:
-        # Set test manager
-        shared_state.set_alert_manager(manager)
-
+    with patch("src.runtime_config.get_alert_config", return_value=mock_config):
         response = client.post("/api/alerts/test")
         assert response.status_code == 200
 
         data = response.json()
         assert data["status"] == "no_providers"
         assert "no alert providers" in data["message"].lower()
-    finally:
-        # Restore original state
-        if original_manager:
-            shared_state.set_alert_manager(original_manager)

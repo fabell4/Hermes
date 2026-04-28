@@ -4,12 +4,11 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
 from src import runtime_config
 from src.api.auth import require_api_key
-from src import shared_state
 
 logger = logging.getLogger(__name__)
 
@@ -203,21 +202,17 @@ class TestAlertResponse(BaseModel):
 @router.post(
     "/alerts/test",
     dependencies=[Depends(require_api_key)],
-    responses={
-        503: {
-            "description": "Alert manager not initialized. Ensure scheduler is running."
-        },
-    },
 )
 def test_alerts() -> TestAlertResponse:
-    """Send a test notification to all configured and enabled alert providers."""
-    alert_manager = shared_state.get_alert_manager()
+    """Send a test notification to all configured and enabled alert providers.
 
-    if alert_manager is None:
-        raise HTTPException(
-            status_code=503,
-            detail="Alert manager not initialized. Ensure the scheduler is running.",
-        )
+    Builds a fresh alert manager from current config to ensure the test uses
+    the latest settings (even if they were just saved).
+    """
+    from src.api.main import _build_alert_manager_for_api
+
+    # Always build fresh manager from current config
+    alert_manager = _build_alert_manager_for_api()
 
     results = alert_manager.send_test_alert()
 

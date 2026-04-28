@@ -172,7 +172,13 @@ export function Settings() {
     setTestMessage('')
     try {
       const response = await api.testAlerts()
-      setTestStatus('success')
+      // Map API status to UI status
+      if (response.status === 'success' || response.status === 'partial') {
+        setTestStatus('success')
+      } else {
+        // 'failed' or 'no_providers'
+        setTestStatus('error')
+      }
       setTestMessage(response.message)
       setTimeout(() => {
         setTestStatus('idle')

@@ -9,7 +9,13 @@ services:
       - "${PROMETHEUS_PORT:-8000}:8000" # Prometheus /metrics endpoint
     volumes:
       - hermes-logs:/app/logs           # CSV result history + hermes.log
-      - hermes-data:/app/data           # runtime_config.json, .run_trigger 
+      - hermes-data:/app/data           # runtime_config.json, .run_trigger
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
     environment:
       APP_ENV: "${APP_ENV:-production}"
       LOG_LEVEL: "${LOG_LEVEL:-INFO}"
@@ -47,6 +53,12 @@ services:
     volumes:
       - hermes-logs:/app/logs
       - hermes-data:/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/api/health', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
     environment:
       APP_ENV: "${APP_ENV:-production}"
       APP_VERSION: "${APP_VERSION:-dev}"
