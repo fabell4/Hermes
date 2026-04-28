@@ -377,7 +377,7 @@ def test_post_alerts_test_succeeds_with_configured_providers():
         "providers": {
             "webhook": {
                 "enabled": True,
-                "url": "http://test.example.com/webhook",  # NOSONAR: test fixture
+                "url": "http://test.example.com/webhook",  # NOSONAR
             },
         },
     }
