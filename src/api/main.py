@@ -65,9 +65,8 @@ def _build_alert_manager_for_api() -> AlertManager:
     return manager
 
 
-def _register_alert_providers(manager: AlertManager, providers_config: dict) -> None:
-    """Register alert providers based on configuration."""
-    # Webhook
+def _register_webhook_provider(manager: AlertManager, providers_config: dict) -> None:
+    """Register webhook alert provider if configured and enabled."""
     webhook_url = (
         providers_config.get("webhook", {}).get("url") or app_config.ALERT_WEBHOOK_URL
     )
@@ -77,7 +76,9 @@ def _register_alert_providers(manager: AlertManager, providers_config: dict) -> 
         except Exception as e:  # pylint: disable=broad-except
             logger.warning("Could not initialize webhook alert provider: %s", e)
 
-    # Gotify
+
+def _register_gotify_provider(manager: AlertManager, providers_config: dict) -> None:
+    """Register Gotify alert provider if configured and enabled."""
     gotify_config = providers_config.get("gotify", {})
     gotify_url = gotify_config.get("url") or app_config.ALERT_GOTIFY_URL
     gotify_token = gotify_config.get("token") or app_config.ALERT_GOTIFY_TOKEN
@@ -96,7 +97,9 @@ def _register_alert_providers(manager: AlertManager, providers_config: dict) -> 
         except Exception as e:  # pylint: disable=broad-except
             logger.warning("Could not initialize Gotify alert provider: %s", e)
 
-    # ntfy
+
+def _register_ntfy_provider(manager: AlertManager, providers_config: dict) -> None:
+    """Register ntfy alert provider if configured and enabled."""
     ntfy_config = providers_config.get("ntfy", {})
     ntfy_topic = ntfy_config.get("topic") or app_config.ALERT_NTFY_TOPIC
     if ntfy_topic and ntfy_config.get("enabled", False):
@@ -118,7 +121,9 @@ def _register_alert_providers(manager: AlertManager, providers_config: dict) -> 
         except Exception as e:  # pylint: disable=broad-except
             logger.warning("Could not initialize ntfy alert provider: %s", e)
 
-    # Apprise
+
+def _register_apprise_provider(manager: AlertManager, providers_config: dict) -> None:
+    """Register Apprise alert provider if configured and enabled."""
     apprise_config = providers_config.get("apprise", {})
     apprise_url = apprise_config.get("url") or app_config.ALERT_APPRISE_URL
     if apprise_url and apprise_config.get("enabled", False):
@@ -126,6 +131,14 @@ def _register_alert_providers(manager: AlertManager, providers_config: dict) -> 
             manager.add_provider("apprise", AppriseProvider(url=apprise_url))
         except Exception as e:  # pylint: disable=broad-except
             logger.warning("Could not initialize Apprise alert provider: %s", e)
+
+
+def _register_alert_providers(manager: AlertManager, providers_config: dict) -> None:
+    """Register alert providers based on configuration."""
+    _register_webhook_provider(manager, providers_config)
+    _register_gotify_provider(manager, providers_config)
+    _register_ntfy_provider(manager, providers_config)
+    _register_apprise_provider(manager, providers_config)
 
 
 @asynccontextmanager
