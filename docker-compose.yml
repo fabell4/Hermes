@@ -11,7 +11,7 @@ services:
       - hermes-logs:/app/logs           # CSV result history + hermes.log
       - hermes-data:/app/data           # runtime_config.json, .run_trigger
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health', timeout=4)"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
       timeout: 5s
       start_period: 15s
@@ -54,7 +54,7 @@ services:
       - hermes-logs:/app/logs
       - hermes-data:/app/data
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/api/health', timeout=4)"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
       interval: 30s
       timeout: 5s
       start_period: 15s

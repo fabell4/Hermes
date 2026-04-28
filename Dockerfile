@@ -23,8 +23,8 @@ ENV APP_VERSION=${APP_VERSION}
 
 WORKDIR /app
 
-# Install sqlite3 CLI + dependencies; create persistent dirs in same layer
-RUN apt-get update && apt-get install -y --no-install-recommends sqlite3 \
+# Install sqlite3 CLI + curl for healthchecks; create persistent dirs in same layer
+RUN apt-get update && apt-get install -y --no-install-recommends sqlite3 curl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
