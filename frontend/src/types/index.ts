@@ -65,6 +65,7 @@ export interface NtfyProviderConfig {
 export interface AppriseProviderConfig {
   enabled: boolean
   url: string
+  urls: string[]  // Service URLs for stateless mode (e.g., ['ntfy://...', 'gotify://...'])
 }
 
 export interface AlertProvidersConfig {

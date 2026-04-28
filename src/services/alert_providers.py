@@ -217,12 +217,13 @@ class NtfyProvider(AlertProvider):
 class AppriseProvider(AlertProvider):
     """Sends alerts via Apprise API service (separate container)."""
 
-    def __init__(self, url: str, timeout: int = 10) -> None:
+    def __init__(self, url: str, urls: list[str] | None = None, timeout: int = 10) -> None:
         """
         Initialize Apprise provider.
 
         Args:
-            url: Apprise API URL (e.g., http://apprise:8000/notify)
+            url: Apprise API URL (e.g., http://apprise:8000/notify or http://apprise:8000/notify/config)
+            urls: Optional list of Apprise service URLs (e.g., ['ntfy://...', 'gotify://...']) for stateless mode
             timeout: Request timeout in seconds
 
         Raises:
@@ -232,6 +233,7 @@ class AppriseProvider(AlertProvider):
             raise ValueError("Apprise API URL cannot be empty")
 
         self.url = url.rstrip("/")
+        self.urls = urls or []
         self.timeout = timeout
 
     def send_alert(
@@ -261,6 +263,14 @@ class AppriseProvider(AlertProvider):
             "type": "warning",
         }
 
+        # Add URLs for stateless mode (if provided)
+        if self.urls:
+            payload["urls"] = self.urls
+
+        logger.debug(
+            "Sending Apprise alert to %s with payload: %s", endpoint, payload
+        )
+
         try:
             response = requests.post(
                 endpoint,
@@ -270,7 +280,10 @@ class AppriseProvider(AlertProvider):
             )
             response.raise_for_status()
             logger.info(
-                "Apprise alert sent to %s (status: %d)", self.url, response.status_code
+                "Apprise alert sent to %s (status: %d, response: %s)",
+                self.url,
+                response.status_code,
+                response.text[:200] if response.text else "empty",
             )
         except requests.exceptions.RequestException as e:
             logger.error("Failed to send Apprise alert to %s: %s", self.url, e)
@@ -317,6 +330,7 @@ def create_provider(provider_type: str, config: dict[str, Any]) -> AlertProvider
     elif provider_type == "apprise":
         return AppriseProvider(
             url=config["url"],
+            urls=config.get("urls"),
             timeout=config.get("timeout", 10),
         )
     else:

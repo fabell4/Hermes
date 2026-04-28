@@ -651,15 +651,44 @@ export function Settings() {
                       className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                     />
                     <p className="text-xs text-slate-500">
-                      Full URL to Apprise notify endpoint (with config key if using persistent config). See{' '}
+                      Apprise API endpoint URL. Use persistent config (e.g., /notify/myconfig) or stateless mode with service URLs below.
+                    </p>
+                    <textarea
+                      placeholder="Optional: Service URLs for stateless mode (one per line)&#10;ntfy://ntfy.example.com/topic&#10;gotify://gotify.example.com/token"
+                      value={(alertsDraft.providers.apprise.urls || []).join('\n')}
+                      onChange={(e) =>
+                        setAlertsDraft((d) =>
+                          d
+                            ? {
+                                ...d,
+                                providers: {
+                                  ...d.providers,
+                                  apprise: {
+                                    ...d.providers.apprise,
+                                    urls: e.target.value
+                                      .split('\n')
+                                      .map(s => s.trim())
+                                      .filter(s => s.length > 0),
+                                  },
+                                },
+                              }
+                            : d
+                        )
+                      }
+                      rows={3}
+                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 font-mono"
+                    />
+                    <p className="text-xs text-slate-500">
+                      See{' '}
                       <a
                         href="https://github.com/caronc/apprise-api"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-cyan-400 hover:underline"
                       >
-                        Apprise API
+                        Apprise API docs
                       </a>
+                      {' '}for URL format examples.
                     </p>
                   </div>
                 )}

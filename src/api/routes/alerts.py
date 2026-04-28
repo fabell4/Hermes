@@ -53,6 +53,7 @@ class AppriseProviderConfig(BaseModel):
 
     enabled: bool = False
     url: str = ""
+    urls: list[str] = []  # Service URLs for stateless mode (e.g., ['ntfy://...', 'gotify://...'])
 
 
 class AlertProvidersConfig(BaseModel):
