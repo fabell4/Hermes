@@ -191,10 +191,10 @@ def _register_ntfy_provider(manager: AlertManager, providers_config: dict) -> No
 
 
 def _register_apprise_provider(manager: AlertManager, providers_config: dict) -> None:
-    """Register Apprise alert provider if configured."""
+    """Register Apprise alert provider if configured and enabled."""
     apprise_config = providers_config.get("apprise", {})
     apprise_url = apprise_config.get("url") or config.ALERT_APPRISE_URL
-    if apprise_url:
+    if apprise_url and apprise_config.get("enabled", False):
         try:
             manager.add_provider(
                 "apprise",
