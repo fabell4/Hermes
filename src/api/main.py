@@ -7,6 +7,7 @@ Run with:
 import logging
 import os
 import time
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Literal, Optional
 
@@ -20,6 +21,15 @@ from starlette.responses import FileResponse
 
 from src.api.routes import config, results, trigger, alerts
 from src import runtime_config as rc
+from src import shared_state
+from src.services.alert_manager import AlertManager
+from src.services.alert_providers import (
+    WebhookProvider,
+    GotifyProvider,
+    NtfyProvider,
+    AppriseProvider,
+)
+from src import config as app_config
 
 logger = logging.getLogger(__name__)
 
@@ -28,10 +38,113 @@ _START_TIME = time.time()
 # Path to the pre-built Vite output — present in Docker, absent in dev.
 _DIST = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
 
+
+def _build_alert_manager_for_api() -> AlertManager:
+    """
+    Build alert manager for the API process.
+    This is separate from the scheduler's alert manager since they run in different processes.
+    """
+    alert_config = rc.get_alert_config()
+
+    failure_threshold = alert_config.get(
+        "failure_threshold", app_config.ALERT_FAILURE_THRESHOLD
+    )
+    cooldown_minutes = alert_config.get(
+        "cooldown_minutes", app_config.ALERT_COOLDOWN_MINUTES
+    )
+
+    manager = AlertManager(
+        failure_threshold=max(1, failure_threshold),
+        cooldown_minutes=cooldown_minutes,
+    )
+
+    # Register providers if alerting is enabled
+    if alert_config.get("enabled", False) or failure_threshold > 0:
+        _register_alert_providers(manager, alert_config.get("providers", {}))
+
+    return manager
+
+
+def _register_alert_providers(manager: AlertManager, providers_config: dict) -> None:
+    """Register alert providers based on configuration."""
+    # Webhook
+    webhook_url = (
+        providers_config.get("webhook", {}).get("url") or app_config.ALERT_WEBHOOK_URL
+    )
+    if webhook_url and providers_config.get("webhook", {}).get("enabled", False):
+        try:
+            manager.add_provider("webhook", WebhookProvider(url=webhook_url))
+        except Exception as e:  # pylint: disable=broad-except
+            logger.warning("Could not initialize webhook alert provider: %s", e)
+
+    # Gotify
+    gotify_config = providers_config.get("gotify", {})
+    gotify_url = gotify_config.get("url") or app_config.ALERT_GOTIFY_URL
+    gotify_token = gotify_config.get("token") or app_config.ALERT_GOTIFY_TOKEN
+    if gotify_url and gotify_token and gotify_config.get("enabled", False):
+        try:
+            manager.add_provider(
+                "gotify",
+                GotifyProvider(
+                    url=gotify_url,
+                    token=gotify_token,
+                    priority=gotify_config.get(
+                        "priority", app_config.ALERT_GOTIFY_PRIORITY
+                    ),
+                ),
+            )
+        except Exception as e:  # pylint: disable=broad-except
+            logger.warning("Could not initialize Gotify alert provider: %s", e)
+
+    # ntfy
+    ntfy_config = providers_config.get("ntfy", {})
+    ntfy_topic = ntfy_config.get("topic") or app_config.ALERT_NTFY_TOPIC
+    if ntfy_topic and ntfy_config.get("enabled", False):
+        try:
+            manager.add_provider(
+                "ntfy",
+                NtfyProvider(
+                    url=ntfy_config.get("url")
+                    or app_config.ALERT_NTFY_URL
+                    or "https://ntfy.sh",
+                    topic=ntfy_topic,
+                    token=ntfy_config.get("token") or app_config.ALERT_NTFY_TOKEN,
+                    priority=ntfy_config.get(
+                        "priority", app_config.ALERT_NTFY_PRIORITY
+                    ),
+                    tags=ntfy_config.get("tags", app_config.ALERT_NTFY_TAGS),
+                ),
+            )
+        except Exception as e:  # pylint: disable=broad-except
+            logger.warning("Could not initialize ntfy alert provider: %s", e)
+
+    # Apprise
+    apprise_config = providers_config.get("apprise", {})
+    apprise_url = apprise_config.get("url") or app_config.ALERT_APPRISE_URL
+    if apprise_url and apprise_config.get("enabled", False):
+        try:
+            manager.add_provider("apprise", AppriseProvider(url=apprise_url))
+        except Exception as e:  # pylint: disable=broad-except
+            logger.warning("Could not initialize Apprise alert provider: %s", e)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manage application lifespan - startup and shutdown."""
+    # Startup
+    logger.info("Initializing alert manager for API process...")
+    alert_manager = _build_alert_manager_for_api()
+    shared_state.set_alert_manager(alert_manager)
+    logger.info("Alert manager initialized.")
+    yield
+    # Shutdown (if cleanup needed)
+
+
 app = FastAPI(
     title="Hermes API",
     description="REST interface for the Hermes speed-monitor.",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 

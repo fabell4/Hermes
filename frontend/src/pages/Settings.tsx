@@ -143,15 +143,19 @@ export function Settings() {
   const [testStatus, setTestStatus] = useState<TestAlertStatus>('idle')
   const [testMessage, setTestMessage] = useState('')
 
-  // Keep local drafts in sync when config/alerts load
+  // Initialize local drafts once when config/alerts first load
+  // Don't continuously sync to avoid overwriting user's unsaved changes
   useEffect(() => {
-    if (config) {
+    if (config && !draft) {
       setDraft({ ...config })
     }
-    if (alerts) {
+  }, [config, draft])
+
+  useEffect(() => {
+    if (alerts && !alertsDraft) {
       setAlertsDraft({ ...alerts })
     }
-  }, [config, alerts])
+  }, [alerts, alertsDraft])
 
   if (!draft || !alertsDraft) {
     return (

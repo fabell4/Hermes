@@ -144,61 +144,35 @@ def get_alerts() -> AlertConfigSchema:
     )
 
 
-def _should_save_webhook(provider: WebhookProviderConfig) -> bool:
-    """Check if webhook provider has any data to save."""
-    return provider.enabled or bool(provider.url)
-
-
-def _should_save_gotify(provider: GotifyProviderConfig) -> bool:
-    """Check if Gotify provider has any data to save."""
-    return provider.enabled or bool(provider.url) or bool(provider.token)
-
-
-def _should_save_ntfy(provider: NtfyProviderConfig) -> bool:
-    """Check if ntfy provider has any data to save."""
-    return provider.enabled or bool(provider.topic)
-
-
-def _should_save_apprise(provider: AppriseProviderConfig) -> bool:
-    """Check if Apprise provider has any data to save."""
-    return provider.enabled or bool(provider.url)
-
-
 def _build_providers_dict(providers: AlertProvidersConfig) -> dict:
-    """Build providers dictionary from schema for storage."""
-    providers_dict = {}
-
-    if _should_save_webhook(providers.webhook):
-        providers_dict["webhook"] = {
+    """
+    Build providers dictionary from schema for storage.
+    Saves all provider data to preserve user's configuration.
+    """
+    return {
+        "webhook": {
             "enabled": providers.webhook.enabled,
             "url": providers.webhook.url,
-        }
-
-    if _should_save_gotify(providers.gotify):
-        providers_dict["gotify"] = {
+        },
+        "gotify": {
             "enabled": providers.gotify.enabled,
             "url": providers.gotify.url,
             "token": providers.gotify.token,
             "priority": providers.gotify.priority,
-        }
-
-    if _should_save_ntfy(providers.ntfy):
-        providers_dict["ntfy"] = {
+        },
+        "ntfy": {
             "enabled": providers.ntfy.enabled,
             "url": providers.ntfy.url,
             "topic": providers.ntfy.topic,
             "token": providers.ntfy.token,
             "priority": providers.ntfy.priority,
             "tags": providers.ntfy.tags,
-        }
-
-    if _should_save_apprise(providers.apprise):
-        providers_dict["apprise"] = {
+        },
+        "apprise": {
             "enabled": providers.apprise.enabled,
             "url": providers.apprise.url,
-        }
-
-    return providers_dict
+        },
+    }
 
 
 @router.put(
