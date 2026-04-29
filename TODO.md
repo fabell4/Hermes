@@ -108,6 +108,7 @@ _Goal: notify users when something goes wrong and ensure code quality before v1.
 - [ ] Scheduler persistence tests — simulate restart and verify interval is restored
 - [x] SpeedtestRunner retry tests — verify retry behaviour on transient failure
 
+
 ---
 
 ## Post-Release Enhancements
