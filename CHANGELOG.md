@@ -10,6 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.10-beta] - 2026-04-29
+
+### Fixed
+- **CI workflows** — added Docker Hub authentication to prevent rate limit errors when pulling base images
+
+---
+
 ## [0.3.9-beta] - 2026-04-29
 
 ### Fixed
