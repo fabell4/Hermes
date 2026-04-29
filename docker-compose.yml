@@ -11,7 +11,7 @@ services:
       - hermes-logs:/app/logs           # CSV result history + hermes.log
       - hermes-data:/app/data           # runtime_config.json, .run_trigger
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/metrics"]
       interval: 30s
       timeout: 5s
       start_period: 15s

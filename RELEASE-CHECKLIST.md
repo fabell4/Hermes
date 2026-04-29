@@ -8,7 +8,7 @@ Use this checklist for every release. See [docs/RELEASE-PROCESS.md](../docs/RELE
 - [ ] Run `ruff format src tests` - no changes needed
 - [ ] Run `ruff check src tests` - all checks pass
 - [ ] Run `mypy src` - no errors
-- [ ] Run `pytest --cov=src -v` - all 242+ tests pass
+- [ ] Run `pytest --cov=src -v` - all 297+ tests pass
 
 ## Version Update
 
