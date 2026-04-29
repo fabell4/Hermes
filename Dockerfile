@@ -12,7 +12,7 @@ RUN npm run build
 # ---------------------------------------------------------------------------
 # Stage 2 — Python application image
 # ---------------------------------------------------------------------------
-FROM registry.greenflametech.net/python:3.13-slim
+FROM python:3.13-slim
 
 LABEL org.opencontainers.image.source="https://github.com/fabell4/hermes"
 
