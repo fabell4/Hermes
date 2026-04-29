@@ -191,6 +191,7 @@ def test_apprise_provider_sends_notification(mock_post):
     """AppriseProvider sends notification via HTTP POST."""
     mock_response = Mock()
     mock_response.status_code = 200
+    mock_response.text = "ok"
     mock_post.return_value = mock_response
 
     provider = AppriseProvider(url="http://apprise:8000")  # NOSONAR
