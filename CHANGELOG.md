@@ -10,6 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.12-beta] - 2026-04-29
+
+### Fixed
+- **GitHub publish workflow** — added `contents:write` permission and release creation steps to fix permission errors
+
+---
+
 ## [0.3.11-beta] - 2026-04-29
 
 ### Fixed
