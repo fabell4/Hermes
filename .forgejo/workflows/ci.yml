@@ -781,6 +781,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Clean up any leftover containers
+        run: docker rm -f hermes-zap || true
+
       - name: Start Hermes container
         run: |
           SHA=$(echo "${{ github.sha }}" | cut -c1-7)
