@@ -10,6 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.13-beta] - 2026-04-29
+
+### Fixed
+- **GHCR authentication** — use GH_PAT instead of GITHUB_TOKEN for container registry push
+
+---
+
 ## [0.3.12-beta] - 2026-04-29
 
 ### Fixed
