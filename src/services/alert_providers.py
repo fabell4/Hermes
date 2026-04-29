@@ -217,7 +217,9 @@ class NtfyProvider(AlertProvider):
 class AppriseProvider(AlertProvider):
     """Sends alerts via Apprise API service (separate container)."""
 
-    def __init__(self, url: str, urls: list[str] | None = None, timeout: int = 10) -> None:
+    def __init__(
+        self, url: str, urls: list[str] | None = None, timeout: int = 10
+    ) -> None:
         """
         Initialize Apprise provider.
 
@@ -269,9 +271,7 @@ class AppriseProvider(AlertProvider):
         if self.urls:
             payload["urls"] = self.urls
 
-        logger.debug(
-            "Sending Apprise alert to %s with payload: %s", endpoint, payload
-        )
+        logger.debug("Sending Apprise alert to %s with payload: %s", endpoint, payload)
 
         try:
             response = requests.post(

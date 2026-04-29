@@ -131,7 +131,9 @@ def _register_apprise_provider(manager: AlertManager, providers_config: dict) ->
         try:
             manager.add_provider(
                 "apprise",
-                AppriseProvider(url=apprise_url, urls=apprise_urls if apprise_urls else None),
+                AppriseProvider(
+                    url=apprise_url, urls=apprise_urls if apprise_urls else None
+                ),
             )
         except Exception as e:  # pylint: disable=broad-except
             logger.warning("Could not initialize Apprise alert provider: %s", e)
