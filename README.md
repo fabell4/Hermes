@@ -2,7 +2,7 @@
 
 A Python application that periodically runs internet speed tests and exports results to multiple destinations (CSV, SQLite, Prometheus, and Loki). Results are surfaced through a React + Vite frontend backed by a FastAPI REST layer. Each result captures download, upload, ping, jitter, and ISP name.
 
-**Alert notifications** can be configured to send alerts via webhook, Gotify, or ntfy.sh when consecutive speedtest failures occur, with configurable thresholds and cooldown periods.
+**Alert notifications** can be configured to send alerts via webhook, Gotify, ntfy.sh, or Apprise (100+ services) when consecutive speedtest failures occur, with configurable thresholds and cooldown periods.
 
 ## Architecture
   *Hermes is currently in beta. All four exporters (CSV, SQLite, Prometheus, Loki) are fully operational.*
@@ -21,6 +21,7 @@ flowchart TD
         RUNNER["**SpeedtestRunner**\nsrc/services/speedtest_runner.py"]
         MODEL["**SpeedResult**\nsrc/models/speed_result.py"]
         DISP["**ResultDispatcher**\nsrc/result_dispatcher.py"]
+        ALERT["**AlertManager**\nsrc/services/alert_manager.py"]
         CSV["CSVExporter"]
         SQLITE["SQLiteExporter"]
         PROM["PrometheusExporter\n:8000/metrics"]
@@ -29,13 +30,15 @@ flowchart TD
 
     SHARED_VOL[("**Shared Volume**\nruntime_config.json\n.run_trigger\nresults.csv")]
     DATA_VOL[("**Data Volume**\nhermes.db")]
+    ALERT_DEST[("**Alert Destinations**\nWebhook, Gotify,\nntfy, Apprise")]
 
     REACT -- "HTTP GET/POST" --> API
-    API -- "POST /api/trigger\nPUT /api/config" --> SHARED_VOL
+    API -- "POST /api/trigger\nPUT /api/config\nPUT /api/alerts" --> SHARED_VOL
     API -- "GET /api/results" --> DATA_VOL
     SHARED_VOL -- "polls every 30s" --> MAIN
     MAIN -- "scheduled / triggered" --> RUNNER
-    RUNNER --> MODEL
+    RUNNER -- "success" --> MODEL
+    RUNNER -- "success/failure" --> ALERT
     MODEL --> DISP
     DISP --> CSV
     DISP --> SQLITE
@@ -43,6 +46,7 @@ flowchart TD
     DISP --> LOKI
     CSV -- "writes" --> SHARED_VOL
     SQLITE -- "writes" --> DATA_VOL
+    ALERT -- "on threshold" --> ALERT_DEST
 
     style API fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style REACT fill:#1565c0,stroke:#90caf9,color:#ffffff
@@ -50,12 +54,14 @@ flowchart TD
     style RUNNER fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style MODEL fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style DISP fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style ALERT fill:#c62828,stroke:#ef5350,color:#ffffff
     style CSV fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style SQLITE fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style PROM fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style LOKI fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style SHARED_VOL fill:#f57c00,stroke:#ffb74d,color:#ffffff
     style DATA_VOL fill:#f57c00,stroke:#ffb74d,color:#ffffff
+    style ALERT_DEST fill:#c62828,stroke:#ef5350,color:#ffffff
 ```
 
 ### Deployment Topology
@@ -66,6 +72,7 @@ flowchart LR
         subgraph SCHED_CONTAINER["hermes-scheduler"]
             PROM_EP["PrometheusExporter\n:8000/metrics"]
             LOKI_EXP["LokiExporter"]
+            ALERT_MGR["AlertManager"]
         end
         subgraph API_CONTAINER["hermes-api"]
             API["FastAPI + React UI\n:8080"]
@@ -78,17 +85,33 @@ flowchart LR
         GRAFANA["Grafana\n:3000"]
     end
 
+    subgraph ALERT_HOST["Alert Services (optional)"]
+        GOTIFY["Gotify"]
+        NTFY["ntfy"]
+        APPRISE["Apprise API"]
+        WEBHOOK["Custom Webhook"]
+    end
+
     PROMETHEUS -- "scrapes :8000/metrics\nevery 15s" --> PROM_EP
     LOKI_EXP -- "HTTP push\n/loki/api/v1/push" --> LOKI
     GRAFANA -- "PromQL queries" --> PROMETHEUS
     GRAFANA -- "LogQL queries" --> LOKI
+    ALERT_MGR -- "HTTP POST\non failure threshold" --> GOTIFY
+    ALERT_MGR -- "HTTP POST\non failure threshold" --> NTFY
+    ALERT_MGR -- "HTTP POST\non failure threshold" --> APPRISE
+    ALERT_MGR -- "HTTP POST\non failure threshold" --> WEBHOOK
 
     style PROM_EP fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
     style LOKI_EXP fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style ALERT_MGR fill:#c62828,stroke:#ef5350,color:#ffffff
     style API fill:#1565c0,stroke:#90caf9,color:#ffffff
     style PROMETHEUS fill:#e65100,stroke:#ffcc80,color:#ffffff
     style LOKI fill:#1565c0,stroke:#90caf9,color:#ffffff
     style GRAFANA fill:#4a148c,stroke:#ce93d8,color:#ffffff
+    style GOTIFY fill:#c62828,stroke:#ef5350,color:#ffffff
+    style NTFY fill:#c62828,stroke:#ef5350,color:#ffffff
+    style APPRISE fill:#c62828,stroke:#ef5350,color:#ffffff
+    style WEBHOOK fill:#c62828,stroke:#ef5350,color:#ffffff
 ```
 
 **Key integration notes:**
@@ -96,6 +119,7 @@ flowchart LR
 - **Loki URL** must be set via `LOKI_URL` env var (e.g. `http://loki:3100`) — Hermes pushes directly on each test run
 - **Grafana** datasources must point to the Prometheus and Loki servers, not to Hermes directly
 - The pre-built dashboard (`docs/grafana-dashboard.json`) can be imported via **+ → Import** and will prompt for both datasource bindings
+- **Alert services** are optional and configured per provider — Hermes sends HTTP POST notifications when consecutive failure threshold is met
 
 ## Project Structure
 
@@ -105,15 +129,18 @@ Hermes/
 │   ├── main.py                        # Entry point — wires scheduler, dispatcher, and exporters
 │   ├── config.py                      # Static config loaded from environment variables
 │   ├── runtime_config.py              # Persistent runtime state (interval, enabled exporters)
+│   ├── shared_state.py                # Shared state for alert_manager access across API
 │   ├── result_dispatcher.py           # ResultDispatcher — fans out SpeedResult to exporters
 │   ├── api/
 │   │   ├── main.py                    # FastAPI app — REST API + React frontend serving
 │   │   ├── auth.py                    # API key authentication and rate limiting
-│   │   └── routes/                    # API endpoint modules
+│   │   └── routes/                    # API endpoint modules (config, results, trigger, alerts)
 │   ├── models/
 │   │   └── speed_result.py            # SpeedResult dataclass — shared data contract
 │   ├── services/
 │   │   ├── speedtest_runner.py        # SpeedtestRunner — runs test, returns SpeedResult
+│   │   ├── alert_manager.py           # AlertManager — tracks failures and sends alerts
+│   │   ├── alert_providers.py         # Alert provider implementations (Webhook, Gotify, ntfy, Apprise)
 │   │   ├── health_server.py           # Health check endpoint
 │   │   └── log_service.py             # Logging configuration
 │   ├── exporters/
@@ -133,7 +160,9 @@ Hermes/
 │   └── vite.config.ts                 # Vite build configuration
 ├── tests/
 │   ├── test_main.py
-│   ├── test_api_*.py                  # FastAPI endpoint tests
+│   ├── test_api_*.py                  # FastAPI endpoint tests (including alerts)
+│   ├── test_alert_manager.py
+│   ├── test_alert_providers.py
 │   ├── test_csv_exporter.py
 │   ├── test_loki_exporter.py
 │   ├── test_prometheus_exporter.py
@@ -242,6 +271,19 @@ services:
       PROMETHEUS_PORT: "${PROMETHEUS_PORT:-8000}"
       LOKI_URL: "${LOKI_URL:-}"
       LOKI_JOB_LABEL: "${LOKI_JOB_LABEL:-hermes_speedtest}"
+      # Alert configuration (optional) - see Alerts section
+      ALERT_FAILURE_THRESHOLD: "${ALERT_FAILURE_THRESHOLD:-0}"
+      ALERT_COOLDOWN_MINUTES: "${ALERT_COOLDOWN_MINUTES:-60}"
+      ALERT_WEBHOOK_URL: "${ALERT_WEBHOOK_URL:-}"
+      ALERT_GOTIFY_URL: "${ALERT_GOTIFY_URL:-}"
+      ALERT_GOTIFY_TOKEN: "${ALERT_GOTIFY_TOKEN:-}"
+      ALERT_GOTIFY_PRIORITY: "${ALERT_GOTIFY_PRIORITY:-5}"
+      ALERT_NTFY_URL: "${ALERT_NTFY_URL:-https://ntfy.sh}"
+      ALERT_NTFY_TOPIC: "${ALERT_NTFY_TOPIC:-}"
+      ALERT_NTFY_TOKEN: "${ALERT_NTFY_TOKEN:-}"
+      ALERT_NTFY_PRIORITY: "${ALERT_NTFY_PRIORITY:-3}"
+      ALERT_NTFY_TAGS: "${ALERT_NTFY_TAGS:-warning,rotating_light}"
+      ALERT_APPRISE_URL: "${ALERT_APPRISE_URL:-}"
     env_file:
       - path: .env
         required: false
@@ -313,12 +355,97 @@ The **React UI** is available at `http://<server-ip>:8080`.
 | `API_PORT` | `8080` | Host port to expose the FastAPI + React frontend on |
 | `API_KEY` | *(unset)* | API key for authentication (disables auth if unset) |
 | `RATE_LIMIT_PER_MINUTE` | `60` | Maximum write requests per API key per 60-second window |
+| `ALERT_FAILURE_THRESHOLD` | `0` (disabled) | Consecutive failures before sending alert |
+| `ALERT_COOLDOWN_MINUTES` | `60` | Minimum minutes between alerts |
+| `ALERT_WEBHOOK_URL` | *(unset)* | Webhook URL for alert notifications |
+| `ALERT_GOTIFY_URL` | *(unset)* | Gotify server URL |
+| `ALERT_GOTIFY_TOKEN` | *(unset)* | Gotify application token |
+| `ALERT_NTFY_TOPIC` | *(unset)* | ntfy.sh topic name |
+| `ALERT_NTFY_TOKEN` | *(unset)* | ntfy.sh authentication token (optional) |
+| `ALERT_APPRISE_URL` | *(unset)* | Apprise API URL with config ID (e.g., `https://apprise.example.com/notify/myconfig`) |
+
+> **Note:** Alert provider settings can also be configured via the UI Settings page. See the [Alert Notifications](#alert-notifications) section for details.
 
 **Enable SQLite for the best UI experience** — the React dashboard reads from `hermes.db` when available and falls back to `results.csv` otherwise. Add `sqlite` to `ENABLED_EXPORTERS`:
 
 ```bash
 ENABLED_EXPORTERS=csv,sqlite
 ```
+
+## Alert Notifications
+
+Hermes can send alert notifications when speed tests fail consecutively. Alerts are configurable via:
+- **UI Settings page** (recommended) — saves to `data/runtime_config.json`
+- **Environment variables** — set before first run (requires restart to change)
+
+### Supported Alert Providers
+
+| Provider | Description | Setup |
+|---|---|---|
+| **Webhook** | POST JSON to any HTTP endpoint | Provide webhook URL |
+| **Gotify** | Self-hosted push notifications ([gotify.net](https://gotify.net)) | Gotify server URL + app token |
+| **ntfy** | Simple pub-sub notifications ([ntfy.sh](https://ntfy.sh)) | Topic name (optionally with auth token) |
+| **Apprise** | 100+ services via Apprise API ([caronc/apprise-api](https://github.com/caronc/apprise-api)) | Apprise API URL with config ID |
+
+### Configuration via Environment Variables
+
+Add to your `.env` file:
+
+```bash
+# Enable alerting (set threshold > 0)
+ALERT_FAILURE_THRESHOLD=3          # Send alert after 3 consecutive failures
+ALERT_COOLDOWN_MINUTES=60          # Minimum 60 minutes between alerts
+
+# Example: Apprise (recommended for multiple recipients)
+ALERT_APPRISE_URL=https://apprise.example.com/notify/myconfig
+
+# Example: ntfy
+ALERT_NTFY_TOPIC=hermes_alerts
+ALERT_NTFY_TOKEN=tk_xxxxxxxxxxxxx
+ALERT_NTFY_PRIORITY=3
+ALERT_NTFY_TAGS=warning,rotating_light
+
+# Example: Gotify
+ALERT_GOTIFY_URL=https://gotify.example.com
+ALERT_GOTIFY_TOKEN=your_app_token
+ALERT_GOTIFY_PRIORITY=5
+
+# Example: Webhook
+ALERT_WEBHOOK_URL=https://your-webhook.example.com/alerts
+```
+
+### Configuration via UI
+
+The Settings page provides a visual interface to configure alerts:
+
+1. Navigate to **Settings → Alerts**
+2. Toggle alerts **ON** and set failure threshold and cooldown
+3. Enable desired providers and fill in their settings
+4. Use **"Send Test Notification"** to verify configuration
+5. Click **"Save Settings"** to persist
+
+**Apprise with persistent config (recommended):**
+- Set **URL** to `https://apprise.example.com/notify/myconfig`
+- Leave **Service URLs** empty
+- Manage recipients in Apprise's web UI
+
+**Apprise with stateless mode:**
+- Set **URL** to `https://apprise.example.com`
+- Add service URLs (one per line):
+  ```
+  ntfys://ntfy.example.com/topic?token=tk_xxx
+  gotify://gotify.example.com/token
+  ```
+
+### Alert API Endpoints
+
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/api/alerts` | Get current alert configuration |
+| `PUT` | `/api/alerts` | Update alert configuration (requires API key) |
+| `POST` | `/api/alerts/test` | Send test notification (requires API key) |
+
+See the `.env.example` file for all available alert environment variables and detailed comments.
 
 ## API Endpoints
 
@@ -332,7 +459,7 @@ The FastAPI server (`hermes-api` container) exposes the following REST endpoints
 | `GET` | `/api/results` | Paginated speed test results (newest first) |
 | `GET` | `/api/results/latest` | Most recent speed test result |
 | `GET` | `/api/config` | Current runtime configuration |
-| `GET` | `/api/alerts` | Current alert configuration |
+| `GET` | `/api/alerts` | Current alert configuration (see Alerts section above) |
 | `GET` | `/api/trigger/status` | Check if a speed test is currently running |
 
 ### Protected Endpoints (require `X-Api-Key` header when `API_KEY` is set)
@@ -341,7 +468,8 @@ The FastAPI server (`hermes-api` container) exposes the following REST endpoints
 |---|---|---|
 | `POST` | `/api/trigger` | Manually trigger a speed test |
 | `PUT` | `/api/config` | Update runtime configuration |
-| `PUT` | `/api/alerts` | Update alert configuration |
+| `PUT` | `/api/alerts` | Update alert configuration (see Alerts section above) |
+| `POST` | `/api/alerts/test` | Send test notification to configured providers |
 
 **Authentication:**
 

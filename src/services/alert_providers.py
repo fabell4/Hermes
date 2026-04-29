@@ -222,7 +222,9 @@ class AppriseProvider(AlertProvider):
         Initialize Apprise provider.
 
         Args:
-            url: Apprise API URL (e.g., http://apprise:8000/notify or http://apprise:8000/notify/config)
+            url: Apprise API URL. Examples:
+                - Persistent config: https://apprise.example.com/notify/myconfig
+                - Stateless mode: https://apprise.example.com
             urls: Optional list of Apprise service URLs (e.g., ['ntfy://...', 'gotify://...']) for stateless mode
             timeout: Request timeout in seconds
 
@@ -244,9 +246,9 @@ class AppriseProvider(AlertProvider):
     ) -> None:
         """Send alert via Apprise API POST request.
 
-        URL can be:
-        - Base URL (e.g., http://apprise:8000) - will append /notify
-        - Full endpoint (e.g., http://apprise:8000/notify/myconfig) - used as-is
+        The URL behavior:
+        - If URL contains /notify (e.g., https://apprise.example.com/notify/config), use as-is
+        - Otherwise (e.g., https://apprise.example.com), append /notify
         """
         # If URL already contains /notify, use it as-is, otherwise append /notify
         if "/notify" in self.url:
