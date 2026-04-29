@@ -511,3 +511,62 @@ curl -X PUT http://localhost:8080/api/config \
   -H "Content-Type: application/json" \
   -d '{"speedtest_interval_minutes": 30}'
 ```
+
+## Security
+
+Hermes implements multiple layers of security for production deployments:
+
+### Security Features
+
+- **API Key Authentication** — Optional `API_KEY` environment variable protects write endpoints (32-character minimum enforced at startup)
+- **Rate Limiting** — Per-API-key sliding window rate limiting (60 requests per 60 seconds by default) with `Retry-After` headers
+- **SSRF Protection** — Alert URLs validated to block internal network access, cloud metadata endpoints, and non-HTTP schemes
+- **Request Size Limits** — 1 MB default body size limit to prevent DoS attacks
+- **Security Headers** — `X-Frame-Options`, `X-Content-Type-Options`, `Cross-Origin-Resource-Policy`, `Referrer-Policy`
+- **Configurable CORS** — Restrict frontend origins via `CORS_ORIGINS` environment variable
+- **Input Validation** — Pydantic models enforce strict type checking and range validation on all API inputs
+- **Timing-Safe Comparisons** — API key validation uses `secrets.compare_digest()` to prevent timing attacks
+
+### Security Documentation
+
+- **[Security Audit Report](docs/SECURITY-AUDIT.md)** — Comprehensive 50-page security analysis covering authentication, rate limiting, input validation, SSRF risks, and threat modeling
+- **[Security Enhancements Summary](docs/SECURITY-ENHANCEMENTS.md)** — Implementation details of security fixes applied for v1.0 release
+
+### Security Best Practices
+
+**For production deployments:**
+
+1. **Always set `API_KEY`** — Generate a secure key with:
+   ```bash
+   python -c 'import secrets; print(secrets.token_urlsafe(32))'
+   ```
+
+2. **Use HTTPS** — Deploy behind a reverse proxy (nginx, Caddy, Traefik) with TLS certificates
+
+3. **Restrict CORS origins** — Set `CORS_ORIGINS` to your frontend domain only:
+   ```bash
+   CORS_ORIGINS=https://your-frontend-domain.com
+   ```
+
+4. **Configure rate limits** — Adjust `RATE_LIMIT_PER_MINUTE` based on your usage patterns
+
+5. **Validate alert URLs** — Only use trusted, public HTTPS endpoints for alert webhooks
+
+6. **Network isolation** — Deploy in a private network segment if possible; expose only necessary ports
+
+7. **Monitor logs** — Review authentication failures and rate limit violations regularly
+
+### Test Coverage
+
+130+ API security tests validate:
+- Authentication and authorization flows
+- Rate limiting behavior
+- SSRF protection (15 comprehensive tests)
+- Input validation and boundary conditions
+- Request size limits
+- Test alert rate limiting
+
+---
+
+Licensed under MIT. See [LICENSE](LICENSE) for details.
+

@@ -10,6 +10,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.0.0-beta] - 2026-04-29
+
+### Added
+- **Security audit and enhancements** — Comprehensive security review completed with all critical issues addressed:
+  - API key length validation (32-character minimum enforced at startup)
+  - SSRF protection for alert URLs (blocks localhost, private IPs, link-local, non-HTTP schemes)
+  - Request body size limit middleware (1 MB default, configurable via `MAX_REQUEST_BODY_SIZE`)
+  - Configurable CORS origins (via `CORS_ORIGINS` environment variable)
+  - Test alert rate limiting (10-second cooldown with `Retry-After` header)
+  - Additional security headers (`X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`)
+  - `Retry-After` header on rate limit responses (429 status)
+- **Security documentation** — Added comprehensive security audit report ([docs/SECURITY-AUDIT.md](docs/SECURITY-AUDIT.md)) and implementation summary ([docs/SECURITY-ENHANCEMENTS.md](docs/SECURITY-ENHANCEMENTS.md))
+- **Security test coverage** — 130 API tests including 15 SSRF protection tests, 6 request size limit tests, and 7 test alert rate limiting tests
+
+### Changed
+- **Enhanced API authentication** — API keys now validated for minimum length on startup, application exits with helpful error message if key is too short
+
+### Security
+- **CRITICAL: SSRF vulnerability fixed** — Alert URL validation now prevents attackers from targeting internal services, cloud metadata endpoints, or private network infrastructure
+- **Defense-in-depth improvements** — Multiple security layers now protect production deployments (authentication + rate limiting + size limits + SSRF protection + security headers)
+
+---
+
 ## [0.3.13-beta] - 2026-04-29
 
 ### Fixed

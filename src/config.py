@@ -60,9 +60,25 @@ LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
 # Leave unset to disable authentication (local dev / trusted network).
 API_KEY: str | None = os.getenv("API_KEY") or None
 
+# Validate API key length to prevent weak keys
+if API_KEY is not None and len(API_KEY) < 32:
+    logging.error(
+        "API_KEY must be at least 32 characters for security. "
+        "Generate a secure key with: python -c 'import secrets; print(secrets.token_urlsafe(32))'"
+    )
+    raise SystemExit(1)
+
 # Maximum requests per API key per 60-second window on protected endpoints.
 # Set to 0 to disable rate limiting while keeping auth on.
 RATE_LIMIT_PER_MINUTE: int = _get_int("RATE_LIMIT_PER_MINUTE", 60)
+
+# Maximum request body size in bytes (1 MB default)
+MAX_REQUEST_BODY_SIZE: int = _get_int("MAX_REQUEST_BODY_SIZE", 1_048_576)
+
+# CORS allowed origins (comma-separated URLs)
+CORS_ORIGINS: str = os.getenv(
+    "CORS_ORIGINS", "http://localhost:5173,http://localhost:4173"
+)
 
 # --- Scheduler ---
 # Runtime config takes priority over env var

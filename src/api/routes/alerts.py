@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import ipaddress
 import logging
+import time
+from urllib.parse import urlparse
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from src import runtime_config
@@ -21,11 +24,100 @@ TEST_ALERT_STATUS_PARTIAL = "partial"
 TEST_ALERT_STATUS_NO_PROVIDERS = "no_providers"
 
 
+# ---------------------------------------------------------------------------
+# SSRF Protection
+# ---------------------------------------------------------------------------
+
+
+def validate_alert_url(url: str, field_name: str) -> None:  # pylint: disable=too-many-branches
+    """Validate alert provider URL to prevent Server-Side Request Forgery (SSRF).
+    
+    Blocks:
+    - Non-HTTP(S) schemes (file://, ftp://, etc.)
+    - Localhost addresses
+    - Private IP ranges (RFC 1918, RFC 4193)
+    - Link-local addresses
+    
+    Args:
+        url: The URL to validate
+        field_name: Human-readable field name for error messages
+        
+    Raises:
+        HTTPException: If URL is invalid or unsafe (documented in endpoint responses)
+    """
+    if not url:
+        return  # Empty URL is valid (provider disabled)
+    
+    try:
+        parsed = urlparse(url)
+        
+        # Only allow http/https schemes
+        if parsed.scheme not in ("http", "https"):
+            raise HTTPException(
+                status_code=422,
+                detail=f"{field_name}: Only http:// and https:// URLs are allowed (got {parsed.scheme}://)."
+            )
+        
+        if not parsed.hostname:
+            raise HTTPException(
+                status_code=422,
+                detail=f"{field_name}: URL must include a hostname."
+            )
+        
+        # Check for localhost (case-insensitive)
+        hostname_lower = parsed.hostname.lower()
+        if hostname_lower in ("localhost", "127.0.0.1", "::1", "0.0.0.0", "::"):
+            raise HTTPException(
+                status_code=422,
+                detail=f"{field_name}: Localhost addresses are not allowed."
+            )
+        
+        # Check for private IP ranges
+        try:
+            ip = ipaddress.ip_address(parsed.hostname)
+            if ip.is_loopback:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"{field_name}: Loopback addresses are not allowed."
+                )
+            if ip.is_link_local:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"{field_name}: Link-local addresses are not allowed."
+                )
+            if ip.is_reserved:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"{field_name}: Reserved IP addresses are not allowed."
+                )
+            if ip.is_private:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"{field_name}: Private IP addresses are not allowed (RFC 1918/4193)."
+                )
+        except ValueError:
+            # Not an IP address — it's a hostname/domain, which is allowed
+            # (DNS rebinding is a separate issue, not addressed here)
+            pass
+    
+    except ValueError as e:
+        raise HTTPException(
+            status_code=422,
+            detail=f"{field_name}: Invalid URL format — {e}"
+        ) from e
+
+
+# ---------------------------------------------------------------------------
+# Pydantic Models
+# ---------------------------------------------------------------------------
+
+
 class WebhookProviderConfig(BaseModel):
     """Webhook alert provider configuration."""
 
     enabled: bool = False
     url: str = ""
+
 
 
 class GotifyProviderConfig(BaseModel):
@@ -180,9 +272,20 @@ def _build_providers_dict(providers: AlertProvidersConfig) -> dict:
 @router.put(
     "/alerts",
     dependencies=[Depends(require_api_key)],
+    responses={
+        422: {
+            "description": "Invalid alert configuration (e.g., unsafe URL, invalid values)"
+        }
+    },
 )
 def update_alerts(body: AlertConfigSchema) -> AlertConfigSchema:
     """Persist updated alert configuration."""
+    # Validate all provider URLs to prevent SSRF attacks
+    validate_alert_url(body.providers.webhook.url, "Webhook URL")
+    validate_alert_url(body.providers.gotify.url, "Gotify URL")
+    validate_alert_url(body.providers.ntfy.url, "ntfy URL")
+    validate_alert_url(body.providers.apprise.url, "Apprise URL")
+    
     alert_config = {
         "enabled": body.enabled,
         "failure_threshold": body.failure_threshold,
@@ -201,17 +304,60 @@ class TestAlertResponse(BaseModel):
     results: dict[str, bool] = Field(default_factory=dict)
     message: str = ""
 
+# ---------------------------------------------------------------------------
+# Test Alert Rate Limiting
+# ---------------------------------------------------------------------------
+
+_test_alert_last_call: float = 0.0
+_TEST_ALERT_COOLDOWN_SECONDS = 10
+
+
+def _check_test_alert_rate_limit() -> None:
+    """Enforce rate limit for test alert endpoint to prevent abuse.
+    
+    Raises:
+        HTTPException 429: if cooldown period has not elapsed
+    """
+    global _test_alert_last_call  # pylint: disable=global-statement
+    now = time.time()
+    elapsed = now - _test_alert_last_call
+    
+    if _test_alert_last_call > 0 and elapsed < _TEST_ALERT_COOLDOWN_SECONDS:
+        remaining = int(_TEST_ALERT_COOLDOWN_SECONDS - elapsed)
+        raise HTTPException(
+            status_code=429,
+            detail=f"Test alerts can only be sent every {_TEST_ALERT_COOLDOWN_SECONDS} seconds. Try again in {remaining} seconds.",
+            headers={"Retry-After": str(remaining)},
+        )
+    
+    _test_alert_last_call = now
+
+
+# ---------------------------------------------------------------------------
+# Test Alert Endpoint
+# ---------------------------------------------------------------------------
+
 
 @router.post(
     "/alerts/test",
     dependencies=[Depends(require_api_key)],
+    responses={
+        429: {
+            "description": "Rate limit exceeded — wait before sending another test alert"
+        }
+    },
 )
 def test_alerts() -> TestAlertResponse:
     """Send a test notification to all configured and enabled alert providers.
 
     Builds a fresh alert manager from current config to ensure the test uses
     the latest settings (even if they were just saved).
+    
+    Rate limited to once every 10 seconds to prevent abuse.
     """
+    # Enforce rate limit
+    _check_test_alert_rate_limit()
+    
     from src.api.main import _build_alert_manager_for_api
 
     # Always build fresh manager from current config

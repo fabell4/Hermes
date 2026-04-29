@@ -79,4 +79,8 @@ def require_api_key(x_api_key: Annotated[str | None, Header()] = None) -> None:
         raise HTTPException(status_code=403, detail="Invalid API key.")
     if not _check_rate_limit(x_api_key):
         logger.warning("auth: rate limit exceeded for key prefix=%.4s", x_api_key)
-        raise HTTPException(status_code=429, detail="Rate limit exceeded.")
+        raise HTTPException(
+            status_code=429,
+            detail="Rate limit exceeded.",
+            headers={"Retry-After": "60"}
+        )

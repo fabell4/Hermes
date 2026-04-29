@@ -368,6 +368,10 @@ def test_post_alerts_test_requires_auth_when_key_set():
 def test_post_alerts_test_succeeds_with_configured_providers():
     """POST /api/alerts/test returns success when providers configured."""
     from unittest.mock import patch, Mock
+    from src.api.routes import alerts
+    
+    # Reset rate limit for this test
+    alerts._test_alert_last_call = 0.0
 
     # Mock config to return enabled webhook provider
     mock_config = {
@@ -405,6 +409,10 @@ def test_post_alerts_test_succeeds_with_configured_providers():
 def test_post_alerts_test_returns_no_providers_when_none_configured():
     """POST /api/alerts/test indicates when no providers configured."""
     from unittest.mock import patch
+    from src.api.routes import alerts
+    
+    # Reset rate limit for this test
+    alerts._test_alert_last_call = 0.0
 
     # Mock config with no enabled providers
     mock_config = {

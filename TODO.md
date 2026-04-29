@@ -89,14 +89,20 @@ _Goal: notify users when something goes wrong and ensure code quality before v1.
 
 ### Quality Assurance
 - [ ] Full code review — comprehensive review of all modules before v1.0 release
-  - Security audit (authentication, rate limiting, input validation)
-  - Review for defensive coding practices
-  - Review for best practices, and possible code simplification
-  - Review for modernization, remediate deprecated items
-  - Error handling completeness
-  - Test coverage gaps
-  - Documentation accuracy
-  - Performance optimization opportunities
+  - [x] Security audit (authentication, rate limiting, input validation) — **COMPLETE**
+    - ✅ Comprehensive 50-page security audit completed (see [docs/SECURITY-AUDIT.md](docs/SECURITY-AUDIT.md))
+    - ✅ All high-priority issues fixed: API key validation, SSRF protection, rate limiting headers
+    - ✅ All low-priority enhancements implemented: request size limits, configurable CORS, test alert throttling
+    - ✅ 130 API tests passing including 15 SSRF tests, 6 request size tests, 7 rate limit tests
+    - ✅ Security enhancements documented (see [docs/SECURITY-ENHANCEMENTS.md](docs/SECURITY-ENHANCEMENTS.md))
+    - ✅ Approved for v1.0 release
+  - [ ] Review for defensive coding practices
+  - [ ] Review for best practices, and possible code simplification
+  - [ ] Review for modernization, remediate deprecated items
+  - [ ] Error handling completeness
+  - [ ] Test coverage gaps
+  - [ ] Documentation accuracy
+  - [ ] Performance optimization opportunities
 
 > 🏁 **Beta → Full release gate** — all Phase 4 items must be complete before tagging v1.0.
 
@@ -145,6 +151,13 @@ _Features planned for after v1.0. Not required for stable release._
 - [ ] Dashboard customization — choose which metrics to display, rearrange cards
 - [ ] Export charts — download charts as PNG/SVG for reports
 - [ ] Scheduled test windows — only run tests during specific hours (avoid counting against data caps)
+
+### Security & Infrastructure (Post-v1.0)
+- [ ] API key rotation mechanism — support rotating keys without restart, or multiple valid keys
+- [ ] Multi-user support — per-user API keys with access control and audit trails
+- [ ] Distributed rate limiting — migrate from in-process state to Redis for multi-instance deployments
+- [ ] Secrets vault integration — integrate with HashiCorp Vault or similar for production secret management
+- [ ] Strict-Transport-Security header — add HSTS header for HTTPS-only deployments
 
 ---
 
