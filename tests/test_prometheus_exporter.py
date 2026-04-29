@@ -60,9 +60,9 @@ def test_export_updates_gauges_without_raising(_mock_start):
 def test_prometheus_gauges_reflect_exported_values(_mock_start):
     """Integration test: verify Prometheus gauges are set to correct metric values."""
     from src.exporters.prometheus_exporter import _DOWNLOAD, _UPLOAD, _PING, _JITTER
-    
+
     exporter = PrometheusExporter(port=9192)
-    
+
     # Create a result with known values
     result = SpeedResult(
         timestamp=datetime.now(timezone.utc),
@@ -75,16 +75,16 @@ def test_prometheus_gauges_reflect_exported_values(_mock_start):
         server_location="Berlin, DE",
         server_id=9999,
     )
-    
+
     exporter.export(result)
-    
+
     # Verify gauge values match the exported result
     labels = {
         "server_name": "TestServer",
         "server_location": "Berlin, DE",
         "isp_name": "TestISP",
     }
-    
+
     # Get the actual gauge values by collecting metrics
     assert _DOWNLOAD.labels(**labels)._value._value == pytest.approx(123.45)
     assert _UPLOAD.labels(**labels)._value._value == pytest.approx(67.89)
@@ -96,9 +96,9 @@ def test_prometheus_gauges_reflect_exported_values(_mock_start):
 def test_prometheus_gauges_update_on_multiple_exports(_mock_start):
     """Integration test: verify gauges update correctly with new values."""
     from src.exporters.prometheus_exporter import _DOWNLOAD, _UPLOAD, _PING
-    
+
     exporter = PrometheusExporter(port=9193)
-    
+
     # Export first result
     result1 = SpeedResult(
         timestamp=datetime.now(timezone.utc),
@@ -110,10 +110,10 @@ def test_prometheus_gauges_update_on_multiple_exports(_mock_start):
         server_id=1,
     )
     exporter.export(result1)
-    
+
     labels1 = {"server_name": "Server1", "server_location": "Location1", "isp_name": ""}
     assert _DOWNLOAD.labels(**labels1)._value._value == pytest.approx(100.0)
-    
+
     # Export second result with different values
     result2 = SpeedResult(
         timestamp=datetime.now(timezone.utc),
@@ -125,7 +125,7 @@ def test_prometheus_gauges_update_on_multiple_exports(_mock_start):
         server_id=1,
     )
     exporter.export(result2)
-    
+
     # Verify gauges updated to new values
     assert _DOWNLOAD.labels(**labels1)._value._value == pytest.approx(200.0)
     assert _UPLOAD.labels(**labels1)._value._value == pytest.approx(100.0)
@@ -135,10 +135,9 @@ def test_prometheus_gauges_update_on_multiple_exports(_mock_start):
 @patch("src.exporters.prometheus_exporter.start_http_server")
 def test_prometheus_gauges_handle_missing_jitter(_mock_start):
     """Integration test: verify jitter gauge is not updated when jitter_ms is None."""
-    from src.exporters.prometheus_exporter import _JITTER
-    
+
     exporter = PrometheusExporter(port=9194)
-    
+
     # Export result without jitter
     result = SpeedResult(
         timestamp=datetime.now(timezone.utc),
@@ -150,6 +149,6 @@ def test_prometheus_gauges_handle_missing_jitter(_mock_start):
         server_location="Location",
         server_id=1,
     )
-    
+
     # This should not raise, and jitter gauge should not be set
     exporter.export(result)  # Should complete without error

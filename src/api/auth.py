@@ -82,5 +82,5 @@ def require_api_key(x_api_key: Annotated[str | None, Header()] = None) -> None:
         raise HTTPException(
             status_code=429,
             detail="Rate limit exceeded.",
-            headers={"Retry-After": "60"}
+            headers={"Retry-After": "60"},
         )

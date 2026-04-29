@@ -20,7 +20,6 @@ def test_request_at_size_limit_accepted():
     """Requests at exactly the size limit should be accepted."""
     # Create a payload that's exactly at the limit
     with patch("src.api.main.app_config.MAX_REQUEST_BODY_SIZE", 100):
-        payload = {"data": "x" * 50}  # Small payload
         # Mock the content-length header to be exactly at limit
         response = client.put(
             "/api/config",

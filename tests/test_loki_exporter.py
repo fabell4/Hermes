@@ -161,48 +161,48 @@ def test_loki_payload_structure_complete() -> None:
 
     # Extract and validate the payload
     assert mock_post.call_count == 1
-    
+
     # Validate URL
     url = mock_post.call_args[0][0]
     assert url == "http://localhost:3100/loki/api/v1/push"
-    
+
     # Validate headers
     headers = mock_post.call_args[1]["headers"]
     assert headers["Content-Type"] == "application/json"
-    
+
     # Validate payload structure
     body_bytes = mock_post.call_args[1]["data"]
     body = json.loads(body_bytes.decode("utf-8"))
-    
+
     # Top-level structure
     assert "streams" in body
     assert isinstance(body["streams"], list)
     assert len(body["streams"]) == 1
-    
+
     stream = body["streams"][0]
-    
+
     # Stream structure
     assert "stream" in stream
     assert "values" in stream
-    
+
     # Labels
     labels = stream["stream"]
     assert labels["job"] == "hermes_integration"
     assert labels["server_name"] == "Berlin-1"
     assert labels["server_location"] == "DE"
     # Note: server_id is not in labels, only in the line content
-    
+
     # Values array
     values = stream["values"]
     assert isinstance(values, list)
     assert len(values) == 1
-    
+
     # Timestamp and line
     timestamp_ns, line_json = values[0]
     assert isinstance(timestamp_ns, str)
     assert timestamp_ns.isdigit()
     assert len(timestamp_ns) == 19  # nanosecond timestamp
-    
+
     # Line content
     line = json.loads(line_json)
     assert line["download_mbps"] == pytest.approx(123.45)
@@ -216,7 +216,7 @@ def test_loki_payload_structure_complete() -> None:
 def test_loki_payload_includes_all_fields() -> None:
     """Integration test: verify all SpeedResult fields are included in Loki payload."""
     exporter = LokiExporter("http://localhost:3100", job_label="hermes_test")
-    
+
     # Create result with all optional fields populated
     result = SpeedResult(
         timestamp=datetime(2026, 4, 29, 15, 30, 45, tzinfo=timezone.utc),
@@ -240,7 +240,7 @@ def test_loki_payload_includes_all_fields() -> None:
 
     body = json.loads(mock_post.call_args[1]["data"].decode("utf-8"))
     line = json.loads(body["streams"][0]["values"][0][1])
-    
+
     # Verify all fields are present and correct
     assert line["download_mbps"] == pytest.approx(456.78)
     assert line["upload_mbps"] == pytest.approx(234.56)
@@ -256,7 +256,7 @@ def test_loki_payload_includes_all_fields() -> None:
 def test_loki_payload_handles_none_values() -> None:
     """Integration test: verify Loki payload correctly handles None values."""
     exporter = LokiExporter("http://localhost:3100")
-    
+
     result = SpeedResult(
         timestamp=datetime.now(timezone.utc),
         download_mbps=100.0,
@@ -279,10 +279,10 @@ def test_loki_payload_handles_none_values() -> None:
 
     body = json.loads(mock_post.call_args[1]["data"].decode("utf-8"))
     line = json.loads(body["streams"][0]["values"][0][1])
-    
+
     # Verify None values are handled (should be null in JSON)
     assert line["jitter_ms"] is None
     assert line["isp_name"] is None
-    
+
     # Verify other fields still present
     assert line["download_mbps"] == pytest.approx(100.0)
