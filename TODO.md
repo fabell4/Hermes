@@ -104,8 +104,8 @@ _Goal: notify users when something goes wrong and ensure code quality before v1.
 
 ## Testing Backlog
 
-- [ ] Exporter integration tests — CSV schema validation, Prometheus metric values, Loki payload shape
-- [ ] Scheduler persistence tests — simulate restart and verify interval is restored
+- [x] Exporter integration tests — CSV schema validation, Prometheus metric values, Loki payload shape
+- [x] Scheduler persistence tests — simulate restart and verify interval is restored
 - [x] SpeedtestRunner retry tests — verify retry behaviour on transient failure
 
 

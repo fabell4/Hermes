@@ -281,3 +281,103 @@ def test_isp_name_empty_when_none(tmp_path):
     with open(path, encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
     assert rows[0]["isp_name"] == ""
+
+
+# ---------------------------------------------------------------------------
+# Integration tests — schema validation
+# ---------------------------------------------------------------------------
+
+
+def test_csv_schema_complete_with_all_fields(tmp_path):
+    """Integration test: verify CSV contains all expected fields in the correct order."""
+    path = tmp_path / "results.csv"
+    exporter = CSVExporter(path)
+    
+    # Create a result with all fields populated
+    result = SpeedResult(
+        timestamp=datetime(2026, 4, 29, 12, 30, 0, tzinfo=timezone.utc),
+        download_mbps=250.75,
+        upload_mbps=125.5,
+        ping_ms=12.3,
+        jitter_ms=4.2,
+        isp_name="Test ISP Corp",
+        server_name="TestServer",
+        server_location="New York, NY",
+        server_id=12345,
+    )
+    
+    exporter.export(result)
+    
+    # Validate the CSV file structure
+    with open(path, encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        
+        # Verify all expected columns are present in the correct order
+        assert reader.fieldnames == FIELDNAMES
+        assert reader.fieldnames == [
+            "timestamp",
+            "download_mbps",
+            "upload_mbps",
+            "ping_ms",
+            "jitter_ms",
+            "isp_name",
+            "server_name",
+            "server_location",
+            "server_id",
+        ]
+        
+        # Verify data values
+        rows = list(reader)
+        assert len(rows) == 1
+        row = rows[0]
+        
+        # Validate timestamp format (ISO 8601)
+        parsed_ts = datetime.fromisoformat(row["timestamp"])
+        assert parsed_ts.year == 2026
+        assert parsed_ts.month == 4
+        assert parsed_ts.day == 29
+        
+        # Validate numeric fields
+        assert float(row["download_mbps"]) == pytest.approx(250.75)
+        assert float(row["upload_mbps"]) == pytest.approx(125.5)
+        assert float(row["ping_ms"]) == pytest.approx(12.3)
+        assert float(row["jitter_ms"]) == pytest.approx(4.2)
+        
+        # Validate string fields
+        assert row["isp_name"] == "Test ISP Corp"
+        assert row["server_name"] == "TestServer"
+        assert row["server_location"] == "New York, NY"
+        assert row["server_id"] == "12345"
+
+
+def test_csv_handles_missing_optional_fields(tmp_path):
+    """Integration test: verify CSV correctly handles None values for optional fields."""
+    path = tmp_path / "results.csv"
+    exporter = CSVExporter(path)
+    
+    # Create a result with optional fields as None
+    result = SpeedResult(
+        timestamp=datetime.now(tz=timezone.utc),
+        download_mbps=100.0,
+        upload_mbps=50.0,
+        ping_ms=10.0,
+        jitter_ms=None,  # Optional
+        isp_name=None,   # Optional
+        server_name="Server",
+        server_location="Location",
+        server_id=1,
+    )
+    
+    exporter.export(result)
+    
+    with open(path, encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+        row = rows[0]
+        
+        # Optional fields should be empty strings when None
+        assert row["jitter_ms"] == ""
+        assert row["isp_name"] == ""
+        
+        # Required fields should still be present
+        assert row["server_name"] == "Server"
+        assert float(row["download_mbps"]) == pytest.approx(100.0)
