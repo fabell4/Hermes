@@ -10,6 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.11-beta] - 2026-04-29
+
+### Fixed
+- **CI ZAP job** — added cleanup step to remove leftover containers from previous failed runs
+
+---
+
 ## [0.3.10-beta] - 2026-04-29
 
 ### Fixed
