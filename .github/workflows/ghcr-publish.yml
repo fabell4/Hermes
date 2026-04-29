@@ -15,7 +15,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
 
     steps:
@@ -53,3 +53,21 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository_owner }}/hermes:${{ steps.version.outputs.version }}
             ghcr.io/${{ github.repository_owner }}/hermes:latest
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Extract changelog notes
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: python scripts/extract_changelog.py
+
+      - name: Create GitHub release
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+          VERSION: ${{ steps.version.outputs.version }}
+          GH_USERNAME: ${{ github.repository_owner }}
+          GH_PAT: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/create_github_release.py
