@@ -1,8 +1,10 @@
 site_name: Hermes
-site_description: Hermes Speedtest Documentation
+site_description: Hermes Speedtest Monitoring & Alert Documentation
 docs_dir: .
 nav:
   - Home: index.md
+  - Release Process: RELEASE-PROCESS.md
+  - Suppression Decisions: suppression-decisions.md
 
 plugins:
   - search
