@@ -261,7 +261,7 @@ class AppriseProvider(AlertProvider):
         title = f"⚠️ Speedtest Failure ({failure_count} consecutive)"
         body = f"{last_error}\n\nTime: {timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
 
-        payload = {
+        payload: dict[str, Any] = {
             "title": title,
             "body": body,
             "type": "warning",
