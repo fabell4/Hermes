@@ -10,6 +10,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.9-beta] - 2026-04-29
+
+### Fixed
+- **Dockerfile base image** — changed from private registry to public Docker Hub `python:3.13-slim` for GitHub Actions compatibility
+
+---
+
 ## [0.3.8-beta] - 2026-04-29
 
 ### Fixed

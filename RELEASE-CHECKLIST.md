@@ -9,6 +9,7 @@ Use this checklist for every release. See [docs/RELEASE-PROCESS.md](../docs/RELE
 - [ ] Run `ruff check src tests` - all checks pass
 - [ ] Run `mypy src` - no errors
 - [ ] Run `pytest --cov=src -v` - all 297+ tests pass
+- [ ] Verify Dockerfile uses public registries (Docker Hub, not private registry)
 
 ## Version Update
 
