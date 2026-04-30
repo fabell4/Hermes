@@ -73,7 +73,7 @@ def _register_webhook_provider(manager: AlertManager, providers_config: dict) ->
     if webhook_url and providers_config.get("webhook", {}).get("enabled", False):
         try:
             manager.add_provider("webhook", WebhookProvider(url=webhook_url))
-        except Exception as e:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except  # NOSONAR
             logger.warning("Could not initialize webhook alert provider: %s", e)
 
 
@@ -94,7 +94,7 @@ def _register_gotify_provider(manager: AlertManager, providers_config: dict) -> 
                     ),
                 ),
             )
-        except Exception as e:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except  # NOSONAR
             logger.warning("Could not initialize Gotify alert provider: %s", e)
 
 
@@ -118,7 +118,7 @@ def _register_ntfy_provider(manager: AlertManager, providers_config: dict) -> No
                     tags=ntfy_config.get("tags", app_config.ALERT_NTFY_TAGS),
                 ),
             )
-        except Exception as e:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except  # NOSONAR
             logger.warning("Could not initialize ntfy alert provider: %s", e)
 
 
@@ -135,7 +135,7 @@ def _register_apprise_provider(manager: AlertManager, providers_config: dict) ->
                     url=apprise_url, urls=apprise_urls if apprise_urls else None
                 ),
             )
-        except Exception as e:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except  # NOSONAR
             logger.warning("Could not initialize Apprise alert provider: %s", e)
 
 

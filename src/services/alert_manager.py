@@ -141,7 +141,7 @@ class AlertManager:
                     timestamp=timestamp,
                 )
                 logger.info("Alert sent successfully via %s", name)
-            except Exception as e:  # pylint: disable=broad-exception-caught
+            except Exception as e:  # pylint: disable=broad-exception-caught  # NOSONAR
                 logger.error("Alert provider '%s' failed: %s", name, e, exc_info=True)
                 failures[name] = e
 
@@ -208,7 +208,7 @@ class AlertManager:
                 )
                 logger.info("Test alert sent successfully via %s", name)
                 results[name] = True
-            except Exception as e:  # pylint: disable=broad-exception-caught
+            except Exception as e:  # pylint: disable=broad-exception-caught  # NOSONAR
                 logger.error("Test alert failed via %s: %s", name, e, exc_info=True)
                 results[name] = False
 

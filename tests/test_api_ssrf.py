@@ -1,5 +1,11 @@
-"""Tests for SSRF protection in alert configuration endpoints."""
+"""Tests for SSRF protection in alert configuration endpoints.
+
+NOTE: This file intentionally uses insecure URLs, private IPs, and dangerous schemes
+to verify that our SSRF protection correctly BLOCKS them. All flagged security issues
+are test vectors, not vulnerabilities.
+"""
 # pylint: disable=missing-function-docstring
+# NOSONAR - All http://, private IPs, and dangerous URLs in this file are intentional test data
 
 from unittest.mock import patch
 

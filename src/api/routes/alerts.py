@@ -29,7 +29,67 @@ TEST_ALERT_STATUS_NO_PROVIDERS = "no_providers"
 # ---------------------------------------------------------------------------
 
 
-def validate_alert_url(url: str, field_name: str) -> None:  # pylint: disable=too-many-branches
+def _check_dangerous_hostnames(hostname: str, field_name: str) -> None:
+    """Check for localhost and reserved hostnames.
+    
+    Args:
+        hostname: The hostname to check
+        field_name: Human-readable field name for error messages
+        
+    Raises:
+        HTTPException: If hostname is localhost or a reserved address
+    """
+    hostname_lower = hostname.lower()
+    # NOSONAR - We are checking these values to BLOCK them (SSRF protection),
+    # not binding to them. This is intentional security validation.
+    if hostname_lower in ("localhost", "127.0.0.1", "::1", "0.0.0.0", "::"):
+        raise HTTPException(
+            status_code=422,
+            detail=f"{field_name}: Localhost addresses are not allowed.",
+        )
+
+
+def _check_ip_address_restrictions(hostname: str, field_name: str) -> None:
+    """Check if hostname is an IP address with restrictions.
+    
+    Args:
+        hostname: The hostname to check
+        field_name: Human-readable field name for error messages
+        
+    Raises:
+        HTTPException: If IP address is restricted (loopback, link-local, private, reserved)
+    """
+    try:
+        ip = ipaddress.ip_address(hostname)
+        if ip.is_loopback:
+            raise HTTPException(
+                status_code=422,
+                detail=f"{field_name}: Loopback addresses are not allowed.",
+            )
+        if ip.is_link_local:
+            raise HTTPException(
+                status_code=422,
+                detail=f"{field_name}: Link-local addresses are not allowed.",
+            )
+        if ip.is_reserved:
+            raise HTTPException(
+                status_code=422,
+                detail=f"{field_name}: Reserved IP addresses are not allowed.",
+            )
+        if ip.is_private:
+            raise HTTPException(
+                status_code=422,
+                detail=f"{field_name}: Private IP addresses are not allowed (RFC 1918/4193).",
+            )
+    except ValueError:
+        # Not an IP address — it's a hostname/domain, which is allowed
+        # (DNS rebinding is a separate issue, not addressed here)
+        logger.debug(
+            "%s is not an IP address (hostname/domain allowed)", hostname
+        )
+
+
+def validate_alert_url(url: str, field_name: str) -> None:
     """Validate alert provider URL to prevent Server-Side Request Forgery (SSRF).
 
     Blocks:
@@ -63,41 +123,11 @@ def validate_alert_url(url: str, field_name: str) -> None:  # pylint: disable=to
                 status_code=422, detail=f"{field_name}: URL must include a hostname."
             )
 
-        # Check for localhost (case-insensitive)
-        hostname_lower = parsed.hostname.lower()
-        if hostname_lower in ("localhost", "127.0.0.1", "::1", "0.0.0.0", "::"):
-            raise HTTPException(
-                status_code=422,
-                detail=f"{field_name}: Localhost addresses are not allowed.",
-            )
+        # Check for localhost and reserved hostnames
+        _check_dangerous_hostnames(parsed.hostname, field_name)
 
         # Check for private IP ranges
-        try:
-            ip = ipaddress.ip_address(parsed.hostname)
-            if ip.is_loopback:
-                raise HTTPException(
-                    status_code=422,
-                    detail=f"{field_name}: Loopback addresses are not allowed.",
-                )
-            if ip.is_link_local:
-                raise HTTPException(
-                    status_code=422,
-                    detail=f"{field_name}: Link-local addresses are not allowed.",
-                )
-            if ip.is_reserved:
-                raise HTTPException(
-                    status_code=422,
-                    detail=f"{field_name}: Reserved IP addresses are not allowed.",
-                )
-            if ip.is_private:
-                raise HTTPException(
-                    status_code=422,
-                    detail=f"{field_name}: Private IP addresses are not allowed (RFC 1918/4193).",
-                )
-        except ValueError:
-            # Not an IP address — it's a hostname/domain, which is allowed
-            # (DNS rebinding is a separate issue, not addressed here)
-            pass
+        _check_ip_address_restrictions(parsed.hostname, field_name)
 
     except ValueError as e:
         raise HTTPException(

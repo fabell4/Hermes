@@ -78,7 +78,7 @@ def build_dispatcher() -> ResultDispatcher:
         if name in EXPORTER_REGISTRY:
             try:
                 dispatcher.add_exporter(name, EXPORTER_REGISTRY[name]())
-            except Exception as e:  # pylint: disable=broad-except
+            except Exception as e:  # pylint: disable=broad-except  # NOSONAR
                 logger.warning("Exporter '%s' could not be initialized: %s", name, e)
         else:
             logger.warning("Unknown exporter '%s' in enabled list — skipping.", name)
@@ -98,7 +98,7 @@ def update_exporters(dispatcher: ResultDispatcher, enabled: list[str]) -> None:
         if name in EXPORTER_REGISTRY:
             try:
                 dispatcher.add_exporter(name, EXPORTER_REGISTRY[name]())
-            except Exception as e:  # pylint: disable=broad-except
+            except Exception as e:  # pylint: disable=broad-except  # NOSONAR
                 logger.warning("Exporter '%s' could not be initialized: %s", name, e)
         else:
             logger.warning("Unknown exporter '%s' in enabled list — skipping.", name)
@@ -143,7 +143,7 @@ def _register_webhook_provider(manager: AlertManager, providers_config: dict) ->
     if webhook_url:
         try:
             manager.add_provider("webhook", WebhookProvider(url=webhook_url))
-        except Exception as e:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except  # NOSONAR
             logger.warning("Could not initialize webhook alert provider: %s", e)
 
 
@@ -164,7 +164,7 @@ def _register_gotify_provider(manager: AlertManager, providers_config: dict) -> 
                     ),
                 ),
             )
-        except Exception as e:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except  # NOSONAR
             logger.warning("Could not initialize Gotify alert provider: %s", e)
 
 
@@ -186,7 +186,7 @@ def _register_ntfy_provider(manager: AlertManager, providers_config: dict) -> No
                     tags=ntfy_config.get("tags", config.ALERT_NTFY_TAGS),
                 ),
             )
-        except Exception as e:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except  # NOSONAR
             logger.warning("Could not initialize ntfy alert provider: %s", e)
 
 
@@ -203,7 +203,7 @@ def _register_apprise_provider(manager: AlertManager, providers_config: dict) ->
                     url=apprise_url, urls=apprise_urls if apprise_urls else None
                 ),
             )
-        except Exception as e:  # pylint: disable=broad-except
+        except Exception as e:  # pylint: disable=broad-except  # NOSONAR
             logger.warning("Could not initialize Apprise alert provider: %s", e)
 
 
@@ -440,7 +440,7 @@ def _validate_environment() -> None:
                     loki_url,
                     e,
                 )
-            except Exception as e:  # pylint: disable=broad-except
+            except Exception as e:  # pylint: disable=broad-except  # NOSONAR
                 logger.warning(
                     "Environment: Could not verify Loki URL '%s' — %s.",
                     loki_url,

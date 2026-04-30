@@ -73,7 +73,7 @@ def _run_test() -> None:
             result.upload_mbps,
             result.ping_ms,
         )
-    except Exception as exc:  # pylint: disable=broad-exception-caught
+    except Exception as exc:  # pylint: disable=broad-exception-caught  # NOSONAR
         logger.exception("Manual trigger failed: %s", exc)
     finally:
         _test_lock.release()
