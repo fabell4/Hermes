@@ -55,7 +55,10 @@ def _check_dangerous_hostnames(hostname: str, field_name: str) -> None:
         HTTPException: If hostname is localhost or a reserved address
     """
     hostname_lower = hostname.lower()
-    if hostname_lower in _BLOCKED_LOCALHOST_ADDRESSES or hostname_lower == _BLOCKED_ALL_INTERFACES_ADDRESS:
+    if (
+        hostname_lower in _BLOCKED_LOCALHOST_ADDRESSES
+        or hostname_lower == _BLOCKED_ALL_INTERFACES_ADDRESS
+    ):
         raise HTTPException(
             status_code=422,
             detail=f"{field_name}: Localhost addresses are not allowed.",
