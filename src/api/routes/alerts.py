@@ -40,12 +40,12 @@ def _check_dangerous_hostnames(hostname: str, field_name: str) -> None:
         HTTPException: If hostname is localhost or a reserved address
     """
     hostname_lower = hostname.lower()
-    if hostname_lower in (  # NOSONAR - checking values to BLOCK them (SSRF protection)
-        "localhost",
-        "127.0.0.1",
-        "::1",
-        "0.0.0.0",
-        "::",
+    if hostname_lower in (
+        "localhost",  # NOSONAR - checking to BLOCK (SSRF protection)
+        "127.0.0.1",  # NOSONAR - checking to BLOCK (SSRF protection)
+        "::1",  # NOSONAR - checking to BLOCK (SSRF protection)
+        "0.0.0.0",  # NOSONAR - checking to BLOCK (SSRF protection)
+        "::",  # NOSONAR - checking to BLOCK (SSRF protection)
     ):
         raise HTTPException(
             status_code=422,
