@@ -92,6 +92,42 @@ class CSVExporter(BaseExporter):
 
         self._prune()
 
+    def _filter_by_retention(
+        self, rows: list[dict[str, str]]
+    ) -> list[dict[str, str]]:
+        """Filter rows older than retention_days."""
+        if not self.retention_days:
+            return rows
+
+        cutoff = datetime.now(tz=timezone.utc) - timedelta(days=self.retention_days)
+        return [
+            r
+            for r in rows
+            if datetime.fromisoformat(r["timestamp"]).astimezone(timezone.utc) >= cutoff
+        ]
+
+    def _filter_by_max_rows(
+        self, rows: list[dict[str, str]]
+    ) -> list[dict[str, str]]:
+        """Keep only the most recent max_rows."""
+        if not self.max_rows or len(rows) <= self.max_rows:
+            return rows
+        return rows[-self.max_rows :]
+
+    def _write_pruned_rows(self, rows: list[dict[str, str]]) -> None:
+        """Write filtered rows to CSV file atomically."""
+        temp_path = self.path.with_suffix(".tmp")
+        try:
+            with open(temp_path, mode="w", newline="", encoding="utf-8") as f:
+                writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
+                writer.writeheader()
+                writer.writerows(rows)
+            temp_path.replace(self.path)
+        except Exception:
+            if temp_path.exists():
+                temp_path.unlink(missing_ok=True)
+            raise
+
     def _prune(self) -> None:
         """
         Removes rows that exceed max_rows or are older than retention_days.
@@ -108,41 +144,15 @@ class CSVExporter(BaseExporter):
             rows = list(reader)
 
         original_count = len(rows)
-
-        if self.retention_days:
-            cutoff = datetime.now(tz=timezone.utc) - timedelta(days=self.retention_days)
-            rows = [
-                r
-                for r in rows
-                if datetime.fromisoformat(r["timestamp"]).astimezone(timezone.utc)
-                >= cutoff
-            ]
-
-        if self.max_rows and len(rows) > self.max_rows:
-            rows = rows[-self.max_rows :]
+        rows = self._filter_by_retention(rows)
+        rows = self._filter_by_max_rows(rows)
 
         removed = original_count - len(rows)
         if removed == 0:
             return
 
-        # Write to temporary file first for atomic replacement
-        temp_path = self.path.with_suffix(".tmp")
-        try:
-            with open(temp_path, mode="w", newline="", encoding="utf-8") as f:
-                writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
-                writer.writeheader()
-                writer.writerows(rows)
-
-            # Atomic replacement
-            temp_path.replace(self.path)
-            logger.info(
-                "CSV pruned — removed %d row(s), %d remaining.", removed, len(rows)
-            )
-        except Exception:
-            # Clean up temp file on failure
-            if temp_path.exists():
-                temp_path.unlink(missing_ok=True)
-            raise
+        self._write_pruned_rows(rows)
+        logger.info("CSV pruned — removed %d row(s), %d remaining.", removed, len(rows))
 
     def get_file_path(self) -> Path:
         """
