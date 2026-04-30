@@ -23,7 +23,7 @@ We take the security of Hermes seriously. If you discover a security vulnerabili
 
 **Report via:**
 - **GitHub Security Advisories**: Use the "Security" tab → "Report a vulnerability"
-- **Email**: [Your security contact email - e.g., security@yourdomain.com]
+- **Email**: fabell.4@greenflametech.com
 
 **Include in your report:**
 - Description of the vulnerability
