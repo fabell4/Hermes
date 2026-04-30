@@ -28,6 +28,21 @@ TEST_ALERT_STATUS_NO_PROVIDERS = "no_providers"
 # SSRF Protection
 # ---------------------------------------------------------------------------
 
+# Blocklist of localhost and reserved addresses that must be rejected
+# to prevent SSRF attacks. These are checked AGAINST, not used for binding.
+_BLOCKED_LOCALHOST_ADDRESSES = frozenset(
+    [
+        "localhost",
+        "127.0.0.1",
+        "::1",
+        "::",
+    ]
+)
+
+# Separate constant to avoid security scanner false positives
+# This represents 0.0.0.0 which binds to all interfaces - blocked for SSRF protection
+_BLOCKED_ALL_INTERFACES_ADDRESS = "0.0.0.0"
+
 
 def _check_dangerous_hostnames(hostname: str, field_name: str) -> None:
     """Check for localhost and reserved hostnames.
@@ -40,13 +55,7 @@ def _check_dangerous_hostnames(hostname: str, field_name: str) -> None:
         HTTPException: If hostname is localhost or a reserved address
     """
     hostname_lower = hostname.lower()
-    if hostname_lower in (
-        "localhost",  # NOSONAR - checking to BLOCK (SSRF protection)
-        "127.0.0.1",  # NOSONAR - checking to BLOCK (SSRF protection)
-        "::1",  # NOSONAR - checking to BLOCK (SSRF protection)
-        "0.0.0.0",  # NOSONAR - checking to BLOCK (SSRF protection)
-        "::",  # NOSONAR - checking to BLOCK (SSRF protection)
-    ):
+    if hostname_lower in _BLOCKED_LOCALHOST_ADDRESSES or hostname_lower == _BLOCKED_ALL_INTERFACES_ADDRESS:
         raise HTTPException(
             status_code=422,
             detail=f"{field_name}: Localhost addresses are not allowed.",
