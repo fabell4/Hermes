@@ -10,7 +10,12 @@ import logging
 from typing import TYPE_CHECKING, Any
 
 from src import config as app_config
-from src.constants import PROVIDER_APPRISE, PROVIDER_GOTIFY, PROVIDER_NTFY, PROVIDER_WEBHOOK
+from src.constants import (
+    PROVIDER_APPRISE,
+    PROVIDER_GOTIFY,
+    PROVIDER_NTFY,
+    PROVIDER_WEBHOOK,
+)
 from src.services.alert_providers import (
     AppriseProvider,
     GotifyProvider,
@@ -80,7 +85,9 @@ def register_gotify_provider(
     """
     gotify_config = providers_config.get(PROVIDER_GOTIFY, {})
     gotify_url = _get_config_value(gotify_config, "url", app_config.ALERT_GOTIFY_URL)
-    gotify_token = _get_config_value(gotify_config, "token", app_config.ALERT_GOTIFY_TOKEN)
+    gotify_token = _get_config_value(
+        gotify_config, "token", app_config.ALERT_GOTIFY_TOKEN
+    )
 
     if not (gotify_url and gotify_token):
         return
@@ -94,7 +101,9 @@ def register_gotify_provider(
             GotifyProvider(
                 url=gotify_url,
                 token=gotify_token,
-                priority=gotify_config.get("priority", app_config.ALERT_GOTIFY_PRIORITY),
+                priority=gotify_config.get(
+                    "priority", app_config.ALERT_GOTIFY_PRIORITY
+                ),
             ),
         )
     except Exception as e:  # pylint: disable=broad-except  # NOSONAR
@@ -126,10 +135,16 @@ def register_ntfy_provider(
         manager.add_provider(
             PROVIDER_NTFY,
             NtfyProvider(
-                url=_get_config_value(ntfy_config, "url", app_config.ALERT_NTFY_URL or "https://ntfy.sh"),
+                url=_get_config_value(
+                    ntfy_config, "url", app_config.ALERT_NTFY_URL or "https://ntfy.sh"
+                ),
                 topic=ntfy_topic,
-                token=_get_config_value(ntfy_config, "token", app_config.ALERT_NTFY_TOKEN),
-                priority=_get_config_value(ntfy_config, "priority", app_config.ALERT_NTFY_PRIORITY),
+                token=_get_config_value(
+                    ntfy_config, "token", app_config.ALERT_NTFY_TOKEN
+                ),
+                priority=_get_config_value(
+                    ntfy_config, "priority", app_config.ALERT_NTFY_PRIORITY
+                ),
                 tags=_get_config_value(ntfy_config, "tags", app_config.ALERT_NTFY_TAGS),
             ),
         )

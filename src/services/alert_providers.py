@@ -120,7 +120,11 @@ class GotifyProvider(AlertProvider):
     """Sends alerts via Gotify push notification service."""
 
     def __init__(
-        self, url: str, token: str, priority: int = 5, timeout: int = DEFAULT_ALERT_TIMEOUT_SECONDS
+        self,
+        url: str,
+        token: str,
+        priority: int = 5,
+        timeout: int = DEFAULT_ALERT_TIMEOUT_SECONDS,
     ) -> None:
         """
         Initialize Gotify provider.
@@ -260,7 +264,10 @@ class AppriseProvider(AlertProvider):
     """Sends alerts via Apprise API service (separate container)."""
 
     def __init__(
-        self, url: str, urls: list[str] | None = None, timeout: int = DEFAULT_ALERT_TIMEOUT_SECONDS
+        self,
+        url: str,
+        urls: list[str] | None = None,
+        timeout: int = DEFAULT_ALERT_TIMEOUT_SECONDS,
     ) -> None:
         """
         Initialize Apprise provider.
