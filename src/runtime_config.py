@@ -209,8 +209,10 @@ def save(data: dict) -> None:
         # Clean up temp file on failure
         try:
             Path(temp_path).unlink(missing_ok=True)
-        except OSError:
-            pass  # Best effort cleanup
+        except OSError as cleanup_error:
+            logger.warning(
+                "Failed to clean up temp file %s: %s", temp_path, cleanup_error
+            )
         logger.error("Could not save runtime config: %s", e)
         raise
 
