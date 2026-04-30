@@ -1,0 +1,129 @@
+---
+---
+
+@import "{{ site.theme }}";
+
+/* Custom dark theme styling to match Zeniscal */
+body {
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+}
+
+header {
+  background-color: #2d2d2d;
+  border-bottom: 1px solid #3d3d3d;
+}
+
+.container {
+  max-width: 1200px;
+}
+
+/* Code blocks */
+pre, code {
+  background-color: #2d2d2d;
+  border: 1px solid #3d3d3d;
+}
+
+pre code {
+  background-color: transparent;
+  border: none;
+}
+
+/* Tables */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+
+table th {
+  background-color: #2d2d2d;
+  color: #4fc3f7;
+  border: 1px solid #3d3d3d;
+  padding: 0.5em;
+}
+
+table td {
+  border: 1px solid #3d3d3d;
+  padding: 0.5em;
+}
+
+table tr:nth-child(even) {
+  background-color: #252525;
+}
+
+/* Links */
+a {
+  color: #4fc3f7;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #81d4fa;
+  text-decoration: underline;
+}
+
+/* Headers */
+h1, h2, h3, h4, h5, h6 {
+  color: #ffffff;
+  border-bottom: 1px solid #3d3d3d;
+  padding-bottom: 0.3em;
+}
+
+h1 {
+  font-size: 2em;
+  margin-top: 1em;
+}
+
+h2 {
+  font-size: 1.5em;
+  margin-top: 1.5em;
+}
+
+h3 {
+  font-size: 1.25em;
+  margin-top: 1.25em;
+  border-bottom: none;
+}
+
+/* Blockquotes */
+blockquote {
+  border-left: 4px solid #4fc3f7;
+  padding-left: 1em;
+  color: #b0b0b0;
+  background-color: #252525;
+  margin: 1em 0;
+  padding: 0.5em 1em;
+}
+
+/* Horizontal rules */
+hr {
+  border: 0;
+  border-top: 1px solid #3d3d3d;
+  margin: 2em 0;
+}
+
+/* Inline code */
+code {
+  padding: 0.2em 0.4em;
+  font-size: 0.9em;
+}
+
+/* Navigation styling */
+nav ul {
+  list-style: none;
+  padding: 0;
+}
+
+nav ul li {
+  display: inline-block;
+  margin-right: 1em;
+}
+
+/* Footer */
+footer {
+  border-top: 1px solid #3d3d3d;
+  margin-top: 2em;
+  padding-top: 1em;
+  color: #808080;
+}

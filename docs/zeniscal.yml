@@ -3,7 +3,14 @@ site_description: Hermes Speedtest Monitoring & Alert Documentation
 docs_dir: .
 nav:
   - Home: index.md
+  - Getting Started: getting-started.md
+  - Architecture: architecture.md
+  - API Reference: api-reference.md
+  - Security: security.md
+  - Alerts: alerts.md
   - Release Process: RELEASE-PROCESS.md
+  - Security Audit: SECURITY-AUDIT.md
+  - Security Enhancements: SECURITY-ENHANCEMENTS.md
   - Suppression Decisions: suppression-decisions.md
 
 plugins:

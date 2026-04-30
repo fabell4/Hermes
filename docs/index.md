@@ -1,102 +1,150 @@
 # Hermes Documentation
 
-**Hermes** is a self-hosted speed test monitoring solution that periodically tests your internet connection and exports results to multiple destinations (CSV, SQLite, Prometheus, Loki). It includes a modern React frontend for visualization and configuration.
+**Hermes** is a self-hosted internet speed test monitoring solution that periodically tests your connection and exports results to multiple destinations. It features a modern React frontend, comprehensive API, and integrates seamlessly with your observability stack.
 
-## Quick Links
-
-- [GitHub Repository](https://github.com/fabell4/hermes)
-- [Docker Image](https://github.com/fabell4/hermes/pkgs/container/hermes)
-- [Full README](https://github.com/fabell4/hermes/blob/main/README.md)
+---
 
 ## Features
 
-### Data Collection & Export
-- **Scheduled Speed Tests** — Runs tests at configurable intervals
-- **Multiple Exporters** — CSV, SQLite, Prometheus, Loki
-- **Manual Triggers** — On-demand tests via UI or API
-- **Data Retention** — Configurable row limits and retention periods
+### 🚀 Core Capabilities
 
-### Alert Notifications
-Send notifications when speed tests fail consecutively:
-- **Webhook** — POST to any HTTP endpoint
-- **Gotify** — Self-hosted push notifications
-- **ntfy** — Simple pub-sub notifications
-- **Apprise** — 100+ services (Discord, Telegram, Slack, Email, SMS, etc.)
+- **Automated Speed Testing** — Scheduled tests at configurable intervals with manual triggers
+- **Multi-Destination Export** — CSV, SQLite, Prometheus, Loki
+- **Modern Web UI** — React + Vite frontend with real-time charts and statistics
+- **REST API** — Full-featured FastAPI backend for automation and integration
+- **Alert Notifications** — Webhook, Gotify, ntfy, Apprise (100+ services)
+- **Production-Ready** — Docker deployment, health checks, data retention policies
 
-Alert configuration supports:
-- Failure threshold (consecutive failures before alerting)
-- Cooldown period (minimum time between alerts)
-- Per-provider settings (URLs, tokens, priorities)
-- Test notifications to verify setup
+### 📊 Data Collection
 
-### Web Interface
-- **Dashboard** — Real-time charts and statistics
-- **Settings** — Configure intervals, exporters, and alerts
-- **API** — REST endpoints for automation
+Each speed test captures:
+- Download speed (Mbps)
+- Upload speed (Mbps)
+- Ping latency (ms)
+- Jitter (ms)
+- ISP name
+- Timestamp
 
-## Alert Setup Examples
+### 🔔 Alert System
 
-### Apprise (Recommended)
+Send notifications when consecutive test failures occur:
+- Configurable failure threshold
+- Cooldown periods to prevent spam
+- Multiple provider support (webhook, Gotify, ntfy, Apprise)
+- Test notifications before deploying
+- UI or environment variable configuration
 
-**With persistent config:**
-```bash
-# Deploy Apprise API container
-docker run -d -p 8000:8000 caronc/apprise-api
+### 🔒 Security
 
-# Configure in Hermes
-ALERT_APPRISE_URL=https://apprise.example.com/notify/myconfig
-```
+- API key authentication with timing-attack prevention
+- Per-key rate limiting with sliding windows
+- SSRF protection on alert URLs
+- Request size limits
+- Security headers (X-Frame-Options, CSP, etc.)
+- Input validation on all endpoints
+- 130+ security-focused tests
 
-Then manage recipients in Apprise's web UI at `http://apprise.example.com`.
+---
 
-**With stateless mode:**
-```bash
-ALERT_APPRISE_URL=https://apprise.example.com
-```
-
-Add service URLs in the UI Settings → Apprise → Service URLs:
-```
-ntfys://ntfy.example.com/topic?token=tk_xxx
-gotify://gotify.example.com/token
-discord://webhook_id/webhook_token
-```
-
-### ntfy
+## Quick Start
 
 ```bash
-ALERT_NTFY_TOPIC=hermes_alerts
-ALERT_NTFY_TOKEN=tk_xxxxxxxxxxxxx  # Optional for private topics
-ALERT_NTFY_PRIORITY=3
+# Create docker-compose.yml
+curl -o docker-compose.yml https://raw.githubusercontent.com/fabell4/hermes/main/docker-compose.yml
+
+# Create .env file
+curl -o .env https://raw.githubusercontent.com/fabell4/hermes/main/.env.example
+
+# Start containers
+docker compose up -d
+
+# Access the UI
+open http://localhost:8080
 ```
 
-### Gotify
+The React UI will be available at `http://localhost:8080`.
 
-```bash
-ALERT_GOTIFY_URL=https://gotify.example.com
-ALERT_GOTIFY_TOKEN=your_app_token
-ALERT_GOTIFY_PRIORITY=5
-```
+---
 
-### Webhook
+## Documentation
 
-```bash
-ALERT_WEBHOOK_URL=https://your-webhook.example.com/alerts
-```
+### 📘 Getting Started
+**[Getting Started Guide](getting-started)** — Deployment, configuration, and first steps
 
-Payload format:
-```json
-{
-  "failure_count": 3,
-  "last_error": "Connection timeout",
-  "timestamp": "2026-04-29T12:00:00Z"
-}
-```
+### 🏗️ Architecture
+**[Architecture Overview](architecture)** — System design, data flow, deployment topology
 
-## Deployment
+### 🔌 API Reference
+**[API Documentation](api-reference)** — REST endpoints, authentication, examples
 
-See the [main README](https://github.com/fabell4/hermes/blob/main/README.md) for full deployment instructions with Docker Compose.
+### 🔐 Security
+**[Security Guide](security)** — Features, best practices, audit reports
 
-## Support
+### 🔔 Alerts
+**[Alert Configuration](alerts)** — Setup guides for webhook, Gotify, ntfy, Apprise
 
-- Report issues on [GitHub Issues](https://github.com/fabell4/hermes/issues)
-- View changelog at [CHANGELOG.md](https://github.com/fabell4/hermes/blob/main/CHANGELOG.md)
+### 📦 Release Process
+**[Release Process](RELEASE-PROCESS)** — Checklist and workflow for releases
+
+### 🛡️ Security Audit
+**[Security Audit Report](SECURITY-AUDIT)** — Comprehensive security analysis (v1.0)
+
+### ✨ Security Enhancements
+**[Security Enhancements](SECURITY-ENHANCEMENTS)** — Implementation details of v1.0 security fixes
+
+---
+
+## Quick Links
+
+- **[GitHub Repository](https://github.com/fabell4/hermes)** — Source code and issues
+- **[Docker Image](https://github.com/fabell4/hermes/pkgs/container/hermes)** — ghcr.io/fabell4/hermes
+- **[Grafana Dashboard](grafana-dashboard.json)** — Pre-built dashboard for import
+
+---
+
+## Environment Variables Reference
+
+Key configuration options (see [Getting Started](getting-started) for complete list):
+
+| Variable | Default | Description |
+|---|---|---|
+| `SPEEDTEST_INTERVAL_MINUTES` | `60` | How often to run speed tests |
+| `ENABLED_EXPORTERS` | `csv` | Comma-separated: `csv`, `sqlite`, `prometheus`, `loki` |
+| `API_KEY` | *(unset)* | API key for authentication (disables auth if empty) |
+| `ALERT_FAILURE_THRESHOLD` | `0` | Consecutive failures before alerting (0 = disabled) |
+| `PROMETHEUS_PORT` | `8000` | Port for /metrics scrape endpoint |
+| `LOKI_URL` | *(unset)* | Loki push URL, e.g., `http://loki:3100` |
+
+See [Getting Started](getting-started) for the full variable list with descriptions.
+
+---
+
+## Architecture at a Glance
+
+Hermes runs as two containers:
+
+- **hermes-scheduler** — Background worker running speed tests on schedule, exposing Prometheus metrics, and pushing to Loki
+- **hermes-api** — FastAPI REST API serving the React frontend and providing programmatic access
+
+Both containers share volumes for `runtime_config.json`, `results.csv`, and `hermes.db`.
+
+**Observability Integration:**
+- **Prometheus** scrapes `:8000/metrics` every 15 seconds
+- **Loki** receives push events on each test completion
+- **Grafana** visualizes data from both sources
+
+See [Architecture](architecture) for detailed diagrams.
+
+---
+
+## Support & Contributing
+
+- **Issues:** [GitHub Issues](https://github.com/fabell4/hermes/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/fabell4/hermes/discussions)
+- **Contributing:** See [README](https://github.com/fabell4/hermes#readme) for development setup
+
+---
+
+## License
+
+Licensed under MIT. See [LICENSE](https://github.com/fabell4/hermes/blob/main/LICENSE) for details.

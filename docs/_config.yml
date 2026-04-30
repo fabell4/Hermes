@@ -1,0 +1,54 @@
+# Jekyll configuration for GitHub Pages
+
+title: Hermes Documentation
+description: Self-hosted internet speed test monitoring with modern observability stack integration
+url: https://fabell4.github.io
+baseurl: /hermes
+
+theme: jekyll-theme-hacker
+
+# Navigation
+navigation:
+  - title: Home
+    url: /
+  - title: Getting Started
+    url: /getting-started
+  - title: Architecture
+    url: /architecture
+  - title: API Reference
+    url: /api-reference
+  - title: Security
+    url: /security
+  - title: Alerts
+    url: /alerts
+  - title: Release Process
+    url: /RELEASE-PROCESS
+
+# GitHub metadata
+github:
+  repository_url: https://github.com/fabell4/hermes
+  
+# Build settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Plugins
+plugins:
+  - jekyll-github-metadata
+  - jekyll-relative-links
+
+# Include files
+include:
+  - SECURITY-AUDIT.md
+  - SECURITY-ENHANCEMENTS.md
+  - RELEASE-PROCESS.md
+
+# Exclude from build
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - grafana-dashboard.json
+  - suppression-decisions.md
+  - zeniscal.yml
