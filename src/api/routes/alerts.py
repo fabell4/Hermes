@@ -28,7 +28,7 @@ TEST_ALERT_STATUS_NO_PROVIDERS = "no_providers"
 # SSRF Protection
 # ---------------------------------------------------------------------------
 
-# Blocklist of localhost and reserved addresses that must be rejected
+# Blocklist of localhost and reserved hostnames that must be rejected
 # to prevent SSRF attacks. These are checked AGAINST, not used for binding.
 _BLOCKED_LOCALHOST_ADDRESSES = frozenset(
     [
@@ -38,10 +38,6 @@ _BLOCKED_LOCALHOST_ADDRESSES = frozenset(
         "::",
     ]
 )
-
-# Separate constant to avoid security scanner false positives
-# This represents 0.0.0.0 which binds to all interfaces - blocked for SSRF protection
-_BLOCKED_ALL_INTERFACES_ADDRESS = "0.0.0.0"
 
 
 def _check_dangerous_hostnames(hostname: str, field_name: str) -> None:
@@ -55,10 +51,7 @@ def _check_dangerous_hostnames(hostname: str, field_name: str) -> None:
         HTTPException: If hostname is localhost or a reserved address
     """
     hostname_lower = hostname.lower()
-    if (
-        hostname_lower in _BLOCKED_LOCALHOST_ADDRESSES
-        or hostname_lower == _BLOCKED_ALL_INTERFACES_ADDRESS
-    ):
+    if hostname_lower in _BLOCKED_LOCALHOST_ADDRESSES:
         raise HTTPException(
             status_code=422,
             detail=f"{field_name}: Localhost addresses are not allowed.",
@@ -73,10 +66,15 @@ def _check_ip_address_restrictions(hostname: str, field_name: str) -> None:
         field_name: Human-readable field name for error messages
 
     Raises:
-        HTTPException: If IP address is restricted (loopback, link-local, private, reserved)
+        HTTPException: If IP address is restricted (loopback, link-local, private, reserved, unspecified)
     """
     try:
         ip = ipaddress.ip_address(hostname)
+        if ip.is_unspecified:
+            raise HTTPException(
+                status_code=422,
+                detail=f"{field_name}: Unspecified addresses (0.0.0.0/::) are not allowed.",
+            )
         if ip.is_loopback:
             raise HTTPException(
                 status_code=422,
@@ -109,8 +107,10 @@ def validate_alert_url(url: str, field_name: str) -> None:
     Blocks:
     - Non-HTTP(S) schemes (file://, ftp://, etc.)
     - Localhost addresses
+    - Unspecified addresses (0.0.0.0, ::)
     - Private IP ranges (RFC 1918, RFC 4193)
     - Link-local addresses
+    - Reserved IP ranges
 
     Args:
         url: The URL to validate
