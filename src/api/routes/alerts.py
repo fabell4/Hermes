@@ -31,11 +31,11 @@ TEST_ALERT_STATUS_NO_PROVIDERS = "no_providers"
 
 def _check_dangerous_hostnames(hostname: str, field_name: str) -> None:
     """Check for localhost and reserved hostnames.
-    
+
     Args:
         hostname: The hostname to check
         field_name: Human-readable field name for error messages
-        
+
     Raises:
         HTTPException: If hostname is localhost or a reserved address
     """
@@ -51,11 +51,11 @@ def _check_dangerous_hostnames(hostname: str, field_name: str) -> None:
 
 def _check_ip_address_restrictions(hostname: str, field_name: str) -> None:
     """Check if hostname is an IP address with restrictions.
-    
+
     Args:
         hostname: The hostname to check
         field_name: Human-readable field name for error messages
-        
+
     Raises:
         HTTPException: If IP address is restricted (loopback, link-local, private, reserved)
     """
@@ -84,9 +84,7 @@ def _check_ip_address_restrictions(hostname: str, field_name: str) -> None:
     except ValueError:
         # Not an IP address — it's a hostname/domain, which is allowed
         # (DNS rebinding is a separate issue, not addressed here)
-        logger.debug(
-            "%s is not an IP address (hostname/domain allowed)", hostname
-        )
+        logger.debug("%s is not an IP address (hostname/domain allowed)", hostname)
 
 
 def validate_alert_url(url: str, field_name: str) -> None:
