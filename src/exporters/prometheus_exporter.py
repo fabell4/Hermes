@@ -48,11 +48,24 @@ class PrometheusExporter(BaseExporter):
     _server_started: bool = False
 
     def __init__(self, port: int = 8000) -> None:
+        if port <= 0 or port > 65535:
+            raise ValueError(f"Invalid port number: {port}")
+
         self._port = port
         if not PrometheusExporter._server_started:
-            start_http_server(port)
-            PrometheusExporter._server_started = True
-            logger.info("Prometheus metrics server started on port %d", port)
+            try:
+                start_http_server(port)
+                PrometheusExporter._server_started = True
+                logger.info("Prometheus metrics server started on port %d", port)
+            except OSError as e:
+                if "Address already in use" in str(e) or "Only one usage" in str(e):
+                    raise RuntimeError(
+                        f"Prometheus metrics port {port} is already in use. "
+                        f"Set PROMETHEUS_PORT to a different value or stop the conflicting service."
+                    ) from e
+                raise RuntimeError(
+                    f"Failed to start Prometheus server on port {port}: {e}"
+                ) from e
         else:
             logger.debug(
                 "Prometheus metrics server already running; skipping start on port %d",

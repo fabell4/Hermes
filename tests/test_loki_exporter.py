@@ -114,8 +114,9 @@ def test_init_rejects_custom_scheme() -> None:
 
 
 def test_loki_timestamp_ns_with_naive_datetime() -> None:
+    # SpeedResult now requires timezone-aware datetimes
     result = SpeedResult(
-        timestamp=datetime(2026, 3, 4, 12, 0, 0),  # no tzinfo
+        timestamp=datetime(2026, 3, 4, 12, 0, 0, tzinfo=timezone.utc),
         download_mbps=1.0,
         upload_mbps=1.0,
         ping_ms=1.0,
@@ -123,7 +124,7 @@ def test_loki_timestamp_ns_with_naive_datetime() -> None:
         server_location="y",
         server_id=1,
     )
-    # Should not raise; naive datetime is treated as UTC
+    # Should not raise; datetime is UTC-aware
     ns = LokiExporter._to_loki_timestamp_ns(result)
     assert ns.isdigit()
 

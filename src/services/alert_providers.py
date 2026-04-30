@@ -6,10 +6,42 @@ import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any
+from urllib.parse import urlparse
 
 import requests
 
 logger = logging.getLogger(__name__)
+
+# Error messages
+_ERR_TIMEOUT_POSITIVE = "Timeout must be positive"
+
+
+def _validate_http_url(url: str, provider_name: str) -> None:
+    """
+    Validate that URL is a proper HTTP(S) URL.
+
+    Args:
+        url: The URL to validate
+        provider_name: Provider name for error messages
+
+    Raises:
+        ValueError: If URL is invalid or not HTTP(S)
+    """
+    if not url or not url.strip():
+        raise ValueError(f"{provider_name} URL cannot be empty")
+
+    try:
+        parsed = urlparse(url)
+        if parsed.scheme not in ("http", "https"):
+            raise ValueError(
+                f"{provider_name} URL must use http or https (got {parsed.scheme})"
+            )
+        if not parsed.hostname:
+            raise ValueError(f"{provider_name} URL must include a hostname")
+    except Exception as e:
+        if isinstance(e, ValueError):
+            raise
+        raise ValueError(f"Invalid {provider_name} URL: {e}") from e
 
 
 class AlertProvider(ABC):
@@ -43,9 +75,10 @@ class WebhookProvider(AlertProvider):
             url: The webhook URL to POST to
             timeout: Request timeout in seconds
         """
-        if not url:
-            raise ValueError("Webhook URL cannot be empty")
-        self.url = url
+        _validate_http_url(url, "Webhook")
+        if timeout <= 0:
+            raise ValueError(_ERR_TIMEOUT_POSITIVE)
+        self.url = url.rstrip("/")
         self.timeout = timeout
 
     def send_alert(
@@ -93,10 +126,11 @@ class GotifyProvider(AlertProvider):
             priority: Message priority (0-10, default 5)
             timeout: Request timeout in seconds
         """
-        if not url:
-            raise ValueError("Gotify URL cannot be empty")
-        if not token:
+        _validate_http_url(url, "Gotify")
+        if not token or not token.strip():
             raise ValueError("Gotify token cannot be empty")
+        if timeout <= 0:
+            raise ValueError(_ERR_TIMEOUT_POSITIVE)
 
         self.url = url.rstrip("/")
         self.token = token
@@ -163,11 +197,14 @@ class NtfyProvider(AlertProvider):
             tags: List of tags/emojis for the notification
             timeout: Request timeout in seconds
         """
-        if not topic:
+        _validate_http_url(url, "ntfy")
+        if not topic or not topic.strip():
             raise ValueError("ntfy topic cannot be empty")
+        if timeout <= 0:
+            raise ValueError(_ERR_TIMEOUT_POSITIVE)
 
         self.url = url.rstrip("/")
-        self.topic = topic
+        self.topic = topic.strip()
         self.token = token
         self.priority = max(1, min(5, priority))  # Clamp to 1-5
         self.tags = tags or ["warning", "rotating_light"]

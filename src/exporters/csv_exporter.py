@@ -125,12 +125,24 @@ class CSVExporter(BaseExporter):
         if removed == 0:
             return
 
-        with open(self.path, mode="w", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
-            writer.writeheader()
-            writer.writerows(rows)
+        # Write to temporary file first for atomic replacement
+        temp_path = self.path.with_suffix(".tmp")
+        try:
+            with open(temp_path, mode="w", newline="", encoding="utf-8") as f:
+                writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
+                writer.writeheader()
+                writer.writerows(rows)
 
-        logger.info("CSV pruned — removed %d row(s), %d remaining.", removed, len(rows))
+            # Atomic replacement
+            temp_path.replace(self.path)
+            logger.info(
+                "CSV pruned — removed %d row(s), %d remaining.", removed, len(rows)
+            )
+        except Exception:
+            # Clean up temp file on failure
+            if temp_path.exists():
+                temp_path.unlink(missing_ok=True)
+            raise
 
     def get_file_path(self) -> Path:
         """

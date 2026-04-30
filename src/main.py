@@ -264,10 +264,14 @@ def run_once(
             if alert_manager:
                 alert_manager.record_success()
         except RuntimeError as e:
-            logger.error("Speedtest failed: %s", e)
+            logger.error("Speedtest failed: %s", e, exc_info=True)
             # Record failure with alert manager
             if alert_manager:
                 alert_manager.record_failure(str(e))
+
+            # In development, make failures more visible
+            if config.APP_ENV == "development":
+                logger.critical("Speedtest failure in development mode")
             return
         try:
             dispatcher.dispatch(result)

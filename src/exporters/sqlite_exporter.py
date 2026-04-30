@@ -117,7 +117,13 @@ class SQLiteExporter(BaseExporter):
             "server_location": result.server_location,
             "server_id": result.server_id,
         }
-        with self._lock:
+
+        # Try to acquire lock with timeout to prevent deadlock
+        acquired = self._lock.acquire(timeout=30.0)
+        if not acquired:
+            raise RuntimeError("Could not acquire SQLite lock within 30 seconds")
+
+        try:
             try:
                 with self._transaction() as conn:
                     conn.execute(_INSERT, row)
@@ -125,6 +131,9 @@ class SQLiteExporter(BaseExporter):
             except sqlite3.Error as e:
                 logger.error("Failed to write SQLite row: %s", e)
                 raise RuntimeError(f"SQLite write failed: {e}") from e
+        finally:
+            self._lock.release()
+
         logger.info(
             "SQLite row written — down: %sMbps up: %sMbps ping: %sms",
             result.download_mbps,

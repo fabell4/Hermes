@@ -8,7 +8,6 @@ Stored as a JSON file mapped as a Docker volume.
 import json
 import logging
 from pathlib import Path
-from typing import cast
 
 logger = logging.getLogger(__name__)
 
@@ -19,16 +18,130 @@ def _ensure_dir() -> None:
     RUNTIME_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 
+def _validate_interval_minutes(data: dict, sanitized: dict) -> None:
+    """Validate and sanitize interval_minutes field (1 to 10080 minutes)."""
+    if "interval_minutes" not in data:
+        return
+
+    try:
+        val = int(data["interval_minutes"])
+        if 1 <= val <= 10080:  # 1 week = 10080 minutes
+            sanitized["interval_minutes"] = val
+        else:
+            logger.warning(
+                "interval_minutes (%d) out of range [1, 10080] — discarding.", val
+            )
+    except (ValueError, TypeError):
+        logger.warning(
+            "Invalid interval_minutes value: %s — discarding.",
+            data["interval_minutes"],
+        )
+
+
+def _validate_enabled_exporters(data: dict, sanitized: dict) -> None:
+    """Validate and sanitize enabled_exporters field (must be list of strings)."""
+    if "enabled_exporters" not in data:
+        return
+
+    if isinstance(data["enabled_exporters"], list):
+        validated_exporters = [
+            str(e)
+            for e in data["enabled_exporters"]
+            if isinstance(e, str) and e.strip()
+        ]
+        if validated_exporters:
+            sanitized["enabled_exporters"] = validated_exporters
+        else:
+            logger.warning("enabled_exporters list is empty — discarding.")
+    else:
+        logger.warning(
+            "enabled_exporters is not a list — discarding: %s",
+            type(data["enabled_exporters"]).__name__,
+        )
+
+
+def _validate_scanning_disabled(data: dict, sanitized: dict) -> None:
+    """Validate and sanitize scanning_disabled field (must be boolean)."""
+    if "scanning_disabled" not in data:
+        return
+
+    if isinstance(data["scanning_disabled"], bool):
+        sanitized["scanning_disabled"] = data["scanning_disabled"]
+    else:
+        logger.warning(
+            "scanning_disabled is not a bool — discarding: %s",
+            type(data["scanning_disabled"]).__name__,
+        )
+
+
+def _validate_scheduler_paused(data: dict, sanitized: dict) -> None:
+    """Validate and sanitize scheduler_paused field (must be boolean)."""
+    if "scheduler_paused" not in data:
+        return
+
+    if isinstance(data["scheduler_paused"], bool):
+        sanitized["scheduler_paused"] = data["scheduler_paused"]
+    else:
+        logger.warning(
+            "scheduler_paused is not a bool — discarding: %s",
+            type(data["scheduler_paused"]).__name__,
+        )
+
+
+def _validate_timestamp_fields(data: dict, sanitized: dict) -> None:
+    """Validate and sanitize timestamp string fields."""
+    for key in ["last_run_at", "next_run_at"]:
+        if key in data:
+            if isinstance(data[key], str) and data[key].strip():
+                sanitized[key] = data[key]
+            elif data[key] is not None:
+                logger.warning(
+                    "%s is not a valid string — discarding: %s", key, data[key]
+                )
+
+
+def _validate_alert_config(data: dict, sanitized: dict) -> None:
+    """Validate and sanitize alert_config field (must be dict)."""
+    if "alert_config" not in data:
+        return
+
+    if isinstance(data["alert_config"], dict):
+        sanitized["alert_config"] = data["alert_config"]
+    else:
+        logger.warning(
+            "alert_config is not a dict — discarding: %s",
+            type(data["alert_config"]).__name__,
+        )
+
+
 def load() -> dict:
     """
-    Loads the runtime config from disk.
+    Loads the runtime config from disk with validation.
     Returns an empty dict if the file doesn't exist yet.
+    Invalid values are logged and discarded to prevent corrupted config from crashing the app.
     """
     if not RUNTIME_CONFIG_PATH.exists():
         return {}
     try:
         with open(RUNTIME_CONFIG_PATH, encoding="utf-8") as f:
-            return cast(dict, json.load(f))
+            data = json.load(f)
+
+        # Validate structure - must be a dict
+        if not isinstance(data, dict):
+            logger.warning("Runtime config is not a dict — using defaults.")
+            return {}
+
+        # Sanitize and validate each field using helper functions
+        sanitized: dict = {}
+        _validate_interval_minutes(data, sanitized)
+        _validate_enabled_exporters(data, sanitized)
+        _validate_scanning_disabled(data, sanitized)
+        _validate_scheduler_paused(data, sanitized)
+        _validate_timestamp_fields(data, sanitized)
+        _validate_alert_config(data, sanitized)
+
+        return sanitized
+
     except (json.JSONDecodeError, OSError) as e:
         logger.warning("Could not read runtime config: %s — using defaults.", e)
         return {}
@@ -52,13 +165,29 @@ def save(data: dict) -> None:
 
 
 def get_interval_minutes(default: int) -> int:
-    """Returns the persisted interval if set, otherwise the provided default."""
+    """
+    Returns the persisted interval if set and valid, otherwise the provided default.
+    Enforces bounds: 1 minute minimum, 10080 minutes (1 week) maximum.
+    """
     data = load()
     value = data.get("interval_minutes")
     if value is None:
         return default
     try:
-        return int(value)
+        interval = int(value)
+        # Enforce reasonable bounds (defense-in-depth, also validated in load())
+        if interval < 1:
+            logger.warning(
+                "interval_minutes (%d) is below minimum (1), using default.", interval
+            )
+            return default
+        if interval > 10080:  # 1 week
+            logger.warning(
+                "interval_minutes (%d) exceeds maximum (10080), using default.",
+                interval,
+            )
+            return default
+        return interval
     except (ValueError, TypeError):
         logger.warning("Invalid interval_minutes in runtime config, using default.")
         return default
