@@ -1,13 +1,13 @@
 """SpeedtestRunner — wraps speedtest-cli, runs a test, and returns a SpeedResult."""
 
 import logging
-import os
 from datetime import datetime
 from typing import Any, cast
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import speedtest
 
+from src import config
 from src.models.speed_result import SpeedResult
 
 _log = logging.getLogger(__name__)
@@ -72,7 +72,7 @@ class SpeedtestRunner:
             download_bps = st.download(threads=None)
             upload_bps = st.upload(threads=None, pre_allocate=True)
 
-            _tz_name = os.getenv("TZ", "UTC")
+            _tz_name = config.TIMEZONE
             try:
                 _tz = ZoneInfo(_tz_name)
             except ZoneInfoNotFoundError:

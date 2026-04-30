@@ -13,6 +13,20 @@ from src.models.speed_result import SpeedResult
 
 logger = logging.getLogger(__name__)
 
+
+class SQLiteLockTimeout(Exception):
+    """Raised when SQLite lock cannot be acquired within timeout."""
+
+    def __init__(self, timeout: float, db_path: str | Path):
+        self.timeout = timeout
+        self.db_path = str(db_path)
+        super().__init__(
+            f"Could not acquire SQLite lock for {self.db_path} within {timeout}s. "
+            f"Another process may be holding the lock or database may be busy. "
+            f"Check for long-running queries or concurrent write operations."
+        )
+
+
 _CREATE_TABLE = """
 CREATE TABLE IF NOT EXISTS results (
     id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -121,7 +135,7 @@ class SQLiteExporter(BaseExporter):
         # Try to acquire lock with timeout to prevent deadlock
         acquired = self._lock.acquire(timeout=30.0)
         if not acquired:
-            raise RuntimeError("Could not acquire SQLite lock within 30 seconds")
+            raise SQLiteLockTimeout(timeout=30.0, db_path=self.path)
 
         try:
             try:

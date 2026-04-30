@@ -60,16 +60,13 @@ def get_results(
     page_size: Annotated[int, Query(ge=1, le=500)] = 50,
 ) -> ResultsPage:
     """Return paginated results, newest first."""
-    conn = _connect()
-    try:
+    with _connect() as conn:
         total: int = conn.execute("SELECT COUNT(*) FROM results").fetchone()[0]
         offset = (page - 1) * page_size
         rows = conn.execute(
             "SELECT * FROM results ORDER BY timestamp DESC LIMIT ? OFFSET ?",
             (page_size, offset),
         ).fetchall()
-    finally:
-        conn.close()
 
     return ResultsPage(
         results=[SpeedResultSchema(**dict(r)) for r in rows],
@@ -82,13 +79,10 @@ def get_results(
 @router.get("/results/latest", responses=_503)
 def get_latest_result() -> SpeedResultSchema | None:
     """Return the most recent result, or null if the database is empty."""
-    conn = _connect()
-    try:
+    with _connect() as conn:
         row = conn.execute(
             "SELECT * FROM results ORDER BY timestamp DESC LIMIT 1"
         ).fetchone()
-    finally:
-        conn.close()
 
     if row is None:
         return None

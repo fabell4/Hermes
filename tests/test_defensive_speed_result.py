@@ -157,3 +157,51 @@ def test_sqlite_roundtrip_preserves_text_and_optional_fields(
     assert row[1] == result.server_location
     assert row[2] == result.isp_name
     assert row[3] == result.server_id
+
+
+# ---------------------------------------------------------------------------
+# SpeedResult validation tests
+# ---------------------------------------------------------------------------
+
+
+def test_negative_download_mbps_raises_value_error() -> None:
+    """download_mbps cannot be negative."""
+    with pytest.raises(ValueError, match="download_mbps cannot be negative"):
+        SpeedResult(download_mbps=-1.0, upload_mbps=10.0, ping_ms=5.0)
+
+
+def test_negative_upload_mbps_raises_value_error() -> None:
+    """upload_mbps cannot be negative."""
+    with pytest.raises(ValueError, match="upload_mbps cannot be negative"):
+        SpeedResult(download_mbps=10.0, upload_mbps=-5.0, ping_ms=5.0)
+
+
+def test_negative_ping_ms_raises_value_error() -> None:
+    """ping_ms cannot be negative."""
+    with pytest.raises(ValueError, match="ping_ms cannot be negative"):
+        SpeedResult(download_mbps=10.0, upload_mbps=10.0, ping_ms=-2.0)
+
+
+def test_negative_jitter_ms_raises_value_error() -> None:
+    """jitter_ms cannot be negative when provided."""
+    with pytest.raises(ValueError, match="jitter_ms cannot be negative"):
+        SpeedResult(
+            download_mbps=10.0, upload_mbps=10.0, ping_ms=5.0, jitter_ms=-1.0
+        )
+
+
+def test_timezone_naive_timestamp_raises_value_error() -> None:
+    """timestamp must be timezone-aware."""
+    naive_dt = datetime(2024, 1, 1, 12, 0, 0)
+    with pytest.raises(ValueError, match="timestamp must be timezone-aware"):
+        SpeedResult(
+            timestamp=naive_dt, download_mbps=10.0, upload_mbps=10.0, ping_ms=5.0
+        )
+
+
+def test_negative_server_id_raises_value_error() -> None:
+    """server_id cannot be negative when provided."""
+    with pytest.raises(ValueError, match="server_id cannot be negative"):
+        SpeedResult(
+            download_mbps=10.0, upload_mbps=10.0, ping_ms=5.0, server_id=-1
+        )

@@ -3,7 +3,6 @@
 # Pytest fixtures intentionally shadow the outer fixture name — this is standard pytest.
 # pylint: disable=redefined-outer-name
 
-import builtins
 import json
 from unittest.mock import patch
 
@@ -68,15 +67,14 @@ def test_save_merges_with_existing_data(config_path):
 
 
 def test_save_raises_on_os_error(config_path, monkeypatch):
-    """save() re-raises OSError when the file cannot be written."""
-    real_open = builtins.open
+    """save() re-raises Exception when the file cannot be written (atomic write)."""
+    # With atomic write, we need to mock tempfile.mkstemp to simulate failure
+    import tempfile
 
-    def _bad_open(path, mode="r", **kwargs):
-        if "w" in mode and str(path) == str(config_path):
-            raise OSError("disk full")
-        return real_open(path, mode, **kwargs)
+    def _bad_mkstemp(*args, **kwargs):
+        raise OSError("disk full")
 
-    monkeypatch.setattr(builtins, "open", _bad_open)
+    monkeypatch.setattr(tempfile, "mkstemp", _bad_mkstemp)
     with pytest.raises(OSError, match="disk full"):
         runtime_config.save({"interval_minutes": 5})
 

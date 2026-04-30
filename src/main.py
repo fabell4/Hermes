@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 import sys
 import time
+from collections.abc import Callable
 
 # Third-party
 import requests
@@ -26,6 +27,7 @@ from .constants import (
     EXPORTER_PROMETHEUS,
     EXPORTER_SQLITE,
 )
+from .exporters.base_exporter import BaseExporter
 from .exporters.csv_exporter import CSVExporter
 from .exporters.loki_exporter import LokiExporter
 from .exporters.prometheus_exporter import PrometheusExporter
@@ -57,7 +59,8 @@ def _build_loki_exporter() -> LokiExporter:
 
 
 # All known exporters and how to build them.
-EXPORTER_REGISTRY = {
+# Keys are strings for runtime flexibility (StrEnum values are strings)
+EXPORTER_REGISTRY: dict[str, Callable[[], BaseExporter]] = {
     EXPORTER_CSV: lambda: CSVExporter(
         path=config.CSV_LOG_PATH,
         max_rows=config.CSV_MAX_ROWS,
@@ -360,6 +363,39 @@ def _build_health_status(scheduler: BackgroundScheduler) -> dict:
     }
 
 
+def _validate_loki_endpoint(loki_url: str) -> None:
+    """Validate that Loki endpoint is reachable."""
+    try:
+        response = requests.head(loki_url, timeout=5)
+        response.raise_for_status()
+    except requests.exceptions.Timeout:
+        logger.warning(
+            "Environment: Loki endpoint '%s' timed out after 5s. "
+            "Check if Loki is slow, overloaded, or unreachable.",
+            loki_url,
+        )
+    except requests.exceptions.ConnectionError as e:
+        logger.warning(
+            "Environment: Loki endpoint '%s' is unreachable: %s. "
+            "Check network connectivity, DNS resolution, and URL correctness.",
+            loki_url,
+            e,
+        )
+    except requests.exceptions.HTTPError as e:
+        logger.warning(
+            "Environment: Loki endpoint '%s' returned HTTP error: %s. "
+            "Check authentication, permissions, and endpoint configuration.",
+            loki_url,
+            e,
+        )
+    except requests.exceptions.RequestException as e:
+        logger.warning(
+            "Environment: Loki endpoint '%s' validation failed: %s.",
+            loki_url,
+            e,
+        )
+
+
 def _validate_environment() -> None:
     """Warn about misconfigured or unreachable services at startup."""
     enabled = runtime_config.get_enabled_exporters(default=config.ENABLED_EXPORTERS)
@@ -370,21 +406,7 @@ def _validate_environment() -> None:
                 "Environment: Loki exporter is enabled but LOKI_URL is not set."
             )
         else:
-            try:
-                requests.head(loki_url, timeout=5)
-            except requests.exceptions.ConnectionError as e:
-                logger.warning(
-                    "Environment: Loki URL '%s' is unreachable — %s. "
-                    "Loki exports will fail until the server is available.",
-                    loki_url,
-                    e,
-                )
-            except Exception as e:  # pylint: disable=broad-except  # NOSONAR
-                logger.warning(
-                    "Environment: Could not verify Loki URL '%s' — %s.",
-                    loki_url,
-                    e,
-                )
+            _validate_loki_endpoint(loki_url)
 
 
 def main():

@@ -278,3 +278,49 @@ def test_export_raises_on_missing_table(db_path: Path) -> None:
     conn.close()
     with pytest.raises(RuntimeError, match="SQLite write failed"):
         exp.export(_make_result())
+
+# ---------------------------------------------------------------------------
+# Lock timeout and error handling tests
+# ---------------------------------------------------------------------------
+
+
+def test_export_raises_lock_timeout_when_lock_held(db_path: Path) -> None:
+    """Export should raise SQLiteLockTimeout if lock cannot be acquired."""
+    from src.exporters.sqlite_exporter import SQLiteLockTimeout
+    from unittest.mock import Mock
+
+    exp = SQLiteExporter(path=db_path)
+
+    # Replace the lock with a mock that returns False on acquire (simulating timeout)
+    mock_lock = Mock()
+    mock_lock.acquire.return_value = False
+    exp._lock = mock_lock
+
+    with pytest.raises(SQLiteLockTimeout) as exc_info:
+        exp.export(_make_result())
+    assert exc_info.value.timeout == pytest.approx(30.0)
+    assert str(db_path) in exc_info.value.db_path
+
+
+def test_sqlite_lock_timeout_exception_contains_diagnostics(db_path: Path) -> None:
+    """SQLiteLockTimeout exception should include timeout and db_path."""
+    from src.exporters.sqlite_exporter import SQLiteLockTimeout
+
+    exc = SQLiteLockTimeout(timeout=30.0, db_path=db_path)
+    assert exc.timeout == pytest.approx(30.0)
+    assert exc.db_path == str(db_path)
+    assert "30.0s" in str(exc)
+    assert str(db_path) in str(exc)
+
+
+def test_export_creates_missing_parent_directories(tmp_path: Path) -> None:
+    """SQLiteExporter should create missing parent directories."""
+    deep_path = tmp_path / "nested" / "deep" / "db" / "test.db"
+    exp = SQLiteExporter(path=deep_path)
+    assert deep_path.exists()
+    exp.export(_make_result())
+    # Verify data was written
+    conn = sqlite3.connect(deep_path)
+    count = conn.execute("SELECT COUNT(*) FROM results").fetchone()[0]
+    conn.close()
+    assert count == 1

@@ -90,7 +90,18 @@ class CSVExporter(BaseExporter):
             logger.error("Failed to write CSV row: %s", e)
             raise
 
-        self._prune()
+        # Non-fatal pruning - log but don't raise
+        # This prevents write success from being rolled back if pruning fails
+        try:
+            self._prune()
+        except Exception as e:  # pylint: disable=broad-except  # NOSONAR
+            logger.error(
+                "CSV pruning failed for %s: %s. "
+                "File may grow unbounded. Check permissions, disk space, and file integrity.",
+                self.path,
+                e,
+                exc_info=True,
+            )
 
     def _filter_by_retention(self, rows: list[dict[str, str]]) -> list[dict[str, str]]:
         """Filter rows older than retention_days."""
@@ -129,12 +140,27 @@ class CSVExporter(BaseExporter):
         Removes rows that exceed max_rows or are older than retention_days.
         Rewrites the file in place if any rows are removed.
         Both limits are applied together — whichever removes more rows wins.
+
+        Optimized to skip expensive full file read when pruning is not needed.
         """
         if not self.max_rows and not self.retention_days:
             return
         if not self.path.exists():
             return
 
+        # Quick row count check first to avoid loading file if not needed
+        try:
+            with open(self.path, encoding="utf-8") as f:
+                row_count = sum(1 for _ in f) - 1  # Exclude header
+        except OSError:
+            return  # Can't read file, skip pruning
+
+        # Skip expensive full read if row count is below max_rows
+        # (Note: retention still requires full read, so we can't skip in that case)
+        if self.max_rows > 0 and row_count <= self.max_rows and not self.retention_days:
+            return  # No pruning needed
+
+        # Load full file for pruning
         with open(self.path, encoding="utf-8") as f:
             reader = csv.DictReader(f)
             rows = list(reader)

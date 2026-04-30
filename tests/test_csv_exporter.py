@@ -381,3 +381,47 @@ def test_csv_handles_missing_optional_fields(tmp_path):
         # Required fields should still be present
         assert row["server_name"] == "Server"
         assert float(row["download_mbps"]) == pytest.approx(100.0)
+
+
+# ---------------------------------------------------------------------------
+# Error handling tests
+# ---------------------------------------------------------------------------
+
+
+def test_prune_failure_is_non_fatal(tmp_path, monkeypatch):
+    """Pruning failure should be logged but not prevent writes."""
+    path = tmp_path / "results.csv"
+    exporter = CSVExporter(path, max_rows=2)
+
+    # Export one row successfully
+    exporter.export(_sample_result())
+    assert exporter.get_row_count() == 1
+
+    # Break file reading for prune but not for write
+    import builtins
+
+    real_open = builtins.open
+    call_count = {"count": 0}
+
+    def _mock_open(p, mode="r", **kwargs):
+        # First call is for counting rows (in _prune)
+        # Second call is for appending data (in export)
+        if mode == "r" and "a" not in mode and call_count["count"] == 0:
+            call_count["count"] += 1
+            raise OSError("simulated read failure during prune")
+        return real_open(p, mode, **kwargs)
+
+    monkeypatch.setattr(builtins, "open", _mock_open)
+
+    # Export should succeed even though prune fails
+    exporter.export(_sample_result())
+    assert exporter.get_row_count() == 2
+
+
+def test_ensure_file_creates_missing_parent_dirs(tmp_path):
+    """_ensure_file should create any missing parent directories."""
+    deep_path = tmp_path / "a" / "b" / "c" / "results.csv"
+    _exporter = CSVExporter(deep_path)
+    assert deep_path.exists()
+    assert deep_path.parent.exists()
+

@@ -60,6 +60,7 @@ def _get_csv_list(key: str, default: list[str]) -> list[str]:
 APP_ENV: str = os.getenv("APP_ENV", "development")
 APP_VERSION: str = os.getenv("APP_VERSION", "dev")
 LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
+TIMEZONE: str = os.getenv("TZ", "UTC")
 
 # --- Authentication ---
 # If set, all write endpoints (POST /api/trigger, PUT /api/config) require

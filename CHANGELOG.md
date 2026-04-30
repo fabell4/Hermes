@@ -10,6 +10,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 - **Security policy** — Added [SECURITY.md](SECURITY.md) with vulnerability disclosure process, supported versions, and coordinated disclosure policy for security researchers
+- **Defensive coding improvements** — Comprehensive defensive coding review completed with 8 critical/medium priority fixes implemented:
+  - Runtime config validation with schema enforcement and type checking
+  - Speed result validation with safe integer/float handling
+  - Thread-safe shared state access for AlertManager
+  - Enhanced failure logging for speedtest errors
+  - Atomic CSV file operations with proper error handling
+  - Alert provider URL validation (HTTP/HTTPS enforcement)
+  - SQLite lock timeout configuration (30 seconds)
+  - Better Prometheus error handling with graceful degradation
+- **Code quality improvements** — Best practices review completed with 5 high/medium priority enhancements:
+  - Alert provider factory module (`src/services/alert_provider_factory.py`) eliminates ~150 lines of code duplication
+  - Standardized type hints to Python 3.10+ style (`str | None` instead of `Optional[str]`)
+  - Constants module (`src/constants.py`) centralizes exporter and provider names
+  - Config fallback helper function (`_get_config_value()`) simplifies configuration retrieval patterns
+  - PEP 8 import organization (Standard library → Third-party → Local) applied across all modules
+- **Quality assurance documentation** — Added comprehensive review reports:
+  - [docs/DEFENSIVE-CODING-REVIEW.md](docs/DEFENSIVE-CODING-REVIEW.md) — 15 issues analyzed, 8 implemented
+  - [docs/BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) — 13 issues analyzed, 5 implemented
+
+### Changed
+- **Code organization** — Provider registration logic now shared between scheduler and API processes via factory pattern
+- **Type system** — All modules use modern Python 3.10+ union syntax consistently
+
+### Fixed
+- **Code quality** — SonarQube finding resolved: `require_enabled` parameter now properly utilized in `register_apprise_provider()`
+- **Test coverage** — Maintained 91% coverage (344 tests passing) after refactoring
 
 ---
 

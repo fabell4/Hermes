@@ -408,6 +408,7 @@ Hermes/
 ├── src/
 │   ├── main.py                        # Entry point — wires scheduler, dispatcher, and exporters
 │   ├── config.py                      # Static config loaded from environment variables
+│   ├── constants.py                   # Centralized constants for exporters and alert providers
 │   ├── runtime_config.py              # Persistent runtime state (interval, enabled exporters)
 │   ├── shared_state.py                # Shared state for alert_manager access across API
 │   ├── result_dispatcher.py           # ResultDispatcher — fans out SpeedResult to exporters
@@ -421,6 +422,7 @@ Hermes/
 │   │   ├── speedtest_runner.py        # SpeedtestRunner — runs test, returns SpeedResult
 │   │   ├── alert_manager.py           # AlertManager — tracks failures and sends alerts
 │   │   ├── alert_providers.py         # Alert provider implementations (Webhook, Gotify, ntfy, Apprise)
+│   │   ├── alert_provider_factory.py  # Shared alert provider registration logic
 │   │   ├── health_server.py           # Health check endpoint
 │   │   └── log_service.py             # Logging configuration
 │   ├── exporters/

@@ -9,11 +9,17 @@ from __future__ import annotations
 
 import json
 import logging
+import os
+import tempfile
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 RUNTIME_CONFIG_PATH = Path("data/runtime_config.json")
+
+# Cache for runtime config to avoid repeated file reads
+_config_cache: dict | None = None
+_config_mtime: float = 0
 
 
 def _ensure_dir() -> None:
@@ -121,10 +127,24 @@ def load() -> dict:
     Loads the runtime config from disk with validation.
     Returns an empty dict if the file doesn't exist yet.
     Invalid values are logged and discarded to prevent corrupted config from crashing the app.
+
+    Uses file modification time caching to avoid repeated file reads and validation.
+    Cache is invalidated when file is modified.
     """
+    global _config_cache, _config_mtime
+
     if not RUNTIME_CONFIG_PATH.exists():
         return {}
+
     try:
+        # Check modification time for caching
+        current_mtime = RUNTIME_CONFIG_PATH.stat().st_mtime
+
+        # Cache hit - file hasn't changed
+        if _config_cache is not None and current_mtime == _config_mtime:
+            return _config_cache.copy()  # Return copy to prevent mutation
+
+        # Cache miss - reload and validate
         with open(RUNTIME_CONFIG_PATH, encoding="utf-8") as f:
             data = json.load(f)
 
@@ -142,6 +162,10 @@ def load() -> dict:
         _validate_timestamp_fields(data, sanitized)
         _validate_alert_config(data, sanitized)
 
+        # Update cache
+        _config_cache = sanitized
+        _config_mtime = current_mtime
+
         return sanitized
 
     except (json.JSONDecodeError, OSError) as e:
@@ -151,17 +175,42 @@ def load() -> dict:
 
 def save(data: dict) -> None:
     """
-    Writes the runtime config to disk.
+    Writes the runtime config to disk atomically.
     Merges with existing values so unrelated keys are preserved.
+
+    Uses atomic write pattern (write to temp file, then rename) to prevent
+    corruption if write fails or process crashes mid-write.
     """
+    global _config_cache, _config_mtime
+
     _ensure_dir()
     existing = load()
     existing.update(data)
+
+    config_path = Path(RUNTIME_CONFIG_PATH)
+
+    # Write to temporary file first
+    fd, temp_path = tempfile.mkstemp(
+        dir=config_path.parent, prefix=".runtime_config_", suffix=".tmp"
+    )
     try:
-        with open(RUNTIME_CONFIG_PATH, "w", encoding="utf-8") as f:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
             json.dump(existing, f, indent=2)
+
+        # Atomic rename (OS guarantees this is atomic)
+        Path(temp_path).replace(config_path)
+
+        # Invalidate cache so next load() will re-read
+        _config_cache = None
+        _config_mtime = 0
+
         logger.info("Runtime config saved: %s", existing)
-    except OSError as e:
+    except Exception as e:
+        # Clean up temp file on failure
+        try:
+            Path(temp_path).unlink(missing_ok=True)
+        except OSError:
+            pass  # Best effort cleanup
         logger.error("Could not save runtime config: %s", e)
         raise
 
