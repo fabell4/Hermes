@@ -4,13 +4,17 @@ Run with:
     uvicorn src.api.main:app --port 8080 --reload
 """
 
+from __future__ import annotations
+
+# Standard library
 import logging
 import os
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Literal
 
+# Third-party
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -19,17 +23,13 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import FileResponse, JSONResponse
 
-from src.api.routes import config, results, trigger, alerts
+# Local
+from src import config as app_config
 from src import runtime_config as rc
 from src import shared_state
+from src.api.routes import alerts, config, results, trigger
 from src.services.alert_manager import AlertManager
-from src.services.alert_providers import (
-    WebhookProvider,
-    GotifyProvider,
-    NtfyProvider,
-    AppriseProvider,
-)
-from src import config as app_config
+from src.services.alert_provider_factory import register_all_providers
 
 logger = logging.getLogger(__name__)
 
@@ -59,92 +59,14 @@ def _build_alert_manager_for_api() -> AlertManager:
     )
 
     # Always register providers for API (used for test notifications)
-    # Individual providers check their own enabled flag
-    _register_alert_providers(manager, alert_config.get("providers", {}))
+    # require_enabled=True ensures only enabled providers are registered
+    register_all_providers(
+        manager,
+        alert_config.get("providers", {}),
+        require_enabled=True,
+    )
 
     return manager
-
-
-def _register_webhook_provider(manager: AlertManager, providers_config: dict) -> None:
-    """Register webhook alert provider if configured and enabled."""
-    webhook_url = (
-        providers_config.get("webhook", {}).get("url") or app_config.ALERT_WEBHOOK_URL
-    )
-    if webhook_url and providers_config.get("webhook", {}).get("enabled", False):
-        try:
-            manager.add_provider("webhook", WebhookProvider(url=webhook_url))
-        except Exception as e:  # pylint: disable=broad-except  # NOSONAR
-            logger.warning("Could not initialize webhook alert provider: %s", e)
-
-
-def _register_gotify_provider(manager: AlertManager, providers_config: dict) -> None:
-    """Register Gotify alert provider if configured and enabled."""
-    gotify_config = providers_config.get("gotify", {})
-    gotify_url = gotify_config.get("url") or app_config.ALERT_GOTIFY_URL
-    gotify_token = gotify_config.get("token") or app_config.ALERT_GOTIFY_TOKEN
-    if gotify_url and gotify_token and gotify_config.get("enabled", False):
-        try:
-            manager.add_provider(
-                "gotify",
-                GotifyProvider(
-                    url=gotify_url,
-                    token=gotify_token,
-                    priority=gotify_config.get(
-                        "priority", app_config.ALERT_GOTIFY_PRIORITY
-                    ),
-                ),
-            )
-        except Exception as e:  # pylint: disable=broad-except  # NOSONAR
-            logger.warning("Could not initialize Gotify alert provider: %s", e)
-
-
-def _register_ntfy_provider(manager: AlertManager, providers_config: dict) -> None:
-    """Register ntfy alert provider if configured and enabled."""
-    ntfy_config = providers_config.get("ntfy", {})
-    ntfy_topic = ntfy_config.get("topic") or app_config.ALERT_NTFY_TOPIC
-    if ntfy_topic and ntfy_config.get("enabled", False):
-        try:
-            manager.add_provider(
-                "ntfy",
-                NtfyProvider(
-                    url=ntfy_config.get("url")
-                    or app_config.ALERT_NTFY_URL
-                    or "https://ntfy.sh",
-                    topic=ntfy_topic,
-                    token=ntfy_config.get("token") or app_config.ALERT_NTFY_TOKEN,
-                    priority=ntfy_config.get(
-                        "priority", app_config.ALERT_NTFY_PRIORITY
-                    ),
-                    tags=ntfy_config.get("tags", app_config.ALERT_NTFY_TAGS),
-                ),
-            )
-        except Exception as e:  # pylint: disable=broad-except  # NOSONAR
-            logger.warning("Could not initialize ntfy alert provider: %s", e)
-
-
-def _register_apprise_provider(manager: AlertManager, providers_config: dict) -> None:
-    """Register Apprise alert provider if configured and enabled."""
-    apprise_config = providers_config.get("apprise", {})
-    apprise_url = apprise_config.get("url") or app_config.ALERT_APPRISE_URL
-    apprise_urls = apprise_config.get("urls", [])
-    if apprise_url and apprise_config.get("enabled", False):
-        try:
-            manager.add_provider(
-                "apprise",
-                AppriseProvider(
-                    url=apprise_url, urls=apprise_urls if apprise_urls else None
-                ),
-            )
-        except Exception as e:  # pylint: disable=broad-except  # NOSONAR
-            logger.warning("Could not initialize Apprise alert provider: %s", e)
-
-
-def _register_alert_providers(manager: AlertManager, providers_config: dict) -> None:
-    """Register alert providers based on configuration."""
-    _register_webhook_provider(manager, providers_config)
-    _register_gotify_provider(manager, providers_config)
-    _register_ntfy_provider(manager, providers_config)
-    _register_apprise_provider(manager, providers_config)
 
 
 @asynccontextmanager
@@ -221,8 +143,8 @@ class HealthResponse(BaseModel):
 
     status: Literal["ok", "degraded"]
     scheduler_running: bool
-    last_run: Optional[str] = None
-    next_run: Optional[str] = None
+    last_run: str | None = None
+    next_run: str | None = None
     uptime_seconds: float
     version: str
 

@@ -4,30 +4,38 @@ Hermes — entry point.
 Wires all components together, starts the scheduler, and runs the application.
 """
 
+from __future__ import annotations
+
+# Standard library
 import logging
 import sys
 import time
+
+# Third-party
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
+
+# Local
 from . import config
 from . import runtime_config
 from . import shared_state
-from .runtime_config import set_interval_minutes, set_enabled_exporters
+from .constants import (
+    EXPORTER_CSV,
+    EXPORTER_LOKI,
+    EXPORTER_PROMETHEUS,
+    EXPORTER_SQLITE,
+)
+from .exporters.csv_exporter import CSVExporter
+from .exporters.loki_exporter import LokiExporter
+from .exporters.prometheus_exporter import PrometheusExporter
+from .exporters.sqlite_exporter import SQLiteExporter
+from .result_dispatcher import DispatchError, ResultDispatcher
+from .runtime_config import set_enabled_exporters, set_interval_minutes
+from .services.alert_manager import AlertManager
+from .services.alert_provider_factory import register_all_providers
 from .services.health_server import HealthServer
 from .services.speedtest_runner import SpeedtestRunner
-from .services.alert_manager import AlertManager
-from .services.alert_providers import (
-    WebhookProvider,
-    GotifyProvider,
-    NtfyProvider,
-    AppriseProvider,
-)
-from .result_dispatcher import ResultDispatcher, DispatchError
-from .exporters.csv_exporter import CSVExporter
-from .exporters.prometheus_exporter import PrometheusExporter
-from .exporters.loki_exporter import LokiExporter
-from .exporters.sqlite_exporter import SQLiteExporter
 
 # --- Logging setup ---
 logging.basicConfig(
@@ -49,16 +57,15 @@ def _build_loki_exporter() -> LokiExporter:
 
 
 # All known exporters and how to build them.
-# Uncomment each entry as the exporter is implemented.
 EXPORTER_REGISTRY = {
-    "csv": lambda: CSVExporter(
+    EXPORTER_CSV: lambda: CSVExporter(
         path=config.CSV_LOG_PATH,
         max_rows=config.CSV_MAX_ROWS,
         retention_days=config.CSV_RETENTION_DAYS,
     ),
-    "prometheus": lambda: PrometheusExporter(port=config.PROMETHEUS_PORT),
-    "loki": _build_loki_exporter,
-    "sqlite": lambda: SQLiteExporter(
+    EXPORTER_PROMETHEUS: lambda: PrometheusExporter(port=config.PROMETHEUS_PORT),
+    EXPORTER_LOKI: _build_loki_exporter,
+    EXPORTER_SQLITE: lambda: SQLiteExporter(
         path=config.SQLITE_DB_PATH,
         max_rows=config.SQLITE_MAX_ROWS,
         retention_days=config.SQLITE_RETENTION_DAYS,
@@ -130,89 +137,13 @@ def build_alert_manager() -> AlertManager:
 
     # Only register providers if alerting is enabled
     if alert_config.get("enabled", False) or failure_threshold > 0:
-        _register_alert_providers(manager, alert_config.get("providers", {}))
+        register_all_providers(
+            manager,
+            alert_config.get("providers", {}),
+            require_enabled=False,
+        )
 
     return manager
-
-
-def _register_webhook_provider(manager: AlertManager, providers_config: dict) -> None:
-    """Register webhook alert provider if configured."""
-    webhook_url = (
-        providers_config.get("webhook", {}).get("url") or config.ALERT_WEBHOOK_URL
-    )
-    if webhook_url:
-        try:
-            manager.add_provider("webhook", WebhookProvider(url=webhook_url))
-        except Exception as e:  # pylint: disable=broad-except  # NOSONAR
-            logger.warning("Could not initialize webhook alert provider: %s", e)
-
-
-def _register_gotify_provider(manager: AlertManager, providers_config: dict) -> None:
-    """Register Gotify alert provider if configured."""
-    gotify_config = providers_config.get("gotify", {})
-    gotify_url = gotify_config.get("url") or config.ALERT_GOTIFY_URL
-    gotify_token = gotify_config.get("token") or config.ALERT_GOTIFY_TOKEN
-    if gotify_url and gotify_token:
-        try:
-            manager.add_provider(
-                "gotify",
-                GotifyProvider(
-                    url=gotify_url,
-                    token=gotify_token,
-                    priority=gotify_config.get(
-                        "priority", config.ALERT_GOTIFY_PRIORITY
-                    ),
-                ),
-            )
-        except Exception as e:  # pylint: disable=broad-except  # NOSONAR
-            logger.warning("Could not initialize Gotify alert provider: %s", e)
-
-
-def _register_ntfy_provider(manager: AlertManager, providers_config: dict) -> None:
-    """Register ntfy alert provider if configured."""
-    ntfy_config = providers_config.get("ntfy", {})
-    ntfy_topic = ntfy_config.get("topic") or config.ALERT_NTFY_TOPIC
-    if ntfy_topic:
-        try:
-            manager.add_provider(
-                "ntfy",
-                NtfyProvider(
-                    url=ntfy_config.get("url")
-                    or config.ALERT_NTFY_URL
-                    or "https://ntfy.sh",
-                    topic=ntfy_topic,
-                    token=ntfy_config.get("token") or config.ALERT_NTFY_TOKEN,
-                    priority=ntfy_config.get("priority", config.ALERT_NTFY_PRIORITY),
-                    tags=ntfy_config.get("tags", config.ALERT_NTFY_TAGS),
-                ),
-            )
-        except Exception as e:  # pylint: disable=broad-except  # NOSONAR
-            logger.warning("Could not initialize ntfy alert provider: %s", e)
-
-
-def _register_apprise_provider(manager: AlertManager, providers_config: dict) -> None:
-    """Register Apprise alert provider if configured and enabled."""
-    apprise_config = providers_config.get("apprise", {})
-    apprise_url = apprise_config.get("url") or config.ALERT_APPRISE_URL
-    apprise_urls = apprise_config.get("urls", [])
-    if apprise_url and apprise_config.get("enabled", False):
-        try:
-            manager.add_provider(
-                "apprise",
-                AppriseProvider(
-                    url=apprise_url, urls=apprise_urls if apprise_urls else None
-                ),
-            )
-        except Exception as e:  # pylint: disable=broad-except  # NOSONAR
-            logger.warning("Could not initialize Apprise alert provider: %s", e)
-
-
-def _register_alert_providers(manager: AlertManager, providers_config: dict) -> None:
-    """Register alert providers based on configuration."""
-    _register_webhook_provider(manager, providers_config)
-    _register_gotify_provider(manager, providers_config)
-    _register_ntfy_provider(manager, providers_config)
-    _register_apprise_provider(manager, providers_config)
 
 
 def update_alert_providers(manager: AlertManager, alert_config: dict) -> None:
@@ -230,7 +161,11 @@ def update_alert_providers(manager: AlertManager, alert_config: dict) -> None:
     manager.clear_providers()
 
     if alert_config.get("enabled", False):
-        _register_alert_providers(manager, alert_config.get("providers", {}))
+        register_all_providers(
+            manager,
+            alert_config.get("providers", {}),
+            require_enabled=False,
+        )
         logger.info("Alert providers updated and enabled.")
     else:
         logger.info("Alerting disabled — providers cleared.")

@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
+# Standard library
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any
 from urllib.parse import urlparse
 
+# Third-party
 import requests
+
+# Local
+from src.constants import DEFAULT_ALERT_TIMEOUT_SECONDS
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +72,7 @@ class AlertProvider(ABC):
 class WebhookProvider(AlertProvider):
     """Sends alerts via HTTP POST to a configured webhook URL."""
 
-    def __init__(self, url: str, timeout: int = 10) -> None:
+    def __init__(self, url: str, timeout: int = DEFAULT_ALERT_TIMEOUT_SECONDS) -> None:
         """
         Initialize webhook provider.
 
@@ -115,7 +120,7 @@ class GotifyProvider(AlertProvider):
     """Sends alerts via Gotify push notification service."""
 
     def __init__(
-        self, url: str, token: str, priority: int = 5, timeout: int = 10
+        self, url: str, token: str, priority: int = 5, timeout: int = DEFAULT_ALERT_TIMEOUT_SECONDS
     ) -> None:
         """
         Initialize Gotify provider.
@@ -184,7 +189,7 @@ class NtfyProvider(AlertProvider):
         token: str | None = None,
         priority: int = 3,
         tags: list[str] | None = None,
-        timeout: int = 10,
+        timeout: int = DEFAULT_ALERT_TIMEOUT_SECONDS,
     ) -> None:
         """
         Initialize ntfy provider.
@@ -255,7 +260,7 @@ class AppriseProvider(AlertProvider):
     """Sends alerts via Apprise API service (separate container)."""
 
     def __init__(
-        self, url: str, urls: list[str] | None = None, timeout: int = 10
+        self, url: str, urls: list[str] | None = None, timeout: int = DEFAULT_ALERT_TIMEOUT_SECONDS
     ) -> None:
         """
         Initialize Apprise provider.

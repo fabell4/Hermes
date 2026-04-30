@@ -6,10 +6,17 @@ All environment variables are read here — nowhere else in the app calls os.get
 Reads from .env file automatically via python-dotenv.
 """
 
-import os
+from __future__ import annotations
+
+# Standard library
 import logging
+import os
 from pathlib import Path
+
+# Third-party
 from dotenv import load_dotenv
+
+# Local
 from .runtime_config import get_interval_minutes
 
 # Load .env file if present — does nothing in production if env vars are set directly

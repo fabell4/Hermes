@@ -1,8 +1,10 @@
 """SpeedResult dataclass — the shared data contract between all layers."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -15,9 +17,9 @@ class SpeedResult:
     ping_ms: float = 0.0
     server_name: str = ""
     server_location: str = ""
-    server_id: Optional[int] = None
-    jitter_ms: Optional[float] = None
-    isp_name: Optional[str] = None
+    server_id: int | None = None
+    jitter_ms: float | None = None
+    isp_name: str | None = None
 
     def __post_init__(self) -> None:
         """Validate field values after initialization."""

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import sqlite3
 from pathlib import Path
-from typing import Annotated, Any, Optional
+from typing import Annotated, Any
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
@@ -29,11 +29,11 @@ class SpeedResultSchema(BaseModel):
     download_mbps: float
     upload_mbps: float
     ping_ms: float
-    jitter_ms: Optional[float] = None
-    isp_name: Optional[str] = None
+    jitter_ms: float | None = None
+    isp_name: str | None = None
     server_name: str
     server_location: str
-    server_id: Optional[int] = None
+    server_id: int | None = None
 
 
 class ResultsPage(BaseModel):
@@ -80,7 +80,7 @@ def get_results(
 
 
 @router.get("/results/latest", responses=_503)
-def get_latest_result() -> Optional[SpeedResultSchema]:
+def get_latest_result() -> SpeedResultSchema | None:
     """Return the most recent result, or null if the database is empty."""
     conn = _connect()
     try:

@@ -5,6 +5,8 @@ Runtime configuration — persists user changes made via the UI across restarts.
 Stored as a JSON file mapped as a Docker volume.
 """
 
+from __future__ import annotations
+
 import json
 import logging
 from pathlib import Path
