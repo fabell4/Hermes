@@ -8,6 +8,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+- **Security policy** — Added [SECURITY.md](SECURITY.md) with vulnerability disclosure process, supported versions, and coordinated disclosure policy for security researchers
+
 ---
 
 ## [1.0.0-beta] - 2026-04-29

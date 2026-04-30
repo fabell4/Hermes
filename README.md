@@ -78,6 +78,8 @@ Hermes implements multiple layers of security:
 
 **Security Audit:** [APPROVED FOR v1.0 RELEASE](https://fabell4.github.io/hermes/SECURITY-AUDIT) after implementing all critical fixes.
 
+**Found a vulnerability?** See [SECURITY.md](SECURITY.md) for our responsible disclosure policy.
+
 See [Security Documentation](https://fabell4.github.io/hermes/security) for best practices and audit reports.
 
 ---

@@ -92,6 +92,9 @@ The React UI will be available at `http://localhost:8080`.
 ### ✨ Security Enhancements
 **[Security Enhancements](SECURITY-ENHANCEMENTS)** — Implementation details of v1.0 security fixes
 
+### 🛡️ Vulnerability Reporting
+**[Security Policy](https://github.com/fabell4/hermes/blob/main/SECURITY.md)** — How to report vulnerabilities responsibly
+
 ---
 
 ## Quick Links
