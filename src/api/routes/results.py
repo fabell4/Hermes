@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -60,7 +61,7 @@ def get_results(
     page_size: Annotated[int, Query(ge=1, le=500)] = 50,
 ) -> ResultsPage:
     """Return paginated results, newest first."""
-    with _connect() as conn:
+    with closing(_connect()) as conn:
         total: int = conn.execute("SELECT COUNT(*) FROM results").fetchone()[0]
         offset = (page - 1) * page_size
         rows = conn.execute(
@@ -79,7 +80,7 @@ def get_results(
 @router.get("/results/latest", responses=_503)
 def get_latest_result() -> SpeedResultSchema | None:
     """Return the most recent result, or null if the database is empty."""
-    with _connect() as conn:
+    with closing(_connect()) as conn:
         row = conn.execute(
             "SELECT * FROM results ORDER BY timestamp DESC LIMIT 1"
         ).fetchone()

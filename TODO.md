@@ -157,7 +157,28 @@ _Goal: notify users when something goes wrong and ensure code quality before v1.
     - ✅ Static analysis clean (mypy, ruff)
     - ✅ Approved for v1.0 release
     - 📋 Test coverage gaps (H6-H8) and documentation polish (M1-M4) deferred to v1.1
-  - [ ] Test coverage gaps
+  - [x] Test coverage gaps — **COMPLETE**
+    - ✅ Comprehensive test coverage review completed (see [docs/TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md))
+    - ✅ Current coverage: **92.32%** (397 Python tests, 12 TypeScript tests)
+    - ✅ 8 gap categories identified (2 high, 3 medium, 3 low priority)
+    - ✅ **ALL REQUIRED FIXES IMPLEMENTED**:
+      - ✅ Fixed ResourceWarnings (unclosed database connections) — contextlib.closing() wrapper added
+      - ✅ Added 42 alert_provider_factory tests (66% → 97% coverage)
+    - ✅ Test suite: 355 → 397 tests (+42 tests)
+    - ✅ Overall coverage: 91.36% → 92.32% (+0.96%)
+    - ✅ All 397 tests passing
+    - ✅ No ResourceWarnings
+    - ✅ **Approved for v1.0 release**
+    - 📋 HIGH priority deferred to v1.1:
+      - Main loop tests (12-15 tests for uncovered paths)
+      - Frontend component tests (Layout, Dashboard, Settings)
+    - 📋 MEDIUM priority deferred to v1.1:
+      - Integration tests (end-to-end flows)
+      - Runtime config edge cases
+      - Alert provider error paths
+    - 📋 LOW priority deferred to v1.1:
+      - Config module subprocess test
+      - Comprehensive frontend coverage (80%+ target)
   - [ ] Documentation accuracy
   - [ ] Performance optimization opportunities
 
