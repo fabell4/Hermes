@@ -40,9 +40,13 @@ def _check_dangerous_hostnames(hostname: str, field_name: str) -> None:
         HTTPException: If hostname is localhost or a reserved address
     """
     hostname_lower = hostname.lower()
-    # NOSONAR - We are checking these values to BLOCK them (SSRF protection),
-    # not binding to them. This is intentional security validation.
-    if hostname_lower in ("localhost", "127.0.0.1", "::1", "0.0.0.0", "::"):
+    if hostname_lower in (  # NOSONAR - checking values to BLOCK them (SSRF protection)
+        "localhost",
+        "127.0.0.1",
+        "::1",
+        "0.0.0.0",
+        "::",
+    ):
         raise HTTPException(
             status_code=422,
             detail=f"{field_name}: Localhost addresses are not allowed.",
