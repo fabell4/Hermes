@@ -76,8 +76,9 @@ RATE_LIMIT_PER_MINUTE: int = _get_int("RATE_LIMIT_PER_MINUTE", 60)
 MAX_REQUEST_BODY_SIZE: int = _get_int("MAX_REQUEST_BODY_SIZE", 1_048_576)
 
 # CORS allowed origins (comma-separated URLs)
+# NOSONAR - Development default for local frontend (http://localhost:5173,4173)
 CORS_ORIGINS: str = os.getenv(
-    "CORS_ORIGINS", "http://localhost:5173,http://localhost:4173"
+    "CORS_ORIGINS", "http://localhost:5173,http://localhost:4173"  # NOSONAR
 )
 
 # --- Scheduler ---
