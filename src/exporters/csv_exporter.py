@@ -92,9 +92,7 @@ class CSVExporter(BaseExporter):
 
         self._prune()
 
-    def _filter_by_retention(
-        self, rows: list[dict[str, str]]
-    ) -> list[dict[str, str]]:
+    def _filter_by_retention(self, rows: list[dict[str, str]]) -> list[dict[str, str]]:
         """Filter rows older than retention_days."""
         if not self.retention_days:
             return rows
@@ -106,9 +104,7 @@ class CSVExporter(BaseExporter):
             if datetime.fromisoformat(r["timestamp"]).astimezone(timezone.utc) >= cutoff
         ]
 
-    def _filter_by_max_rows(
-        self, rows: list[dict[str, str]]
-    ) -> list[dict[str, str]]:
+    def _filter_by_max_rows(self, rows: list[dict[str, str]]) -> list[dict[str, str]]:
         """Keep only the most recent max_rows."""
         if not self.max_rows or len(rows) <= self.max_rows:
             return rows
