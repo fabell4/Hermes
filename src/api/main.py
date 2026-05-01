@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Literal
 
 # Third-party
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -182,10 +182,17 @@ def health() -> HealthResponse:
 # SPA fallback route — serves index.html for all non-API, non-asset paths
 # Must be registered last so API routes take precedence
 # ---------------------------------------------------------------------------
-if _DIST.is_dir():
 
-    @app.get("/{full_path:path}", include_in_schema=False)
-    def spa_fallback(full_path: str) -> FileResponse:
-        """Return index.html for all non-API paths to support client-side routing."""
-        logger.debug("SPA fallback: /%s", full_path)
-        return FileResponse(str(_DIST / "index.html"))
+
+@app.get(
+    "/{full_path:path}",
+    include_in_schema=False,
+    responses={404: {"description": "Frontend not built — dist directory missing"}},
+)
+def spa_fallback(full_path: str) -> FileResponse:
+    """Return index.html for all non-API paths to support client-side routing."""
+    index = _DIST / "index.html"
+    if not index.is_file():
+        raise HTTPException(status_code=404)
+    logger.debug("SPA fallback: /%s", full_path)
+    return FileResponse(str(index))

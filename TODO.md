@@ -191,10 +191,17 @@ _Goal: notify users when something goes wrong and ensure code quality before v1.
     - ✅ No ResourceWarnings
     - ✅ **Approved for v1.0 release**
     - ✅ **POST-v1.0 DEFERRED ITEMS COMPLETED (May 1, 2026)**:
-      - ✅ **H6: Alert provider network failure scenarios** — Added 6 comprehensive tests covering multi-provider failures, partial success scenarios, different exception types, and send_test_alert failure scenarios
-      - ✅ **H7: API main uncovered lines** — Added 12 tests covering SPA fallback and security headers middleware across all response types
-      - ✅ **H8: SQLite migration idempotency** — Added 7 comprehensive migration tests (fresh initialization, idempotent re-initialization, missing column/index addition, concurrent migration safety)
-      - ✅ **M1: Missing docstrings** — Enhanced module docstring for shared_state.py, comprehensive docstrings for set_alert_manager(), get_alert_manager(), consume_run_trigger(), and register_all_providers()
+      - ✅ **H6: Alert provider network failure scenarios** — Added 6 comprehensive tests covering
+        multi-provider failures, partial success scenarios, different exception types, and
+        send_test_alert failure scenarios
+      - ✅ **H7: API main uncovered lines** — Added 12 tests covering SPA fallback and security
+        headers middleware across all response types
+      - ✅ **H8: SQLite migration idempotency** — Added 7 comprehensive migration tests (fresh
+        initialization, idempotent re-initialization, missing column/index addition, concurrent
+        migration safety)
+      - ✅ **M1: Missing docstrings** — Enhanced module docstring for shared_state.py, comprehensive
+        docstrings for set_alert_manager(), get_alert_manager(), consume_run_trigger(), and
+        register_all_providers()
     - ✅ Test suite expanded: 403 → 426 tests (+23 tests)
     - ✅ All 426 tests passing
     - 📋 HIGH priority deferred to v1.1:
@@ -292,6 +299,7 @@ _Features and improvements planned for after v1.0. Not required for stable relea
   [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) L8)
 
 **Note:** The following deferred items from BEST-PRACTICES-REVIEW.md were completed on May 1, 2026:
+
 - ✅ Config helper functions — `_get_str()` helper added to config.py (Issue #8)
 - ✅ Hardcoded timeout constants — Already extracted to constants.py (Issue #9)
 - ✅ Error message consistency — Reviewed, current pattern appropriate (Issue #10)
