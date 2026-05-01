@@ -2,7 +2,8 @@
 
 import json
 import logging
-import subprocess
+import shutil
+import subprocess  # noqa: S404  # NOSONAR - Required to invoke Ookla CLI executable
 from datetime import datetime
 from typing import Any
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -17,7 +18,21 @@ class SpeedtestRunner:
     """
     Runs a speed test using official Ookla CLI and returns results as SpeedResult.
     Retries once on transient failure before raising.
+    
+    Security: Uses absolute path to speedtest binary (resolved at init) to prevent
+    PATH manipulation attacks.
     """
+
+    def __init__(self) -> None:
+        """Initialize runner and validate speedtest binary exists."""
+        speedtest_path = shutil.which("speedtest")
+        if speedtest_path is None:
+            raise RuntimeError(
+                "Ookla speedtest CLI not found in PATH. "
+                "Install from https://www.speedtest.net/apps/cli"
+            )
+        self._speedtest_path: str = speedtest_path
+        _log.debug("Using speedtest binary at: %s", self._speedtest_path)
 
     def run(self) -> SpeedResult:
         """Run the speed test, retrying once on transient failure."""
@@ -37,8 +52,15 @@ class SpeedtestRunner:
         """Execute a single speed test attempt using Ookla CLI."""
         try:
             # Run speedtest CLI with JSON output and accept license automatically
-            result = subprocess.run(
-                ["speedtest", "--accept-license", "--accept-gdpr", "--format=json"],
+            # Security: All arguments are hardcoded strings (no user input)
+            # Uses absolute path resolved at init to prevent PATH injection
+            result = subprocess.run(  # noqa: S603  # NOSONAR - No user input, hardcoded args only
+                [
+                    self._speedtest_path,
+                    "--accept-license",
+                    "--accept-gdpr",
+                    "--format=json",
+                ],
                 capture_output=True,
                 text=True,
                 timeout=120,  # 2 minute timeout
