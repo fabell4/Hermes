@@ -1,7 +1,7 @@
 services:
 
   hermes-scheduler:
-    image: ${HERMES_IMAGE:-registry.greenflametech.net/hermes:latest}
+    image: ${HERMES_IMAGE:-ghcr.io/fabell4/hermes:latest}
     container_name: hermes-scheduler
     restart: always
     command: ["python", "-m", "src.main"]
@@ -45,7 +45,7 @@ services:
         required: false
 
   hermes-api:
-    image: ${HERMES_IMAGE:-registry.greenflametech.net/hermes:latest}
+    image: ${HERMES_IMAGE:-ghcr.io/fabell4/hermes:latest}
     container_name: hermes-api
     restart: always
     ports:

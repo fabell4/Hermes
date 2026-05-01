@@ -29,6 +29,7 @@ The React UI will be available at `http://localhost:8080`.
 ## Self-Hosting Guide
 
 Hermes runs as two containers from the same Docker image:
+
 - **hermes-scheduler** — Background worker running speed tests on schedule
 - **hermes-api** — FastAPI REST API serving the React frontend
 
@@ -121,7 +122,7 @@ curl -o .env https://raw.githubusercontent.com/fabell4/hermes/main/.env.example
 **Key `.env` variables:**
 
 | Variable | Default | Description |
-|---|---|---|
+| --- | --- | --- |
 | `TZ` | `UTC` | IANA timezone name for log timestamps |
 | `ENABLED_EXPORTERS` | `csv` | Comma-separated: `csv`, `sqlite`, `prometheus`, `loki` |
 | `SPEEDTEST_INTERVAL_MINUTES` | `60` | How often to run speed tests |
@@ -150,6 +151,7 @@ docker compose up -d
 ```
 
 Check logs:
+
 ```bash
 docker logs hermes-scheduler
 docker logs hermes-api
@@ -164,9 +166,71 @@ ENABLED_EXPORTERS=csv,sqlite
 ```
 
 Then restart:
+
 ```bash
 docker compose restart
 ```
+
+---
+
+## Building from Source
+
+If you prefer to build the Docker image locally instead of using the pre-built image:
+
+### Building Docker Image
+
+```bash
+# Clone the repository
+git clone https://github.com/fabell4/hermes.git
+cd hermes
+
+# Build the image
+docker build -t hermes:local .
+
+# Use the local image in docker-compose
+export HERMES_IMAGE=hermes:local
+docker compose up -d
+```
+
+### Running Directly with Python (Without Docker)
+
+For production deployment without Docker:
+
+```bash
+# Install Python 3.12+
+python --version  # Verify Python 3.12 or higher
+
+# Create and activate virtual environment
+python -m venv .venv
+
+# Windows
+.venv\Scripts\activate
+
+# macOS/Linux
+source .venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the scheduler (background worker)
+python -m src.main
+```
+
+In a separate terminal (or systemd service), run the API server:
+
+```bash
+# Activate virtual environment first
+source .venv/bin/activate  # or .venv\Scripts\activate on Windows
+
+# Run FastAPI server
+uvicorn src.api.main:app --host 0.0.0.0 --port 8080
+```
+
+**Note:** For production deployments, consider using:
+
+- **systemd** service units to manage both processes
+- **Gunicorn** or **Hypercorn** for the FastAPI server
+- **Process manager** like supervisord to ensure both services restart on failure
 
 ---
 
@@ -254,6 +318,7 @@ npm run lint
 ### VS Code Tasks
 
 Use pre-configured tasks (Terminal → Run Task):
+
 - **Run Hermes** — Start Python scheduler
 - **Run Hermes UI** — Start Streamlit UI (legacy)
 - **Run Hermes API** — Start FastAPI server
@@ -270,6 +335,7 @@ Navigate to `http://localhost:8080` (or your server IP).
 ### 2. View Dashboard
 
 The **Dashboard** page shows:
+
 - Latest speed test result
 - Download/upload trend charts
 - Ping/jitter statistics
@@ -282,6 +348,7 @@ Click **"Run Speed Test"** on the Dashboard to trigger an on-demand test.
 ### 4. Configure Settings
 
 Navigate to **Settings** to adjust:
+
 - **Test interval** — How often to run automatic tests
 - **Enabled exporters** — Which destinations to write results to
 - **Alert settings** — Configure failure notifications (see [Alerts](alerts))
@@ -291,14 +358,17 @@ Changes are saved to `data/runtime_config.json` and apply immediately (no restar
 ### 5. Integrate with Observability Stack
 
 **Prometheus:**
+
 - Add scrape job targeting `http://<hermes-host>:8000/metrics`
 - Scrape interval: 15 seconds recommended
 
 **Loki:**
+
 - Set `LOKI_URL=http://loki:3100` in `.env`
 - Hermes pushes on each test completion
 
 **Grafana:**
+
 - Import dashboard from `docs/grafana-dashboard.json`
 - Configure Prometheus and Loki datasources
 - View download/upload/ping trends with annotations
@@ -310,12 +380,14 @@ Changes are saved to `data/runtime_config.json` and apply immediately (no restar
 ### Container Won't Start
 
 Check logs:
+
 ```bash
 docker logs hermes-scheduler
 docker logs hermes-api
 ```
 
 Common issues:
+
 - **Port already in use:** Change `API_PORT` or `PROMETHEUS_PORT` in `.env`
 - **Missing .env file:** Ensure `.env` exists or remove `required: true` from `docker-compose.yml`
 - **Invalid API_KEY length:** Must be 32+ characters if set
@@ -323,21 +395,25 @@ Common issues:
 ### No Results in UI
 
 1. **Check scheduler logs:**
+
    ```bash
    docker logs hermes-scheduler
    ```
 
 2. **Verify test interval:**
+
    ```bash
    curl http://localhost:8080/api/config
    ```
 
 3. **Trigger manual test:**
+
    ```bash
    curl -X POST http://localhost:8080/api/trigger
    ```
 
 4. **Check SQLite enabled:**
+
    ```bash
    ENABLED_EXPORTERS=csv,sqlite
    ```
@@ -345,11 +421,13 @@ Common issues:
 ### Prometheus Metrics Not Scraping
 
 1. **Verify `/metrics` endpoint:**
+
    ```bash
    curl http://localhost:8000/metrics
    ```
 
 2. **Check Prometheus scrape config:**
+
    ```yaml
    scrape_configs:
      - job_name: 'hermes'
@@ -359,6 +437,7 @@ Common issues:
    ```
 
 3. **Check port exposure in `docker-compose.yml`:**
+
    ```yaml
    ports:
      - "8000:8000"
@@ -367,16 +446,19 @@ Common issues:
 ### Loki Logs Not Appearing
 
 1. **Verify `LOKI_URL` is set:**
+
    ```bash
    docker exec hermes-scheduler printenv LOKI_URL
    ```
 
 2. **Check Loki is reachable:**
+
    ```bash
    docker exec hermes-scheduler curl $LOKI_URL/ready
    ```
 
 3. **Enable loki exporter:**
+
    ```bash
    ENABLED_EXPORTERS=csv,sqlite,loki
    ```
@@ -391,6 +473,7 @@ curl -X POST http://localhost:8080/api/trigger \
 ```
 
 **Generate secure key:**
+
 ```bash
 python -c 'import secrets; print(secrets.token_urlsafe(32))'
 ```
@@ -400,11 +483,13 @@ python -c 'import secrets; print(secrets.token_urlsafe(32))'
 Response `429 Too Many Requests` means you've exceeded `RATE_LIMIT_PER_MINUTE` (default: 60 requests per 60 seconds).
 
 Check `Retry-After` header for wait time:
+
 ```bash
 curl -i http://localhost:8080/api/trigger -H "X-Api-Key: key"
 ```
 
 Adjust rate limit in `.env`:
+
 ```bash
 RATE_LIMIT_PER_MINUTE=120
 ```

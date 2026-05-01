@@ -9,6 +9,7 @@
 ## Executive Summary
 
 This audit examines the security posture of the Hermes API with focus on three critical areas:
+
 1. **Authentication** — API key-based access control
 2. **Rate Limiting** — Request throttling per API key
 3. **Input Validation** — Protection against injection and malformed data
@@ -16,6 +17,7 @@ This audit examines the security posture of the Hermes API with focus on three c
 **Overall Assessment:** 🟢 **SECURE** with minor recommendations for improvement.
 
 The codebase demonstrates strong security fundamentals with proper use of:
+
 - Constant-time comparison for API keys
 - Parameterized SQL queries (no SQL injection risk)
 - Pydantic validation for all user inputs
@@ -31,16 +33,19 @@ The codebase demonstrates strong security fundamentals with proper use of:
 **Location:** [`src/api/auth.py`](../src/api/auth.py)
 
 Authentication is **optional** and controlled by the `API_KEY` environment variable:
+
 - **If set:** All write endpoints require `X-Api-Key` header matching the configured key
 - **If unset:** Authentication is disabled (zero-config local development)
 
 Protected endpoints:
+
 - `POST /api/trigger` — Manual speed test trigger
 - `PUT /api/config` — Runtime configuration updates
 - `PUT /api/alerts` — Alert configuration updates
 - `POST /api/alerts/test` — Test alert notification
 
 Public endpoints (no auth required):
+
 - `GET /api/health` — Health check
 - `GET /api/config` — Read configuration
 - `GET /api/alerts` — Read alert configuration
@@ -51,6 +56,7 @@ Public endpoints (no auth required):
 ### Security Strengths ✅
 
 1. **Constant-time comparison** prevents timing attacks:
+
    ```python
    if not secrets.compare_digest(x_api_key, config.API_KEY):
        raise HTTPException(status_code=403, detail="Invalid API key.")
@@ -137,6 +143,7 @@ For v1.1+: Consider user database with hashed keys if multi-user access is requi
 **Storage:** In-process dictionary (`_request_timestamps`)
 
 When rate limit is exceeded:
+
 - Returns `429 Too Many Requests`
 - Logs warning with redacted key prefix
 - Request is rejected (no retry-after header)
@@ -161,6 +168,7 @@ When rate limit is exceeded:
 Rate limit state is stored in memory and not shared between processes or instances.
 
 **Risk:**  
+
 - Multi-instance deployments behind a load balancer bypass rate limiting
 - Each instance tracks limits independently (effective limit × instance count)
 - Restart resets all counters
@@ -232,6 +240,7 @@ Deploy behind reverse proxy (nginx/Caddy/Traefik) with connection limits, or use
 ### Implementation Overview
 
 **Validation Strategy:**
+
 1. **Pydantic models** for JSON request bodies (automatic type/constraint validation)
 2. **FastAPI `Query` annotations** for query parameters (type/range validation)
 3. **Parameterized SQL queries** for database operations (SQL injection prevention)
@@ -243,6 +252,7 @@ Deploy behind reverse proxy (nginx/Caddy/Traefik) with connection limits, or use
 All `PUT`/`POST` endpoints use typed Pydantic models:
 
 **Example:** [`src/api/routes/config.py:16-21`](../src/api/routes/config.py)
+
 ```python
 class RuntimeConfigSchema(BaseModel):
     interval_minutes: int = Field(ge=5, le=1440)  # 5 min to 24 hours
@@ -251,6 +261,7 @@ class RuntimeConfigSchema(BaseModel):
 ```
 
 **Protection:**
+
 - ✅ Type coercion (string `"30"` → int `30`)
 - ✅ Range constraints (`ge=5, le=1440`)
 - ✅ Required field enforcement
@@ -258,6 +269,7 @@ class RuntimeConfigSchema(BaseModel):
 - ✅ Returns `422 Unprocessable Entity` with detailed error messages
 
 **Additional validation:** Unknown exporter names are rejected with explicit check:
+
 ```python
 unknown = [e for e in body.enabled_exporters if e not in VALID_EXPORTERS]
 if unknown:
@@ -269,6 +281,7 @@ if unknown:
 #### 3.2 Query Parameter Validation
 
 **Example:** [`src/api/routes/results.py:59-61`](../src/api/routes/results.py)
+
 ```python
 def get_results(
     page: Annotated[int, Query(ge=1)] = 1,
@@ -277,6 +290,7 @@ def get_results(
 ```
 
 **Protection:**
+
 - ✅ Type validation (`?page=abc` → `422` error)
 - ✅ Range constraints (`page_size ≤ 500` prevents excessive memory usage)
 - ✅ Minimum values (`page ≥ 1` prevents negative indexing)
@@ -288,6 +302,7 @@ def get_results(
 All database queries use **parameterized statements**:
 
 **Example:** [`src/exporters/sqlite_exporter.py:36-40`](../src/exporters/sqlite_exporter.py)
+
 ```python
 _INSERT = """
 INSERT INTO results
@@ -302,10 +317,12 @@ conn.execute(_INSERT, row)  # Parameters passed separately
 ```
 
 **Protection:**
+
 - ✅ No string interpolation (`f"SELECT * FROM results WHERE id={user_input}"` ❌)
 - ✅ No manual escaping (SQLite driver handles it)
 - ✅ Named parameters (`:timestamp`) prevent positional injection
 - ✅ All user-controlled data in `results.py` uses `?` placeholders:
+
   ```python
   conn.execute(
       "SELECT * FROM results ORDER BY timestamp DESC LIMIT ? OFFSET ?",
@@ -320,6 +337,7 @@ conn.execute(_INSERT, row)  # Parameters passed separately
 #### 3.4 Path Traversal Prevention
 
 **File system operations:**
+
 1. Database path (`SQLITE_DB_PATH`) — from environment, not user input
 2. CSV log path (`CSV_LOG_PATH`) — from environment, not user input
 3. Runtime config path (`data/runtime_config.json`) — hardcoded
@@ -327,6 +345,7 @@ conn.execute(_INSERT, row)  # Parameters passed separately
 **User-controlled paths:** None. The API does not accept file paths from users.
 
 **Protection:**
+
 - ✅ No endpoints accept file paths as input
 - ✅ File operations use `Path` objects with validation
 - ✅ SPA static file serving uses `StaticFiles` (FastAPI built-in, secure)
@@ -338,6 +357,7 @@ conn.execute(_INSERT, row)  # Parameters passed separately
 **Mechanism:** FastAPI + Pydantic handle all JSON parsing.
 
 **Protection:**
+
 - ✅ No custom deserialization (avoids `eval()`, `pickle`, etc.)
 - ✅ Recursive depth limited by Pydantic (prevents stack exhaustion)
 - ✅ Malformed JSON rejected before reaching application code
@@ -349,10 +369,12 @@ conn.execute(_INSERT, row)  # Parameters passed separately
 **Issue Investigated:** Users provide webhook URLs, Gotify URLs, ntfy URLs via `/api/alerts`.
 
 **Risk Assessment:**
+
 - URLs are stored and **invoked by the backend** (not client-side)
 - Could be used for **Server-Side Request Forgery (SSRF)** if not validated
 
 **Current Implementation:** [`src/services/alert_providers.py`](../src/services/alert_providers.py)
+
 ```python
 # WebhookProvider
 response = requests.post(self.url, json=payload, timeout=10)
@@ -367,6 +389,7 @@ response = requests.post(endpoint, headers=headers, data=message, timeout=10)
 ```
 
 **Protection:**
+
 - ✅ Timeouts prevent indefinite hangs (10 seconds)
 - ⚠️ No URL scheme validation (could POST to `file://`, `ftp://`, etc.)
 - ⚠️ No private IP range filtering (could target internal services like `http://localhost:6379`)
@@ -381,6 +404,7 @@ response = requests.post(endpoint, headers=headers, data=message, timeout=10)
 
 **Issue:**  
 Alert provider URLs are not validated. Malicious users could configure alerts to target:
+
 - Internal services (`http://localhost:6379` — Redis)
 - Private networks (`http://192.168.1.1/admin`)
 - Cloud metadata endpoints (`http://169.254.169.254/latest/meta-data/`)
@@ -450,6 +474,7 @@ def update_alerts(body: AlertConfigSchema) -> AlertConfigSchema:
 ```
 
 **Alternative:** Use Pydantic's `HttpUrl` type with custom validator:
+
 ```python
 from pydantic import HttpUrl, field_validator
 
@@ -550,6 +575,7 @@ User-controlled strings (API keys, error messages) are logged without sanitizati
 Log injection (newline characters in input could corrupt log files or inject fake entries).
 
 **Example:**
+
 ```python
 logger.warning("auth: rate limit exceeded for key prefix=%.4s", x_api_key)
 ```
@@ -579,10 +605,12 @@ class _SecurityHeadersMiddleware(BaseHTTPMiddleware):
 ```
 
 **Headers Present:**
+
 - ✅ `X-Content-Type-Options: nosniff` — prevents MIME sniffing
 - ✅ `Cross-Origin-Resource-Policy: same-origin` — restricts resource embedding
 
 **Missing Headers (consider adding):**
+
 - `X-Frame-Options: DENY` — prevents clickjacking
 - `Content-Security-Policy` — prevents XSS (if serving HTML)
 - `Strict-Transport-Security` — forces HTTPS (if deployed with TLS)
@@ -617,6 +645,7 @@ app.add_middleware(
 ```
 
 **Analysis:**
+
 - ✅ Restricts origins to Vite dev server (not wide open)
 - ⚠️ `allow_methods=["*"]` and `allow_headers=["*"]` are permissive but safe given origin restrictions
 
@@ -642,6 +671,7 @@ app.add_middleware(
 ### 4.3 Dependency Security ✅
 
 **Supply Chain Scans:**
+
 - ✅ CI pipeline runs `safety`, `pip-audit`, `npm audit`, `trivy`
 - ✅ Renovate auto-updates dependencies weekly
 - ✅ Semgrep + Bandit scan for code-level issues
@@ -653,10 +683,12 @@ app.add_middleware(
 ### 4.4 Secret Management
 
 **Current Approach:**
+
 - Environment variables (`API_KEY`, `ALERT_GOTIFY_TOKEN`, etc.)
 - Stored in `.env` file (excluded from git via `.gitignore`)
 
 **Recommendations:**
+
 - ✅ Document in README: "Never commit `.env` to version control"
 - ✅ Add `.env.example` with placeholders (already exists)
 - 🟢 For production: Consider Docker secrets or vault integration (post-v1.0)
@@ -668,6 +700,7 @@ app.add_middleware(
 ## 5. Test Coverage Analysis
 
 ### Authentication Tests ✅
+
 **File:** `tests/test_api_auth.py`
 
 - ✅ Rate limit under limit (allows requests)
@@ -683,6 +716,7 @@ app.add_middleware(
 ---
 
 ### Input Validation Tests ✅
+
 **File:** `tests/test_api_boundaries.py`
 
 - ✅ Protected endpoints return 401 when key missing
@@ -697,7 +731,8 @@ app.add_middleware(
 
 ---
 
-### Gaps:
+### Gaps
+
 - ⚠️ No SSRF tests for alert provider URLs
 - ⚠️ No test for oversized request bodies
 - ⚠️ No test for rapid test alert spam
@@ -726,6 +761,7 @@ app.add_middleware(
 ## 7. Recommendations Summary
 
 ### 🔴 Critical (Block v1.0)
+
 *None* — No blocking issues found.
 
 ---
@@ -745,20 +781,20 @@ app.add_middleware(
 
 ### 🟢 Low Priority (Nice-to-Have for v1.0)
 
-3. **Add `Retry-After` header to 429 responses** (5 minutes)
-4. **Add request body size limit** (10 minutes)
-5. **Rate limit test alert endpoint** (10 minutes)
-6. **Add missing security headers** (5 minutes)
-7. **Make CORS origins configurable** (5 minutes)
+1. **Add `Retry-After` header to 429 responses** (5 minutes)
+2. **Add request body size limit** (10 minutes)
+3. **Rate limit test alert endpoint** (10 minutes)
+4. **Add missing security headers** (5 minutes)
+5. **Make CORS origins configurable** (5 minutes)
 
 ---
 
 ### 🔵 Deferred (Post-v1.0)
 
-8. API key rotation mechanism
-9. Multi-user support with per-user keys
-10. Distributed rate limiting (Redis)
-11. Secrets vault integration
+1. API key rotation mechanism
+2. Multi-user support with per-user keys
+3. Distributed rate limiting (Redis)
+4. Secrets vault integration
 
 ---
 
@@ -767,6 +803,7 @@ app.add_middleware(
 **Overall Security Posture:** 🟢 **STRONG**
 
 The Hermes API demonstrates solid security fundamentals:
+
 - ✅ No SQL injection vulnerabilities
 - ✅ Proper authentication with constant-time comparison
 - ✅ Comprehensive input validation via Pydantic
@@ -775,6 +812,7 @@ The Hermes API demonstrates solid security fundamentals:
 - ✅ Excellent test coverage
 
 **Two medium-priority issues identified:**
+
 1. **SSRF risk** in alert provider URLs — easily fixed with URL validation
 2. **Weak API key risk** — mitigated by enforcing minimum length
 

@@ -14,6 +14,7 @@ This review identifies performance optimization opportunities in the Hermes code
 **Overall Assessment:** ✅ **Performance is acceptable** with recommended improvements
 
 **Key Findings:**
+
 - ✅ Runtime config caching already implemented (file mtime check)
 - ✅ CSV pruning optimization already implemented (skip full read when not needed)
 - ✅ SQLite using WAL mode for concurrent reads
@@ -43,16 +44,19 @@ This review identifies performance optimization opportunities in the Hermes code
 ### 🔴 HIGH Priority
 
 #### Issue #1: SQLite Missing Timestamp Index
+
 **File:** [src/exporters/sqlite_exporter.py](../src/exporters/sqlite_exporter.py) (lines 39-48)  
 **Severity:** High — Affects API query performance and pruning operations
 
 **Problem:**
 The `results` table lacks an index on the `timestamp` column, causing:
+
 1. Full table scan on every `/api/results` query (ORDER BY timestamp DESC)
 2. Full table scan on every pruning operation (WHERE timestamp < ?)
 3. O(n) complexity for queries that should be O(log n) with index
 
 Current schema:
+
 ```python
 _CREATE_TABLE = """
 CREATE TABLE IF NOT EXISTS results (
@@ -64,6 +68,7 @@ CREATE TABLE IF NOT EXISTS results (
 ```
 
 API query pattern (lines 62-67 of [src/api/routes/results.py](../src/api/routes/results.py)):
+
 ```python
 rows = conn.execute(
     "SELECT * FROM results ORDER BY timestamp DESC LIMIT ? OFFSET ?",
@@ -72,6 +77,7 @@ rows = conn.execute(
 ```
 
 Pruning pattern (lines 168-176 of [src/exporters/sqlite_exporter.py](../src/exporters/sqlite_exporter.py)):
+
 ```python
 if self.retention_days:
     cutoff = (datetime.now(timezone.utc) - timedelta(days=self.retention_days)).isoformat()
@@ -79,6 +85,7 @@ if self.retention_days:
 ```
 
 **Impact:**
+
 - API response time degrades linearly with table size
 - With 10,000 rows (≈7 days at 15-min intervals), queries take 50-100ms
 - With 100,000 rows (≈70 days), queries can take 500ms-1s
@@ -122,6 +129,7 @@ _MIGRATIONS: list[tuple[str, str]] = [
 ---
 
 #### Issue #2: Alert Providers Block Speedtest Thread
+
 **File:** [src/services/alert_manager.py](../src/services/alert_manager.py) (lines 138-147)  
 **Severity:** High — Slow/failing alert providers delay speedtest completion
 
@@ -143,11 +151,13 @@ for name, provider in self._providers.items():
 ```
 
 Each alert provider has a 10-second timeout (default). With 3 providers and network delays:
+
 - Best case: 3 × 50ms = 150ms overhead
 - Typical case: 3 × 500ms = 1.5s overhead
 - Worst case (timeouts): 3 × 10s = 30s blocked time
 
 **Impact:**
+
 - Speedtest completion delayed by alert delivery time
 - Scheduler blocked during alert sending
 - Failed alerts (unreachable webhook) can delay speedtest by up to 10 seconds per provider
@@ -247,6 +257,7 @@ def _maybe_send_alert(self, timestamp: datetime) -> None:
 ---
 
 #### Issue #3: API Middleware Applied to Static Files
+
 **File:** [src/api/main.py](../src/api/main.py) (lines 115-127, 173-182)  
 **Severity:** High — Unnecessary overhead on every static asset request
 
@@ -271,6 +282,7 @@ if _DIST.is_dir():
 ```
 
 **Impact:**
+
 - Every request for `/assets/main.js`, `/assets/style.css` etc. runs through all middleware
 - Request size limit check (reads `Content-Length` header) — unnecessary for GET requests
 - Security headers added to static assets — correct but wasteful (already set by CDN/nginx in production)
@@ -282,6 +294,7 @@ if _DIST.is_dir():
 Mount static file serving BEFORE middleware, or use FastAPI sub-applications:
 
 **Option 1: Mount static files first (simplest)**
+
 ```python
 # Create app without middleware first
 app = FastAPI(
@@ -318,6 +331,7 @@ if _DIST.is_dir():
 **IMPORTANT:** FastAPI middleware applies to routes registered AFTER the middleware is added. By mounting static files before adding middleware, they bypass the middleware stack.
 
 **Option 2: Use sub-application for API (more complex but explicit)**
+
 ```python
 # Main app (no middleware)
 app = FastAPI(lifespan=lifespan)
@@ -353,6 +367,7 @@ if _DIST.is_dir():
 ### 🟡 MEDIUM Priority
 
 #### Issue #4: Prometheus Label Cardinality Growth
+
 **File:** [src/exporters/prometheus_exporter.py](../src/exporters/prometheus_exporter.py) (lines 19-38, 84-99)  
 **Severity:** Medium — Could cause memory growth over time
 
@@ -376,6 +391,7 @@ _DOWNLOAD.labels(**labels).set(result.download_mbps)
 ```
 
 **Impact:**
+
 - Each unique combination of (server_name, server_location, isp_name) creates a new time series in Prometheus
 - If speedtest.net selects different servers over time, cardinality grows
 - Example: 50 unique servers × 3 ISPs = 150 time series per metric × 4 metrics = 600 time series
@@ -437,6 +453,7 @@ _DOWNLOAD = Gauge(
 ---
 
 #### Issue #5: Exporter Registry Rebuilt on Every Trigger
+
 **File:** [src/api/routes/trigger.py](../src/api/routes/trigger.py) (lines 31-65)  
 **Severity:** Medium — Duplicates factory logic, wastes cycles
 
@@ -459,6 +476,7 @@ def _run_test() -> None:
 ```
 
 **Impact:**
+
 - Duplicates the factory logic from `main.py` (lines 65-77)
 - Violates DRY principle
 - SQLiteExporter creates new connection and checks schema on every trigger
@@ -498,6 +516,7 @@ def _run_test() -> None:
 ---
 
 #### Issue #6: SQLite WAL Checkpoint Not Managed
+
 **File:** [src/exporters/sqlite_exporter.py](../src/exporters/sqlite_exporter.py) (lines 82-91)  
 **Severity:** Medium — WAL file can grow unbounded
 
@@ -510,11 +529,13 @@ conn.execute("PRAGMA journal_mode=WAL")
 ```
 
 However, WAL checkpoints are never explicitly triggered. SQLite auto-checkpoints at 1000 pages (~4MB), but:
+
 - WAL file can grow large between checkpoints
 - On crash, recovery requires replaying WAL (slower startup)
 - No manual control over checkpoint timing
 
 **Impact:**
+
 - WAL file can reach 4+ MB before auto-checkpoint
 - Increases disk space usage by 2-3× (DB + WAL + SHM)
 - Slightly slower recovery on crash/restart
@@ -561,7 +582,9 @@ def _prune(self, conn: sqlite3.Connection) -> None:
 ---
 
 #### Issue #7: HTTP Connection Pooling Not Used
-**Files:** 
+
+**Files:**
+
 - [src/services/alert_providers.py](../src/services/alert_providers.py) (all provider classes)
 - [src/exporters/loki_exporter.py](../src/exporters/loki_exporter.py) (lines 81-91)
 
@@ -589,6 +612,7 @@ response = requests.post(
 ```
 
 **Impact:**
+
 - Every HTTP request creates a new TCP connection (3-way handshake = 1-3 RTT)
 - TLS handshake adds another 1-2 RTT for HTTPS
 - Typical overhead: 20-100ms per request on home networks, 50-300ms on mobile
@@ -635,6 +659,7 @@ class WebhookProvider(AlertProvider):
 **Performance Improvement:** Saves 20-100ms per HTTP request (only benefits repeated alerts or Loki exports).
 
 **Note:** For Hermes's infrequent HTTP usage (1-3 requests per 15 minutes), the benefit is minimal. Connection pooling is more valuable if:
+
 1. Speedtest interval is reduced to <1 minute
 2. Multiple alerts are sent in quick succession
 3. Loki exporter is used with high-frequency testing
@@ -647,6 +672,7 @@ class WebhookProvider(AlertProvider):
 ### 🟢 LOW Priority
 
 #### Issue #8: JSON Serialization in Loki Exporter
+
 **File:** [src/exporters/loki_exporter.py](../src/exporters/loki_exporter.py) (lines 72-79)  
 **Severity:** Low — Negligible overhead
 
@@ -671,6 +697,7 @@ def export(self, result: SpeedResult) -> None:
 ```
 
 **Impact:**
+
 - Two JSON serializations per export: ~100-200 µs overhead
 - Negligible compared to network latency (10-500ms)
 
@@ -703,6 +730,7 @@ def export(self, result: SpeedResult) -> None:
 ---
 
 #### Issue #9: CSV File I/O Buffering
+
 **File:** [src/exporters/csv_exporter.py](../src/exporters/csv_exporter.py) (lines 64-77)  
 **Severity:** Low — Negligible overhead
 
@@ -716,6 +744,7 @@ with open(self.path, mode="a", newline="", encoding="utf-8") as f:
 ```
 
 **Impact:**
+
 - Each row is ~150-200 bytes
 - Python buffers writes automatically (8KB buffer)
 - CSV is flushed on close (end of `with` block)
@@ -758,6 +787,7 @@ Measured on Intel i5-12400, 16GB RAM, NVMe SSD, Python 3.13:
 ## Implementation Priority
 
 **For v1.0 Release:**
+
 1. ✅ **Issue #1: SQLite Timestamp Index** — Critical for API performance
 2. ✅ **Issue #2: Async Alert Sending** — Prevents scheduler blocking
 3. ✅ **Issue #3: Static File Middleware** — Improves page load time
@@ -769,6 +799,7 @@ Measured on Intel i5-12400, 16GB RAM, NVMe SSD, Python 3.13:
 7. **Issue #7: HTTP Connection Pooling** — Only if testing interval is reduced
 
 **Not Recommended:**
+
 - ❌ Issue #8: Loki JSON serialization (complexity outweighs benefit)
 - ❌ Issue #9: CSV buffering (no benefit for current usage)
 
@@ -779,6 +810,7 @@ Measured on Intel i5-12400, 16GB RAM, NVMe SSD, Python 3.13:
 After implementing optimizations, verify:
 
 1. **Load Test:** SQLite query performance with 100K rows
+
    ```python
    # Generate 100K test rows
    for i in range(100_000):
@@ -792,6 +824,7 @@ After implementing optimizations, verify:
    ```
 
 2. **Concurrency Test:** Verify async alerts don't block scheduler
+
    ```python
    # Configure 3 alert providers with 10s timeout
    # Trigger failure threshold
@@ -799,6 +832,7 @@ After implementing optimizations, verify:
    ```
 
 3. **Memory Test:** Monitor Prometheus memory with labels enabled
+
    ```bash
    # Query Prometheus for cardinality
    curl localhost:9090/api/v1/label/__name__/values | grep hermes
@@ -806,6 +840,7 @@ After implementing optimizations, verify:
    ```
 
 4. **Regression Test:** Verify all existing tests pass after changes
+
    ```bash
    pytest tests/ -v --cov=src --cov-report=term-missing
    ```
@@ -833,17 +868,20 @@ After implementing optimizations, verify:
 ## Summary
 
 **High Priority (v1.0):**
+
 - ✅ Add SQLite timestamp index (1 hour) — **Critical for API performance**
 - ✅ Make alert sending async (2-3 hours) — **Prevents scheduler blocking**
 - ✅ Move static files before middleware (1 hour) — **Faster page loads**
 
 **Medium Priority (v1.1 or monitor):**
+
 - Reduce Prometheus label cardinality if memory grows (1-2 hours)
 - Reuse exporter registry (30 mins) — Code quality improvement
 - Add WAL checkpointing (30 mins) — Reduces disk usage
 - Add HTTP connection pooling (2 hours) — Only if testing frequency increases
 
 **Low Priority (optional):**
+
 - ❌ JSON serialization optimization — Not recommended
 - ❌ CSV buffering — Not recommended
 

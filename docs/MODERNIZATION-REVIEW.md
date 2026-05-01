@@ -15,6 +15,7 @@ This review scans the codebase for deprecated Python features, outdated patterns
 **Overall Assessment:** ✅ **Approved for v1.0** with recommended improvements
 
 **Key Findings:**
+
 - ✅ No deprecated Python features or Python 2 artifacts found
 - ✅ Already using modern type hints (`|` syntax, `list[T]`, `dict[K, V]`)
 - ✅ Already using `datetime.now(timezone.utc)` (not deprecated `utcnow()`)
@@ -39,6 +40,7 @@ This review scans the codebase for deprecated Python features, outdated patterns
 ### 🔴 HIGH Priority
 
 #### Issue #1: SQLite Connections Not Using Context Managers
+
 **Files:** [src/api/routes/results.py](../src/api/routes/results.py) (lines 62-76, 81-94)  
 **Severity:** High — Inconsistent resource management pattern
 
@@ -55,6 +57,7 @@ finally:
 ```
 
 **Impact:**
+
 - Inconsistent with Python best practices (context managers preferred)
 - More verbose than necessary
 - While functionally correct, violates "prefer context managers for resource management" pattern
@@ -76,6 +79,7 @@ with _connect() as conn:
 ---
 
 #### Issue #2: String Constants Should Be Enums
+
 **File:** [src/constants.py](../src/constants.py)  
 **Severity:** High — Missed opportunity for type safety
 
@@ -97,6 +101,7 @@ PROVIDER_APPRISE = "apprise"
 ```
 
 **Impact:**
+
 - No type safety — can pass arbitrary strings where exporter/provider names expected
 - No IDE autocomplete support
 - Risk of typos ("prometeus" vs "prometheus")
@@ -124,12 +129,14 @@ class AlertProviderType(StrEnum):
 ```
 
 **Benefits:**
+
 - Type safety: `def export(exporter: ExporterType)` vs `def export(exporter: str)`
 - `StrEnum` inherits from `str`, so direct string comparisons still work: `if name == ExporterType.CSV`
 - IDE autocomplete and refactoring support
 - Self-documenting: all valid values visible in enum definition
 
 **Migration Impact:**
+
 - Need to update imports across codebase
 - Can maintain backward compatibility by keeping `EXPORTER_*` as aliases during transition
 - Type checkers will catch any invalid usage
@@ -142,6 +149,7 @@ class AlertProviderType(StrEnum):
 ### 🟡 MEDIUM Priority
 
 #### Issue #3: Environment Variable Access Outside Config Module
+
 **File:** [src/services/speedtest_runner.py](../src/services/speedtest_runner.py) (line 75)  
 **Severity:** Medium — Architecture principle violation
 
@@ -156,6 +164,7 @@ _tz_name = os.getenv("TZ", "UTC")
 ```
 
 **Impact:**
+
 - Inconsistent configuration pattern
 - Makes testing harder (can't easily mock all config in one place)
 - Violates stated architecture principle
@@ -183,6 +192,7 @@ _tz_name = config.TIMEZONE
 ---
 
 #### Issue #4: Dead Log Service Code
+
 **File:** [src/services/log_service.py](../src/services/log_service.py)  
 **Severity:** Medium — Technical debt
 
@@ -198,6 +208,7 @@ class Log:
 ```
 
 **Impact:**
+
 - Confuses new developers ("What does this do?")
 - Increases maintenance burden (file must be maintained, type-checked, etc.)
 - "Kept for compatibility" suggests unfinished migration
@@ -223,6 +234,7 @@ class Log:
 ```
 
 **Action Required:**
+
 1. Search codebase for `from src.services.log_service import Log`
 2. If found, migrate to standard `logging` module
 3. If not found, delete file
@@ -233,6 +245,7 @@ class Log:
 ---
 
 #### Issue #5: Lock Usage in Trigger Route Could Use Context Manager
+
 **File:** [src/api/routes/trigger.py](../src/api/routes/trigger.py) (lines 66-79)  
 **Severity:** Medium — Consistency improvement
 
@@ -258,6 +271,7 @@ if not _test_lock.acquire(blocking=False):
 ```
 
 **Impact:**
+
 - Less Pythonic than context manager
 - Slightly more verbose
 - Pattern inconsistency with rest of codebase
@@ -290,10 +304,12 @@ Keep current pattern as it's actually more correct for the non-blocking check. T
 ### 🟢 LOW Priority
 
 #### Issue #6: Dict Merge Could Use | Operator
+
 **File:** [src/exporters/loki_exporter.py](../src/exporters/loki_exporter.py) (lines 57-63)  
 **Severity:** Low — Stylistic preference
 
 **Current:**
+
 ```python
 labels: dict[str, str] = {
     "job": self._job_label,
@@ -305,6 +321,7 @@ return labels
 ```
 
 **Could be:**
+
 ```python
 return {
     "job": self._job_label,
@@ -314,6 +331,7 @@ return {
 ```
 
 **Assessment:**
+
 - Python 3.9+ dict merge operator (`|`) is more functional/concise
 - However, current pattern is clear, readable, and explicit
 - This is purely stylistic with no functional benefit
@@ -335,6 +353,7 @@ return {
 ### Deprecated Features Found
 
 **None.** The codebase does not use any deprecated Python features:
+
 - ✅ No `datetime.utcnow()` (uses `datetime.now(timezone.utc)`)
 - ✅ No Python 2 artifacts (`unicode`, `basestring`, old exception syntax)
 - ✅ No deprecated standard library functions
@@ -370,30 +389,30 @@ return {
 
 ### Phase 2: Medium Priority (Recommended for v1.0)
 
-3. **Centralize TZ Config** (#3)
+1. **Centralize TZ Config** (#3)
    - Add `TIMEZONE` to `config.py`
    - Update `speedtest_runner.py` to import from config
    - Verify no behavior changes
 
-4. **Clean Up Dead Code** (#4)
+2. **Clean Up Dead Code** (#4)
    - Search for `log_service` imports
    - Remove file if unused or add deprecation warning
    - Update any references
 
-5. **Review Lock Context Manager** (#5)
+3. **Review Lock Context Manager** (#5)
    - Analyze non-blocking lock semantics
    - Decide if refactoring improves clarity
    - Keep current pattern if it's most correct
 
 ### Phase 3: Validation
 
-6. **Testing**
+1. **Testing**
    - Run `pytest` with coverage (must remain >90%)
    - Run `mypy` (must pass)
    - Run `ruff check` (must pass)
    - Manual smoke test of API endpoints
 
-7. **Documentation**
+2. **Documentation**
    - Update this document with implementation results
    - Mark TODO.md item as complete
    - Update CHANGELOG.md
@@ -405,6 +424,7 @@ return {
 **Expected:** All changes are refactoring/modernization with identical behavior. Test coverage should remain stable (~95%). No new test cases required unless behavior changes.
 
 **Validation:**
+
 ```bash
 pytest --cov=src --cov-report=html --cov-report=term
 # Must show ≥90% coverage
@@ -430,10 +450,12 @@ pytest --cov=src --cov-report=html --cov-report=term
 ### Changes Implemented
 
 #### ✅ Issue #1: SQLite Connections Context Managers
+
 **Status:** COMPLETE  
 **Files Modified:** [src/api/routes/results.py](../src/api/routes/results.py)
 
 Converted both `get_results()` and `get_latest_result()` to use context managers:
+
 ```python
 with _connect() as conn:
     # database operations
@@ -444,10 +466,12 @@ with _connect() as conn:
 ---
 
 #### ✅ Issue #2: String Constants to Enums
+
 **Status:** COMPLETE  
 **Files Modified:** [src/constants.py](../src/constants.py), [src/main.py](../src/main.py)
 
 Added `ExporterType` and `AlertProviderType` as `StrEnum` classes:
+
 ```python
 class ExporterType(StrEnum):
     CSV = "csv"
@@ -469,10 +493,12 @@ Maintained backward compatibility by keeping old constant names as aliases. Upda
 ---
 
 #### ✅ Issue #3: Centralized TZ Environment Variable
+
 **Status:** COMPLETE  
 **Files Modified:** [src/config.py](../src/config.py), [src/services/speedtest_runner.py](../src/services/speedtest_runner.py)
 
 Added `TIMEZONE` constant to `config.py`:
+
 ```python
 TIMEZONE: str = os.getenv("TZ", "UTC")
 ```
@@ -484,6 +510,7 @@ Updated `speedtest_runner.py` to import from config instead of calling `os.geten
 ---
 
 #### ✅ Issue #4: Removed Dead Log Service Code
+
 **Status:** COMPLETE  
 **Files Deleted:** `src/services/log_service.py`
 
@@ -494,6 +521,7 @@ Verified no imports existed and removed the unused placeholder class.
 ---
 
 #### ⚪ Issue #5: Lock Usage in trigger.py
+
 **Status:** NO ACTION (OPTIONAL)  
 **Rationale:** Current pattern is correct for the non-blocking lock acquisition across thread boundaries. Lock is acquired in `trigger_test()` and released in `_run_test()` running in a background thread. Context manager refactoring would be more complex without benefits.
 
@@ -504,12 +532,14 @@ Verified no imports existed and removed the unused placeholder class.
 ### Test Results
 
 **All 344 tests passing:**
+
 - Unit tests: ✅
 - Integration tests: ✅
 - API tests: ✅  
 - Coverage: **91.36%** (target: ≥90%)
 
 **Static Analysis:**
+
 - mypy: ✅ No errors (26 files checked)
 - ruff: ✅ All checks passed
 

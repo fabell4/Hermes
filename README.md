@@ -1,6 +1,8 @@
 # Hermes
 
-**Hermes** is a self-hosted internet speed test monitoring solution that periodically tests your connection and exports results to multiple destinations. It features a modern React frontend, comprehensive REST API, and integrates seamlessly with your observability stack.
+**Hermes** is a self-hosted internet speed test monitoring solution that periodically tests your connection and exports
+results to multiple destinations. It features a modern React frontend, comprehensive REST API, and integrates seamlessly
+with your observability stack.
 
 ---
 
@@ -50,12 +52,14 @@ The React UI will be available at `http://localhost:8080`.
 
 Hermes runs as two Docker containers:
 
-- **hermes-scheduler** — Background worker running speed tests on schedule, exposing Prometheus metrics, and pushing to Loki
+- **hermes-scheduler** — Background worker running speed tests on schedule, exposing Prometheus metrics, and pushing to
+  Loki
 - **hermes-api** — FastAPI REST API serving the React frontend and providing programmatic access
 
 Both containers share volumes for `runtime_config.json`, `results.csv`, and `hermes.db`.
 
 **Observability Integration:**
+
 - **Prometheus** scrapes `:8000/metrics` every 15 seconds
 - **Loki** receives push events on each test completion
 - **Grafana** visualizes data from both sources with pre-built dashboard
@@ -76,7 +80,8 @@ Hermes implements multiple layers of security:
 - **Configurable CORS** — Restrict frontend origins via environment variable
 - **130+ Security Tests** — Comprehensive test coverage for all security features
 
-**Security Audit:** [APPROVED FOR v1.0 RELEASE](https://fabell4.github.io/hermes/SECURITY-AUDIT) after implementing all critical fixes.
+**Security Audit:** [APPROVED FOR v1.0 RELEASE](https://fabell4.github.io/hermes/SECURITY-AUDIT) after implementing
+all critical fixes.
 
 **Found a vulnerability?** See [SECURITY.md](SECURITY.md) for our responsible disclosure policy.
 
@@ -113,6 +118,7 @@ cd frontend && npm run type-check && npm run lint
 ## 📊 Data Collection
 
 Each speed test captures:
+
 - Download speed (Mbps)
 - Upload speed (Mbps)
 - Ping latency (ms)
@@ -121,6 +127,7 @@ Each speed test captures:
 - Timestamp (ISO 8601)
 
 Results are exported to your choice of:
+
 - **CSV** — Simple log file for manual inspection
 - **SQLite** — Fast queries for UI and API (recommended)
 - **Prometheus** — Time-series metrics for Grafana
@@ -187,7 +194,7 @@ See [Getting Started Guide](https://fabell4.github.io/hermes/getting-started) fo
 Key configuration options (see [Getting Started](https://fabell4.github.io/hermes/getting-started) for complete list):
 
 | Variable | Default | Description |
-|---|---|---|
+| --- | --- | --- |
 | `SPEEDTEST_INTERVAL_MINUTES` | `60` | How often to run speed tests |
 | `ENABLED_EXPORTERS` | `csv` | Comma-separated: `csv`, `sqlite`, `prometheus`, `loki` |
 | `API_KEY` | *(unset)* | API key for authentication (32+ chars, disables auth if empty) |
@@ -199,8 +206,8 @@ Key configuration options (see [Getting Started](https://fabell4.github.io/herme
 
 ## 🧪 Test Coverage
 
-- **344 tests passing** including 130+ API security tests
-- **91% code coverage** (1,529 statements, 133 missed)
+- **397 tests passing** including 130+ API security tests
+- **92% code coverage** (1,529 statements, 133 missed)
 - **All ruff checks passing** (format + lint)
 - **All mypy type checks passing** (27 source files)
 - **Comprehensive security validation:**
@@ -234,9 +241,11 @@ Licensed under MIT. See [LICENSE](LICENSE) for details.
 
 ## ⭐ Project Status
 
-**Hermes v1.0 is in beta.** All four exporters (CSV, SQLite, Prometheus, Loki) are fully operational. Security audit complete and approved for release.
+**Hermes v1.0 is in beta.** All four exporters (CSV, SQLite, Prometheus, Loki) are fully operational. Security audit
+complete and approved for release.
 
 **Coming in v2.0:**
+
 - Multi-user support with role-based access control
 - API key rotation with zero-downtime
 - Distributed rate limiting (Redis-backed)

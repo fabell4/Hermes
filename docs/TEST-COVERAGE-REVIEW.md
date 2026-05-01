@@ -64,21 +64,25 @@ The Hermes project has a **strong test foundation** with 355 Python tests achiev
 #### Missing Test Scenarios
 
 1. **Provider Initialization Failures** (Lines 66-186)
+
    ```python
    # Untested error paths in register_*_provider functions
    except Exception as e:
        logger.warning("Could not initialize webhook alert provider: %s", e)
    ```
+
    - ❌ No tests for invalid Gotify URLs
    - ❌ No tests for malformed ntfy topics
    - ❌ No tests for Apprise URL validation failures
    - ❌ No tests for webhook URL scheme validation
 
 2. **require_enabled Flag** (Multiple functions)
+
    ```python
    if require_enabled and not webhook_config.get("enabled", False):
        return
    ```
+
    - ❌ No tests verify `require_enabled=True` blocks disabled providers
    - ❌ No tests for `require_enabled=False` (default) allowing all configured providers
 
@@ -116,46 +120,56 @@ def test_register_all_providers_with_require_enabled_filters()
 #### Missing Test Scenarios
 
 1. **Build Alert Manager** (Lines 125-149)
+
    ```python
    # Only register providers if alerting is enabled
    if alert_config.get("enabled", False) or failure_threshold > 0:
        register_all_providers(manager, ...)
    ```
+
    - ❌ No test for `enabled=False` with `failure_threshold=0` (providers not registered)
    - ❌ No test for `enabled=True` triggering provider registration
    - ❌ No test for threshold minimum enforcement (`max(1, failure_threshold)`)
 
 2. **Update Alert Providers** (Lines 159-172)
+
    ```python
    def update_alert_providers(manager: AlertManager, alert_config: dict) -> None:
        if "failure_threshold" in alert_config:
            manager.failure_threshold = max(1, alert_config["failure_threshold"])
    ```
+
    - ❌ No test for runtime alert config updates
    - ❌ No test for clearing and re-registering providers
    - ❌ No test for failure threshold validation (minimum 1)
 
 3. **Development Mode Logging** (Lines 407-409)
+
    ```python
    if config.APP_ENV == "development":
        logger.critical("Speedtest failure in development mode")
    ```
+
    - ❌ No test verifies critical log in development
    - ❌ No test verifies log absence in production
 
 4. **Environment Validation** (Lines 368-392)
+
    ```python
    def _validate_environment() -> None:
        """Warn about misconfigured or unreachable services at startup."""
    ```
+
    - ❌ No tests for Loki endpoint validation warnings
    - ❌ No tests for timeout/connection/HTTP errors
 
 5. **Main Loop Initialization** (Lines 472-473)
+
    ```python
    if last_paused:
        scheduler.pause_job("speedtest_run")
    ```
+
    - ❌ No test for restoring paused state on startup
    - ❌ No test for scheduler state persistence across restarts
 
@@ -189,29 +203,35 @@ def test_main_loop_restores_paused_state()
 #### Missing Test Scenarios
 
 1. **Load Validation** (Lines 39, 63, 79, 93, 105-106, 119)
+
    ```python
    if not isinstance(data, dict):
        logger.warning("Runtime config is not a dict, resetting to defaults.")
        return {}
    ```
+
    - ❌ No test for non-dict JSON (e.g., array, string)
    - ❌ No test for invalid interval types (non-integer)
    - ❌ No test for out-of-range intervals (negative, zero, > 10080)
    - ❌ No test for invalid exporter lists (non-list, list of non-strings)
 
 2. **Save Error Handling** (Lines 153-154)
+
    ```python
    except OSError as cleanup_error:
        logger.warning("Failed to clean up temp file %s: %s", temp_path, cleanup_error)
    ```
+
    - ❌ No test for temp file cleanup failure (e.g., permission denied)
    - ❌ No test for atomic rename failure
 
 3. **Alert Config Helpers** (Lines 208-217, 233-246, 264-265)
+
    ```python
    def get_alert_config() -> dict:
        # Multiple fallback layers
    ```
+
    - ❌ No test for `get_alert_config()` with missing runtime file
    - ❌ No test for `set_alert_config()` with invalid provider names
    - ❌ No test for partial alert config updates (only some fields)
@@ -243,6 +263,7 @@ def test_set_alert_config_partial_update_preserves_other_fields()
 #### Missing Test Scenarios
 
 1. **Webhook Provider URL Validation** (Lines 41, 45-49)
+
    ```python
    if not url:
        raise ValueError("Webhook URL cannot be empty")
@@ -250,33 +271,40 @@ def test_set_alert_config_partial_update_preserves_other_fields()
    if parsed.scheme not in ("http", "https"):
        raise ValueError(f"Invalid URL scheme: {parsed.scheme}")
    ```
+
    - ✅ Tested: Empty URL rejection
    - ✅ Tested: Invalid scheme rejection
    - ❌ **Missing:** Tests for edge cases like `ftp://`, `file://`, `javascript:`
 
 2. **Gotify Initialization** (Lines 85, 142)
+
    ```python
    if not (url and token):
        raise ValueError("Gotify URL and token are required")
    ```
+
    - ❌ No test for missing URL (only token provided)
    - ❌ No test for missing token (only URL provided)
    - ❌ No test for both missing
 
 3. **ntfy Token Authorization** (Lines 181-183, 213)
+
    ```python
    if self.token:
        headers["Authorization"] = f"Bearer {self.token}"
    ```
+
    - ❌ No test verifies Bearer token header is set when token provided
    - ❌ No test verifies header is absent when token is None/empty
 
 4. **Apprise Request Failure** (Lines 240, 256-260, 306, 321)
+
    ```python
    except requests.exceptions.RequestException as e:
        logger.error("Failed to send Apprise alert to %s: %s", endpoint, e)
        raise
    ```
+
    - ❌ No test for Apprise timeout
    - ❌ No test for Apprise connection error
    - ❌ No test for Apprise HTTP 4xx/5xx errors
@@ -428,21 +456,25 @@ describe('HermesContext', () => {
 #### Missing Test Scenarios
 
 1. **API Key Validation** (Lines 73-77)
+
    ```python
    if API_KEY is not None and len(API_KEY) < 32:
        logging.error("API_KEY must be at least 32 characters...")
        raise SystemExit(1)
    ```
+
    - ❌ **Cannot test:** SystemExit on short API key (requires subprocess)
    - ℹ️ **Justification:** This is a startup-time guard; testing would require spawning subprocess with env var
 
 2. **Helper Function Defaults** (Lines 33-37, 44, 55)
+
    ```python
    def _get_int(key: str, default: int) -> int:
        value = os.getenv(key)
        if value is None:
            return default  # <-- Line 33-35
    ```
+
    - ❌ No explicit tests for helper functions (`_get_int`, `_get_bool`, `_get_csv_list`)
    - ℹ️ **Justification:** These are implicitly tested via config vars; explicit tests would be redundant
 
@@ -478,6 +510,7 @@ def test_api_key_length_validation_causes_startup_failure():
 **Observation:** 16 `ResourceWarning: unclosed database` warnings during test runs
 
 **Affected Tests:**
+
 - `test_api_results.py::test_results_*` — Multiple warnings
 - `test_api_ssrf.py::test_empty_url_accepted` — 7 warnings
 - `test_api_trigger.py::test_run_test_no_loki_when_url_not_set` — 1 warning
@@ -499,6 +532,7 @@ From Python documentation:
 > **Note:** The context manager does NOT close the connection.
 
 **Impact:**
+
 - **Tests pass** but leave connections open until garbage collection
 - **Not a critical production issue** (connections are eventually garbage collected)
 - **Test suite cleanliness** — warnings pollute test output
@@ -564,10 +598,12 @@ def get_results(
 ```
 
 **Files to Update:**
+
 - `src/api/routes/results.py` — 2 endpoint functions (`get_results`, `get_latest_result`)
 
 **Verification:**
 After fix, run tests with warnings as errors:
+
 ```bash
 pytest tests/test_api_results.py -W error::ResourceWarning
 ```
@@ -726,19 +762,19 @@ with sqlite3.connect(db_path) as conn:
 
 ### After v1.0 Release (v1.1 Candidates)
 
-5. **Frontend Comprehensive Tests** — 8-12 hours
+1. **Frontend Comprehensive Tests** — 8-12 hours
    - Test all remaining components
    - Target: 80%+ frontend coverage
 
-6. **Integration Tests** — 6-10 hours
+2. **Integration Tests** — 6-10 hours
    - Add `test_integration.py` with 8-12 tests
    - Test multi-component flows
 
-7. **Runtime Config Edge Cases** — 2-3 hours
+3. **Runtime Config Edge Cases** — 2-3 hours
    - Add 8-10 tests for `runtime_config.py`
    - Target: 95%+ coverage
 
-8. **Alert Provider Error Paths** — 2-3 hours
+4. **Alert Provider Error Paths** — 2-3 hours
    - Add 10-12 tests for `alert_providers.py`
    - Target: 95%+ coverage
 
@@ -775,6 +811,7 @@ with sqlite3.connect(db_path) as conn:
 **Recommendation:** **FIX ResourceWarnings + Add alert_provider_factory tests before v1.0**
 
 **Approval Conditions:**
+
 1. ResourceWarnings resolved (15 min)
 2. `alert_provider_factory.py` coverage ≥90% (~20 tests, 3-4 hrs)
 3. Re-run full test suite with no warnings

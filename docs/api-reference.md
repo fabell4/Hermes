@@ -6,7 +6,7 @@ Complete REST API documentation for the Hermes FastAPI backend.
 
 ## Base URL
 
-```
+```text
 http://localhost:8080/api
 ```
 
@@ -38,6 +38,7 @@ openssl rand -hex 32
 ```
 
 **Requirements:**
+
 - Minimum 32 characters (enforced at startup)
 - Application exits with error if `API_KEY` is set but too short
 
@@ -50,6 +51,7 @@ Leave `API_KEY` unset in `.env` to disable authentication entirely. **Not recomm
 ## Rate Limiting
 
 Protected endpoints are rate-limited per API key:
+
 - **Default:** 60 requests per 60-second sliding window
 - **Configurable:** Set `RATE_LIMIT_PER_MINUTE` in `.env`
 - **Response on limit:** `429 Too Many Requests` with `Retry-After` header
@@ -75,11 +77,13 @@ Content-Type: application/json
 Get API health and scheduler status.
 
 **Request:**
+
 ```http
 GET /api/health
 ```
 
 **Response:**
+
 ```json
 {
   "status": "healthy",
@@ -90,6 +94,7 @@ GET /api/health
 ```
 
 **Status Codes:**
+
 - `200 OK` — API healthy
 
 ---
@@ -99,15 +104,18 @@ GET /api/health
 Retrieve speed test results with pagination. Reads from SQLite if available, falls back to CSV.
 
 **Request:**
+
 ```http
 GET /api/results?page=1&page_size=50
 ```
 
 **Query Parameters:**
+
 - `page` (optional, default: `1`) — Page number (1-indexed)
-- `page_size` (optional, default: `50`) — Results per page (max: 1000)
+- `page_size` (optional, default: `50`) — Results per page (max: 500)
 
 **Response:**
+
 ```json
 {
   "results": [
@@ -132,10 +140,12 @@ GET /api/results?page=1&page_size=50
 ```
 
 **Status Codes:**
+
 - `200 OK` — Results returned
 - `404 Not Found` — Page out of range or no results available
 
 **cURL Example:**
+
 ```bash
 curl http://localhost:8080/api/results?page=1&page_size=100
 ```
@@ -147,11 +157,13 @@ curl http://localhost:8080/api/results?page=1&page_size=100
 Retrieve the most recent speed test result.
 
 **Request:**
+
 ```http
 GET /api/results/latest
 ```
 
 **Response:**
+
 ```json
 {
   "id": 123,
@@ -165,10 +177,12 @@ GET /api/results/latest
 ```
 
 **Status Codes:**
+
 - `200 OK` — Result returned
 - `404 Not Found` — No results available
 
 **cURL Example:**
+
 ```bash
 curl http://localhost:8080/api/results/latest
 ```
@@ -180,11 +194,13 @@ curl http://localhost:8080/api/results/latest
 Retrieve current runtime configuration (interval, enabled exporters).
 
 **Request:**
+
 ```http
 GET /api/config
 ```
 
 **Response:**
+
 ```json
 {
   "speedtest_interval_minutes": 60,
@@ -193,9 +209,11 @@ GET /api/config
 ```
 
 **Status Codes:**
+
 - `200 OK` — Configuration returned
 
 **cURL Example:**
+
 ```bash
 curl http://localhost:8080/api/config
 ```
@@ -207,11 +225,13 @@ curl http://localhost:8080/api/config
 Retrieve current alert settings and provider configuration.
 
 **Request:**
+
 ```http
 GET /api/alerts
 ```
 
 **Response:**
+
 ```json
 {
   "enabled": true,
@@ -246,9 +266,11 @@ GET /api/alerts
 ```
 
 **Status Codes:**
+
 - `200 OK` — Configuration returned
 
 **cURL Example:**
+
 ```bash
 curl http://localhost:8080/api/alerts
 ```
@@ -260,22 +282,25 @@ curl http://localhost:8080/api/alerts
 Check if a speed test is currently running.
 
 **Request:**
+
 ```http
 GET /api/trigger/status
 ```
 
 **Response:**
+
 ```json
 {
-  "running": false,
-  "last_trigger_time": "2026-04-29T11:55:00Z"
+  "is_running": false
 }
 ```
 
 **Status Codes:**
+
 - `200 OK` — Status returned
 
 **cURL Example:**
+
 ```bash
 curl http://localhost:8080/api/trigger/status
 ```
@@ -291,30 +316,41 @@ Require `X-Api-Key` header when `API_KEY` environment variable is set.
 Manually trigger a speed test to run immediately.
 
 **Request:**
+
 ```http
 POST /api/trigger
 ```
 
 **Headers:**
-```
+
+```text
 X-Api-Key: your-api-key-here
 ```
 
 **Response:**
+
 ```json
 {
-  "status": "triggered",
-  "message": "Speed test will run shortly"
+  "status": "started"
+}
+```
+
+OR if a test is already running:
+
+```json
+{
+  "status": "already_running"
 }
 ```
 
 **Status Codes:**
-- `200 OK` — Test triggered successfully
+
+- `200 OK` — Test triggered successfully or already running
 - `401 Unauthorized` — Missing or invalid API key
 - `429 Too Many Requests` — Rate limit exceeded
-- `503 Service Unavailable` — Test already running
 
 **cURL Example:**
+
 ```bash
 curl -X POST http://localhost:8080/api/trigger \
   -H "X-Api-Key: your-api-key-here"
@@ -327,55 +363,62 @@ curl -X POST http://localhost:8080/api/trigger \
 Update runtime configuration (interval, enabled exporters).
 
 **Request:**
+
 ```http
 PUT /api/config
 Content-Type: application/json
 ```
 
 **Headers:**
-```
+
+```text
 X-Api-Key: your-api-key-here
 Content-Type: application/json
 ```
 
 **Body:**
+
 ```json
 {
-  "speedtest_interval_minutes": 30,
-  "enabled_exporters": ["csv", "sqlite", "prometheus", "loki"]
+  "interval_minutes": 30,
+  "enabled_exporters": ["csv", "sqlite", "prometheus", "loki"],
+  "scanning_enabled": true
 }
 ```
 
 **Response:**
+
 ```json
 {
-  "status": "success",
-  "message": "Configuration updated successfully",
-  "config": {
-    "speedtest_interval_minutes": 30,
-    "enabled_exporters": ["csv", "sqlite", "prometheus", "loki"]
-  }
+  "interval_minutes": 30,
+  "enabled_exporters": ["csv", "sqlite"],
+  "scanning_enabled": true
 }
 ```
 
 **Validation:**
-- `speedtest_interval_minutes` must be between 1 and 1440 (24 hours)
+
+- `interval_minutes` must be between 5 and 1440 minutes (5 minutes to 24 hours)
 - `enabled_exporters` must be a list containing valid exporters: `csv`, `sqlite`, `prometheus`, `loki`
+- `scanning_enabled` controls whether automatic tests are running
 
 **Status Codes:**
+
 - `200 OK` — Configuration updated
 - `400 Bad Request` — Invalid input
 - `401 Unauthorized` — Missing or invalid API key
 - `429 Too Many Requests` — Rate limit exceeded
 
 **cURL Example:**
+
 ```bash
 curl -X PUT http://localhost:8080/api/config \
   -H "X-Api-Key: your-api-key-here" \
   -H "Content-Type: application/json" \
   -d '{
-    "speedtest_interval_minutes": 30,
-    "enabled_exporters": ["csv", "sqlite"]
+    "interval_minutes": 30,
+    "enabled_exporters": ["csv", "sqlite"],
+    "scanning_enabled": true
   }'
 ```
 
@@ -386,18 +429,21 @@ curl -X PUT http://localhost:8080/api/config \
 Update alert settings and provider configuration.
 
 **Request:**
+
 ```http
 PUT /api/alerts
 Content-Type: application/json
 ```
 
 **Headers:**
-```
+
+```text
 X-Api-Key: your-api-key-here
 Content-Type: application/json
 ```
 
 **Body:**
+
 ```json
 {
   "enabled": true,
@@ -421,6 +467,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "status": "success",
@@ -429,18 +476,21 @@ Content-Type: application/json
 ```
 
 **Validation:**
+
 - `failure_threshold` must be >= 0 (0 = disabled)
 - `cooldown_minutes` must be >= 1
 - Alert URLs validated for SSRF protection (see [Security](security))
 - Provider-specific validation (priority ranges, required fields)
 
 **Status Codes:**
+
 - `200 OK` — Configuration updated
 - `400 Bad Request` — Invalid input or SSRF risk detected
 - `401 Unauthorized` — Missing or invalid API key
 - `429 Too Many Requests` — Rate limit exceeded
 
 **cURL Example:**
+
 ```bash
 curl -X PUT http://localhost:8080/api/alerts \
   -H "X-Api-Key: your-api-key-here" \
@@ -467,16 +517,19 @@ curl -X PUT http://localhost:8080/api/alerts \
 Send a test notification to all enabled alert providers.
 
 **Request:**
+
 ```http
 POST /api/alerts/test
 ```
 
 **Headers:**
-```
+
+```text
 X-Api-Key: your-api-key-here
 ```
 
 **Response:**
+
 ```json
 {
   "status": "success",
@@ -491,16 +544,19 @@ X-Api-Key: your-api-key-here
 ```
 
 **Rate Limiting:**
+
 - Test alerts are rate-limited globally (10-second cooldown)
 - Separate from per-API-key rate limits
 - Prevents notification spam
 
 **Status Codes:**
+
 - `200 OK` — Test sent (check `results` for per-provider status)
 - `401 Unauthorized` — Missing or invalid API key
 - `429 Too Many Requests` — Test alert cooldown active (wait 10 seconds)
 
 **cURL Example:**
+
 ```bash
 curl -X POST http://localhost:8080/api/alerts/test \
   -H "X-Api-Key: your-api-key-here"
@@ -513,6 +569,7 @@ curl -X POST http://localhost:8080/api/alerts/test \
 All errors return JSON with `detail` field:
 
 ### 400 Bad Request
+
 ```json
 {
   "detail": "speedtest_interval_minutes must be between 1 and 1440"
@@ -520,6 +577,7 @@ All errors return JSON with `detail` field:
 ```
 
 ### 401 Unauthorized
+
 ```json
 {
   "detail": "Invalid API key"
@@ -527,6 +585,7 @@ All errors return JSON with `detail` field:
 ```
 
 ### 404 Not Found
+
 ```json
 {
   "detail": "No results found"
@@ -534,6 +593,7 @@ All errors return JSON with `detail` field:
 ```
 
 ### 413 Payload Too Large
+
 ```json
 {
   "detail": "Request body exceeds maximum size of 1048576 bytes"
@@ -541,14 +601,17 @@ All errors return JSON with `detail` field:
 ```
 
 ### 429 Too Many Requests
+
 ```json
 {
   "detail": "Rate limit exceeded. Try again in 60 seconds."
 }
 ```
+
 Response includes `Retry-After` header with seconds to wait.
 
 ### 503 Service Unavailable
+
 ```json
 {
   "detail": "Speed test already running"
@@ -564,6 +627,7 @@ Response includes `Retry-After` header with seconds to wait.
 Alert URLs are validated to prevent Server-Side Request Forgery attacks:
 
 **Blocked:**
+
 - Non-HTTP schemes: `file://`, `ftp://`, `data://`
 - Localhost: `localhost`, `127.0.0.1`, `::1`
 - Private IP ranges: `10.x`, `192.168.x`, `172.16-31.x`
@@ -571,6 +635,7 @@ Alert URLs are validated to prevent Server-Side Request Forgery attacks:
 - Cloud metadata endpoints: `169.254.169.254`
 
 **Allowed:**
+
 - Public HTTPS/HTTP URLs only
 
 See [Security Guide](security) for details.
@@ -578,6 +643,7 @@ See [Security Guide](security) for details.
 ### Security Headers
 
 All responses include security headers:
+
 - `X-Frame-Options: DENY`
 - `X-Content-Type-Options: nosniff`
 - `Cross-Origin-Resource-Policy: same-origin`
@@ -703,6 +769,7 @@ curl -s "$BASE_URL/results?page=1&page_size=100" | jq .
 Hermes does not currently support WebSocket connections. For real-time updates:
 
 **Option 1:** Poll `/api/results/latest` periodically
+
 ```javascript
 setInterval(async () => {
   const response = await fetch("/api/results/latest");
@@ -712,6 +779,7 @@ setInterval(async () => {
 ```
 
 **Option 2:** Poll `/api/trigger/status` to detect test completion
+
 ```javascript
 async function waitForTestCompletion() {
   while (true) {

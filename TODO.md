@@ -17,7 +17,8 @@
 - [x] `Dockerfile` + `docker-compose.yml` — containerised with volume mounts
 - [x] `.dockerignore` — optimised Docker build context
 - [x] `requirements.txt` — pinned dependencies
-- [x] CI pipeline — ruff, mypy, bandit, semgrep, pytest with 95% coverage; Vitest frontend tests; Safety, pip-audit, Trivy, npm-audit supply-chain scans
+- [x] CI pipeline — ruff, mypy, bandit, semgrep, pytest with 95% coverage; Vitest frontend tests; Safety, pip-audit,
+  Trivy, npm-audit supply-chain scans
 - [x] Release workflow — builds and pushes to private registry + GHCR, creates GitHub + Forgejo releases
 - [x] Renovate — automated dependency PRs (Python, npm, Docker base images) every weekend
 
@@ -32,7 +33,8 @@ _Goal: make the deployed instance reliable before adding features._
 - [x] Docker `HEALTHCHECK` — use `/health` once endpoint exists
 - [x] Environment validation on startup — warn if Loki URL is unreachable when Loki exporter is enabled
 - [x] Multi-architecture Docker build — add `linux/arm64` for ARM server / Raspberry Pi support
-- [x] Enable/disable automated scans toggle — UI button (default: enabled) that pauses/resumes the scheduler without changing the configured interval
+- [x] Enable/disable automated scans toggle — UI button (default: enabled) that pauses/resumes the scheduler without
+  changing the configured interval
 
 ---
 
@@ -53,7 +55,8 @@ _Goal: make historical data more useful and integrate with the wider observabili
 
 ## Phase 3 — UI & UX Improvements
 
-_Goal: complete the Streamlit UI improvements, then replace Streamlit with a React + Vite frontend backed by a FastAPI REST layer._
+_Goal: complete the Streamlit UI improvements, then replace Streamlit with a React + Vite frontend backed by a FastAPI
+REST layer._
 
 ### Phase 3 — Production Frontend (beta target)
 
@@ -78,6 +81,7 @@ _Goal: complete the Streamlit UI improvements, then replace Streamlit with a Rea
 _Goal: notify users when something goes wrong and ensure code quality before v1.0._
 
 ### Alerting
+
 - [x] Consecutive failure detection — track N consecutive speedtest failures
 - [x] Webhook alerting — POST to a configurable URL on consecutive failure
 - [x] Gotify / ntfy support — push notification on failure
@@ -88,6 +92,7 @@ _Goal: notify users when something goes wrong and ensure code quality before v1.
 - [x] Alert documentation — README and environment variable examples
 
 ### Quality Assurance
+
 - [x] Full code review — comprehensive review of all modules before v1.0 release
   - [x] Security audit (authentication, rate limiting, input validation) — **COMPLETE**
     - ✅ Comprehensive 50-page security audit completed (see [docs/SECURITY-AUDIT.md](docs/SECURITY-AUDIT.md))
@@ -179,7 +184,16 @@ _Goal: notify users when something goes wrong and ensure code quality before v1.
     - 📋 LOW priority deferred to v1.1:
       - Config module subprocess test
       - Comprehensive frontend coverage (80%+ target)
-  - [ ] Documentation accuracy
+  - [x] Documentation accuracy — **COMPLETE**
+    - ✅ Comprehensive documentation accuracy review completed (see [docs/DOCUMENTATION-ACCURACY-REVIEW.md](docs/DOCUMENTATION-ACCURACY-REVIEW.md))
+    - ✅ 6 HIGH priority issues identified and **FIXED**:
+      - Updated test count (344 → 397) and coverage statistics in README.md
+      - Fixed docker-compose.yml image reference (ghcr.io/fabell4/hermes:latest)
+      - Corrected API response schemas (PUT /api/config, POST /api/trigger, GET /api/trigger/status)
+      - Fixed validation ranges (interval_minutes: 5-1440, page_size: max 500)
+    - ✅ 3 MEDIUM priority issues noted for follow-up
+    - ✅ 4 LOW priority enhancements deferred to v1.1
+    - ✅ **APPROVED FOR v1.0 RELEASE**
   - [x] Performance optimization opportunities — **COMPLETE**
     - ✅ Comprehensive performance review completed (see [docs/PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md))
     - ✅ 9 issues identified (3 high, 4 medium, 2 low priority)
@@ -193,7 +207,8 @@ _Goal: notify users when something goes wrong and ensure code quality before v1.
       - SQLite WAL checkpoint management
       - HTTP connection pooling
     - 📋 2 LOW priority micro-optimizations not recommended
-    - ✅ No conflicts with previous reviews (Security, Defensive Coding, Best Practices, Modernization, Error Handling, Test Coverage)
+    - ✅ No conflicts with previous reviews (Security, Defensive Coding, Best Practices, Modernization, Error Handling,
+      Test Coverage)
     - 🔧 **Implementation required before v1.0** (estimated 4-5 hours)
 
 > 🏁 **Beta → Full release gate** — all Phase 4 items must be complete before tagging v1.0.
@@ -206,7 +221,6 @@ _Goal: notify users when something goes wrong and ensure code quality before v1.
 - [x] Scheduler persistence tests — simulate restart and verify interval is restored
 - [x] SpeedtestRunner retry tests — verify retry behaviour on transient failure
 
-
 ---
 
 ## Post-Release Enhancements
@@ -218,60 +232,103 @@ _Features and improvements planned for after v1.0. Not required for stable relea
 ## v1.1 — Code Quality & Testing (Deferred Items from Reviews)
 
 ### Testing & Coverage (HIGH priority)
-- [ ] Main loop tests — 12-15 tests covering uncovered paths in scheduler and lifecycle management (see [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) H6)
-- [ ] Frontend component tests — Unit tests for Layout, Dashboard, and Settings components (TypeScript/React) (see [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) H6)
-- [ ] Integration tests — End-to-end flows: speedtest → export → alert lifecycle, runtime config persistence across restart, full alert flow from failure to recovery (see [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) H8)
-- [ ] Runtime config edge cases — Additional validation and error path tests (see [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) M-MEDIUM)
-- [ ] Alert provider error paths — Comprehensive failure scenario coverage (see [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) M-MEDIUM)
-- [ ] Frontend coverage target — Expand TypeScript/React test coverage to 80%+ (see [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) L-LOW)
-- [ ] Config module subprocess test — Verify API key validation causes startup failure via subprocess (see [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) H6)
+
+- [ ] Main loop tests — 12-15 tests covering uncovered paths in scheduler and lifecycle management (see
+  [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) H6)
+- [ ] Frontend component tests — Unit tests for Layout, Dashboard, and Settings components (TypeScript/React) (see
+  [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) H6)
+- [ ] Integration tests — End-to-end flows: speedtest → export → alert lifecycle, runtime config persistence across
+  restart, full alert flow from failure to recovery (see [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) H8)
+- [ ] Runtime config edge cases — Additional validation and error path tests (see
+  [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) M-MEDIUM)
+- [ ] Alert provider error paths — Comprehensive failure scenario coverage (see
+  [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) M-MEDIUM)
+- [ ] Frontend coverage target — Expand TypeScript/React test coverage to 80%+ (see
+  [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) L-LOW)
+- [ ] Config module subprocess test — Verify API key validation causes startup failure via subprocess (see
+  [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) H6)
 
 ### Performance Monitoring & Optimization (MEDIUM priority)
-- [ ] Prometheus label cardinality management — Make labels optional via environment variable to prevent unbounded time series growth (see [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #4)
-- [ ] Exporter registry deduplication — Refactor `/api/trigger` to reuse `EXPORTER_REGISTRY` from main.py instead of rebuilding (see [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #5)
-- [ ] SQLite WAL checkpoint management — Manual checkpoint after pruning operations to prevent WAL file growth (see [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #6)
-- [ ] HTTP connection pooling — Shared session for alert providers to reduce connection overhead (see [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #7)
-- [ ] SQLite vacuum automation — Monitor database fragmentation, add vacuum logic if needed (see [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) M6)
-- [ ] Alert provider thread pool statistics — Logging or metrics for async alert queue depth and completion time (see [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) M7)
+
+- [ ] Prometheus label cardinality management — Make labels optional via environment variable to prevent unbounded
+  time series growth (see [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #4)
+- [ ] Exporter registry deduplication — Refactor `/api/trigger` to reuse `EXPORTER_REGISTRY` from main.py instead of
+  rebuilding (see [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #5)
+- [ ] SQLite WAL checkpoint management — Manual checkpoint after pruning operations to prevent WAL file growth (see
+  [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #6)
+- [ ] HTTP connection pooling — Shared session for alert providers to reduce connection overhead (see
+  [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #7)
+- [ ] SQLite vacuum automation — Monitor database fragmentation, add vacuum logic if needed (see
+  [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) M6)
+- [ ] Alert provider thread pool statistics — Logging or metrics for async alert queue depth and completion time (see
+  [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) M7)
 
 ### Code Quality & Maintainability (LOW priority)
-- [ ] Configurable retry count and exponential backoff — Make SpeedtestRunner retry behavior configurable with backoff (see [DEFENSIVE-CODING-REVIEW.md](docs/DEFENSIVE-CODING-REVIEW.md) L12)
-- [ ] Main loop health check stall detection — Detect and log when scheduler appears stalled (see [DEFENSIVE-CODING-REVIEW.md](docs/DEFENSIVE-CODING-REVIEW.md) L14)
-- [ ] Type alias extraction — Extract common types like `dict[str, Any]` to named aliases (see [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) L8)
-- [ ] Config helper functions — Add `_get_str()` helper for consistency with existing `_get_int()`, `_get_float()` patterns (see [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) L8)
-- [ ] Hardcoded timeout constants — Extract alert provider timeout defaults to constants (see [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) L9)
-- [ ] Error message consistency — Standardize error message strings (inline vs constants) (see [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) L10)
-- [ ] Docstring completeness — Add comprehensive docstrings to internal helpers and validate Google style consistency (see [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) L12, [ERROR-HANDLING-REVIEW.md](docs/ERROR-HANDLING-REVIEW.md) M1)
+
+- [ ] Configurable retry count and exponential backoff — Make SpeedtestRunner retry behavior configurable with backoff
+  (see [DEFENSIVE-CODING-REVIEW.md](docs/DEFENSIVE-CODING-REVIEW.md) L12)
+- [ ] Main loop health check stall detection — Detect and log when scheduler appears stalled (see
+  [DEFENSIVE-CODING-REVIEW.md](docs/DEFENSIVE-CODING-REVIEW.md) L14)
+- [ ] Type alias extraction — Extract common types like `dict[str, Any]` to named aliases (see
+  [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) L8)
+- [ ] Config helper functions — Add `_get_str()` helper for consistency with existing `_get_int()`, `_get_float()`
+  patterns (see [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) L8)
+- [ ] Hardcoded timeout constants — Extract alert provider timeout defaults to constants (see
+  [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) L9)
+- [ ] Error message consistency — Standardize error message strings (inline vs constants) (see
+  [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) L10)
+- [ ] Docstring completeness — Add comprehensive docstrings to internal helpers and validate Google style consistency
+  (see [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) L12,
+  [ERROR-HANDLING-REVIEW.md](docs/ERROR-HANDLING-REVIEW.md) M1)
 
 ### Documentation Improvements (MEDIUM priority)
-- [ ] Error message documentation — Centralized error message reference with troubleshooting steps (see [ERROR-HANDLING-REVIEW.md](docs/ERROR-HANDLING-REVIEW.md) M2)
-- [ ] Error handling conventions — Document patterns: when to raise vs log, exception hierarchies, wrapping guidelines (see [ERROR-HANDLING-REVIEW.md](docs/ERROR-HANDLING-REVIEW.md) M3)
-- [ ] Error catalog — Comprehensive list of all possible errors by module with causes and remediation (see [ERROR-HANDLING-REVIEW.md](docs/ERROR-HANDLING-REVIEW.md) M4)
-- [ ] Monitoring runbook — Operational guide for diagnosing production issues from logs/metrics (see [ERROR-HANDLING-REVIEW.md](docs/ERROR-HANDLING-REVIEW.md) M5)
-- [ ] Documentation accuracy review — Full sweep of README, docs/, and inline comments for correctness (see [TODO.md](TODO.md) Phase 4)
+
+- [ ] Error message documentation — Centralized error message reference with troubleshooting steps (see
+  [ERROR-HANDLING-REVIEW.md](docs/ERROR-HANDLING-REVIEW.md) M2)
+- [ ] Error handling conventions — Document patterns: when to raise vs log, exception hierarchies, wrapping guidelines
+  (see [ERROR-HANDLING-REVIEW.md](docs/ERROR-HANDLING-REVIEW.md) M3)
+- [ ] Error catalog — Comprehensive list of all possible errors by module with causes and remediation (see
+  [ERROR-HANDLING-REVIEW.md](docs/ERROR-HANDLING-REVIEW.md) M4)
+- [ ] Monitoring runbook — Operational guide for diagnosing production issues from logs/metrics (see
+  [ERROR-HANDLING-REVIEW.md](docs/ERROR-HANDLING-REVIEW.md) M5)
+
+### Documentation Improvements (LOW priority)
+
+- [x] Architecture diagram clarification — Add note explaining both containers use same Docker image (see
+  [DOCUMENTATION-ACCURACY-REVIEW.md](docs/DOCUMENTATION-ACCURACY-REVIEW.md) L2)
+- [x] Building from source documentation — Add "Building from Source" section to getting-started.md (see
+  [DOCUMENTATION-ACCURACY-REVIEW.md](docs/DOCUMENTATION-ACCURACY-REVIEW.md) L3)
+- [x] Alert test cooldown documentation — Document 10-second cooldown for test notifications in alerts.md (see
+  [DOCUMENTATION-ACCURACY-REVIEW.md](docs/DOCUMENTATION-ACCURACY-REVIEW.md) L4)
 
 ---
 
 ## v1.2+ — Feature Enhancements
 
 ### Enhanced Diagnostics
+
 - [ ] Packet loss tracking — capture and log packet loss percentage from speedtest results
 - [ ] Server selection — allow pinning to specific server ID for consistent baseline testing
 - [ ] SLA monitoring — define speed thresholds (e.g., "download ≥100 Mbps") and track compliance percentage
 - [ ] Connection quality score — aggregate metric combining speed, latency, jitter, and packet loss
 
 ### Data & Integration
-- [ ] InfluxDB exporter — optional time-series exporter; pairs with Grafana for long-term trend analysis and retention policy management
+
+- [ ] InfluxDB exporter — optional time-series exporter; pairs with Grafana for long-term trend analysis and retention
+  policy management
 - [ ] Data export API — bulk export historical data (CSV dump, JSON export for migration/backup)
 - [ ] Result annotations — add notes to specific test results (e.g., "ISP maintenance", "router reboot", "storm")
 
 ### Testing Improvements
-- [ ] Alternative test providers — support fast.com (Netflix), Google speed test, or custom endpoints as backup when Ookla is down
+
+- [ ] Alternative test providers — support fast.com (Netflix), Google speed test, or custom endpoints as backup when
+  Ookla is down
 - [ ] IPv4/IPv6 selection — force tests over specific protocol to isolate dual-stack issues
 - [ ] Custom test parameters — configure test duration, number of connections, chunk size
 - [ ] Multi-server testing — run tests against multiple servers and compare/aggregate results
 
 ### Analysis & Insights
+
 - [ ] Result validation — flag suspicious results (impossibly high speeds, timeouts, inconsistent values)
 - [ ] Anomaly detection — automatically flag results that deviate significantly from baseline
 - [ ] Time-of-day analysis — show average speeds by hour/day to identify congestion patterns
@@ -279,6 +336,7 @@ _Features and improvements planned for after v1.0. Not required for stable relea
 - [ ] Outage detection — detect and log complete connectivity loss (different from slow speeds)
 
 ### UI/UX Enhancements
+
 - [ ] Light theme toggle — add light mode option to React UI
 - [ ] Result filtering — filter history by date range, speed threshold, server
 - [ ] Dashboard customization — choose which metrics to display, rearrange cards
@@ -286,6 +344,7 @@ _Features and improvements planned for after v1.0. Not required for stable relea
 - [ ] Scheduled test windows — only run tests during specific hours (avoid counting against data caps)
 
 ### Security & Infrastructure
+
 - [ ] API key rotation mechanism — support rotating keys without restart, or multiple valid keys
 - [ ] Multi-user support — per-user API keys with access control and audit trails
 - [ ] Distributed rate limiting — migrate from in-process state to Redis for multi-instance deployments
@@ -309,4 +368,3 @@ _Items that were completed but are no longer part of the active codebase._
 - Historical charts — completed in Streamlit, reimplemented in React dashboard with Recharts
 - Result anomaly flagging — planned for Streamlit but not implemented; may be added to React if needed
 - Mobile-friendly layout — completed in Streamlit, reimplemented in React with Tailwind responsive design
-

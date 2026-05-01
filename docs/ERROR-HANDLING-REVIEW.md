@@ -14,6 +14,7 @@ This review identifies remaining quality issues before v1.0 release, focusing on
 **Overall Assessment:** ✅ **Codebase is production-ready** with recommended improvements
 
 **Key Findings:**
+
 - 8 high severity issues identified (5 error handling, 3 test coverage)
 - 10 medium severity issues identified (4 documentation, 4 performance, 2 error handling)
 - No critical security vulnerabilities (already addressed)
@@ -36,6 +37,7 @@ This review identifies remaining quality issues before v1.0 release, focusing on
 ## HIGH SEVERITY ISSUES
 
 ### Issue #1: Runtime Config Atomic Writes
+
 **File:** [src/runtime_config.py](../src/runtime_config.py) (lines 152-164)  
 **Severity:** 🔴 High — Data integrity risk
 
@@ -55,6 +57,7 @@ def save(data: dict) -> None:
 ```
 
 **Impact:**
+
 - Corrupted config file prevents scheduler from restarting
 - Loss of user settings (interval, enabled exporters, alert config)
 - Manual intervention required to recover
@@ -103,6 +106,7 @@ def save(data: dict) -> None:
 ---
 
 ### Issue #2: SQLite Lock Timeout Diagnostics
+
 **File:** [src/exporters/sqlite_exporter.py](../src/exporters/sqlite_exporter.py) (lines 107-112)  
 **Severity:** 🔴 High — Production debugging difficulty
 
@@ -116,6 +120,7 @@ if not acquired:
 ```
 
 **Impact:**
+
 - Difficult to diagnose lock contention in production
 - Cannot distinguish timeout from other SQLite errors
 - No information about what's holding the lock or for how long
@@ -147,6 +152,7 @@ if not acquired:
 ---
 
 ### Issue #3: CSV Prune Failure Handling
+
 **File:** [src/exporters/csv_exporter.py](../src/exporters/csv_exporter.py) (lines 77-86)  
 **Severity:** 🔴 High — Disk space risk
 
@@ -161,6 +167,7 @@ self._prune()  # If this fails, row is written but cleanup didn't happen
 ```
 
 **Impact:**
+
 - CSV file grows unbounded if pruning repeatedly fails
 - Could fill disk over time
 - User unaware of failed pruning until disk full
@@ -193,6 +200,7 @@ except Exception as e:  # pylint: disable=broad-except
 ---
 
 ### Issue #4: Thread Safety in Trigger Endpoint
+
 **File:** [src/api/routes/trigger.py](../src/api/routes/trigger.py) (lines 80-95)  
 **Severity:** 🔴 High — Race condition risk
 
@@ -212,6 +220,7 @@ return TriggerResponse(status="started")  # Always returns success
 Additionally, `_run_test()` always releases the lock in finally, but if the thread fails to start, the lock is already acquired by the endpoint function but won't be released.
 
 **Impact:**
+
 - Lock remains held if thread fails to start
 - All future manual triggers blocked until process restart
 - Silent failure - user thinks test is running but it's not
@@ -246,6 +255,7 @@ except Exception as e:
 ---
 
 ### Issue #5: Loki URL Validation Error Handling
+
 **File:** [src/main.py](../src/main.py) (line 377)  
 **Severity:** 🔴 High — Unclear diagnostics
 
@@ -262,6 +272,7 @@ except Exception as e:  # Too broad - catches timeout, HTTP errors, etc.
 ```
 
 **Impact:**
+
 - Cannot distinguish timeout vs unreachable vs misconfigured
 - Startup diagnostic messages unclear
 - Harder to debug Loki integration issues
@@ -306,6 +317,7 @@ except requests.exceptions.RequestException as e:
 ## MEDIUM SEVERITY ISSUES
 
 ### Issue #M1: Missing Docstrings
+
 **Files:** Multiple modules  
 **Severity:** 🟡 Medium — Maintainability
 
@@ -318,6 +330,7 @@ Several public functions lack comprehensive docstrings:
 - `src/services/alert_provider_factory.py:register_all_providers()` - No docstring
 
 **Impact:**
+
 - API unclear for maintainers
 - Makes onboarding difficult
 - Harder to use IDE autocomplete
@@ -345,6 +358,7 @@ def consume_run_trigger() -> bool:
 ---
 
 ### Issue #M5: Runtime Config Caching
+
 **File:** [src/runtime_config.py](../src/runtime_config.py) (lines 119-150)  
 **Severity:** 🟡 Medium — Performance at scale
 
@@ -359,11 +373,13 @@ def load() -> dict:
 ```
 
 Called frequently:
+
 - Every scheduler cycle (every 60s by default)
 - Every API config request
 - Every exporter list update
 
 **Impact:**
+
 - Unnecessary I/O and CPU
 - Scales poorly with many API requests
 - File read storms under load
@@ -405,6 +421,7 @@ def load() -> dict:
 ---
 
 ### Issue #M6: CSV Pruning Performance
+
 **File:** [src/exporters/csv_exporter.py](../src/exporters/csv_exporter.py) (lines 136-150)  
 **Severity:** 🟡 Medium — Performance degrades with file size
 
@@ -419,6 +436,7 @@ def _prune(self) -> None:
 ```
 
 **Impact:**
+
 - Performance degrades linearly with file size
 - 10,000 rows = ~1MB read per test
 - Unnecessary I/O on most writes when pruning not needed
@@ -465,8 +483,10 @@ def _prune(self) -> None:
 ### Phase 1 (Critical for v1.0) - COMPLETE ✅
 
 #### ✅ Issue #1: Atomic Runtime Config Writes
+
 **Status:** IMPLEMENTED  
 **Changes:**
+
 - Modified [src/runtime_config.py](../src/runtime_config.py) `save()` function
 - Implemented atomic write pattern using `tempfile.mkstemp()` and atomic rename
 - Added proper cleanup of temp files on failure
@@ -478,8 +498,10 @@ def _prune(self) -> None:
 ---
 
 #### ✅ Issue #2: SQLite Lock Timeout Diagnostics
+
 **Status:** IMPLEMENTED  
 **Changes:**
+
 - Added `SQLiteLockTimeout` exception class to [src/exporters/sqlite_exporter.py](../src/exporters/sqlite_exporter.py)
 - Exception includes timeout duration and database path for diagnostics
 - Updated `export()` method to raise specific exception instead of generic `RuntimeError`
@@ -489,8 +511,10 @@ def _prune(self) -> None:
 ---
 
 #### ✅ Issue #3: CSV Prune Failure Handling
+
 **Status:** IMPLEMENTED  
 **Changes:**
+
 - Modified [src/exporters/csv_exporter.py](../src/exporters/csv_exporter.py) `export()` method
 - Wrapped `_prune()` call in try/except to make it non-fatal
 - Added detailed error logging with `exc_info=True` for stack traces
@@ -501,8 +525,10 @@ def _prune(self) -> None:
 ---
 
 #### ✅ Issue #4: Thread Safety in Trigger Endpoint
+
 **Status:** IMPLEMENTED  
 **Changes:**
+
 - Modified [src/api/routes/trigger.py](../src/api/routes/trigger.py) `trigger_test()` function
 - Added lock release in exception handler to prevent deadlock
 - Added brief thread aliveness check (with logging for test environments)
@@ -513,8 +539,10 @@ def _prune(self) -> None:
 ---
 
 #### ✅ Issue #5: Loki URL Validation Error Handling
+
 **Status:** IMPLEMENTED  
 **Changes:**
+
 - Enhanced [src/main.py](../src/main.py) `_validate_environment()` function
 - Added specific exception handlers for Timeout, ConnectionError, HTTPError
 - Each error type has tailored diagnostic message
@@ -527,8 +555,10 @@ def _prune(self) -> None:
 ### Phase 2 (Performance Optimizations) - COMPLETE ✅
 
 #### ✅ Issue #M5: Runtime Config Caching
+
 **Status:** IMPLEMENTED  
 **Changes:**
+
 - Added `_config_cache` and `_config_mtime` module-level variables to [src/runtime_config.py](../src/runtime_config.py)
 - `load()` function now checks file modification time before re-reading
 - Cache is copied before return to prevent mutation
@@ -539,8 +569,10 @@ def _prune(self) -> None:
 ---
 
 #### ✅ Issue #M6: CSV Pruning Performance
+
 **Status:** IMPLEMENTED  
 **Changes:**
+
 - Modified [src/exporters/csv_exporter.py](../src/exporters/csv_exporter.py) `_prune()` method
 - Added quick row count check before loading entire file
 - Only loads full file if pruning is actually needed
@@ -553,6 +585,7 @@ def _prune(self) -> None:
 ### Phase 3 (Test Coverage - Deferred to v1.1)
 
 Test coverage gaps (H6-H8) have been documented but deferred to v1.1:
+
 - H6: Alert provider network failure scenarios (multi-provider failure, partial success)
 - H7: API main uncovered lines (SPA fallback, security headers edge cases)
 - H8: SQLite migration idempotency and concurrent migration tests
@@ -564,6 +597,7 @@ Test coverage gaps (H6-H8) have been documented but deferred to v1.1:
 ### Phase 4 (Documentation & Polish - Partially Complete)
 
 Medium priority documentation issues (M1-M4, M9-M10) have been documented but not all implemented:
+
 - M1: Missing docstrings (deferred - not blocking)
 - M2-M4: Documentation accuracy improvements (minor polish)
 - M9-M10: Additional error handling polish (non-critical)
@@ -575,16 +609,19 @@ Medium priority documentation issues (M1-M4, M9-M10) have been documented but no
 ## Test Results
 
 **All 344 tests passing:**
+
 - Unit tests: ✅
 - Integration tests: ✅
 - API tests: ✅
 - Coverage: **90.16%** (target: ≥90%)
 
 **Static Analysis:**
+
 - ruff: ✅ All checks passed
 - mypy: ✅ Success (26 files)
 
 **Fixes Validated:**
+
 - Atomic config saves tested with failure injection
 - SQLite lock timeout exception properly raised
 - CSV pruning failures don't block writes
@@ -611,6 +648,7 @@ Medium priority documentation issues (M1-M4, M9-M10) have been documented but no
 ## Summary of Changes
 
 **Files Modified:** 6
+
 1. [src/runtime_config.py](../src/runtime_config.py) - Atomic writes + caching
 2. [src/exporters/sqlite_exporter.py](../src/exporters/sqlite_exporter.py) - Custom timeout exception
 3. [src/exporters/csv_exporter.py](../src/exporters/csv_exporter.py) - Non-fatal pruning + optimization
@@ -623,9 +661,11 @@ Medium priority documentation issues (M1-M4, M9-M10) have been documented but no
 **Breaking Changes:** None (all internal improvements)
 
 **New Exception Types:**
+
 - `SQLiteLockTimeout` - For better production diagnostics
 
 **Performance Improvements:**
+
 - Runtime config: Eliminated repeated file reads (cached until modified)
 - CSV pruning: Skips full file read when not needed (O(1) check vs O(n) read)
 

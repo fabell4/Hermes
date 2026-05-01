@@ -151,7 +151,8 @@ git push forgejo --delete v0.3.7-beta
 
 **Symptom**: Release workflow uses old commit, tests fail  
 **Cause**: Tag created before pushing all commits  
-**Solution**: 
+**Solution**:
+
 - Delete tag and recreate at correct commit, OR
 - Create new patch version with fixes
 
@@ -159,7 +160,8 @@ git push forgejo --delete v0.3.7-beta
 
 **Symptom**: Pipeline stops at SonarQube analysis  
 **Cause**: Code quality issues, security vulnerabilities, or unused suppressions  
-**Solution**: 
+**Solution**:
+
 - Check SonarQube dashboard for specific issues
 - Fix locally and re-test
 - Do not disable quality gates to force release
@@ -169,6 +171,7 @@ git push forgejo --delete v0.3.7-beta
 **Symptom**: Public repo CI fails but Forgejo CI passed  
 **Cause**: Environment differences, missing configuration files  
 **Solution**:
+
 - Ensure `mypy.ini`, `pytest.ini`, etc. are not in `.forgejo/` (would be stripped)
 - Keep CI config files at repo root
 - Test on fresh checkout to simulate public repo state
@@ -198,6 +201,7 @@ git push forgejo --delete v0.3.7-beta
 ## Contact
 
 For questions about the release process, refer to:
+
 - `.forgejo/workflows/release.yml` - Forgejo CI pipeline
 - `.github/workflows/` - GitHub Actions configuration
 - `docs/RELEASE-SETUP.md` - Infrastructure setup documentation

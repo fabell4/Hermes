@@ -11,18 +11,21 @@ Hermes implements multiple layers of security for production deployments. This g
 **Purpose:** Protect write endpoints from unauthorized access.
 
 **Implementation:**
+
 - Optional `API_KEY` environment variable
 - **32-character minimum** enforced at startup (application exits if too short)
 - Timing-safe comparison using `secrets.compare_digest()` to prevent timing attacks
 - `X-Api-Key` header required on all protected endpoints
 
 **Protected Endpoints:**
+
 - `POST /api/trigger` — Manual speed test trigger
 - `PUT /api/config` — Configuration updates
 - `PUT /api/alerts` — Alert configuration updates
 - `POST /api/alerts/test` — Test alert notifications
 
 **Public Endpoints:** (no authentication required)
+
 - `GET /api/health` — Health check
 - `GET /api/results` — Speed test results
 - `GET /api/results/latest` — Latest result
@@ -31,6 +34,7 @@ Hermes implements multiple layers of security for production deployments. This g
 - `GET /api/trigger/status` — Test status
 
 **Generate Secure Key:**
+
 ```bash
 # Recommended: Python secrets module
 python -c 'import secrets; print(secrets.token_urlsafe(32))'
@@ -40,6 +44,7 @@ openssl rand -hex 32
 ```
 
 **Startup Validation:**
+
 ```
 ERROR: API_KEY must be at least 32 characters long
 Suggestion: Generate a secure key with:
@@ -53,12 +58,14 @@ Suggestion: Generate a secure key with:
 **Purpose:** Prevent abuse and DoS attacks via request flooding.
 
 **Implementation:**
+
 - Per-API-key sliding window rate limiting
 - **Default:** 60 requests per 60-second window (configurable via `RATE_LIMIT_PER_MINUTE`)
 - Applies to protected endpoints only
 - Returns `429 Too Many Requests` with `Retry-After` header
 
 **Example Response:**
+
 ```http
 HTTP/1.1 429 Too Many Requests
 Retry-After: 60
@@ -70,11 +77,13 @@ Content-Type: application/json
 ```
 
 **Configuration:**
+
 ```bash
 RATE_LIMIT_PER_MINUTE=120  # Allow 120 requests per 60 seconds
 ```
 
 **Test Alert Rate Limiting:**
+
 - Test alerts (`POST /api/alerts/test`) have **10-second global cooldown**
 - Separate from per-API-key limits
 - Prevents notification spam during configuration testing
@@ -86,6 +95,7 @@ RATE_LIMIT_PER_MINUTE=120  # Allow 120 requests per 60 seconds
 **Purpose:** Prevent Server-Side Request Forgery attacks via alert URLs.
 
 **Implementation:**
+
 - **URL validation** on all alert webhook/Gotify/ntfy/Apprise URLs
 - Blocks internal network access, cloud metadata endpoints, and non-HTTP schemes
 
@@ -100,9 +110,11 @@ RATE_LIMIT_PER_MINUTE=120  # Allow 120 requests per 60 seconds
 | **Cloud metadata** | `169.254.169.254` | Prevent AWS/GCP/Azure credential theft |
 
 **Allowed Targets:**
+
 - Public HTTPS/HTTP URLs only (resolved IPs must be public)
 
 **Validation Error:**
+
 ```json
 {
   "detail": "Invalid alert URL: private IP addresses and localhost are not allowed"
@@ -110,6 +122,7 @@ RATE_LIMIT_PER_MINUTE=120  # Allow 120 requests per 60 seconds
 ```
 
 **Testing:**
+
 ```bash
 # Blocked - private IP
 curl -X PUT http://localhost:8080/api/alerts \
@@ -131,16 +144,19 @@ curl -X PUT http://localhost:8080/api/alerts \
 **Purpose:** Prevent DoS attacks via large request bodies.
 
 **Implementation:**
+
 - **1 MB default limit** (configurable via `MAX_REQUEST_BODY_SIZE`)
 - Middleware checks `Content-Length` header before reading body
 - Returns `413 Payload Too Large` if exceeded
 
 **Configuration:**
+
 ```bash
 MAX_REQUEST_BODY_SIZE=524288  # 512 KB limit
 ```
 
 **Error Response:**
+
 ```json
 {
   "detail": "Request body exceeds maximum size of 1048576 bytes"
@@ -165,6 +181,7 @@ MAX_REQUEST_BODY_SIZE=524288  # 512 KB limit
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Control referrer information |
 
 **Verification:**
+
 ```bash
 curl -I http://localhost:8080/api/health
 ```
@@ -176,12 +193,14 @@ curl -I http://localhost:8080/api/health
 **Purpose:** Restrict which frontend origins can access the API.
 
 **Implementation:**
+
 - Configurable via `CORS_ORIGINS` environment variable (comma-separated)
 - **Default:** `http://localhost:5173,http://localhost:4173` (Vite dev servers)
 - Restricted methods: `GET`, `POST`, `PUT`
 - Restricted headers: `Content-Type`, `X-Api-Key`
 
 **Configuration:**
+
 ```bash
 # Production: restrict to your domain only
 CORS_ORIGINS=https://your-frontend-domain.com
@@ -191,6 +210,7 @@ CORS_ORIGINS=http://localhost:5173,http://localhost:4173,https://staging.example
 ```
 
 **Preflight Request:**
+
 ```bash
 curl -X OPTIONS http://localhost:8080/api/config \
   -H "Origin: https://your-frontend-domain.com" \
@@ -204,6 +224,7 @@ curl -X OPTIONS http://localhost:8080/api/config \
 **Purpose:** Prevent injection attacks and ensure data integrity.
 
 **Implementation:**
+
 - **Pydantic models** enforce strict type checking on all API inputs
 - Range validation (e.g., `speedtest_interval_minutes` between 1 and 1440)
 - Required field validation
@@ -212,6 +233,7 @@ curl -X OPTIONS http://localhost:8080/api/config \
 **Examples:**
 
 **Valid Configuration Update:**
+
 ```json
 {
   "speedtest_interval_minutes": 30,
@@ -220,6 +242,7 @@ curl -X OPTIONS http://localhost:8080/api/config \
 ```
 
 **Invalid Configuration Update:**
+
 ```json
 {
   "speedtest_interval_minutes": 0,  // Too low
@@ -228,6 +251,7 @@ curl -X OPTIONS http://localhost:8080/api/config \
 ```
 
 **Error Response:**
+
 ```json
 {
   "detail": [
@@ -255,6 +279,7 @@ python -c 'import secrets; print(secrets.token_urlsafe(32))'
 ```
 
 Add to `.env`:
+
 ```bash
 API_KEY=your-generated-key-here
 ```
@@ -266,6 +291,7 @@ API_KEY=your-generated-key-here
 Deploy behind a reverse proxy (nginx, Caddy, Traefik) with TLS certificates:
 
 **nginx example:**
+
 ```nginx
 server {
     listen 443 ssl http2;
@@ -285,6 +311,7 @@ server {
 ```
 
 **Caddy example:**
+
 ```
 hermes.yourdomain.com {
     reverse_proxy localhost:8080
@@ -318,12 +345,14 @@ RATE_LIMIT_PER_MINUTE=120
 Only use trusted, public HTTPS endpoints for alert webhooks:
 
 **Good:**
+
 ```bash
 ALERT_WEBHOOK_URL=https://webhook.site/unique-id
 ALERT_GOTIFY_URL=https://gotify.yourdomain.com
 ```
 
 **Bad (blocked by SSRF protection):**
+
 ```bash
 ALERT_WEBHOOK_URL=http://localhost:8080/admin
 ALERT_WEBHOOK_URL=http://192.168.1.100/internal
@@ -334,6 +363,7 @@ ALERT_WEBHOOK_URL=http://192.168.1.100/internal
 Deploy in a private network segment if possible:
 
 **docker-compose.yml:**
+
 ```yaml
 services:
   hermes-scheduler:
@@ -378,7 +408,7 @@ docker compose up -d
 ```
 
 Subscribe to GitHub releases for notifications:
-https://github.com/fabell4/hermes/releases
+<https://github.com/fabell4/hermes/releases>
 
 #### 9. Use Read-Only Volumes (Optional)
 
@@ -447,6 +477,7 @@ docker exec hermes-api whoami
 **Linting:** All ruff checks passing
 
 **Run Tests:**
+
 ```bash
 pytest --cov=src tests/
 ```
@@ -460,6 +491,7 @@ pytest --cov=src tests/
 **DO NOT** open public GitHub issues for security vulnerabilities.
 
 **Instead:**
+
 1. Email security report to: [maintainer-email]
 2. Include:
    - Description of vulnerability
@@ -472,12 +504,13 @@ Response SLA: 48 hours for acknowledgment, 7 days for fix timeline.
 ### Security Updates
 
 Security patches are released as:
+
 - **Patch releases** for critical vulnerabilities (e.g., v1.0.1)
 - **Changelog entries** with `[SECURITY]` prefix
 - **GitHub Security Advisories** for CVE-level issues
 
 Subscribe to releases for notifications:
-https://github.com/fabell4/hermes/releases
+<https://github.com/fabell4/hermes/releases>
 
 ---
 
@@ -512,6 +545,7 @@ Use this checklist before deploying to production:
 ### Q: How do I rotate API keys?
 
 **A:** Currently, key rotation requires:
+
 1. Generate new key
 2. Update `.env` with new key
 3. Restart containers
@@ -534,6 +568,7 @@ Use this checklist before deploying to production:
 ### Q: How are secrets stored?
 
 **A:** All secrets (API keys, alert tokens) are stored in:
+
 - `.env` file (plaintext, should be protected via file permissions)
 - `runtime_config.json` (plaintext, alert provider tokens)
 
@@ -542,6 +577,7 @@ Use this checklist before deploying to production:
 ### Q: Is SQLite database encrypted?
 
 **A:** No. The `hermes.db` file stores speed test results in plaintext. If you need encryption, use:
+
 - **Filesystem-level encryption** (LUKS, FileVault, BitLocker)
 - **Volume encryption** via Docker secrets or encrypted volumes
 

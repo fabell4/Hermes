@@ -113,6 +113,13 @@ flowchart LR
     style WEBHOOK fill:#c62828,stroke:#ef5350,color:#ffffff
 ```
 
+**Note:** Both containers use the same Docker image (`hermes:latest`) but with different entry points:
+
+- **hermes-scheduler:** Runs `python -m src.main` (background worker with scheduler)
+- **hermes-api:** Uses the default CMD which starts the FastAPI server
+
+This single-image design simplifies builds and deployments while enabling flexible scaling of each service independently.
+
 ---
 
 ## Component Details
@@ -122,6 +129,7 @@ flowchart LR
 **Purpose:** Background worker that runs speed tests on schedule and exports results.
 
 **Key Components:**
+
 - **`main.py`** — Entry point, wires scheduler and watches for trigger file
 - **`SpeedtestRunner`** — Executes speedtest-cli and parses results
 - **`SpeedResult`** — Data model capturing download, upload, ping, jitter, ISP, timestamp
@@ -130,13 +138,16 @@ flowchart LR
 - **Exporters:** CSV, SQLite, Prometheus, Loki
 
 **Exposed Ports:**
+
 - `:8000` — Prometheus `/metrics` scrape endpoint
 
 **Volumes:**
+
 - `/app/logs` — CSV results and application logs
 - `/app/data` — SQLite database, runtime config, trigger file
 
 **Environment Variables:**
+
 - `SPEEDTEST_INTERVAL_MINUTES` — Test frequency (default: 60)
 - `RUN_ON_STARTUP` — Run test immediately on start (default: true)
 - `ENABLED_EXPORTERS` — Comma-separated list: `csv`, `sqlite`, `prometheus`, `loki`
@@ -149,25 +160,30 @@ flowchart LR
 **Purpose:** FastAPI REST API serving the React frontend and providing programmatic access.
 
 **Key Components:**
+
 - **`src/api/main.py`** — FastAPI application with middleware
 - **`src/api/auth.py`** — API key authentication and rate limiting
 - **`src/api/routes/`** — Endpoint modules (config, results, trigger, alerts)
 - **`frontend/dist`** — Built React SPA served as static files
 
 **Exposed Ports:**
+
 - `:8080` — HTTP API and frontend
 
 **Volumes:**
+
 - `/app/logs` — Shared CSV results (for fallback reads)
 - `/app/data` — Shared SQLite database and runtime config
 
 **Environment Variables:**
+
 - `API_KEY` — Optional API key for auth (32+ chars, disables auth if unset)
 - `RATE_LIMIT_PER_MINUTE` — Max write requests per API key per 60s (default: 60)
 - `CORS_ORIGINS` — Comma-separated allowed origins (default: `http://localhost:5173,http://localhost:4173`)
 - `MAX_REQUEST_BODY_SIZE` — Request size limit in bytes (default: 1048576 = 1 MB)
 
 **Middleware:**
+
 - **RequestSizeLimitMiddleware** — Rejects requests > `MAX_REQUEST_BODY_SIZE`
 - **SecurityHeadersMiddleware** — Adds `X-Frame-Options`, `X-Content-Type-Options`, `Cross-Origin-Resource-Policy`, `Referrer-Policy`
 - **CORSMiddleware** — Validates origins, restricts methods (GET, POST, PUT) and headers
@@ -222,12 +238,14 @@ Stored in `data/runtime_config.json`, managed via API or UI:
 **Path:** `logs/results.csv`
 
 **Format:**
+
 ```csv
 timestamp,download_mbps,upload_mbps,ping_ms,jitter_ms,isp
 2026-04-29T12:00:00Z,250.5,35.2,15.3,2.1,Comcast
 ```
 
 **Configuration:**
+
 - `CSV_MAX_ROWS` — Limit total rows (oldest removed first)
 - `CSV_RETENTION_DAYS` — Delete rows older than N days
 
@@ -238,6 +256,7 @@ timestamp,download_mbps,upload_mbps,ping_ms,jitter_ms,isp
 **Path:** `data/hermes.db`
 
 **Table Schema:**
+
 ```sql
 CREATE TABLE results (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -252,6 +271,7 @@ CREATE INDEX idx_timestamp ON results(timestamp DESC);
 ```
 
 **Configuration:**
+
 - `SQLITE_MAX_ROWS` — Limit total rows (oldest removed first)
 - `SQLITE_RETENTION_DAYS` — Delete rows older than N days
 - Uses WAL (Write-Ahead Logging) mode for concurrency
@@ -263,7 +283,8 @@ CREATE INDEX idx_timestamp ON results(timestamp DESC);
 **Endpoint:** `http://<hermes-host>:8000/metrics`
 
 **Metrics:**
-```
+
+```text
 hermes_download_mbps{isp="Comcast"} 250.5
 hermes_upload_mbps{isp="Comcast"} 35.2
 hermes_ping_ms{isp="Comcast"} 15.3
@@ -273,9 +294,11 @@ hermes_test_failure{isp="Comcast"} 0
 ```
 
 **Configuration:**
+
 - `PROMETHEUS_PORT` — Port for `/metrics` endpoint (default: 8000)
 
 **Integration:**
+
 ```yaml
 scrape_configs:
   - job_name: 'hermes'
@@ -291,6 +314,7 @@ scrape_configs:
 **Endpoint:** Pushes to `http://<loki-host>:3100/loki/api/v1/push`
 
 **Log Format:**
+
 ```json
 {
   "streams": [{
@@ -307,6 +331,7 @@ scrape_configs:
 ```
 
 **Configuration:**
+
 - `LOKI_URL` — Loki push endpoint (e.g., `http://loki:3100`)
 - `LOKI_JOB_LABEL` — Job label for log entries (default: `hermes_speedtest`)
 
@@ -321,6 +346,7 @@ scrape_configs:
 **Purpose:** Tracks consecutive test failures and sends notifications when threshold is met.
 
 **Behavior:**
+
 - Maintains failure counter across test runs
 - Resets counter on successful test
 - Sends alerts when `failure_count >= ALERT_FAILURE_THRESHOLD`
@@ -328,12 +354,14 @@ scrape_configs:
 - Supports multiple simultaneous providers
 
 **Providers:**
+
 - **Webhook** — POST JSON to custom HTTP endpoint
 - **Gotify** — Self-hosted push notifications
 - **ntfy** — Simple pub-sub notifications
 - **Apprise** — 100+ services via Apprise API
 
 **Configuration:**
+
 - Via UI Settings page (recommended)
 - Via environment variables
 - Stored in `data/runtime_config.json`
@@ -349,6 +377,7 @@ See [Alert Configuration](alerts) for detailed setup guides.
 **Hermes exposes metrics** for Prometheus scraping:
 
 1. **Configure Prometheus scrape job:**
+
    ```yaml
    scrape_configs:
      - job_name: 'hermes'
@@ -358,12 +387,14 @@ See [Alert Configuration](alerts) for detailed setup guides.
    ```
 
 2. **Verify metrics:**
+
    ```bash
    curl http://localhost:8000/metrics
    ```
 
 3. **Query in Grafana with PromQL:**
-   ```
+
+   ```text
    hermes_download_mbps{job="hermes"}
    ```
 
@@ -372,17 +403,20 @@ See [Alert Configuration](alerts) for detailed setup guides.
 **Hermes pushes logs** directly to Loki:
 
 1. **Set `LOKI_URL` environment variable:**
+
    ```bash
    LOKI_URL=http://loki:3100
    ```
 
 2. **Enable loki exporter:**
+
    ```bash
    ENABLED_EXPORTERS=csv,sqlite,loki
    ```
 
 3. **Query in Grafana with LogQL:**
-   ```
+
+   ```text
    {job="hermes_speedtest"} | json | download_mbps > 100
    ```
 
@@ -394,6 +428,7 @@ See [Alert Configuration](alerts) for detailed setup guides.
 2. In Grafana: **+ → Import → Upload JSON file**
 3. Select Prometheus and Loki datasources
 4. Dashboard includes:
+
    - Download/upload trend charts
    - Ping/jitter statistics
    - Test failure annotations
@@ -403,7 +438,7 @@ See [Alert Configuration](alerts) for detailed setup guides.
 
 ## Project Structure
 
-```
+```text
 Hermes/
 ├── src/
 │   ├── main.py                        # Entry point — wires scheduler, dispatcher, and exporters

@@ -13,6 +13,7 @@ This review examined the Hermes codebase for defensive coding practices includin
 **Overall Assessment:** ✅ **Approved for v1.0** with recommended improvements
 
 **Findings:**
+
 - 15 issues identified (4 high priority, 7 medium priority, 4 low priority)
 - No critical security vulnerabilities (these were addressed in the security audit)
 - Most issues are related to input validation and error handling edge cases
@@ -29,9 +30,11 @@ This review examined the Hermes codebase for defensive coding practices includin
 **Issue:** The `_get_int()` helper catches `ValueError` on invalid integers but doesn't validate that the parsed value is within acceptable ranges. This could allow negative values or zero where positive integers are expected.
 
 **Example:**
+
 ```python
 SPEEDTEST_INTERVAL_MINUTES: int = _get_int("SPEEDTEST_INTERVAL_MINUTES", 60)
 ```
+
 If someone sets `SPEEDTEST_INTERVAL_MINUTES=-10`, it would be accepted and could break the scheduler.
 
 **Recommendation:** Add range validation to `_get_int()` or create a specialized `_get_positive_int()`:
@@ -50,6 +53,7 @@ def _get_positive_int(key: str, default: int, minimum: int = 1) -> int:
 ```
 
 Then use it for values that must be positive:
+
 ```python
 SPEEDTEST_INTERVAL_MINUTES: int = _get_positive_int("SPEEDTEST_INTERVAL_MINUTES", 60, minimum=1)
 PROMETHEUS_PORT: int = _get_positive_int("PROMETHEUS_PORT", 8000, minimum=1)
@@ -325,6 +329,7 @@ class SpeedtestRunner:
 ```
 
 Then update `main.py`:
+
 ```python
 def main() -> None:
     # ...
@@ -649,6 +654,7 @@ def __init__(self, port: int = 8000) -> None:
 **Location:** [src/exporters/loki_exporter.py](../src/exporters/loki_exporter.py) - `__init__()` method
 
 **Issue:** While the constructor validates the URL scheme, it doesn't check for:
+
 - Empty hostname
 - Invalid URL format
 - URLs with authentication credentials embedded (which could be logged)
@@ -829,6 +835,7 @@ The following defensive practices were observed and are working well:
 ## Implementation Priority
 
 **Before v1.0 Release (Must Fix):**
+
 - ✅ Issue #2: Runtime config validation (High Priority) — **IMPLEMENTED**
 - ✅ Issue #4: Speed result validation (High Priority) — **IMPLEMENTED**
 - ✅ Issue #3: Shared state thread safety — **IMPLEMENTED**
@@ -839,6 +846,7 @@ The following defensive practices were observed and are working well:
 - ✅ Issue #11: Better Prometheus error handling — **IMPLEMENTED**
 
 **Post v1.0 Release (Nice to Have):**
+
 - Issue #1: Config range validation
 - Issue #6: Configurable retry logic with backoff
 - Issue #8: File locking for triggers (Windows compatibility needed)
@@ -853,6 +861,7 @@ The following defensive practices were observed and are working well:
 **Implementation Date:** April 30, 2026
 
 **Changes Made:**
+
 - Refactored `load()` function in [src/runtime_config.py](src/runtime_config.py) to validate JSON structure
 - Added validation helper functions for each config field:
   - `_validate_interval_minutes()` - enforces 1-10080 range
@@ -865,10 +874,12 @@ The following defensive practices were observed and are working well:
 - All invalid values are logged and discarded, preventing corrupted config from crashing the app
 
 **Tests Updated:**
+
 - All existing tests pass (344 tests)
 - Runtime config validation now prevents invalid data from propagating
 
 **Impact:**
+
 - Protects against corrupted or malicious JSON in runtime_config.json
 - Provides clear logging when invalid values are encountered
 - Maintains backward compatibility with existing configs
@@ -880,6 +891,7 @@ The following defensive practices were observed and are working well:
 **Implementation Date:** April 30, 2026
 
 **Changes Made:**
+
 - Added `__post_init__()` validation to `SpeedResult` dataclass in [src/models/speed_result.py](src/models/speed_result.py)
 - Validates all numeric fields are non-negative:
   - `download_mbps >= 0`
@@ -891,10 +903,12 @@ The following defensive practices were observed and are working well:
 - Raises clear `ValueError` messages for invalid values
 
 **Tests Updated:**
+
 - Updated `test_loki_timestamp_ns_with_naive_datetime` to use timezone-aware datetime
 - All 344 tests pass with new validation
 
 **Impact:**
+
 - Catches invalid speedtest data at creation time
 - Prevents negative speeds or invalid timestamps from propagating through exporters
 - Ensures consistent timezone handling across the application
@@ -907,14 +921,17 @@ The following defensive practices were observed and are working well:
 **Implementation Date:** April 30, 2026
 
 **Changes Made:**
+
 - Added `threading.Lock` to [src/shared_state.py](src/shared_state.py)
 - Wrapped `set_alert_manager()` and `get_alert_manager()` with lock acquisition
 - Future-proofs against potential architecture changes
 
 **Tests Updated:**
+
 - All 344 tests pass with thread-safe access
 
 **Impact:**
+
 - Prevents potential race conditions in shared state access
 - Safe for multi-threaded environments
 - No performance impact (lock contention is negligible)
@@ -926,15 +943,18 @@ The following defensive practices were observed and are working well:
 **Implementation Date:** April 30, 2026
 
 **Changes Made:**
+
 - Added `exc_info=True` to error logging in [src/main.py](src/main.py) `run_once()` function
 - Captures full stack traces for better debugging
 - Added development mode check for critical logging
 - Makes failures more visible during development
 
 **Tests Updated:**
+
 - All existing tests pass
 
 **Impact:**
+
 - Better debugging information for speedtest failures
 - More visible failures in development environment
 - Helps identify root causes faster
@@ -946,16 +966,19 @@ The following defensive practices were observed and are working well:
 **Implementation Date:** April 30, 2026
 
 **Changes Made:**
+
 - Modified `_prune()` method in [src/exporters/csv_exporter.py](src/exporters/csv_exporter.py)
 - Write to temporary file (`.tmp`) before replacing original
 - Atomic file replacement using `Path.replace()`
 - Cleanup of temp file on failure
 
 **Tests Updated:**
+
 - All existing CSV exporter tests pass
 - Atomic operations prevent data corruption
 
 **Impact:**
+
 - Prevents CSV corruption if process crashes during pruning
 - Prevents partial file writes
 - Safe for concurrent reads during pruning
@@ -967,6 +990,7 @@ The following defensive practices were observed and are working well:
 **Implementation Date:** April 30, 2026
 
 **Changes Made:**
+
 - Added `_validate_http_url()` helper function in [src/services/alert_providers.py](src/services/alert_providers.py)
 - Validates URL scheme (http/https only)
 - Validates hostname presence
@@ -974,10 +998,12 @@ The following defensive practices were observed and are working well:
 - Applied to all providers: WebhookProvider, GotifyProvider, NtfyProvider, AppriseProvider
 
 **Tests Updated:**
+
 - All 344 tests pass
 - Existing provider tests verify validation
 
 **Impact:**
+
 - Prevents invalid URLs from environment variables
 - Clearer error messages on misconfiguration
 - Prevents crashes on provider initialization
@@ -990,15 +1016,18 @@ The following defensive practices were observed and are working well:
 **Implementation Date:** April 30, 2026
 
 **Changes Made:**
+
 - Modified `export()` method in [src/exporters/sqlite_exporter.py](src/exporters/sqlite_exporter.py)
 - Added 30-second timeout to lock acquisition
 - Explicit `acquire(timeout=30.0)` with error on timeout
 - Proper lock release in finally block
 
 **Tests Updated:**
+
 - All existing SQLite exporter tests pass
 
 **Impact:**
+
 - Prevents indefinite blocking on lock acquisition
 - Clear error message when deadlock occurs
 - Allows debugging of lock contention issues
@@ -1010,6 +1039,7 @@ The following defensive practices were observed and are working well:
 **Implementation Date:** April 30, 2026
 
 **Changes Made:**
+
 - Enhanced `__init__()` method in [src/exporters/prometheus_exporter.py](src/exporters/prometheus_exporter.py)
 - Added port range validation (1-65535)
 - Specific error message for port conflicts ("Address already in use")
@@ -1017,9 +1047,11 @@ The following defensive practices were observed and are working well:
 - Catches OSError from `start_http_server()`
 
 **Tests Updated:**
+
 - All existing Prometheus exporter tests pass
 
 **Impact:**
+
 - User-friendly error messages on port conflicts
 - Suggests corrective action (set PROMETHEUS_PORT)
 - Prevents cryptic OSError messages
@@ -1044,18 +1076,21 @@ To verify these defensive improvements:
 The Hermes codebase demonstrates solid engineering practices with good separation of concerns, comprehensive testing, and extensive logging. All critical and medium-priority defensive coding issues have been addressed and tested.
 
 **Implementation Summary:**
+
 - ✅ 8 issues implemented (2 critical + 6 medium priority)
 - ✅ All 344 tests passing
 - ✅ No static analysis errors
 - ✅ Production-ready for v1.0 release
 
 **Remaining Items (Post v1.0):**
+
 - 4 low-priority edge case improvements
 - Optional: Configurable retry logic with backoff
 - Optional: File locking for triggers (requires Windows/Unix compatibility)
 - Optional: Config range validation helper functions
 
 **Next Steps:**
+
 1. ✅ All critical defensive fixes complete
 2. Proceed with remaining v1.0 checklist items (best practices review, modernization, etc.)
 3. Consider GitHub issues for post-v1.0 improvements

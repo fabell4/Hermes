@@ -10,6 +10,7 @@
 ## Executive Summary
 
 This review identifies opportunities to improve code quality through:
+
 - **Reducing code duplication** (especially provider registration logic)
 - **Standardizing type hints** for consistency
 - **Extracting constants** for magic strings
@@ -35,11 +36,13 @@ This review identifies opportunities to improve code quality through:
 ### 🔴 HIGH Priority
 
 #### Issue #1: Duplicate Provider Registration Logic
+
 **Files:** `src/main.py`, `src/api/main.py`  
 **Severity:** High — Code duplication across 2 files (~150 lines duplicated)
 
 **Problem:**
 Both `main.py` and `api/main.py` contain nearly identical functions for registering alert providers:
+
 - `_register_webhook_provider()`
 - `_register_gotify_provider()`
 - `_register_ntfy_provider()`
@@ -49,6 +52,7 @@ Both `main.py` and `api/main.py` contain nearly identical functions for register
 The logic differs only in whether providers check an `enabled` flag (API version checks it, main.py version doesn't always).
 
 **Impact:**
+
 - Changes to provider registration must be made in two places
 - Risk of inconsistency between API and main processes
 - Increased maintenance burden
@@ -57,6 +61,7 @@ The logic differs only in whether providers check an `enabled` flag (API version
 Extract provider registration logic to a shared helper module (e.g., `src/services/alert_provider_factory.py`) with a single implementation that handles both use cases.
 
 **Proposed Solution:**
+
 ```python
 # src/services/alert_provider_factory.py
 def register_alert_providers(
@@ -81,16 +86,19 @@ def register_alert_providers(
 ---
 
 #### Issue #2: Type Hint Inconsistency
+
 **Files:** Multiple  
 **Severity:** High — Inconsistent patterns across codebase
 
 **Problem:**
 Type hints use inconsistent styles:
+
 - Some files use `from __future__ import annotations` with `str | None` (modern Python 3.10+)
 - Other files use `Optional[str]` without the future import (older style)
 - Some files mix both styles
 
 **Examples:**
+
 ```python
 # Modern style (with future import)
 from __future__ import annotations
@@ -102,6 +110,7 @@ def foo(x: Optional[str]) -> Optional[int]: ...
 ```
 
 **Files Using Modern Style:**
+
 - `src/api/auth.py`
 - `src/api/routes/*.py`
 - `src/services/alert_manager.py`
@@ -110,12 +119,14 @@ def foo(x: Optional[str]) -> Optional[int]: ...
 - `src/exporters/loki_exporter.py`
 
 **Files Using Mixed/Older Style:**
+
 - `src/config.py` — uses `str | None` but no future import
 - `src/models/speed_result.py` — uses `Optional[]` without future import
 - `src/runtime_config.py` — no type hints for some return values
 - `src/main.py` — no future import, some functions untyped
 
 **Impact:**
+
 - Inconsistent code style
 - Harder to maintain
 - Confusing for contributors
@@ -129,15 +140,18 @@ Standardize on modern Python 3.10+ style with `from __future__ import annotation
 ---
 
 #### Issue #3: Magic String Constants
+
 **Files:** `src/main.py`, `src/api/main.py`, `src/api/routes/config.py`, `src/result_dispatcher.py`  
 **Severity:** High — String literals used throughout codebase
 
 **Problem:**
 Provider and exporter names are hardcoded strings scattered throughout the code:
+
 - Provider names: `"webhook"`, `"gotify"`, `"ntfy"`, `"apprise"`
 - Exporter names: `"csv"`, `"prometheus"`, `"loki"`, `"sqlite"`
 
 **Examples:**
+
 ```python
 # In main.py
 EXPORTER_REGISTRY = {
@@ -151,6 +165,7 @@ if "webhook" in providers:
 ```
 
 **Impact:**
+
 - Typos can cause runtime errors
 - Harder to refactor
 - No IDE autocomplete
@@ -177,6 +192,7 @@ PROVIDER_APPRISE = "apprise"
 ```
 
 Then use them throughout:
+
 ```python
 from src.constants import EXPORTER_CSV, PROVIDER_WEBHOOK
 
@@ -194,12 +210,14 @@ EXPORTER_REGISTRY = {
 ### 🟡 MEDIUM Priority
 
 #### Issue #4: Config Fallback Pattern Repetition ✅ IMPLEMENTED
+
 **Files:** `src/main.py`, `src/api/main.py`, `src/services/alert_provider_factory.py`  
 **Severity:** Medium — Repeated pattern, not a critical issue  
 **Implementation Date:** 2026-04-30
 
 **Problem:****
 The pattern of retrieving config values with runtime override and environment fallback is repeated:
+
 ```python
 webhook_url = (
     providers_config.get("webhook", {}).get("url") or config.ALERT_WEBHOOK_URL
@@ -208,6 +226,7 @@ gotify_url = gotify_config.get("url") or config.ALERT_GOTIFY_URL
 ```
 
 **Impact:**
+
 - Slightly verbose
 - Pattern repeated ~15+ times
 - Could be simplified
@@ -231,6 +250,7 @@ def get_config_value(
 ```
 
 Usage:
+
 ```python
 webhook_url = get_config_value(
     providers_config.get("webhook", {}), "url", config.ALERT_WEBHOOK_URL
@@ -243,6 +263,7 @@ webhook_url = get_config_value(
 **Breaking Changes:** None
 
 **✅ IMPLEMENTATION:**
+
 - Created `_get_config_value()` helper function in `alert_provider_factory.py`
 - Refactored all provider registration to use consistent helper
 - Simplified 10+ config fallback patterns
@@ -251,16 +272,19 @@ webhook_url = get_config_value(
 ---
 
 #### Issue #5: Import Organization (PEP 8) ✅ IMPLEMENTED
+
 **Files:** Multiple  
 **Severity:** Medium — Style consistency
 
 **Problem:**
 Some files don't follow PEP 8 import grouping:
+
 1. Standard library imports
 2. Related third-party imports
 3. Local application/library imports
 
 **Example in `src/main.py`:**
+
 ```python
 import logging
 import sys
@@ -273,6 +297,7 @@ from .services.health_server import HealthServer  # Local
 ```
 
 **Should be:**
+
 ```python
 # Standard library
 import logging
@@ -293,6 +318,7 @@ from .services.health_server import HealthServer
 ```
 
 **Impact:**
+
 - Minor style inconsistency
 - Does not affect functionality
 
@@ -303,6 +329,7 @@ Reorganize imports in all modules according to PEP 8. Consider using `isort` to 
 **Breaking Changes:** None
 
 **✅ IMPLEMENTATION:**
+
 - Reorganized imports in `main.py`, `config.py`, `api/main.py`, `alert_providers.py`
 - Now follows PEP 8: Standard library → Third-party → Local
 - All imports properly grouped with section comments
@@ -311,11 +338,13 @@ Reorganize imports in all modules according to PEP 8. Consider using `isort` to 
 ---
 
 #### Issue #6: Long Function — `_poll_once()`
+
 **File:** `src/main.py`  
 **Severity:** Medium — Function complexity
 
 **Problem:**
 The `_poll_once()` function handles 5 different runtime config changes:
+
 1. Interval changes
 2. Exporter changes
 3. Alert config changes
@@ -328,6 +357,7 @@ While already extracted from the main loop (good!), it's still doing a lot.
 **Current State:** ~50 lines with multiple responsibilities
 
 **Impact:**
+
 - Slightly harder to test each behavior in isolation
 - Function does multiple things
 
@@ -356,11 +386,13 @@ def _poll_once(...) -> tuple[...]:
 ---
 
 #### Issue #7: Database Connection Helper Duplication Risk
+
 **File:** `src/api/routes/results.py`  
 **Severity:** Medium — Potential future duplication
 
 **Problem:**
 The `_connect()` function in `results.py` provides a clean pattern for SQLite connections:
+
 ```python
 def _connect() -> sqlite3.Connection:
     if not DB_PATH.exists():
@@ -374,6 +406,7 @@ def _connect() -> sqlite3.Connection:
 If other routes need database access, this pattern will be duplicated.
 
 **Impact:**
+
 - Currently only used in one module (fine)
 - Risk of duplication if other routes need DB access
 
@@ -390,11 +423,13 @@ If other routes need database access, this pattern will be duplicated.
 ### 🟢 LOW Priority
 
 #### Issue #8: Missing `_get_str()` Helper
+
 **File:** `src/config.py`  
 **Severity:** Low — Consistency/completeness
 
 **Problem:**
 Config has helpers for int, bool, and CSV list parsing:
+
 - `_get_int()`
 - `_get_bool()`
 - `_get_csv_list()`
@@ -402,6 +437,7 @@ Config has helpers for int, bool, and CSV list parsing:
 But no `_get_str()` for consistency. Most string configs use `os.getenv()` directly.
 
 **Impact:**
+
 - Minor inconsistency
 - No functional issue (strings don't need parsing)
 
@@ -424,11 +460,13 @@ def _get_str(key: str, default: str) -> str:
 ---
 
 #### Issue #9: Hardcoded Timeout Values
+
 **Files:** `src/services/alert_providers.py`  
 **Severity:** Low — Minor flexibility issue
 
 **Problem:**
 HTTP timeout for alert providers is hardcoded to 10 seconds in multiple classes:
+
 ```python
 def __init__(self, url: str, timeout: int = 10): ...
 ```
@@ -436,6 +474,7 @@ def __init__(self, url: str, timeout: int = 10): ...
 While this has a default parameter (good!), there's no global constant.
 
 **Impact:**
+
 - If we want to change default timeout globally, must update multiple classes
 - Current default is reasonable
 
@@ -458,22 +497,26 @@ class WebhookProvider:
 ---
 
 #### Issue #10: Error Message Constants
+
 **File:** `src/services/alert_providers.py`  
 **Severity:** Low — Consistency
 
 **Problem:**
 The file defines one error constant:
+
 ```python
 _ERR_TIMEOUT_POSITIVE = "Timeout must be positive"
 ```
 
 But other error messages are inline strings:
+
 ```python
 raise ValueError("Webhook URL cannot be empty")
 raise ValueError("Gotify token cannot be empty")
 ```
 
 **Impact:**
+
 - Minor inconsistency
 - No functional impact
 
@@ -489,11 +532,13 @@ Either define all error messages as constants (if they might be tested or reused
 ---
 
 #### Issue #11: Runtime Config Validator Pattern
+
 **File:** `src/runtime_config.py`  
 **Severity:** Low — Extensibility
 
 **Problem:**
 The `load()` function manually calls each validator:
+
 ```python
 _validate_interval_minutes(data, sanitized)
 _validate_enabled_exporters(data, sanitized)
@@ -506,6 +551,7 @@ If many more config fields are added, this list grows.
 **Current State:** Works well with current number of validators (~6)
 
 **Alternative Pattern:**
+
 ```python
 VALIDATORS = [
     _validate_interval_minutes,
@@ -525,6 +571,7 @@ def load() -> dict:
 ```
 
 **Impact:**
+
 - Current approach is clear and explicit
 - Registry pattern adds indirection
 
@@ -537,16 +584,19 @@ Keep current explicit approach. It's clear and easy to understand. Registry patt
 ---
 
 #### Issue #12: Docstring Completeness
+
 **Files:** Various  
 **Severity:** Low — Documentation quality
 
 **Problem:**
 Most functions have good docstrings, but some are missing or minimal:
+
 - `src/config.py` helpers have docstrings ✅
 - `src/main.py` top-level functions have docstrings ✅
 - Some internal helpers in `runtime_config.py` have minimal docstrings
 
 **Examples:**
+
 ```python
 def _ensure_dir() -> None:
     RUNTIME_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -554,6 +604,7 @@ def _ensure_dir() -> None:
 ```
 
 **Impact:**
+
 - Minor documentation gaps
 - Code is generally self-documenting
 
@@ -567,6 +618,7 @@ Add docstrings to internal helpers for completeness. Not urgent.
 ---
 
 #### Issue #13: Long Line Length
+
 **Files:** Various  
 **Severity:** Low — Style consistency
 
@@ -574,6 +626,7 @@ Add docstrings to internal helpers for completeness. Not urgent.
 Some lines exceed 100 characters, though most code follows reasonable line length.
 
 **Impact:**
+
 - Minor readability concern
 - Not enforced by current tooling
 
@@ -589,25 +642,29 @@ Consider adding line length check to ruff configuration (`line-length = 100` in 
 ## Implementation Summary
 
 ### ✅ Completed (HIGH Priority)
+
 1. **Issue #1: Duplicate Provider Registration** — Created `alert_provider_factory.py` module ✅
 2. **Issue #2: Type Hint Inconsistency** — Standardized to Python 3.10+ style ✅
 3. **Issue #3: Magic String Constants** — Created `constants.py` module ✅
 
 ### ✅ Completed (MEDIUM Priority)
+
 4. **Issue #4: Config Fallback Pattern** — Created `_get_config_value()` helper ✅
-5. **Issue #5: Import Organization** — Reorganized per PEP 8 ✅
+2. **Issue #5: Import Organization** — Reorganized per PEP 8 ✅
 
 ### ⏸️ Deferred (MEDIUM Priority)
+
 6. **Issue #6: Long Function `_poll_once()`** — Marked as optional, current implementation acceptable
-7. **Issue #7: Database Connection Helper** — Monitor only, no change needed
+2. **Issue #7: Database Connection Helper** — Monitor only, no change needed
 
 ### ⏸️ Deferred (LOW Priority)  
+
 8. **Issue #8: Type Alias Extraction** — Nice-to-have, not critical
-9. **Issue #9: Hardcoded Timeout Values** — Already implemented (Issue #3)
-10. **Issue #10: Repeated Error Strings** — Low value improvement
-11. **Issue #11: Validator Registry Pattern** — Current approach preferred
-12. **Issue #12: Docstring Completeness** — Optional quality improvement
-13. **Issue #13: Long Line Length** — Cosmetic concern
+2. **Issue #9: Hardcoded Timeout Values** — Already implemented (Issue #3)
+3. **Issue #10: Repeated Error Strings** — Low value improvement
+4. **Issue #11: Validator Registry Pattern** — Current approach preferred
+5. **Issue #12: Docstring Completeness** — Optional quality improvement
+6. **Issue #13: Long Line Length** — Cosmetic concern
 
 ---
 
@@ -617,12 +674,14 @@ Consider adding line length check to ruff configuration (`line-length = 100` in 
 **Status:** ✅ **COMPLETE - ALL CRITICAL & HIGH PRIORITY ISSUES IMPLEMENTED**
 
 **Implementation Results:**
+
 - ✅ All 3 HIGH priority issues: **IMPLEMENTED**
 - ✅ 2 of 4 MEDIUM priority issues: **IMPLEMENTED**  
 - ⏸️ 2 MEDIUM priority issues: **DEFERRED** (optional/monitor-only)
 - ⏸️ 6 LOW priority issues: **DEFERRED** to post-v1.0
 
 **Verification:**
+
 - ✅ All 344 tests passing
 - ✅ mypy: No type errors
 - ✅ ruff: All checks passed
@@ -647,6 +706,7 @@ def _ensure_dir() -> None:
 ---
 
 #### Issue #13: `__future__` Import Placement
+
 **Files:** Several  
 **Severity:** Low — PEP 8 style
 
@@ -680,6 +740,7 @@ import logging
 ### For v1.0 Release
 
 **Must Implement (HIGH):**
+
 1. ✅ Extract provider registration to shared module (Issue #1)
 2. ✅ Standardize type hints across codebase (Issue #2)
 3. ✅ Extract magic strings to constants (Issue #3)
@@ -689,6 +750,7 @@ import logging
 5. ⚡ Consider extracting config fallback helper (Issue #4)
 
 **May Defer (LOW):**
+
 - All LOW priority issues can be deferred to post-v1.0 without impact
 
 ---
@@ -700,6 +762,7 @@ import logging
 **Goal:** Eliminate duplicate provider registration logic
 
 **Steps:**
+
 1. Create `src/services/alert_provider_factory.py`
 2. Extract unified provider registration functions
 3. Update `main.py` and `api/main.py` to use shared functions
@@ -716,6 +779,7 @@ import logging
 **Goal:** Consistent modern type hints throughout codebase
 
 **Steps:**
+
 1. Add `from __future__ import annotations` to all modules
 2. Convert all `Optional[T]` to `T | None`
 3. Convert all `Union[A, B]` to `A | B`
@@ -732,6 +796,7 @@ import logging
 **Goal:** Replace magic strings with named constants
 
 **Steps:**
+
 1. Create `src/constants.py` with exporter and provider name constants
 2. Update all files to import and use constants
 3. Run all tests to verify string matching still works
@@ -747,6 +812,7 @@ import logging
 **Goal:** PEP 8 compliant import organization
 
 **Steps:**
+
 1. Install `isort`: `pip install isort`
 2. Configure `pyproject.toml` or `.isort.cfg`
 3. Run `isort src/ tests/` to auto-organize
@@ -761,10 +827,12 @@ import logging
 ## Conflicts with Previous Reviews
 
 **Security Audit:** ✅ No conflicts  
+
 - These changes do not affect security measures
 - Authentication, rate limiting, SSRF protection remain unchanged
 
 **Defensive Coding Review:** ✅ No conflicts  
+
 - Validation logic remains unchanged
 - Thread safety improvements are preserved
 - Error handling patterns are maintained
@@ -777,7 +845,7 @@ Each implementation phase should include:
 
 1. **Unit Tests:** Verify all affected functions work correctly
 2. **Integration Tests:** Ensure components work together
-3. **Manual Testing:** 
+3. **Manual Testing:**
    - Start scheduler process (main.py)
    - Start API process (uvicorn)
    - Verify provider registration works in both
@@ -795,6 +863,7 @@ Each implementation phase should include:
 ## Conclusion
 
 The Hermes codebase is **well-structured and maintainable**. Issues identified are primarily about:
+
 - Reducing duplication (provider registration)
 - Improving consistency (type hints, constants)
 - Minor organizational improvements (imports)

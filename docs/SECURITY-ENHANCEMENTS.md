@@ -18,16 +18,19 @@ Comprehensive security audit and implementation of critical security enhancement
 **File:** [`src/config.py`](../src/config.py)
 
 **Change:**
+
 - Added mandatory 32-character minimum length for API keys
 - Application exits on startup with clear error message if key is too short
 - Provides secure key generation command in error message
 
 **Benefits:**
+
 - Prevents weak keys like "password" or "123"
 - Forces users to generate cryptographically secure keys
 - Fails fast at startup (before any requests are accepted)
 
 **Example:**
+
 ```bash
 # If API_KEY is set but too short:
 API_KEY must be at least 32 characters for security.
@@ -41,11 +44,13 @@ Generate a secure key with: python -c 'import secrets; print(secrets.token_urlsa
 **File:** [`src/api/routes/alerts.py`](../src/api/routes/alerts.py)
 
 **Change:**
+
 - Added comprehensive URL validation for all alert provider URLs (webhook, Gotify, ntfy, Apprise)
 - Validates before persisting configuration
 - Returns 422 with descriptive error messages on invalid URLs
 
 **Blocks:**
+
 - ❌ Non-HTTP(S) schemes: `file://`, `ftp://`, `data:`, etc.
 - ❌ Localhost: `localhost`, `127.0.0.1`, `::1`, `0.0.0.0`
 - ❌ Private IP ranges: `10.x.x.x`, `192.168.x.x`, `172.16-31.x.x` (RFC 1918)
@@ -54,11 +59,13 @@ Generate a secure key with: python -c 'import secrets; print(secrets.token_urlsa
 - ❌ URLs without hostnames
 
 **Allows:**
+
 - ✅ Public HTTPS URLs: `https://hooks.example.com/webhook`
 - ✅ Public HTTP URLs: `http://public-server.com:8080/api`
 - ✅ Empty URLs (disabled providers)
 
 **Benefits:**
+
 - Prevents attackers from targeting internal services (Redis, databases)
 - Blocks access to cloud metadata endpoints (AWS EC2 credentials)
 - Protects private network infrastructure
@@ -73,10 +80,12 @@ Generate a secure key with: python -c 'import secrets; print(secrets.token_urlsa
 **File:** [`src/api/auth.py`](../src/api/auth.py)
 
 **Change:**
+
 - Added `Retry-After: 60` header to 429 responses
 - Clients now know when to retry instead of hammering the server
 
 **Benefits:**
+
 - Better API client behavior
 - Clearer rate limit communication
 - Follows HTTP best practices
@@ -88,11 +97,13 @@ Generate a secure key with: python -c 'import secrets; print(secrets.token_urlsa
 **File:** [`src/api/main.py`](../src/api/main.py)
 
 **Changes:**
+
 - Added `X-Frame-Options: DENY` — prevents clickjacking attacks
 - Added `Referrer-Policy: strict-origin-when-cross-origin` — limits referrer leakage
 - Retained existing `X-Content-Type-Options: nosniff` and `Cross-Origin-Resource-Policy: same-origin`
 
 **Benefits:**
+
 - Defense-in-depth against XSS and clickjacking
 - Better privacy protection
 - Follows OWASP secure headers recommendations
@@ -109,6 +120,7 @@ Generate a secure key with: python -c 'import secrets; print(secrets.token_urlsa
 ```
 
 **Test Coverage by Category:**
+
 - Authentication: 7 tests
 - Rate Limiting: 7 tests  
 - SSRF Protection: 15 tests (new)
@@ -124,7 +136,8 @@ Generate a secure key with: python -c 'import secrets; print(secrets.token_urlsa
 
 ## Documentation
 
-### Created:
+### Created
+
 1. **[docs/SECURITY-AUDIT.md](./SECURITY-AUDIT.md)** — Comprehensive 50-page security audit report
    - Threat model analysis
    - Detailed findings with risk ratings
@@ -143,6 +156,7 @@ Generate a secure key with: python -c 'import secrets; print(secrets.token_urlsa
 ## Code Quality
 
 All changes pass:
+
 - ✅ Pylance type checking (0 errors)
 - ✅ Ruff linting (0 warnings)  
 - ✅ Mypy type validation
@@ -169,11 +183,13 @@ All changes pass:
 ⚠️ **Potential Breaking Change:** API key length enforcement
 
 **Impact:**
+
 - Users with API keys shorter than 32 characters will need to regenerate them
 - Application will exit on startup with error message (not a silent failure)
 - Only affects users who have `API_KEY` environment variable set
 
 **Migration:**
+
 ```bash
 # Generate a new secure key
 python -c 'import secrets; print(secrets.token_urlsafe(32))'
@@ -206,6 +222,7 @@ From the security audit, these items were deferred as nice-to-have:
 **Approval:** ✅ **APPROVED FOR v1.0 RELEASE**
 
 All critical and high-priority security issues have been addressed. The codebase demonstrates:
+
 - Strong authentication with timing-attack protection
 - Comprehensive SSRF defense
 - Proper input validation throughout
