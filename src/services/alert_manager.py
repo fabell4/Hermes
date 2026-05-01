@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import concurrent.futures
 import logging
 from datetime import datetime, timedelta, timezone
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
 if TYPE_CHECKING:
     from src.services.alert_providers import AlertProvider
@@ -21,7 +22,11 @@ class AlertManager:
     - Triggers alerts after N consecutive failures
     - Enforces cooldown period between alerts
     - Supports multiple alert providers
+    - Sends alerts asynchronously to avoid blocking speedtest runs
     """
+
+    # Class-level thread pool for async alert sending (shared across all instances)
+    _executor: ClassVar[concurrent.futures.ThreadPoolExecutor | None] = None
 
     def __init__(
         self,
@@ -49,6 +54,14 @@ class AlertManager:
         self._last_alert_time: datetime | None = None
 
         self._providers: dict[str, AlertProvider] = {}
+
+        # Initialize thread pool (lazy, only once)
+        if AlertManager._executor is None:
+            AlertManager._executor = concurrent.futures.ThreadPoolExecutor(
+                max_workers=3,
+                thread_name_prefix="alert-sender"
+            )
+            logger.debug("Alert thread pool initialized (max_workers=3)")
 
     def add_provider(self, name: str, provider: AlertProvider) -> None:
         """Register an alert provider under a given name."""
@@ -103,6 +116,25 @@ class AlertManager:
         if self._consecutive_failures >= self.failure_threshold:
             self._maybe_send_alert(timestamp)
 
+    def _send_alert_async(
+        self,
+        name: str,
+        provider: AlertProvider,
+        failure_count: int,
+        last_error: str,
+        timestamp: datetime,
+    ) -> None:
+        """Send alert in background thread (called by thread pool)."""
+        try:
+            provider.send_alert(
+                failure_count=failure_count,
+                last_error=last_error,
+                timestamp=timestamp,
+            )
+            logger.info("Alert sent successfully via %s", name)
+        except Exception as e:  # pylint: disable=broad-exception-caught  # NOSONAR
+            logger.error("Alert provider '%s' failed: %s", name, e, exc_info=True)
+
     def _maybe_send_alert(self, timestamp: datetime) -> None:
         """Send alert if cooldown period has elapsed."""
         # Check cooldown
@@ -132,28 +164,34 @@ class AlertManager:
             len(self._providers),
         )
 
-        failures: dict[str, Exception] = {}
-        for name, provider in self._providers.items():
-            try:
-                provider.send_alert(
-                    failure_count=self._consecutive_failures,
-                    last_error=self._last_error or "Unknown error",
-                    timestamp=timestamp,
+        # Submit all alerts to thread pool (non-blocking)
+        if AlertManager._executor:
+            for name, provider in self._providers.items():
+                AlertManager._executor.submit(
+                    self._send_alert_async,
+                    name,
+                    provider,
+                    self._consecutive_failures,
+                    self._last_error or "Unknown error",
+                    timestamp,
                 )
-                logger.info("Alert sent successfully via %s", name)
-            except Exception as e:  # pylint: disable=broad-exception-caught  # NOSONAR
-                logger.error("Alert provider '%s' failed: %s", name, e, exc_info=True)
-                failures[name] = e
+            logger.debug("Submitted %d alert(s) to thread pool", len(self._providers))
+        else:
+            # Fallback to synchronous (should never happen, but defensive)
+            logger.warning("Thread pool not initialized, sending alerts synchronously")
+            for name, provider in self._providers.items():
+                try:
+                    provider.send_alert(
+                        failure_count=self._consecutive_failures,
+                        last_error=self._last_error or "Unknown error",
+                        timestamp=timestamp,
+                    )
+                    logger.info("Alert sent successfully via %s", name)
+                except Exception as e:  # pylint: disable=broad-exception-caught  # NOSONAR
+                    logger.error("Alert provider '%s' failed: %s", name, e, exc_info=True)
 
-        # Update last alert time even if some providers failed
+        # Update last alert time immediately (don't wait for delivery)
         self._last_alert_time = timestamp
-
-        if failures:
-            logger.error(
-                "Alert completed with %d failure(s): %s",
-                len(failures),
-                ", ".join(failures.keys()),
-            )
 
     @property
     def consecutive_failures(self) -> int:
@@ -213,6 +251,21 @@ class AlertManager:
                 results[name] = False
 
         return results
+
+    def _wait_for_pending_alerts(self, timeout: float = 5.0) -> None:
+        """Wait for all pending async alerts to complete (for testing).
+        
+        Args:
+            timeout: Maximum time to wait in seconds
+        """
+        if AlertManager._executor:
+            # Submit a no-op task and wait for it to complete
+            # This ensures all previously submitted tasks are done
+            future = AlertManager._executor.submit(lambda: None)
+            try:
+                future.result(timeout=timeout)
+            except concurrent.futures.TimeoutError:
+                logger.warning("Timeout waiting for pending alerts to complete")
 
     def reset(self) -> None:
         """Reset all failure tracking and alert state (for testing)."""

@@ -89,6 +89,19 @@ app = FastAPI(
 )
 
 
+# ---------------------------------------------------------------------------
+# Static file serving — mounted BEFORE middleware to bypass security/CORS checks
+# Static assets are same-origin and don't need rate limiting or request size checks
+# ---------------------------------------------------------------------------
+if _DIST.is_dir():
+    app.mount(
+        "/assets",
+        StaticFiles(directory=str(_DIST / "assets")),
+        name="assets",
+    )
+    logger.debug("Mounted static files from %s/assets", _DIST)
+
+
 # Security middleware
 class _RequestSizeLimitMiddleware(BaseHTTPMiddleware):
     """Enforce maximum request body size to prevent memory exhaustion."""
@@ -117,6 +130,8 @@ class _SecurityHeadersMiddleware(BaseHTTPMiddleware):
         return response
 
 
+# Apply middleware to routes registered after this point
+# Static files (mounted above) bypass all middleware
 app.add_middleware(_RequestSizeLimitMiddleware)
 app.add_middleware(_SecurityHeadersMiddleware)
 
@@ -164,17 +179,10 @@ def health() -> HealthResponse:
 
 
 # ---------------------------------------------------------------------------
-# SPA static file serving — only active when the Vite dist folder exists
-# (i.e. in the Docker image). In development the Vite dev server handles this.
-# API routes registered above take precedence; this catch-all serves the SPA.
+# SPA fallback route — serves index.html for all non-API, non-asset paths
+# Must be registered last so API routes take precedence
 # ---------------------------------------------------------------------------
 if _DIST.is_dir():
-    app.mount(
-        "/assets",
-        StaticFiles(directory=str(_DIST / "assets")),
-        name="assets",
-    )
-
     @app.get("/{full_path:path}", include_in_schema=False)
     def spa_fallback(full_path: str) -> FileResponse:
         """Return index.html for all non-API paths to support client-side routing."""

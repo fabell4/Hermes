@@ -41,6 +41,8 @@ CREATE TABLE IF NOT EXISTS results (
     server_id       INTEGER
 )"""
 
+_CREATE_INDEX = "CREATE INDEX IF NOT EXISTS idx_results_timestamp ON results(timestamp DESC)"
+
 _INSERT = """
 INSERT INTO results
     (timestamp, download_mbps, upload_mbps, ping_ms, jitter_ms, isp_name,
@@ -94,28 +96,46 @@ class SQLiteExporter(BaseExporter):
         finally:
             conn.close()
 
-    # Columns added after initial release; migrated automatically on startup.
+    # Columns and indexes added after initial release; migrated automatically on startup.
     _MIGRATIONS: list[tuple[str, str]] = [
         ("jitter_ms", "ALTER TABLE results ADD COLUMN jitter_ms REAL"),
         ("isp_name", "ALTER TABLE results ADD COLUMN isp_name TEXT"),
+        ("idx_results_timestamp", "CREATE INDEX IF NOT EXISTS idx_results_timestamp ON results(timestamp DESC)"),
     ]
 
     def _init_db(self) -> None:
         """Creates the database file and results table if they do not exist.
 
-        Also runs lightweight column-addition migrations so that databases
-        created by older versions of Hermes gain new columns automatically.
+        Also runs lightweight schema migrations so that databases created by
+        older versions of Hermes gain new columns and indexes automatically.
         """
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self._transaction() as conn:
             conn.execute(_CREATE_TABLE)
-            existing = {
+            conn.execute(_CREATE_INDEX)
+            
+            # Check for missing columns
+            existing_columns = {
                 row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()
             }
-            for column, ddl in self._MIGRATIONS:
-                if column not in existing:
-                    conn.execute(ddl)
-                    logger.info("Migrated SQLite schema: added column '%s'", column)
+            
+            # Check for missing indexes
+            existing_indexes = {
+                row[1] for row in conn.execute("PRAGMA index_list(results)").fetchall()
+            }
+            
+            for name, ddl in self._MIGRATIONS:
+                # Check if it's a column or index migration
+                if name.startswith("idx_"):
+                    # Index migration
+                    if name not in existing_indexes:
+                        conn.execute(ddl)
+                        logger.info("Migrated SQLite schema: added index '%s'", name)
+                else:
+                    # Column migration
+                    if name not in existing_columns:
+                        conn.execute(ddl)
+                        logger.info("Migrated SQLite schema: added column '%s'", name)
         logger.info("SQLite database ready at: %s", self.path)
 
     def export(self, result: SpeedResult) -> None:

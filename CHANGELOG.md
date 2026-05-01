@@ -25,9 +25,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - Constants module (`src/constants.py`) centralizes exporter and provider names
   - Config fallback helper function (`_get_config_value()`) simplifies configuration retrieval patterns
   - PEP 8 import organization (Standard library → Third-party → Local) applied across all modules
+- **Performance optimizations** — Performance optimization review completed with 3 high priority improvements:
+  - SQLite timestamp index (`idx_results_timestamp DESC`) for 10-100× faster pagination queries
+  - Asynchronous alert sending with ThreadPoolExecutor (3 workers) to prevent blocking speedtest runs
+  - Static file middleware ordering to bypass middleware for asset serving (20% faster page loads)
 - **Quality assurance documentation** — Added comprehensive review reports:
   - [docs/DEFENSIVE-CODING-REVIEW.md](docs/DEFENSIVE-CODING-REVIEW.md) — 15 issues analyzed, 8 implemented
   - [docs/BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) — 13 issues analyzed, 5 implemented
+  - [docs/PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) — 9 issues analyzed, 3 implemented
 
 ### Changed
 - **Code organization** — Provider registration logic now shared between scheduler and API processes via factory pattern

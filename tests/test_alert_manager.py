@@ -160,6 +160,7 @@ def test_alert_triggered_at_threshold():
     assert len(provider.alerts_sent) == 0  # Not yet at threshold
 
     manager.record_failure("Error 3", timestamp)
+    manager._wait_for_pending_alerts()  # Wait for async alert to complete
     assert len(provider.alerts_sent) == 1  # Alert triggered
     assert provider.alerts_sent[0] == (3, "Error 3", timestamp)
 
@@ -173,9 +174,11 @@ def test_alert_triggered_above_threshold():
     timestamp = datetime.now(timezone.utc)
     manager.record_failure("Error 1", timestamp)
     manager.record_failure("Error 2", timestamp)
+    manager._wait_for_pending_alerts()  # Wait for async alert to complete
     assert len(provider.alerts_sent) == 1
 
     manager.record_failure("Error 3", timestamp + timedelta(seconds=1))
+    manager._wait_for_pending_alerts()  # Wait for async alert to complete
     assert len(provider.alerts_sent) == 2  # Another alert
 
 
@@ -207,11 +210,13 @@ def test_cooldown_suppresses_alerts():
     # First alert
     manager.record_failure("Error 1", timestamp)
     manager.record_failure("Error 2", timestamp)
+    manager._wait_for_pending_alerts()  # Wait for async alert to complete
     assert len(provider.alerts_sent) == 1
 
     # Within cooldown - no alert
     timestamp_within_cooldown = timestamp + timedelta(minutes=30)
     manager.record_failure("Error 3", timestamp_within_cooldown)
+    manager._wait_for_pending_alerts()  # Wait (no alert expected due to cooldown)
     assert len(provider.alerts_sent) == 1  # Still only 1 alert
 
 
@@ -226,11 +231,13 @@ def test_alert_sent_after_cooldown():
     # First alert
     manager.record_failure("Error 1", timestamp)
     manager.record_failure("Error 2", timestamp)
+    manager._wait_for_pending_alerts()  # Wait for async alert to complete
     assert len(provider.alerts_sent) == 1
 
     # After cooldown - alert sent
     timestamp_after_cooldown = timestamp + timedelta(minutes=61)
     manager.record_failure("Error 3", timestamp_after_cooldown)
+    manager._wait_for_pending_alerts()  # Wait for async alert to complete
     assert len(provider.alerts_sent) == 2
 
 
@@ -250,6 +257,7 @@ def test_alert_sent_to_all_providers():
     timestamp = datetime.now(timezone.utc)
     manager.record_failure("Error 1", timestamp)
     manager.record_failure("Error 2", timestamp)
+    manager._wait_for_pending_alerts()  # Wait for async alerts to complete
 
     assert len(provider1.alerts_sent) == 1
     assert len(provider2.alerts_sent) == 1
@@ -270,6 +278,7 @@ def test_provider_failure_does_not_stop_others():
     timestamp = datetime.now(timezone.utc)
     manager.record_failure("Error 1", timestamp)
     manager.record_failure("Error 2", timestamp)
+    manager._wait_for_pending_alerts()  # Wait for async alerts to complete
 
     # Working provider still received alert
     assert len(working_provider.alerts_sent) == 1
