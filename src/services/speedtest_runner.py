@@ -92,6 +92,4 @@ class SpeedtestRunner:
             raise RuntimeError(f"Failed to parse speedtest output: {exc}") from exc
 
         except FileNotFoundError as exc:
-            raise RuntimeError(
-                "Speedtest CLI not found — check installation."
-            ) from exc
+            raise RuntimeError("Speedtest CLI not found — check installation.") from exc

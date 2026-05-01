@@ -206,7 +206,5 @@ def test_missing_server_location_produces_safe_string(mock_run):
 @patch("src.services.speedtest_runner.subprocess.run")
 def test_zero_ping_is_valid(mock_run):
     """Boundary: zero ping is stored as 0.0."""
-    mock_run.return_value = Mock(
-        stdout=_make_mock_json(latency=0.0), returncode=0
-    )
+    mock_run.return_value = Mock(stdout=_make_mock_json(latency=0.0), returncode=0)
     assert SpeedtestRunner()._attempt().ping_ms == pytest.approx(0.0)

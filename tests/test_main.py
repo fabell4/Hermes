@@ -37,18 +37,20 @@ def _raise_loki_url_required() -> BaseExporter:
 
 def _make_mock_speedtest_json() -> str:
     """Return a mock JSON response from Ookla speedtest CLI."""
-    return json.dumps({
-        "download": {"bandwidth": 12500000},  # 100 Mbps in bytes/s
-        "upload": {"bandwidth": 6250000},     # 50 Mbps in bytes/s
-        "ping": {"latency": 12.5, "jitter": 2.3},
-        "server": {
-            "name": "Test ISP",
-            "location": "Test City",
-            "country": "DE",
-            "id": 1234
-        },
-        "isp": "Test ISP"
-    })
+    return json.dumps(
+        {
+            "download": {"bandwidth": 12500000},  # 100 Mbps in bytes/s
+            "upload": {"bandwidth": 6250000},  # 50 Mbps in bytes/s
+            "ping": {"latency": 12.5, "jitter": 2.3},
+            "server": {
+                "name": "Test ISP",
+                "location": "Test City",
+                "country": "DE",
+                "id": 1234,
+            },
+            "isp": "Test ISP",
+        }
+    )
 
 
 @patch("src.services.speedtest_runner.subprocess.run")
