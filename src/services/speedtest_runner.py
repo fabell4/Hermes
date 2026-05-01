@@ -3,7 +3,7 @@
 import json
 import logging
 import shutil
-import subprocess  # noqa: S404  # NOSONAR - Required to invoke Ookla CLI executable
+import subprocess  # nosec B404  # NOSONAR - Required to invoke Ookla CLI executable
 from datetime import datetime
 from typing import Any
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -57,7 +57,8 @@ class SpeedtestRunner:
             _log.debug("Using speedtest binary at: %s", self._speedtest_path)
 
         # Type narrowing: after _path_resolved is True, _speedtest_path is str
-        assert self._speedtest_path is not None
+        if self._speedtest_path is None:  # pragma: no cover
+            raise RuntimeError("Speedtest path not resolved.")
         return self._speedtest_path
 
     def run(self) -> SpeedResult:
@@ -81,7 +82,7 @@ class SpeedtestRunner:
             # Security: All arguments are hardcoded strings (no user input)
             # Uses absolute path to prevent PATH injection
             speedtest_path = self._get_speedtest_path()
-            result = subprocess.run(  # noqa: S603  # NOSONAR - No user input, hardcoded args only
+            result = subprocess.run(  # nosec B603  # NOSONAR - No user input, hardcoded args only
                 [
                     speedtest_path,
                     "--accept-license",
