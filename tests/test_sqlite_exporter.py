@@ -292,9 +292,7 @@ def test_migration_idempotent_on_fresh_database(tmp_path: Path) -> None:
 
     # Verify all columns exist
     conn = sqlite3.connect(db_path)
-    columns = {
-        row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()
-    }
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()}
     conn.close()
 
     assert "jitter_ms" in columns
@@ -353,9 +351,7 @@ def test_migration_adds_missing_columns_to_old_database(tmp_path: Path) -> None:
 
     # Verify columns are missing
     conn = sqlite3.connect(db_path)
-    columns = {
-        row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()
-    }
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()}
     conn.close()
 
     assert "jitter_ms" not in columns
@@ -366,9 +362,7 @@ def test_migration_adds_missing_columns_to_old_database(tmp_path: Path) -> None:
 
     # Verify columns were added
     conn = sqlite3.connect(db_path)
-    columns = {
-        row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()
-    }
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()}
     conn.close()
 
     assert "jitter_ms" in columns
@@ -412,9 +406,7 @@ def test_migration_adds_missing_index(tmp_path: Path) -> None:
 
     # Verify index is missing
     conn = sqlite3.connect(db_path)
-    indexes = {
-        row[1] for row in conn.execute("PRAGMA index_list(results)").fetchall()
-    }
+    indexes = {row[1] for row in conn.execute("PRAGMA index_list(results)").fetchall()}
     conn.close()
 
     assert "idx_results_timestamp" not in indexes
@@ -424,9 +416,7 @@ def test_migration_adds_missing_index(tmp_path: Path) -> None:
 
     # Verify index was added
     conn = sqlite3.connect(db_path)
-    indexes = {
-        row[1] for row in conn.execute("PRAGMA index_list(results)").fetchall()
-    }
+    indexes = {row[1] for row in conn.execute("PRAGMA index_list(results)").fetchall()}
     conn.close()
 
     assert "idx_results_timestamp" in indexes
@@ -493,12 +483,8 @@ def test_migration_handles_partially_migrated_database(tmp_path: Path) -> None:
 
     # Verify partial state
     conn = sqlite3.connect(db_path)
-    columns = {
-        row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()
-    }
-    indexes = {
-        row[1] for row in conn.execute("PRAGMA index_list(results)").fetchall()
-    }
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()}
+    indexes = {row[1] for row in conn.execute("PRAGMA index_list(results)").fetchall()}
     conn.close()
 
     assert "jitter_ms" in columns
@@ -510,12 +496,8 @@ def test_migration_handles_partially_migrated_database(tmp_path: Path) -> None:
 
     # Verify all migrations applied
     conn = sqlite3.connect(db_path)
-    columns = {
-        row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()
-    }
-    indexes = {
-        row[1] for row in conn.execute("PRAGMA index_list(results)").fetchall()
-    }
+    columns = {row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()}
+    indexes = {row[1] for row in conn.execute("PRAGMA index_list(results)").fetchall()}
     conn.close()
 
     assert "jitter_ms" in columns

@@ -289,3 +289,151 @@ def test_create_provider_case_insensitive():
     config = {"url": "https://webhook.example.com"}
     provider = create_provider("WEBHOOK", config)
     assert isinstance(provider, WebhookProvider)
+
+
+# ---------------------------------------------------------------------------
+# _validate_http_url — error paths
+# ---------------------------------------------------------------------------
+
+
+def test_validate_http_url_non_http_scheme():
+    """Providers reject URLs with non-HTTP schemes."""
+    with pytest.raises(ValueError, match="must use http or https"):
+        WebhookProvider(url="ftp://example.com/hook")
+
+
+def test_validate_http_url_missing_hostname():
+    """Providers reject URLs with no hostname."""
+    with pytest.raises(ValueError, match="must include a hostname"):
+        WebhookProvider(url="http://")
+
+
+# ---------------------------------------------------------------------------
+# Provider timeout validation
+# ---------------------------------------------------------------------------
+
+
+def test_webhook_provider_rejects_non_positive_timeout():
+    """WebhookProvider raises on timeout <= 0."""
+    with pytest.raises(ValueError, match="Timeout must be positive"):
+        WebhookProvider(url="https://example.com", timeout=0)
+
+
+def test_gotify_provider_rejects_non_positive_timeout():
+    """GotifyProvider raises on timeout <= 0."""
+    with pytest.raises(ValueError, match="Timeout must be positive"):
+        GotifyProvider(url="https://gotify.example.com", token="tok", timeout=-1)
+
+
+def test_ntfy_provider_rejects_non_positive_timeout():
+    """NtfyProvider raises on timeout <= 0."""
+    with pytest.raises(ValueError, match="Timeout must be positive"):
+        NtfyProvider(topic="alerts", timeout=0)
+
+
+# ---------------------------------------------------------------------------
+# NtfyProvider — auth token header and error raise
+# ---------------------------------------------------------------------------
+
+
+@patch("src.services.alert_providers.requests.post")
+def test_ntfy_provider_sends_with_auth_token(mock_post):
+    """NtfyProvider adds Authorization header when token is provided."""
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_post.return_value = mock_response
+
+    provider = NtfyProvider(
+        url="https://ntfy.example.com",
+        topic="alerts",
+        token="mytoken123",
+    )
+    provider.send_alert(
+        failure_count=2,
+        last_error="Connection refused",
+        timestamp=datetime(2026, 5, 1, 12, 0, 0, tzinfo=timezone.utc),
+    )
+
+    call_args = mock_post.call_args
+    assert "Authorization" in call_args.kwargs["headers"]
+    assert call_args.kwargs["headers"]["Authorization"] == "Bearer mytoken123"
+
+
+@patch("src.services.alert_providers.requests.post")
+def test_ntfy_provider_raises_on_request_error(mock_post):
+    """NtfyProvider re-raises RequestException after logging."""
+    import requests as req
+
+    mock_post.side_effect = req.exceptions.RequestException("timeout")
+
+    provider = NtfyProvider(topic="alerts")
+    with pytest.raises(req.exceptions.RequestException):
+        provider.send_alert(
+            failure_count=1,
+            last_error="err",
+            timestamp=datetime(2026, 5, 1, 12, 0, 0, tzinfo=timezone.utc),
+        )
+
+
+# ---------------------------------------------------------------------------
+# AppriseProvider — stateless mode and /notify URL handling
+# ---------------------------------------------------------------------------
+
+
+@patch("src.services.alert_providers.requests.post")
+def test_apprise_provider_stateless_mode_includes_urls(mock_post):
+    """AppriseProvider includes 'urls' key in payload for stateless mode."""
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_response.text = "ok"
+    mock_post.return_value = mock_response
+
+    provider = AppriseProvider(
+        url="http://apprise:8000",  # NOSONAR
+        urls=["ntfy://topic", "gotify://server/token"],
+    )
+    provider.send_alert(
+        failure_count=1,
+        last_error="error",
+        timestamp=datetime(2026, 5, 1, 12, 0, 0, tzinfo=timezone.utc),
+    )
+
+    payload = mock_post.call_args.kwargs["json"]
+    assert "urls" in payload
+    assert "ntfy://topic" in payload["urls"]
+
+
+@patch("src.services.alert_providers.requests.post")
+def test_apprise_provider_url_with_notify_uses_as_is(mock_post):
+    """AppriseProvider uses URL as-is when it already contains /notify."""
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_response.text = "ok"
+    mock_post.return_value = mock_response
+
+    provider = AppriseProvider(url="http://apprise:8000/notify/myconfig")  # NOSONAR
+    provider.send_alert(
+        failure_count=1,
+        last_error="error",
+        timestamp=datetime(2026, 5, 1, 12, 0, 0, tzinfo=timezone.utc),
+    )
+
+    called_url = mock_post.call_args.args[0]
+    # URL should not have /notify appended again
+    assert called_url == "http://apprise:8000/notify/myconfig"  # NOSONAR
+
+
+@patch("src.services.alert_providers.requests.post")
+def test_apprise_provider_reraises_request_exception_with_logging(mock_post):
+    """AppriseProvider re-raises RequestException after logging."""
+    import requests as req
+
+    mock_post.side_effect = req.exceptions.RequestException("connection refused")
+
+    provider = AppriseProvider(url="http://apprise:8000")  # NOSONAR
+    with pytest.raises(req.exceptions.RequestException):
+        provider.send_alert(
+            failure_count=2,
+            last_error="error",
+            timestamp=datetime(2026, 5, 1, 12, 0, 0, tzinfo=timezone.utc),
+        )

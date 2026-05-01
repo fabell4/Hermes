@@ -486,7 +486,9 @@ def test_provider_failure_types_all_handled(caplog):
 
     # Different failure types
     timeout_provider = Mock(spec=AlertProvider)
-    timeout_provider.send_alert.side_effect = requests.exceptions.Timeout("Timeout after 30s")
+    timeout_provider.send_alert.side_effect = requests.exceptions.Timeout(
+        "Timeout after 30s"
+    )
 
     connection_provider = Mock(spec=AlertProvider)
     connection_provider.send_alert.side_effect = requests.exceptions.ConnectionError(
@@ -494,7 +496,9 @@ def test_provider_failure_types_all_handled(caplog):
     )
 
     http_provider = Mock(spec=AlertProvider)
-    http_provider.send_alert.side_effect = requests.exceptions.HTTPError("404 Not Found")
+    http_provider.send_alert.side_effect = requests.exceptions.HTTPError(
+        "404 Not Found"
+    )
 
     value_provider = Mock(spec=AlertProvider)
     value_provider.send_alert.side_effect = ValueError("Invalid configuration")
@@ -561,3 +565,58 @@ def test_test_alert_partial_failure():
     assert results["working"] is True
     assert results["failing"] is False
     assert results["also_working"] is True
+
+
+# ---------------------------------------------------------------------------
+# _maybe_send_alert — synchronous fallback when thread pool is None
+# ---------------------------------------------------------------------------
+
+
+def test_maybe_send_alert_synchronous_fallback_when_executor_is_none(caplog):
+    """_maybe_send_alert falls back to synchronous sending when executor is None."""
+    import logging
+    from src.services.alert_manager import AlertManager as AM
+
+    # Save original executor
+    original_executor = AM._executor
+    try:
+        manager = AM(failure_threshold=1, cooldown_minutes=0)
+        provider = MockProvider()
+        manager.add_provider("sync_test", provider)
+
+        # Force the synchronous fallback path AFTER init (init re-creates executor if None)
+        AM._executor = None
+
+        timestamp = datetime.now(timezone.utc)
+        with caplog.at_level(logging.WARNING):
+            manager.record_failure("sync test error", timestamp)
+
+        assert len(provider.alerts_sent) == 1
+        assert "synchronously" in caplog.text
+    finally:
+        # Restore executor
+        AM._executor = original_executor
+
+
+# ---------------------------------------------------------------------------
+# _wait_for_pending_alerts — timeout path
+# ---------------------------------------------------------------------------
+
+
+def test_wait_for_pending_alerts_logs_on_timeout(caplog):
+    """_wait_for_pending_alerts logs a warning when the timeout elapses."""
+    import logging
+    import concurrent.futures
+    from unittest.mock import patch, MagicMock
+
+    manager = AlertManager()
+
+    # Patch the executor's submit to return a future that times out
+    mock_future = MagicMock(spec=concurrent.futures.Future)
+    mock_future.result.side_effect = concurrent.futures.TimeoutError()
+
+    with patch.object(AlertManager._executor, "submit", return_value=mock_future):
+        with caplog.at_level(logging.WARNING):
+            manager._wait_for_pending_alerts(timeout=0.001)
+
+    assert "Timeout" in caplog.text

@@ -2,22 +2,29 @@
 # pylint: disable=missing-function-docstring,protected-access
 
 import json
-from datetime import datetime, timezone
 import logging
 import subprocess
+from datetime import datetime, timezone
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+import requests
 
 import src.main as main_module
 from src.exporters.base_exporter import BaseExporter
 from src.exporters.loki_exporter import LokiExporter
 from src.main import (
+    build_alert_manager,
     build_dispatcher,
     build_scheduler,
     run_once,
+    update_alert_providers,
     update_exporters,
+    _build_health_status,
+    _handle_scheduler_pause_toggle,
     _poll_once,
+    _validate_environment,
+    _validate_loki_endpoint,
 )
 from src.models.speed_result import SpeedResult
 from src.result_dispatcher import DispatchError
@@ -585,3 +592,413 @@ def test_main_run_on_startup_and_poll_loop(monkeypatch):
         main_module.main()
 
     mock_scheduler.shutdown.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# build_alert_manager
+# ---------------------------------------------------------------------------
+
+
+def test_build_alert_manager_registers_providers_when_enabled(monkeypatch):
+    """build_alert_manager registers providers when alerting is enabled in config."""
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_alert_config",
+        lambda: {
+            "enabled": True,
+            "failure_threshold": 3,
+            "cooldown_minutes": 60,
+            "providers": {},
+        },
+    )
+    monkeypatch.setattr(main_module.config, "ALERT_FAILURE_THRESHOLD", 3)
+    monkeypatch.setattr(main_module.config, "ALERT_COOLDOWN_MINUTES", 60)
+
+    manager = build_alert_manager()
+
+    assert manager.failure_threshold == 3
+    assert manager.cooldown_minutes == 60
+
+
+def test_build_alert_manager_registers_providers_when_threshold_positive(monkeypatch):
+    """build_alert_manager registers providers when threshold > 0 even if not enabled."""
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_alert_config",
+        lambda: {
+            "enabled": False,
+            "failure_threshold": 5,
+            "cooldown_minutes": 30,
+            "providers": {},
+        },
+    )
+    monkeypatch.setattr(main_module.config, "ALERT_FAILURE_THRESHOLD", 5)
+    monkeypatch.setattr(main_module.config, "ALERT_COOLDOWN_MINUTES", 30)
+
+    manager = build_alert_manager()
+
+    assert manager.failure_threshold == 5
+
+
+def test_build_alert_manager_no_providers_when_disabled_zero_threshold(monkeypatch):
+    """build_alert_manager skips provider registration when disabled and threshold is 0."""
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_alert_config",
+        lambda: {
+            "enabled": False,
+            "failure_threshold": 0,
+            "cooldown_minutes": 60,
+            "providers": {},
+        },
+    )
+    monkeypatch.setattr(main_module.config, "ALERT_FAILURE_THRESHOLD", 0)
+    monkeypatch.setattr(main_module.config, "ALERT_COOLDOWN_MINUTES", 60)
+
+    manager = build_alert_manager()
+
+    # failure_threshold is clamped to 1 (max(1, 0)) but no providers are registered
+    assert manager.failure_threshold == 1
+    assert manager.provider_names == []
+
+
+# ---------------------------------------------------------------------------
+# update_alert_providers
+# ---------------------------------------------------------------------------
+
+
+def test_update_alert_providers_updates_threshold_and_cooldown(monkeypatch):
+    """update_alert_providers sets threshold and cooldown when present in config."""
+    monkeypatch.setattr(main_module.runtime_config, "set_alert_config", lambda c: None)
+    manager = MagicMock()
+
+    update_alert_providers(
+        manager,
+        {
+            "enabled": False,
+            "failure_threshold": 5,
+            "cooldown_minutes": 30,
+        },
+    )
+
+    assert manager.failure_threshold == 5
+    assert manager.cooldown_minutes == 30
+
+
+def test_update_alert_providers_enabled_registers_providers(monkeypatch, caplog):
+    """update_alert_providers registers providers and logs when alerting is enabled."""
+    registered = []
+
+    def _fake_register(manager, providers, require_enabled):
+        registered.append((manager, providers))
+
+    monkeypatch.setattr(main_module, "register_all_providers", _fake_register)
+    monkeypatch.setattr(main_module.runtime_config, "set_alert_config", lambda c: None)
+    manager = MagicMock()
+
+    with caplog.at_level(logging.INFO):
+        update_alert_providers(
+            manager,
+            {"enabled": True, "providers": {"webhook": {"url": "https://example.com"}}},
+        )
+
+    assert len(registered) == 1
+    assert "updated and enabled" in caplog.text
+
+
+def test_update_alert_providers_disabled_clears_providers(monkeypatch, caplog):
+    """update_alert_providers logs disabled message when alerting is disabled."""
+    monkeypatch.setattr(main_module.runtime_config, "set_alert_config", lambda c: None)
+    manager = MagicMock()
+
+    with caplog.at_level(logging.INFO):
+        update_alert_providers(manager, {"enabled": False})
+
+    manager.clear_providers.assert_called_once()
+    assert "disabled" in caplog.text.lower()
+
+
+# ---------------------------------------------------------------------------
+# _handle_scheduler_pause_toggle — job missing
+# ---------------------------------------------------------------------------
+
+
+def test_handle_scheduler_pause_toggle_when_job_missing():
+    """_handle_scheduler_pause_toggle returns early when the job does not exist."""
+    scheduler = MagicMock()
+    scheduler.get_job.return_value = None
+
+    # Should not raise or call pause_job/resume_job
+    _handle_scheduler_pause_toggle(scheduler, should_pause=True)
+
+    scheduler.pause_job.assert_not_called()
+    scheduler.resume_job.assert_not_called()
+
+
+# ---------------------------------------------------------------------------
+# _build_health_status
+# ---------------------------------------------------------------------------
+
+
+def test_build_health_status_paused(monkeypatch):
+    """_build_health_status returns 'paused' scheduler state when paused."""
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_scheduler_paused", lambda: True
+    )
+    monkeypatch.setattr(main_module.runtime_config, "get_last_run_at", lambda: None)
+    monkeypatch.setattr(main_module.runtime_config, "get_next_run_at", lambda: None)
+    monkeypatch.setattr(main_module.runtime_config, "is_running", lambda: False)
+
+    scheduler = MagicMock()
+    scheduler.running = True
+
+    status = _build_health_status(scheduler)
+
+    assert status["scheduler"] == "paused"
+    assert status["scans_paused"] is True
+
+
+def test_build_health_status_stopped(monkeypatch):
+    """_build_health_status returns 'stopped' and 'degraded' when scheduler not running."""
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_scheduler_paused", lambda: False
+    )
+    monkeypatch.setattr(main_module.runtime_config, "get_last_run_at", lambda: None)
+    monkeypatch.setattr(main_module.runtime_config, "get_next_run_at", lambda: None)
+    monkeypatch.setattr(main_module.runtime_config, "is_running", lambda: False)
+
+    scheduler = MagicMock()
+    scheduler.running = False
+
+    status = _build_health_status(scheduler)
+
+    assert status["scheduler"] == "stopped"
+    assert status["status"] == "degraded"
+
+
+def test_build_health_status_running(monkeypatch):
+    """_build_health_status returns 'running' and 'ok' when scheduler is active."""
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_scheduler_paused", lambda: False
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_last_run_at",
+        lambda: "2026-05-01T10:00:00+00:00",
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_next_run_at",
+        lambda: "2026-05-01T11:00:00+00:00",
+    )
+    monkeypatch.setattr(main_module.runtime_config, "is_running", lambda: False)
+
+    scheduler = MagicMock()
+    scheduler.running = True
+
+    status = _build_health_status(scheduler)
+
+    assert status["scheduler"] == "running"
+    assert status["status"] == "ok"
+
+
+# ---------------------------------------------------------------------------
+# _validate_loki_endpoint
+# ---------------------------------------------------------------------------
+
+
+@patch("src.main.requests.head")
+def test_validate_loki_endpoint_timeout(mock_head, caplog):
+    """_validate_loki_endpoint logs a warning on Timeout."""
+    mock_head.side_effect = requests.exceptions.Timeout()
+
+    with caplog.at_level(logging.WARNING):
+        _validate_loki_endpoint("http://loki:3100")
+
+    assert "timed out" in caplog.text
+
+
+@patch("src.main.requests.head")
+def test_validate_loki_endpoint_connection_error(mock_head, caplog):
+    """_validate_loki_endpoint logs a warning on ConnectionError."""
+    mock_head.side_effect = requests.exceptions.ConnectionError("refused")
+
+    with caplog.at_level(logging.WARNING):
+        _validate_loki_endpoint("http://loki:3100")
+
+    assert "unreachable" in caplog.text
+
+
+@patch("src.main.requests.head")
+def test_validate_loki_endpoint_http_error(mock_head, caplog):
+    """_validate_loki_endpoint logs a warning on HTTPError."""
+    mock_response = MagicMock()
+    mock_response.raise_for_status.side_effect = requests.exceptions.HTTPError(
+        "403 Forbidden"
+    )
+    mock_head.return_value = mock_response
+
+    with caplog.at_level(logging.WARNING):
+        _validate_loki_endpoint("http://loki:3100")
+
+    assert "HTTP error" in caplog.text
+
+
+@patch("src.main.requests.head")
+def test_validate_loki_endpoint_generic_request_error(mock_head, caplog):
+    """_validate_loki_endpoint logs a warning on generic RequestException."""
+    mock_head.side_effect = requests.exceptions.RequestException("ssl error")
+
+    with caplog.at_level(logging.WARNING):
+        _validate_loki_endpoint("http://loki:3100")
+
+    assert "validation failed" in caplog.text
+
+
+@patch("src.main.requests.head")
+def test_validate_loki_endpoint_success(mock_head):
+    """_validate_loki_endpoint does not raise when endpoint is reachable."""
+    mock_response = MagicMock()
+    mock_response.raise_for_status.return_value = None
+    mock_head.return_value = mock_response
+
+    # Should not raise
+    _validate_loki_endpoint("http://loki:3100")
+    mock_head.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# _validate_environment
+# ---------------------------------------------------------------------------
+
+
+def test_validate_environment_loki_enabled_no_url(monkeypatch, caplog):
+    """_validate_environment warns when loki is enabled but LOKI_URL is not set."""
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_enabled_exporters",
+        lambda default: ["loki"],
+    )
+    monkeypatch.setattr(main_module.config, "ENABLED_EXPORTERS", ["loki"])
+    monkeypatch.setattr(main_module.config, "LOKI_URL", "")
+
+    with caplog.at_level(logging.WARNING):
+        _validate_environment()
+
+    assert "LOKI_URL is not set" in caplog.text
+
+
+def test_validate_environment_no_loki_exporter(monkeypatch):
+    """_validate_environment does not call loki validation when loki is not enabled."""
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_enabled_exporters",
+        lambda default: ["csv"],
+    )
+    monkeypatch.setattr(main_module.config, "ENABLED_EXPORTERS", ["csv"])
+
+    # Should not raise; no loki endpoint to validate
+    _validate_environment()
+
+
+# ---------------------------------------------------------------------------
+# main() — restored paused state at startup
+# ---------------------------------------------------------------------------
+
+
+def test_main_restores_paused_state_on_startup(monkeypatch):
+    """main() pauses the scheduler job when runtime config indicates paused state."""
+    mock_scheduler = MagicMock()
+    mock_job = MagicMock()
+    mock_job.next_run_time = datetime.now(timezone.utc)
+    mock_scheduler.get_job.return_value = mock_job
+
+    monkeypatch.setattr(main_module.config, "RUN_ON_STARTUP", False)
+    monkeypatch.setattr(main_module.config, "SPEEDTEST_INTERVAL_MINUTES", 60)
+    monkeypatch.setattr(main_module.runtime_config, "mark_done", lambda: None)
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_interval_minutes", lambda default: 60
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_enabled_exporters", lambda default: ["csv"]
+    )
+    monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
+    monkeypatch.setattr(
+        main_module.runtime_config, "consume_run_trigger", lambda: False
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_alert_config", lambda: {"enabled": False}
+    )
+    # get_scheduler_paused returns True to trigger the restore path
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_scheduler_paused", lambda: True
+    )
+    monkeypatch.setattr(main_module, "SpeedtestRunner", MagicMock)
+    monkeypatch.setattr(main_module, "build_dispatcher", MagicMock)
+    monkeypatch.setattr(main_module, "build_alert_manager", MagicMock)
+    monkeypatch.setattr(main_module, "build_scheduler", lambda s, d, a: mock_scheduler)
+    monkeypatch.setattr(main_module, "HealthServer", MagicMock)
+    monkeypatch.setattr(
+        main_module.time, "sleep", MagicMock(side_effect=KeyboardInterrupt)
+    )
+
+    with pytest.raises(KeyboardInterrupt):
+        main_module.main()
+
+    mock_scheduler.pause_job.assert_called_once_with("speedtest_run")
+
+
+# ---------------------------------------------------------------------------
+# _poll_once — alert config change
+# ---------------------------------------------------------------------------
+
+
+def test_poll_once_alert_config_changed(monkeypatch):
+    """_poll_once calls update_alert_providers when alert config changes."""
+    scheduler, dispatcher, service, alert_manager = _make_poll_deps()
+
+    new_alert_config = {
+        "enabled": True,
+        "failure_threshold": 3,
+        "cooldown_minutes": 10,
+        "providers": {},
+    }
+
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_interval_minutes", lambda default: 60
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_enabled_exporters", lambda default: ["csv"]
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "consume_run_trigger", lambda: False
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_scheduler_paused", lambda: False
+    )
+    monkeypatch.setattr(
+        main_module.runtime_config, "get_alert_config", lambda: new_alert_config
+    )
+    monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
+    monkeypatch.setattr(main_module.runtime_config, "set_alert_config", lambda c: None)
+
+    updated_configs = []
+
+    def _fake_update(manager, cfg):
+        updated_configs.append(cfg)
+        manager.clear_providers()
+
+    monkeypatch.setattr(main_module, "update_alert_providers", _fake_update)
+
+    _, _, _, returned_alert_config, _ = _poll_once(
+        scheduler,
+        dispatcher,
+        service,
+        alert_manager,
+        60,
+        ["csv"],
+        last_alert_config={"enabled": False},
+    )
+
+    assert len(updated_configs) == 1
+    assert returned_alert_config == new_alert_config

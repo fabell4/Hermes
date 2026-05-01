@@ -202,18 +202,27 @@ _Goal: notify users when something goes wrong and ensure code quality before v1.
       - ✅ **M1: Missing docstrings** — Enhanced module docstring for shared_state.py, comprehensive
         docstrings for set_alert_manager(), get_alert_manager(), consume_run_trigger(), and
         register_all_providers()
-    - ✅ Test suite expanded: 403 → 426 tests (+23 tests)
-    - ✅ All 426 tests passing
-    - 📋 HIGH priority deferred to v1.1:
-      - Main loop tests (12-15 tests for uncovered paths)
-      - Frontend component tests (Layout, Dashboard, Settings)
-    - 📋 MEDIUM priority deferred to v1.1:
-      - Integration tests (end-to-end flows)
-      - Runtime config edge cases
-      - Alert provider error paths
-    - 📋 LOW priority deferred to v1.1:
-      - Config module subprocess test
-      - Comprehensive frontend coverage (80%+ target)
+    - ✅ Test suite expanded: 403 → 426 tests (+23 tests) in v1.0
+    - ✅ All 426 tests passing (v1.0)
+    - ✅ **Test coverage gaps addressed in v1.1** — test suite expanded to **496 Python tests**
+      (+70 tests) and **44 frontend tests** (+33 tests):
+      - ✅ **Main loop tests** — 19 new tests covering `build_alert_manager`, `update_alert_providers`,
+        `_build_health_status`, `_handle_scheduler_pause_toggle`, `_validate_loki_endpoint`,
+        `_validate_environment`, and `main()` startup restore
+      - ✅ **Frontend component tests** — Layout, Dashboard, and Settings page tests created
+        (`frontend/src/test/Layout.test.tsx`, `Dashboard.test.tsx`, `Settings.test.tsx`)
+      - ✅ **Integration tests** — End-to-end flows for speedtest→CSV export, speedtest→SQLite export,
+        multi-exporter dispatch, alert failure-to-recovery lifecycle, alert cooldown, runtime config
+        persistence, and run_once alert integration
+      - ✅ **Runtime config edge cases** — 13 new tests covering validation (out-of-range interval,
+        empty exporters, non-bool flags, invalid timestamp, non-dict config), cache behavior, and
+        defense-in-depth paths
+      - ✅ **Alert provider error paths** — 10 new tests covering URL validation, non-positive timeout
+        rejection, ntfy auth token, apprise stateless mode, and request error propagation
+      - ✅ **Config module tests** — 18 new tests for `_get_int`, `_get_bool`, `_get_csv_list`,
+        `_get_str` helpers and API_KEY validation via subprocess
+      - ✅ **Alert manager sync fallback** — 2 new tests covering synchronous executor fallback path and timeout logging
+      - ✅ All 496 Python tests passing, all 44 frontend tests passing
   - [x] Documentation accuracy — **COMPLETE**
     - ✅ Comprehensive documentation accuracy review completed (see [docs/DOCUMENTATION-ACCURACY-REVIEW.md](docs/DOCUMENTATION-ACCURACY-REVIEW.md))
     - ✅ 6 HIGH priority issues identified and **FIXED**:

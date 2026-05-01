@@ -315,3 +315,169 @@ def test_set_scheduler_paused_persists_false(config_path):
     runtime_config.set_scheduler_paused(False)
     assert config_path.exists()
     assert runtime_config.get_scheduler_paused() is False
+
+
+# ---------------------------------------------------------------------------
+# load() — validation edge cases (via writing raw JSON to the config file)
+# ---------------------------------------------------------------------------
+
+
+def test_load_returns_empty_when_config_is_not_dict(config_path, caplog):
+    """load() returns {} and logs a warning when the config file contains a JSON array."""
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text("[1, 2, 3]", encoding="utf-8")
+
+    with caplog.at_level("WARNING"):
+        result = runtime_config.load()
+
+    assert result == {}
+    assert "not a dict" in caplog.text
+
+
+def test_load_discards_interval_out_of_range_low(config_path, caplog):
+    """load() discards interval_minutes when it is below the valid range (< 1)."""
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text('{"interval_minutes": 0}', encoding="utf-8")
+
+    with caplog.at_level("WARNING"):
+        result = runtime_config.load()
+
+    assert "interval_minutes" not in result
+    assert "out of range" in caplog.text
+
+
+def test_load_discards_interval_out_of_range_high(config_path, caplog):
+    """load() discards interval_minutes when it exceeds the maximum (> 10080)."""
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text('{"interval_minutes": 99999}', encoding="utf-8")
+
+    with caplog.at_level("WARNING"):
+        result = runtime_config.load()
+
+    assert "interval_minutes" not in result
+    assert "out of range" in caplog.text
+
+
+def test_load_discards_enabled_exporters_empty_after_filtering(config_path, caplog):
+    """load() discards enabled_exporters when it resolves to an empty list after filtering."""
+    # List with only empty strings — all filtered out
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text('{"enabled_exporters": ["  ", ""]}', encoding="utf-8")
+
+    with caplog.at_level("WARNING"):
+        result = runtime_config.load()
+
+    assert "enabled_exporters" not in result
+    assert "empty" in caplog.text
+
+
+def test_load_discards_enabled_exporters_not_a_list(config_path, caplog):
+    """load() discards enabled_exporters when it is not a list."""
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text('{"enabled_exporters": 42}', encoding="utf-8")
+
+    with caplog.at_level("WARNING"):
+        result = runtime_config.load()
+
+    assert "enabled_exporters" not in result
+    assert "not a list" in caplog.text
+
+
+def test_load_discards_scanning_disabled_not_bool(config_path, caplog):
+    """load() discards scanning_disabled when it is not a boolean."""
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text('{"scanning_disabled": "yes"}', encoding="utf-8")
+
+    with caplog.at_level("WARNING"):
+        result = runtime_config.load()
+
+    assert "scanning_disabled" not in result
+
+
+def test_load_discards_scheduler_paused_not_bool(config_path, caplog):
+    """load() discards scheduler_paused when it is not a boolean."""
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text('{"scheduler_paused": 1}', encoding="utf-8")
+
+    with caplog.at_level("WARNING"):
+        result = runtime_config.load()
+
+    assert "scheduler_paused" not in result
+
+
+def test_load_discards_invalid_timestamp(config_path, caplog):
+    """load() discards next_run_at when it is not a valid string."""
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text('{"next_run_at": 12345}', encoding="utf-8")
+
+    with caplog.at_level("WARNING"):
+        result = runtime_config.load()
+
+    assert "next_run_at" not in result
+
+
+# ---------------------------------------------------------------------------
+# get_interval_minutes — defense-in-depth bounds (monkeypatched load)
+# ---------------------------------------------------------------------------
+
+
+def test_get_interval_minutes_below_minimum_defence_in_depth(config_path, monkeypatch):
+    """get_interval_minutes() returns default when value is below 1 (defense-in-depth)."""
+    # Bypass load() validation by monkeypatching it to return raw invalid data
+    monkeypatch.setattr(runtime_config, "load", lambda: {"interval_minutes": 0})
+
+    result = runtime_config.get_interval_minutes(60)
+
+    assert result == 60
+
+
+def test_get_interval_minutes_above_maximum_defence_in_depth(config_path, monkeypatch):
+    """get_interval_minutes() returns default when value exceeds 10080 (defense-in-depth)."""
+    monkeypatch.setattr(runtime_config, "load", lambda: {"interval_minutes": 99999})
+
+    result = runtime_config.get_interval_minutes(60)
+
+    assert result == 60
+
+
+def test_get_interval_minutes_type_error_defence_in_depth(config_path, monkeypatch):
+    """get_interval_minutes() returns default when value cannot be cast to int."""
+    # A list can't be converted to int
+    monkeypatch.setattr(runtime_config, "load", lambda: {"interval_minutes": [1, 2, 3]})
+
+    result = runtime_config.get_interval_minutes(60)
+
+    assert result == 60
+
+
+# ---------------------------------------------------------------------------
+# get_enabled_exporters — defense-in-depth (monkeypatched load)
+# ---------------------------------------------------------------------------
+
+
+def test_get_enabled_exporters_not_list_defence_in_depth(config_path, monkeypatch):
+    """get_enabled_exporters() returns default when value is not a list (defense-in-depth)."""
+    monkeypatch.setattr(runtime_config, "load", lambda: {"enabled_exporters": "csv"})
+
+    result = runtime_config.get_enabled_exporters(["csv"])
+
+    assert result == ["csv"]
+
+
+# ---------------------------------------------------------------------------
+# load() — cache hit path
+# ---------------------------------------------------------------------------
+
+
+def test_load_returns_cached_result_when_file_unchanged(config_path):
+    """load() returns cached result on subsequent calls without file changes."""
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text('{"interval_minutes": 15}', encoding="utf-8")
+
+    # First call populates cache
+    first = runtime_config.load()
+    # Second call should use cache (same mtime)
+    second = runtime_config.load()
+
+    assert first == second
+    assert first.get("interval_minutes") == 15

@@ -67,7 +67,11 @@ def test_security_headers_on_validation_errors():
     # Send invalid request to trigger 422
     response = client.put(
         "/api/config",
-        json={"interval_minutes": -1, "enabled_exporters": [], "scanning_enabled": True},
+        json={
+            "interval_minutes": -1,
+            "enabled_exporters": [],
+            "scanning_enabled": True,
+        },
         headers={"X-Api-Key": "test"},
     )
 
@@ -217,7 +221,9 @@ def test_cors_headers_on_api_endpoints():
     from src.api.main import app
 
     # Set CORS origins
-    with patch.dict(os.environ, {"CORS_ORIGINS": "http://localhost:3000,http://localhost:5173"}):
+    with patch.dict(
+        os.environ, {"CORS_ORIGINS": "http://localhost:3000,http://localhost:5173"}
+    ):
         client = TestClient(app)
         response = client.get(
             "/api/health",
