@@ -18,7 +18,7 @@ class SpeedtestRunner:
     """
     Runs a speed test using official Ookla CLI and returns results as SpeedResult.
     Retries once on transient failure before raising.
-    
+
     Security: Uses absolute path to speedtest binary (resolved lazily) to prevent
     PATH manipulation attacks.
     """
@@ -26,7 +26,7 @@ class SpeedtestRunner:
     def __init__(self, speedtest_path: str | None = None) -> None:
         """
         Initialize runner.
-        
+
         Args:
             speedtest_path: Optional explicit path to speedtest binary.
                            If None, will be resolved from PATH on first use.
@@ -34,14 +34,14 @@ class SpeedtestRunner:
         """
         self._speedtest_path: str | None = speedtest_path
         self._path_resolved = speedtest_path is not None
-    
+
     def _get_speedtest_path(self) -> str:
         """
         Resolve and cache the speedtest binary path.
-        
+
         Returns:
             Absolute path to speedtest binary.
-            
+
         Raises:
             RuntimeError: If speedtest CLI not found in PATH.
         """
@@ -55,7 +55,7 @@ class SpeedtestRunner:
             self._speedtest_path = speedtest_path
             self._path_resolved = True
             _log.debug("Using speedtest binary at: %s", self._speedtest_path)
-        
+
         # Type narrowing: after _path_resolved is True, _speedtest_path is str
         assert self._speedtest_path is not None
         return self._speedtest_path

@@ -60,7 +60,7 @@ def test_speedtest_runner_run_success(mock_run):
     mock_result.returncode = 0
     mock_run.return_value = mock_result
 
-    result = SpeedtestRunner().run()
+    result = SpeedtestRunner("/usr/bin/speedtest").run()
 
     assert result.download_mbps == pytest.approx(100.0)
     assert result.upload_mbps == pytest.approx(50.0)
@@ -190,7 +190,7 @@ def test_build_dispatcher_skips_loki_on_init_error(monkeypatch, caplog):
 def test_speedtest_runner_raises_on_timeout(mock_run):
     mock_run.side_effect = subprocess.TimeoutExpired(cmd=["speedtest"], timeout=120)
     with pytest.raises(RuntimeError, match="timed out"):
-        SpeedtestRunner().run()
+        SpeedtestRunner("/usr/bin/speedtest").run()
 
 
 @patch("src.services.speedtest_runner.subprocess.run")
@@ -199,7 +199,7 @@ def test_speedtest_runner_raises_on_process_error(mock_run):
         returncode=1, cmd=["speedtest"], stderr="network error"
     )
     with pytest.raises(RuntimeError, match="Speedtest CLI failed"):
-        SpeedtestRunner().run()
+        SpeedtestRunner("/usr/bin/speedtest").run()
 
 
 @patch("src.services.speedtest_runner.subprocess.run")
@@ -209,14 +209,14 @@ def test_speedtest_runner_raises_on_json_decode_error(mock_run):
     mock_result.returncode = 0
     mock_run.return_value = mock_result
     with pytest.raises(RuntimeError, match="Failed to parse"):
-        SpeedtestRunner().run()
+        SpeedtestRunner("/usr/bin/speedtest").run()
 
 
 @patch("src.services.speedtest_runner.subprocess.run")
 def test_speedtest_runner_raises_on_file_not_found(mock_run):
     mock_run.side_effect = FileNotFoundError("speedtest not found")
     with pytest.raises(RuntimeError, match="not found"):
-        SpeedtestRunner().run()
+        SpeedtestRunner("/usr/bin/speedtest").run()
 
 
 @patch("src.services.speedtest_runner.subprocess.run")
@@ -228,7 +228,7 @@ def test_speedtest_runner_retries_once_on_transient_failure(mock_run):
         Mock(stdout=_make_mock_speedtest_json(), returncode=0),
     ]
 
-    result = SpeedtestRunner().run()
+    result = SpeedtestRunner("/usr/bin/speedtest").run()
     assert result.download_mbps == pytest.approx(100.0)
     assert result.upload_mbps == pytest.approx(50.0)
     assert mock_run.call_count == 2
@@ -239,7 +239,7 @@ def test_speedtest_runner_raises_after_two_failures(mock_run):
     """Both attempts fail — run() should raise RuntimeError."""
     mock_run.side_effect = subprocess.TimeoutExpired(cmd=["speedtest"], timeout=120)
     with pytest.raises(RuntimeError, match="timed out"):
-        SpeedtestRunner().run()
+        SpeedtestRunner("/usr/bin/speedtest").run()
     assert mock_run.call_count == 2
 
 

@@ -62,14 +62,14 @@ def _make_mock_json(
 def test_server_id_integer_value_parses_correctly(mock_run):
     """1. Valid: a plain int id is stored correctly."""
     mock_run.return_value = Mock(stdout=_make_mock_json(server_id=42), returncode=0)
-    assert SpeedtestRunner()._attempt().server_id == 42
+    assert SpeedtestRunner("/usr/bin/speedtest")._attempt().server_id == 42
 
 
 @patch("src.services.speedtest_runner.subprocess.run")
 def test_server_id_absent_key_becomes_none(mock_run):
     """2. Invalid: missing 'id' key must produce None rather than a crash."""
     mock_run.return_value = Mock(stdout=_make_mock_json(server_id=None), returncode=0)
-    assert SpeedtestRunner()._attempt().server_id is None
+    assert SpeedtestRunner("/usr/bin/speedtest")._attempt().server_id is None
 
 
 # ---------------------------------------------------------------------------
@@ -81,14 +81,14 @@ def test_server_id_absent_key_becomes_none(mock_run):
 def test_isp_name_extracted_from_valid_json(mock_run):
     """1. Valid: isp_name is correctly extracted from JSON."""
     mock_run.return_value = Mock(stdout=_make_mock_json(isp="Fancy ISP"), returncode=0)
-    assert SpeedtestRunner()._attempt().isp_name == "Fancy ISP"
+    assert SpeedtestRunner("/usr/bin/speedtest")._attempt().isp_name == "Fancy ISP"
 
 
 @patch("src.services.speedtest_runner.subprocess.run")
 def test_isp_name_absent_key_becomes_none(mock_run):
     """2. Invalid: missing isp key must produce None."""
     mock_run.return_value = Mock(stdout=_make_mock_json(isp=None), returncode=0)
-    assert SpeedtestRunner()._attempt().isp_name is None
+    assert SpeedtestRunner("/usr/bin/speedtest")._attempt().isp_name is None
 
 
 # ---------------------------------------------------------------------------
@@ -100,21 +100,21 @@ def test_isp_name_absent_key_becomes_none(mock_run):
 def test_jitter_ms_valid_float_rounded_correctly(mock_run):
     """1. Valid: jitter is rounded to 2 decimal places."""
     mock_run.return_value = Mock(stdout=_make_mock_json(jitter=3.456), returncode=0)
-    assert SpeedtestRunner()._attempt().jitter_ms == pytest.approx(3.46)
+    assert SpeedtestRunner("/usr/bin/speedtest")._attempt().jitter_ms == pytest.approx(3.46)
 
 
 @patch("src.services.speedtest_runner.subprocess.run")
 def test_jitter_ms_absent_becomes_none(mock_run):
     """2. Invalid: missing jitter key must produce None."""
     mock_run.return_value = Mock(stdout=_make_mock_json(jitter=None), returncode=0)
-    assert SpeedtestRunner()._attempt().jitter_ms is None
+    assert SpeedtestRunner("/usr/bin/speedtest")._attempt().jitter_ms is None
 
 
 @patch("src.services.speedtest_runner.subprocess.run")
 def test_jitter_ms_zero_value_accepted(mock_run):
     """1. Valid: jitter=0.0 is a valid measurement."""
     mock_run.return_value = Mock(stdout=_make_mock_json(jitter=0.0), returncode=0)
-    assert SpeedtestRunner()._attempt().jitter_ms == pytest.approx(0.0)
+    assert SpeedtestRunner("/usr/bin/speedtest")._attempt().jitter_ms == pytest.approx(0.0)
 
 
 # ---------------------------------------------------------------------------
@@ -129,7 +129,7 @@ def test_download_bandwidth_converts_correctly(mock_run):
     mock_run.return_value = Mock(
         stdout=_make_mock_json(download_bandwidth=12500000), returncode=0
     )
-    assert SpeedtestRunner()._attempt().download_mbps == pytest.approx(100.0)
+    assert SpeedtestRunner("/usr/bin/speedtest")._attempt().download_mbps == pytest.approx(100.0)
 
 
 @patch("src.services.speedtest_runner.subprocess.run")
@@ -139,7 +139,7 @@ def test_upload_bandwidth_converts_correctly(mock_run):
     mock_run.return_value = Mock(
         stdout=_make_mock_json(upload_bandwidth=6250000), returncode=0
     )
-    assert SpeedtestRunner()._attempt().upload_mbps == pytest.approx(50.0)
+    assert SpeedtestRunner("/usr/bin/speedtest")._attempt().upload_mbps == pytest.approx(50.0)
 
 
 # ---------------------------------------------------------------------------
@@ -156,7 +156,7 @@ def test_server_location_formatted_correctly(mock_run):
         ),
         returncode=0,
     )
-    result = SpeedtestRunner()._attempt()
+    result = SpeedtestRunner("/usr/bin/speedtest")._attempt()
     assert result.server_location == "New York, United States"
 
 
@@ -166,7 +166,7 @@ def test_server_name_defaults_to_unknown(mock_run):
     data = json.loads(_make_mock_json())
     del data["server"]["name"]
     mock_run.return_value = Mock(stdout=json.dumps(data), returncode=0)
-    assert SpeedtestRunner()._attempt().server_name == "Unknown"
+    assert SpeedtestRunner("/usr/bin/speedtest")._attempt().server_name == "Unknown"
 
 
 # ---------------------------------------------------------------------------
@@ -180,7 +180,7 @@ def test_zero_download_speed_is_valid(mock_run):
     mock_run.return_value = Mock(
         stdout=_make_mock_json(download_bandwidth=0), returncode=0
     )
-    assert SpeedtestRunner()._attempt().download_mbps == pytest.approx(0.0)
+    assert SpeedtestRunner("/usr/bin/speedtest")._attempt().download_mbps == pytest.approx(0.0)
 
 
 @patch("src.services.speedtest_runner.subprocess.run")
@@ -189,7 +189,7 @@ def test_zero_upload_speed_is_valid(mock_run):
     mock_run.return_value = Mock(
         stdout=_make_mock_json(upload_bandwidth=0), returncode=0
     )
-    assert SpeedtestRunner()._attempt().upload_mbps == pytest.approx(0.0)
+    assert SpeedtestRunner("/usr/bin/speedtest")._attempt().upload_mbps == pytest.approx(0.0)
 
 
 @patch("src.services.speedtest_runner.subprocess.run")
@@ -199,7 +199,7 @@ def test_missing_server_location_produces_safe_string(mock_run):
     del data["server"]["location"]
     del data["server"]["country"]
     mock_run.return_value = Mock(stdout=json.dumps(data), returncode=0)
-    result = SpeedtestRunner()._attempt()
+    result = SpeedtestRunner("/usr/bin/speedtest")._attempt()
     assert result.server_location == ", "
 
 
@@ -207,4 +207,4 @@ def test_missing_server_location_produces_safe_string(mock_run):
 def test_zero_ping_is_valid(mock_run):
     """Boundary: zero ping is stored as 0.0."""
     mock_run.return_value = Mock(stdout=_make_mock_json(latency=0.0), returncode=0)
-    assert SpeedtestRunner()._attempt().ping_ms == pytest.approx(0.0)
+    assert SpeedtestRunner("/usr/bin/speedtest")._attempt().ping_ms == pytest.approx(0.0)
