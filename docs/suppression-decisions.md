@@ -7,15 +7,6 @@ and why it cannot simply be removed.
 
 ## Python
 
-### `src/services/speedtest_runner.py`
-
-| Line                   | Suppression                        | Reason                                                                                                                                     |
-| ---------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `import speedtest`     | `# type: ignore`                   | `speedtest-cli` ships no type stubs and has no third-party stub package on PyPI. There is no fix available short of replacing the library. |
-| `st.get_best_server()` | `# type: ignore[no-untyped-call]`  | The speedtest library's methods are entirely unannotated. mypy cannot infer their return types.                                            |
-| `st.download(...)`     | `# type: ignore[no-untyped-call]`  | Same library, same reason.                                                                                                                 |
-| `st.upload(...)`       | `# type: ignore[no-untyped-call]`  | Same library, same reason.                                                                                                                 |
-
 ### `src/services/health_server.py`
 
 | Line                           | Suppression                                     | Reason                                                                                                                                                                                                                                                                                                                                                                     |

@@ -1,6 +1,7 @@
 # Architecture Overview
 
-Hermes is designed as a distributed two-container system that periodically runs internet speed tests and exports results to multiple observability destinations.
+Hermes is designed as a distributed two-container system that periodically runs internet speed tests and
+exports results to multiple observability destinations.
 
 ---
 
@@ -131,7 +132,7 @@ This single-image design simplifies builds and deployments while enabling flexib
 **Key Components:**
 
 - **`main.py`** — Entry point, wires scheduler and watches for trigger file
-- **`SpeedtestRunner`** — Executes speedtest-cli and parses results
+- **`SpeedtestRunner`** — Executes official Ookla speedtest CLI and parses JSON results
 - **`SpeedResult`** — Data model capturing download, upload, ping, jitter, ISP, timestamp
 - **`ResultDispatcher`** — Fans out results to all enabled exporters
 - **`AlertManager`** — Tracks consecutive failures and sends notifications
