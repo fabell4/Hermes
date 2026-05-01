@@ -19,20 +19,46 @@ class SpeedtestRunner:
     Runs a speed test using official Ookla CLI and returns results as SpeedResult.
     Retries once on transient failure before raising.
     
-    Security: Uses absolute path to speedtest binary (resolved at init) to prevent
+    Security: Uses absolute path to speedtest binary (resolved lazily) to prevent
     PATH manipulation attacks.
     """
 
-    def __init__(self) -> None:
-        """Initialize runner and validate speedtest binary exists."""
-        speedtest_path = shutil.which("speedtest")
-        if speedtest_path is None:
-            raise RuntimeError(
-                "Ookla speedtest CLI not found in PATH. "
-                "Install from https://www.speedtest.net/apps/cli"
-            )
-        self._speedtest_path: str = speedtest_path
-        _log.debug("Using speedtest binary at: %s", self._speedtest_path)
+    def __init__(self, speedtest_path: str | None = None) -> None:
+        """
+        Initialize runner.
+        
+        Args:
+            speedtest_path: Optional explicit path to speedtest binary.
+                           If None, will be resolved from PATH on first use.
+                           Used for testing and explicit binary location specification.
+        """
+        self._speedtest_path: str | None = speedtest_path
+        self._path_resolved = speedtest_path is not None
+    
+    def _get_speedtest_path(self) -> str:
+        """
+        Resolve and cache the speedtest binary path.
+        
+        Returns:
+            Absolute path to speedtest binary.
+            
+        Raises:
+            RuntimeError: If speedtest CLI not found in PATH.
+        """
+        if not self._path_resolved:
+            speedtest_path = shutil.which("speedtest")
+            if speedtest_path is None:
+                raise RuntimeError(
+                    "Ookla speedtest CLI not found in PATH. "
+                    "Install from https://www.speedtest.net/apps/cli"
+                )
+            self._speedtest_path = speedtest_path
+            self._path_resolved = True
+            _log.debug("Using speedtest binary at: %s", self._speedtest_path)
+        
+        # Type narrowing: after _path_resolved is True, _speedtest_path is str
+        assert self._speedtest_path is not None
+        return self._speedtest_path
 
     def run(self) -> SpeedResult:
         """Run the speed test, retrying once on transient failure."""
@@ -53,10 +79,11 @@ class SpeedtestRunner:
         try:
             # Run speedtest CLI with JSON output and accept license automatically
             # Security: All arguments are hardcoded strings (no user input)
-            # Uses absolute path resolved at init to prevent PATH injection
+            # Uses absolute path to prevent PATH injection
+            speedtest_path = self._get_speedtest_path()
             result = subprocess.run(  # noqa: S603  # NOSONAR - No user input, hardcoded args only
                 [
-                    self._speedtest_path,
+                    speedtest_path,
                     "--accept-license",
                     "--accept-gdpr",
                     "--format=json",
