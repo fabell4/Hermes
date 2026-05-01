@@ -279,6 +279,7 @@ def test_export_raises_on_missing_table(db_path: Path) -> None:
     with pytest.raises(RuntimeError, match="SQLite write failed"):
         exp.export(_make_result())
 
+
 # ---------------------------------------------------------------------------
 # Lock timeout and error handling tests
 # ---------------------------------------------------------------------------

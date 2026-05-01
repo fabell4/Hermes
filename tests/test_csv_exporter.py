@@ -424,4 +424,3 @@ def test_ensure_file_creates_missing_parent_dirs(tmp_path):
     _exporter = CSVExporter(deep_path)
     assert deep_path.exists()
     assert deep_path.parent.exists()
-

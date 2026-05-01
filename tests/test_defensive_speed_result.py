@@ -185,9 +185,7 @@ def test_negative_ping_ms_raises_value_error() -> None:
 def test_negative_jitter_ms_raises_value_error() -> None:
     """jitter_ms cannot be negative when provided."""
     with pytest.raises(ValueError, match="jitter_ms cannot be negative"):
-        SpeedResult(
-            download_mbps=10.0, upload_mbps=10.0, ping_ms=5.0, jitter_ms=-1.0
-        )
+        SpeedResult(download_mbps=10.0, upload_mbps=10.0, ping_ms=5.0, jitter_ms=-1.0)
 
 
 def test_timezone_naive_timestamp_raises_value_error() -> None:
@@ -202,6 +200,4 @@ def test_timezone_naive_timestamp_raises_value_error() -> None:
 def test_negative_server_id_raises_value_error() -> None:
     """server_id cannot be negative when provided."""
     with pytest.raises(ValueError, match="server_id cannot be negative"):
-        SpeedResult(
-            download_mbps=10.0, upload_mbps=10.0, ping_ms=5.0, server_id=-1
-        )
+        SpeedResult(download_mbps=10.0, upload_mbps=10.0, ping_ms=5.0, server_id=-1)

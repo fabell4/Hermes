@@ -211,9 +211,50 @@ _Goal: notify users when something goes wrong and ensure code quality before v1.
 
 ## Post-Release Enhancements
 
-_Features planned for after v1.0. Not required for stable release._
+_Features and improvements planned for after v1.0. Not required for stable release._
 
-### Enhanced Diagnostics (v1.1 candidates)
+---
+
+## v1.1 — Code Quality & Testing (Deferred Items from Reviews)
+
+### Testing & Coverage (HIGH priority)
+- [ ] Main loop tests — 12-15 tests covering uncovered paths in scheduler and lifecycle management (see [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) H6)
+- [ ] Frontend component tests — Unit tests for Layout, Dashboard, and Settings components (TypeScript/React) (see [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) H6)
+- [ ] Integration tests — End-to-end flows: speedtest → export → alert lifecycle, runtime config persistence across restart, full alert flow from failure to recovery (see [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) H8)
+- [ ] Runtime config edge cases — Additional validation and error path tests (see [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) M-MEDIUM)
+- [ ] Alert provider error paths — Comprehensive failure scenario coverage (see [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) M-MEDIUM)
+- [ ] Frontend coverage target — Expand TypeScript/React test coverage to 80%+ (see [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) L-LOW)
+- [ ] Config module subprocess test — Verify API key validation causes startup failure via subprocess (see [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) H6)
+
+### Performance Monitoring & Optimization (MEDIUM priority)
+- [ ] Prometheus label cardinality management — Make labels optional via environment variable to prevent unbounded time series growth (see [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #4)
+- [ ] Exporter registry deduplication — Refactor `/api/trigger` to reuse `EXPORTER_REGISTRY` from main.py instead of rebuilding (see [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #5)
+- [ ] SQLite WAL checkpoint management — Manual checkpoint after pruning operations to prevent WAL file growth (see [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #6)
+- [ ] HTTP connection pooling — Shared session for alert providers to reduce connection overhead (see [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #7)
+- [ ] SQLite vacuum automation — Monitor database fragmentation, add vacuum logic if needed (see [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) M6)
+- [ ] Alert provider thread pool statistics — Logging or metrics for async alert queue depth and completion time (see [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) M7)
+
+### Code Quality & Maintainability (LOW priority)
+- [ ] Configurable retry count and exponential backoff — Make SpeedtestRunner retry behavior configurable with backoff (see [DEFENSIVE-CODING-REVIEW.md](docs/DEFENSIVE-CODING-REVIEW.md) L12)
+- [ ] Main loop health check stall detection — Detect and log when scheduler appears stalled (see [DEFENSIVE-CODING-REVIEW.md](docs/DEFENSIVE-CODING-REVIEW.md) L14)
+- [ ] Type alias extraction — Extract common types like `dict[str, Any]` to named aliases (see [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) L8)
+- [ ] Config helper functions — Add `_get_str()` helper for consistency with existing `_get_int()`, `_get_float()` patterns (see [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) L8)
+- [ ] Hardcoded timeout constants — Extract alert provider timeout defaults to constants (see [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) L9)
+- [ ] Error message consistency — Standardize error message strings (inline vs constants) (see [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) L10)
+- [ ] Docstring completeness — Add comprehensive docstrings to internal helpers and validate Google style consistency (see [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) L12, [ERROR-HANDLING-REVIEW.md](docs/ERROR-HANDLING-REVIEW.md) M1)
+
+### Documentation Improvements (MEDIUM priority)
+- [ ] Error message documentation — Centralized error message reference with troubleshooting steps (see [ERROR-HANDLING-REVIEW.md](docs/ERROR-HANDLING-REVIEW.md) M2)
+- [ ] Error handling conventions — Document patterns: when to raise vs log, exception hierarchies, wrapping guidelines (see [ERROR-HANDLING-REVIEW.md](docs/ERROR-HANDLING-REVIEW.md) M3)
+- [ ] Error catalog — Comprehensive list of all possible errors by module with causes and remediation (see [ERROR-HANDLING-REVIEW.md](docs/ERROR-HANDLING-REVIEW.md) M4)
+- [ ] Monitoring runbook — Operational guide for diagnosing production issues from logs/metrics (see [ERROR-HANDLING-REVIEW.md](docs/ERROR-HANDLING-REVIEW.md) M5)
+- [ ] Documentation accuracy review — Full sweep of README, docs/, and inline comments for correctness (see [TODO.md](TODO.md) Phase 4)
+
+---
+
+## v1.2+ — Feature Enhancements
+
+### Enhanced Diagnostics
 - [ ] Packet loss tracking — capture and log packet loss percentage from speedtest results
 - [ ] Server selection — allow pinning to specific server ID for consistent baseline testing
 - [ ] SLA monitoring — define speed thresholds (e.g., "download ≥100 Mbps") and track compliance percentage
@@ -244,7 +285,7 @@ _Features planned for after v1.0. Not required for stable release._
 - [ ] Export charts — download charts as PNG/SVG for reports
 - [ ] Scheduled test windows — only run tests during specific hours (avoid counting against data caps)
 
-### Security & Infrastructure (Post-v1.0)
+### Security & Infrastructure
 - [ ] API key rotation mechanism — support rotating keys without restart, or multiple valid keys
 - [ ] Multi-user support — per-user API keys with access control and audit trails
 - [ ] Distributed rate limiting — migrate from in-process state to Redis for multi-instance deployments

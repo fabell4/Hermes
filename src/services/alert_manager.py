@@ -58,8 +58,7 @@ class AlertManager:
         # Initialize thread pool (lazy, only once)
         if AlertManager._executor is None:
             AlertManager._executor = concurrent.futures.ThreadPoolExecutor(
-                max_workers=3,
-                thread_name_prefix="alert-sender"
+                max_workers=3, thread_name_prefix="alert-sender"
             )
             logger.debug("Alert thread pool initialized (max_workers=3)")
 
@@ -188,7 +187,9 @@ class AlertManager:
                     )
                     logger.info("Alert sent successfully via %s", name)
                 except Exception as e:  # pylint: disable=broad-exception-caught  # NOSONAR
-                    logger.error("Alert provider '%s' failed: %s", name, e, exc_info=True)
+                    logger.error(
+                        "Alert provider '%s' failed: %s", name, e, exc_info=True
+                    )
 
         # Update last alert time immediately (don't wait for delivery)
         self._last_alert_time = timestamp
@@ -254,7 +255,7 @@ class AlertManager:
 
     def _wait_for_pending_alerts(self, timeout: float = 5.0) -> None:
         """Wait for all pending async alerts to complete (for testing).
-        
+
         Args:
             timeout: Maximum time to wait in seconds
         """

@@ -41,7 +41,9 @@ CREATE TABLE IF NOT EXISTS results (
     server_id       INTEGER
 )"""
 
-_CREATE_INDEX = "CREATE INDEX IF NOT EXISTS idx_results_timestamp ON results(timestamp DESC)"
+_CREATE_INDEX = (
+    "CREATE INDEX IF NOT EXISTS idx_results_timestamp ON results(timestamp DESC)"
+)
 
 _INSERT = """
 INSERT INTO results
@@ -100,7 +102,10 @@ class SQLiteExporter(BaseExporter):
     _MIGRATIONS: list[tuple[str, str]] = [
         ("jitter_ms", "ALTER TABLE results ADD COLUMN jitter_ms REAL"),
         ("isp_name", "ALTER TABLE results ADD COLUMN isp_name TEXT"),
-        ("idx_results_timestamp", "CREATE INDEX IF NOT EXISTS idx_results_timestamp ON results(timestamp DESC)"),
+        (
+            "idx_results_timestamp",
+            "CREATE INDEX IF NOT EXISTS idx_results_timestamp ON results(timestamp DESC)",
+        ),
     ]
 
     def _init_db(self) -> None:
@@ -113,17 +118,17 @@ class SQLiteExporter(BaseExporter):
         with self._transaction() as conn:
             conn.execute(_CREATE_TABLE)
             conn.execute(_CREATE_INDEX)
-            
+
             # Check for missing columns
             existing_columns = {
                 row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()
             }
-            
+
             # Check for missing indexes
             existing_indexes = {
                 row[1] for row in conn.execute("PRAGMA index_list(results)").fetchall()
             }
-            
+
             for name, ddl in self._MIGRATIONS:
                 # Check if it's a column or index migration
                 if name.startswith("idx_"):

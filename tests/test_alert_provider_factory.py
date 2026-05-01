@@ -218,9 +218,7 @@ def test_register_gotify_provider_includes_priority_when_provided():
 def test_register_gotify_provider_handles_invalid_url_gracefully(caplog):
     """Verify Gotify provider logs warning on invalid URL without crashing."""
     manager = AlertManager(failure_threshold=3, cooldown_minutes=30)
-    providers_config = {
-        PROVIDER_GOTIFY: {"url": "not-a-url", "token": "test-token"}
-    }
+    providers_config = {PROVIDER_GOTIFY: {"url": "not-a-url", "token": "test-token"}}
 
     register_gotify_provider(manager, providers_config)
 
@@ -264,9 +262,7 @@ def test_register_ntfy_provider_skips_when_topic_empty():
 def test_register_ntfy_provider_skips_when_disabled_and_require_enabled():
     """Verify ntfy provider is not registered when enabled=False and require_enabled=True."""
     manager = AlertManager(failure_threshold=3, cooldown_minutes=30)
-    providers_config = {
-        PROVIDER_NTFY: {"topic": "hermes-alerts", "enabled": False}
-    }
+    providers_config = {PROVIDER_NTFY: {"topic": "hermes-alerts", "enabled": False}}
 
     register_ntfy_provider(manager, providers_config, require_enabled=True)
 
@@ -316,9 +312,7 @@ def test_register_ntfy_provider_includes_token_when_provided():
 def test_register_ntfy_provider_includes_priority_when_provided():
     """Verify ntfy provider uses custom priority from config."""
     manager = AlertManager(failure_threshold=3, cooldown_minutes=30)
-    providers_config = {
-        PROVIDER_NTFY: {"topic": "hermes-alerts", "priority": 4}
-    }
+    providers_config = {PROVIDER_NTFY: {"topic": "hermes-alerts", "priority": 4}}
 
     register_ntfy_provider(manager, providers_config)
 
@@ -414,7 +408,10 @@ def test_register_apprise_provider_includes_urls_when_provided():
     register_apprise_provider(manager, providers_config)
 
     provider = manager._providers[PROVIDER_APPRISE]  # noqa: SLF001
-    assert provider.urls == ["ntfy://ntfy.sh/topic", "gotify://gotify.example.com/token"]
+    assert provider.urls == [
+        "ntfy://ntfy.sh/topic",
+        "gotify://gotify.example.com/token",
+    ]
 
 
 def test_register_apprise_provider_handles_empty_urls_list():

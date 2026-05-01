@@ -183,6 +183,7 @@ def health() -> HealthResponse:
 # Must be registered last so API routes take precedence
 # ---------------------------------------------------------------------------
 if _DIST.is_dir():
+
     @app.get("/{full_path:path}", include_in_schema=False)
     def spa_fallback(full_path: str) -> FileResponse:
         """Return index.html for all non-API paths to support client-side routing."""
