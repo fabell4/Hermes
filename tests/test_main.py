@@ -1,11 +1,11 @@
 """Tests for current SpeedtestRunner and main.run_once behavior."""
 # pylint: disable=missing-function-docstring,protected-access
 
+import json
 from datetime import datetime, timezone
 import logging
-from unittest.mock import MagicMock, patch
-
-import speedtest as speedtest_module
+import subprocess
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
@@ -35,19 +35,28 @@ def _raise_loki_url_required() -> BaseExporter:
     raise ValueError("Loki URL is required")
 
 
-@patch("src.services.speedtest_runner.speedtest.Speedtest")
-def test_speedtest_runner_run_success(mock_st_class):
-    mock_st = MagicMock()
-    mock_st.get_best_server.return_value = {
-        "sponsor": "Test ISP",
-        "name": "Test City",
-        "country": "DE",
-        "id": "1234",
-    }
-    mock_st.download.return_value = 100_000_000
-    mock_st.upload.return_value = 50_000_000
-    mock_st.results.ping = 12.5
-    mock_st_class.return_value = mock_st
+def _make_mock_speedtest_json() -> str:
+    """Return a mock JSON response from Ookla speedtest CLI."""
+    return json.dumps({
+        "download": {"bandwidth": 12500000},  # 100 Mbps in bytes/s
+        "upload": {"bandwidth": 6250000},     # 50 Mbps in bytes/s
+        "ping": {"latency": 12.5, "jitter": 2.3},
+        "server": {
+            "name": "Test ISP",
+            "location": "Test City",
+            "country": "DE",
+            "id": 1234
+        },
+        "isp": "Test ISP"
+    })
+
+
+@patch("src.services.speedtest_runner.subprocess.run")
+def test_speedtest_runner_run_success(mock_run):
+    mock_result = Mock()
+    mock_result.stdout = _make_mock_speedtest_json()
+    mock_result.returncode = 0
+    mock_run.return_value = mock_result
 
     result = SpeedtestRunner().run()
 
@@ -57,6 +66,7 @@ def test_speedtest_runner_run_success(mock_st_class):
     assert result.server_name == "Test ISP"
     assert result.server_location == "Test City, DE"
     assert result.server_id == 1234
+    assert result.jitter_ms == pytest.approx(2.3)
 
 
 @patch("src.main.runtime_config.mark_running")
@@ -174,72 +184,61 @@ def test_build_dispatcher_skips_loki_on_init_error(monkeypatch, caplog):
 # ---------------------------------------------------------------------------
 
 
-@patch("src.services.speedtest_runner.speedtest.Speedtest")
-def test_speedtest_runner_raises_on_config_error(mock_st_class):
-    mock_st_class.side_effect = speedtest_module.ConfigRetrievalError
-    with pytest.raises(RuntimeError, match="speedtest.net"):
+@patch("src.services.speedtest_runner.subprocess.run")
+def test_speedtest_runner_raises_on_timeout(mock_run):
+    mock_run.side_effect = subprocess.TimeoutExpired(cmd=["speedtest"], timeout=120)
+    with pytest.raises(RuntimeError, match="timed out"):
         SpeedtestRunner().run()
 
 
-@patch("src.services.speedtest_runner.speedtest.Speedtest")
-def test_speedtest_runner_raises_on_no_matched_servers(mock_st_class):
-    mock_st = MagicMock()
-    mock_st.get_best_server.side_effect = speedtest_module.NoMatchedServers
-    mock_st_class.return_value = mock_st
-    with pytest.raises(RuntimeError, match="No speedtest servers"):
+@patch("src.services.speedtest_runner.subprocess.run")
+def test_speedtest_runner_raises_on_process_error(mock_run):
+    mock_run.side_effect = subprocess.CalledProcessError(
+        returncode=1, cmd=["speedtest"], stderr="network error"
+    )
+    with pytest.raises(RuntimeError, match="Speedtest CLI failed"):
         SpeedtestRunner().run()
 
 
-@patch("src.services.speedtest_runner.speedtest.Speedtest")
-def test_speedtest_runner_raises_on_http_error(mock_st_class):
-    mock_st = MagicMock()
-    mock_st.get_best_server.side_effect = speedtest_module.SpeedtestHTTPError
-    mock_st_class.return_value = mock_st
-    with pytest.raises(RuntimeError, match="HTTP error"):
+@patch("src.services.speedtest_runner.subprocess.run")
+def test_speedtest_runner_raises_on_json_decode_error(mock_run):
+    mock_result = Mock()
+    mock_result.stdout = "not valid json"
+    mock_result.returncode = 0
+    mock_run.return_value = mock_result
+    with pytest.raises(RuntimeError, match="Failed to parse"):
         SpeedtestRunner().run()
 
 
-@patch("src.services.speedtest_runner.speedtest.Speedtest")
-def test_speedtest_runner_raises_on_generic_speedtest_exception(mock_st_class):
-    mock_st = MagicMock()
-    mock_st.get_best_server.side_effect = speedtest_module.SpeedtestException("oops")
-    mock_st_class.return_value = mock_st
-    with pytest.raises(RuntimeError, match="Speedtest failed"):
+@patch("src.services.speedtest_runner.subprocess.run")
+def test_speedtest_runner_raises_on_file_not_found(mock_run):
+    mock_run.side_effect = FileNotFoundError("speedtest not found")
+    with pytest.raises(RuntimeError, match="not found"):
         SpeedtestRunner().run()
 
 
-@patch("src.services.speedtest_runner.speedtest.Speedtest")
-def test_speedtest_runner_retries_once_on_transient_failure(mock_st_class):
+@patch("src.services.speedtest_runner.subprocess.run")
+def test_speedtest_runner_retries_once_on_transient_failure(mock_run):
     """First attempt raises; second attempt succeeds — run() should return result."""
-    mock_st_fail = MagicMock()
-    mock_st_fail.get_best_server.side_effect = speedtest_module.ConfigRetrievalError
-
-    mock_st_ok = MagicMock()
-    mock_st_ok.get_best_server.return_value = {
-        "sponsor": "Test ISP",
-        "name": "City",
-        "country": "Country",
-        "id": "1",
-    }
-    mock_st_ok.download.return_value = 100_000_000
-    mock_st_ok.upload.return_value = 50_000_000
-    mock_st_ok.results.ping = 10.0
-
-    mock_st_class.side_effect = [mock_st_fail, mock_st_ok]
+    # First call fails
+    mock_run.side_effect = [
+        subprocess.TimeoutExpired(cmd=["speedtest"], timeout=120),
+        Mock(stdout=_make_mock_speedtest_json(), returncode=0),
+    ]
 
     result = SpeedtestRunner().run()
     assert result.download_mbps == pytest.approx(100.0)
     assert result.upload_mbps == pytest.approx(50.0)
-    assert mock_st_class.call_count == 2
+    assert mock_run.call_count == 2
 
 
-@patch("src.services.speedtest_runner.speedtest.Speedtest")
-def test_speedtest_runner_raises_after_two_failures(mock_st_class):
+@patch("src.services.speedtest_runner.subprocess.run")
+def test_speedtest_runner_raises_after_two_failures(mock_run):
     """Both attempts fail — run() should raise RuntimeError."""
-    mock_st_class.side_effect = speedtest_module.ConfigRetrievalError
-    with pytest.raises(RuntimeError, match="speedtest.net"):
+    mock_run.side_effect = subprocess.TimeoutExpired(cmd=["speedtest"], timeout=120)
+    with pytest.raises(RuntimeError, match="timed out"):
         SpeedtestRunner().run()
-    assert mock_st_class.call_count == 2
+    assert mock_run.call_count == 2
 
 
 # ---------------------------------------------------------------------------

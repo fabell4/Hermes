@@ -23,8 +23,10 @@ ENV APP_VERSION=${APP_VERSION}
 
 WORKDIR /app
 
-# Install sqlite3 CLI + curl for healthchecks; create persistent dirs in same layer
-RUN apt-get update && apt-get install -y --no-install-recommends sqlite3 curl \
+# Install sqlite3 CLI + curl for healthchecks + Ookla speedtest CLI
+RUN apt-get update && apt-get install -y --no-install-recommends sqlite3 curl ca-certificates gnupg \
+    && curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | bash \
+    && apt-get install -y speedtest \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
