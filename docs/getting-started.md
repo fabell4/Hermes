@@ -196,9 +196,21 @@ docker compose up -d
 
 For production deployment without Docker:
 
+**Prerequisites:**
+
+- Python 3.12+
+- **Ookla speedtest CLI** — Download and install from <https://www.speedtest.net/apps/cli>
+  - On Debian/Ubuntu: Follow the official installation script
+  - On macOS: `brew install speedtest-cli` (official Ookla CLI)
+  - On Windows: Download the installer from the official Ookla website
+  - The `speedtest` binary must be available in your system PATH
+
 ```bash
 # Install Python 3.12+
 python --version  # Verify Python 3.12 or higher
+
+# Verify Ookla CLI is installed
+speedtest --version  # Should show "Speedtest by Ookla"
 
 # Create and activate virtual environment
 python -m venv .venv
@@ -243,6 +255,7 @@ For local development with hot reload:
 - Python 3.12+
 - Node.js 18+
 - Virtual environment (venv)
+- **Ookla speedtest CLI** — Install from <https://www.speedtest.net/apps/cli>
 
 ### Backend Setup
 

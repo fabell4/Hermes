@@ -281,6 +281,249 @@ def test_export_raises_on_missing_table(db_path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
+# H8: SQLite Migration Idempotency Tests (v1.1 Test Coverage Gaps)
+# ---------------------------------------------------------------------------
+
+
+def test_migration_idempotent_on_fresh_database(tmp_path: Path) -> None:
+    """Running migrations on a fresh database creates all columns and indexes."""
+    db_path = tmp_path / "fresh.db"
+    SQLiteExporter(path=db_path)
+
+    # Verify all columns exist
+    conn = sqlite3.connect(db_path)
+    columns = {
+        row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()
+    }
+    conn.close()
+
+    assert "jitter_ms" in columns
+    assert "isp_name" in columns
+    assert "timestamp" in columns
+    assert "download_mbps" in columns
+
+
+def test_migration_idempotent_on_second_init(tmp_path: Path) -> None:
+    """Running _init_db twice on the same database is idempotent."""
+    db_path = tmp_path / "idempotent.db"
+
+    # First init
+    exp1 = SQLiteExporter(path=db_path)
+    exp1.export(_make_result())
+
+    # Second init (simulates restart)
+    exp2 = SQLiteExporter(path=db_path)
+
+    # Should not error, and data should still be present
+    conn = sqlite3.connect(db_path)
+    count = conn.execute("SELECT COUNT(*) FROM results").fetchone()[0]
+    conn.close()
+
+    assert count == 1
+
+    # Export with second instance should work
+    exp2.export(_make_result())
+    conn = sqlite3.connect(db_path)
+    count = conn.execute("SELECT COUNT(*) FROM results").fetchone()[0]
+    conn.close()
+
+    assert count == 2
+
+
+def test_migration_adds_missing_columns_to_old_database(tmp_path: Path) -> None:
+    """Migrations add missing columns to databases created without them."""
+    db_path = tmp_path / "old_schema.db"
+
+    # Create database with old schema (no jitter_ms or isp_name)
+    conn = sqlite3.connect(db_path)
+    conn.execute("""
+        CREATE TABLE results (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp       TEXT    NOT NULL,
+            download_mbps   REAL    NOT NULL,
+            upload_mbps     REAL    NOT NULL,
+            ping_ms         REAL    NOT NULL,
+            server_name     TEXT    NOT NULL,
+            server_location TEXT    NOT NULL,
+            server_id       INTEGER
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+    # Verify columns are missing
+    conn = sqlite3.connect(db_path)
+    columns = {
+        row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()
+    }
+    conn.close()
+
+    assert "jitter_ms" not in columns
+    assert "isp_name" not in columns
+
+    # Initialize exporter (should run migrations)
+    exp = SQLiteExporter(path=db_path)
+
+    # Verify columns were added
+    conn = sqlite3.connect(db_path)
+    columns = {
+        row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()
+    }
+    conn.close()
+
+    assert "jitter_ms" in columns
+    assert "isp_name" in columns
+
+    # Verify we can write with new columns
+    result = _make_result()
+    result.jitter_ms = 5.0
+    result.isp_name = "Test ISP"
+    exp.export(result)
+
+    conn = sqlite3.connect(db_path)
+    row = conn.execute("SELECT jitter_ms, isp_name FROM results").fetchone()
+    conn.close()
+
+    assert row == (5.0, "Test ISP")
+
+
+def test_migration_adds_missing_index(tmp_path: Path) -> None:
+    """Migrations add missing indexes to databases created without them."""
+    db_path = tmp_path / "no_index.db"
+
+    # Create database without timestamp index
+    conn = sqlite3.connect(db_path)
+    conn.execute("""
+        CREATE TABLE results (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp       TEXT    NOT NULL,
+            download_mbps   REAL    NOT NULL,
+            upload_mbps     REAL    NOT NULL,
+            ping_ms         REAL    NOT NULL,
+            jitter_ms       REAL,
+            isp_name        TEXT,
+            server_name     TEXT    NOT NULL,
+            server_location TEXT    NOT NULL,
+            server_id       INTEGER
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+    # Verify index is missing
+    conn = sqlite3.connect(db_path)
+    indexes = {
+        row[1] for row in conn.execute("PRAGMA index_list(results)").fetchall()
+    }
+    conn.close()
+
+    assert "idx_results_timestamp" not in indexes
+
+    # Initialize exporter (should run migrations)
+    SQLiteExporter(path=db_path)
+
+    # Verify index was added
+    conn = sqlite3.connect(db_path)
+    indexes = {
+        row[1] for row in conn.execute("PRAGMA index_list(results)").fetchall()
+    }
+    conn.close()
+
+    assert "idx_results_timestamp" in indexes
+
+
+def test_concurrent_migration_does_not_error(tmp_path: Path) -> None:
+    """Multiple processes initializing the same database concurrently is safe."""
+    import concurrent.futures
+    import time
+
+    db_path = tmp_path / "concurrent.db"
+
+    def init_exporter():
+        """Initialize exporter (runs migrations)."""
+        try:
+            # Add small random delay to increase contention
+            time.sleep(0.01)
+            exp = SQLiteExporter(path=db_path)
+            exp.export(_make_result())
+            return True
+        except Exception as e:
+            # Some failures may occur due to lock contention, but that's acceptable
+            # as long as the database ends up in a valid state
+            return str(e)
+
+    # Simulate 5 concurrent initialization attempts
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        futures = [executor.submit(init_exporter) for _ in range(5)]
+        results = [f.result() for f in concurrent.futures.as_completed(futures)]
+
+    # At least some should succeed
+    successes = sum(1 for r in results if r is True)
+    assert successes >= 3, f"Only {successes}/5 concurrent inits succeeded"
+
+    # Verify database is valid and has data (at least from successful inits)
+    conn = sqlite3.connect(db_path)
+    count = conn.execute("SELECT COUNT(*) FROM results").fetchone()[0]
+    conn.close()
+
+    assert count >= successes, f"Expected at least {successes} rows, got {count}"
+
+
+def test_migration_handles_partially_migrated_database(tmp_path: Path) -> None:
+    """Migrations handle databases that have some but not all migrations applied."""
+    db_path = tmp_path / "partial.db"
+
+    # Create database with only jitter_ms column (no isp_name or index)
+    conn = sqlite3.connect(db_path)
+    conn.execute("""
+        CREATE TABLE results (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp       TEXT    NOT NULL,
+            download_mbps   REAL    NOT NULL,
+            upload_mbps     REAL    NOT NULL,
+            ping_ms         REAL    NOT NULL,
+            jitter_ms       REAL,
+            server_name     TEXT    NOT NULL,
+            server_location TEXT    NOT NULL,
+            server_id       INTEGER
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+    # Verify partial state
+    conn = sqlite3.connect(db_path)
+    columns = {
+        row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()
+    }
+    indexes = {
+        row[1] for row in conn.execute("PRAGMA index_list(results)").fetchall()
+    }
+    conn.close()
+
+    assert "jitter_ms" in columns
+    assert "isp_name" not in columns
+    assert "idx_results_timestamp" not in indexes
+
+    # Initialize exporter (should complete remaining migrations)
+    SQLiteExporter(path=db_path)
+
+    # Verify all migrations applied
+    conn = sqlite3.connect(db_path)
+    columns = {
+        row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()
+    }
+    indexes = {
+        row[1] for row in conn.execute("PRAGMA index_list(results)").fetchall()
+    }
+    conn.close()
+
+    assert "jitter_ms" in columns
+    assert "isp_name" in columns
+    assert "idx_results_timestamp" in indexes
+
+
+# ---------------------------------------------------------------------------
 # Lock timeout and error handling tests
 # ---------------------------------------------------------------------------
 

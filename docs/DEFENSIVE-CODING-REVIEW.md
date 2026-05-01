@@ -850,7 +850,7 @@ The following defensive practices were observed and are working well:
 - Issue #1: Config range validation
 - Issue #6: Configurable retry logic with backoff
 - Issue #8: File locking for triggers (Windows compatibility needed)
-- Issues #12-15: Additional validation edge cases
+- ✅ Issues #12-15: Additional validation edge cases — **IMPLEMENTED (May 1, 2026)**
 
 ---
 
@@ -1058,6 +1058,57 @@ The following defensive practices were observed and are working well:
 
 ---
 
+### ✅ Issues #12-15: Additional Validation Edge Cases — COMPLETED
+
+**Implementation Date:** May 1, 2026
+
+**Changes Made:**
+
+#### Issue #12: Loki Exporter URL Validation
+- Enhanced validation in [src/exporters/loki_exporter.py](src/exporters/loki_exporter.py)
+- Added hostname existence check
+- Added timeout validation (must be positive)
+- Added job label validation (cannot be empty/whitespace)
+- Added warning for embedded credentials in URL
+- Job label whitespace is now stripped automatically
+
+#### Issue #13: Alert Manager Upper Bounds
+- Enhanced validation in [src/services/alert_manager.py](src/services/alert_manager.py)
+- Added upper bound for `failure_threshold` (max 100)
+- Added upper bound for `cooldown_minutes` (max 10080 minutes = 1 week)
+- Prevents unrealistic configuration values
+
+#### Issue #14: Config Rate Limit Validation
+- Enhanced validation in [src/config.py](src/config.py)
+- Added negative value clamping for `RATE_LIMIT_PER_MINUTE`
+- Negative values are clamped to 0 with warning log
+- Prevents unexpected auth middleware behavior
+
+#### Issue #15: Runtime Config Interval Bounds
+- Already implemented in previous defensive coding pass
+- Bounds checking exists in `get_interval_minutes()` function
+- Validates 1-10080 minute range with warning logs
+
+**Tests Added:**
+
+- 4 new AlertManager tests (upper bounds validation, boundary values)
+- 7 new Loki exporter tests (hostname, timeout, job label, credentials warning)
+- Total test count: 392 → 403 tests
+
+**Tests Updated:**
+
+- All 403 tests passing
+- No static analysis errors (mypy, ruff)
+
+**Impact:**
+
+- Prevents edge case configuration errors
+- More comprehensive input validation across all components
+- Clearer error messages for invalid configurations
+- Better logging for troubleshooting
+
+---
+
 ## Testing Recommendations
 
 To verify these defensive improvements:
@@ -1073,25 +1124,24 @@ To verify these defensive improvements:
 
 ## Conclusion
 
-The Hermes codebase demonstrates solid engineering practices with good separation of concerns, comprehensive testing, and extensive logging. All critical and medium-priority defensive coding issues have been addressed and tested.
+The Hermes codebase demonstrates solid engineering practices with good separation of concerns, comprehensive testing, and extensive logging. All critical, medium-priority, and low-priority defensive coding issues have been addressed and tested.
 
 **Implementation Summary:**
 
-- ✅ 8 issues implemented (2 critical + 6 medium priority)
-- ✅ All 344 tests passing
+- ✅ 12 issues implemented (2 critical + 6 medium + 4 low priority)
+- ✅ All 403 tests passing (added 11 new tests)
 - ✅ No static analysis errors
 - ✅ Production-ready for v1.0 release
 
 **Remaining Items (Post v1.0):**
 
-- 4 low-priority edge case improvements
-- Optional: Configurable retry logic with backoff
-- Optional: File locking for triggers (requires Windows/Unix compatibility)
-- Optional: Config range validation helper functions
+- Optional: Configurable retry logic with backoff (#6)
+- Optional: File locking for triggers (requires Windows/Unix compatibility) (#8)
+- Optional: Config range validation helper functions (#1)
 
 **Next Steps:**
 
-1. ✅ All critical defensive fixes complete
-2. Proceed with remaining v1.0 checklist items (best practices review, modernization, etc.)
-3. Consider GitHub issues for post-v1.0 improvements
+1. ✅ All defensive fixes complete (including low-priority items)
+2. Ready for production v1.0 release
+3. Consider GitHub issues for remaining post-v1.0 improvements
 4. Consider adding a configuration validation tool (`hermes validate-config`)

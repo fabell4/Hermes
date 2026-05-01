@@ -596,13 +596,16 @@ Test coverage gaps (H6-H8) have been documented but deferred to v1.1:
 
 ### Phase 4 (Documentation & Polish - Partially Complete)
 
-Medium priority documentation issues (M1-M4, M9-M10) have been documented but not all implemented:
+Medium priority documentation issues (M1-M5) status:
 
-- M1: Missing docstrings (deferred - not blocking)
-- M2-M4: Documentation accuracy improvements (minor polish)
-- M9-M10: Additional error handling polish (non-critical)
+- ✅ M2: Error message documentation — **COMPLETED (2026-05-01)** — [docs/error-messages.md](error-messages.md)
+- ✅ M3: Error handling conventions — **COMPLETED (2026-05-01)** — [docs/error-handling-conventions.md](error-handling-conventions.md)
+- ✅ M4: Error catalog — **COMPLETED (2026-05-01)** — [docs/error-catalog.md](error-catalog.md)
+- [ ] M1: Missing docstrings (deferred to v1.1 - not blocking)
+- [ ] M5: Monitoring runbook (deferred to v1.1 - not blocking)
+- [ ] M9-M10: Additional error handling polish (deferred to v1.1 - non-critical)
 
-**Rationale:** Code is production-ready. Documentation can be enhanced post-v1.0 without affecting stability.
+**Rationale:** Critical documentation (M2-M4) completed during beta. Code is production-ready. Remaining documentation enhancements can be completed post-v1.0 without affecting stability.
 
 ---
 
@@ -637,7 +640,7 @@ Medium priority documentation issues (M1-M4, M9-M10) have been documented but no
 - [x] Phase 1 complete (H1-H5)
 - [x] Phase 2 complete (M5-M6)
 - [ ] Phase 3 deferred to v1.1 (H6-H8)
-- [ ] Phase 4 partially complete (M1-M4, M9-M10 deferred)
+- [x] Phase 4 partially complete (M2-M4 complete, M1/M5/M9-M10 deferred)
 - [x] All tests passing
 - [x] Coverage ≥90%
 - [x] Static analysis clean
@@ -646,6 +649,8 @@ Medium priority documentation issues (M1-M4, M9-M10) have been documented but no
 ---
 
 ## Summary of Changes
+
+### Phase 1-2 (Implementation Date: 2026-04-30)
 
 **Files Modified:** 6
 
@@ -668,6 +673,18 @@ Medium priority documentation issues (M1-M4, M9-M10) have been documented but no
 
 - Runtime config: Eliminated repeated file reads (cached until modified)
 - CSV pruning: Skips full file read when not needed (O(1) check vs O(n) read)
+
+---
+
+### Phase 4 Documentation (Implementation Date: 2026-05-01)
+
+**Files Created:** 3
+
+1. [docs/error-messages.md](error-messages.md) - Centralized error message reference with troubleshooting steps (M2)
+2. [docs/error-handling-conventions.md](error-handling-conventions.md) - Error handling patterns and best practices (M3)
+3. [docs/error-catalog.md](error-catalog.md) - Comprehensive error list by module with causes and remediation (M4)
+
+**Total Documentation:** ~1,200 lines covering all error scenarios, troubleshooting guides, and conventions
 
 ---
 

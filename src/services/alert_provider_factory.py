@@ -191,12 +191,31 @@ def register_all_providers(
     providers_config: dict,
     require_enabled: bool = False,
 ) -> None:
-    """Register all configured alert providers.
+    """
+    Register all configured alert providers with the AlertManager.
+
+    Iterates through all supported provider types (webhook, Gotify, ntfy, Apprise)
+    and registers them with the AlertManager if they are properly configured.
 
     Args:
-        manager: AlertManager instance to register providers with
-        providers_config: Provider configuration dictionary
-        require_enabled: If True, only register providers with enabled=True
+        manager: AlertManager instance to register providers with.
+        providers_config: Dictionary containing provider configurations.
+            Expected structure:
+            {
+                "webhook": {"url": "...", "enabled": bool},
+                "gotify": {"url": "...", "token": "...", "enabled": bool},
+                "ntfy": {"topic": "...", "enabled": bool},
+                "apprise": {"url": "...", "enabled": bool}
+            }
+        require_enabled: If True, only register providers where enabled=True.
+            If False (default), register all providers with valid configuration
+            regardless of enabled status. This is used by the API for test
+            notifications where only enabled providers should be tested.
+
+    Note:
+        Registration failures for individual providers are logged but do not
+        stop registration of other providers. Invalid configurations (missing
+        URLs, tokens, etc.) are silently skipped with a warning log.
     """
     register_webhook_provider(manager, providers_config, require_enabled)
     register_gotify_provider(manager, providers_config, require_enabled)

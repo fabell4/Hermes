@@ -23,6 +23,7 @@ _config_mtime: float = 0
 
 
 def _ensure_dir() -> None:
+    """Create the runtime config directory if it doesn't exist."""
     RUNTIME_CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 
@@ -285,8 +286,19 @@ def trigger_run() -> None:
 
 def consume_run_trigger() -> bool:
     """
-    Check whether the UI requested an immediate run.
-    Deletes the trigger file and returns True if it was present.
+    Check if a manual trigger file exists and remove it atomically.
+
+    The trigger file is created by the /api/trigger endpoint to signal that
+    a manual speedtest run has been requested. This function checks for the
+    file and removes it if present, effectively "consuming" the trigger.
+
+    Returns:
+        bool: True if the trigger file existed and was consumed, False otherwise.
+
+    Note:
+        This function is idempotent and thread-safe. Multiple calls will only
+        return True for the first caller that successfully removes the file.
+        Subsequent calls will return False until a new trigger is created.
     """
     if RUN_TRIGGER_PATH.exists():
         try:

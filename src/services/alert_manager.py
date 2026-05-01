@@ -37,13 +37,17 @@ class AlertManager:
         Initialize the alert manager.
 
         Args:
-            failure_threshold: Number of consecutive failures before alerting
-            cooldown_minutes: Minimum minutes between alerts
+            failure_threshold: Number of consecutive failures before alerting (1-100)
+            cooldown_minutes: Minimum minutes between alerts (0-10080)
         """
         if failure_threshold < 1:
             raise ValueError("failure_threshold must be at least 1")
+        if failure_threshold > 100:
+            raise ValueError("failure_threshold cannot exceed 100")
         if cooldown_minutes < 0:
             raise ValueError("cooldown_minutes cannot be negative")
+        if cooldown_minutes > 10080:  # 1 week
+            raise ValueError("cooldown_minutes cannot exceed 10080 (1 week)")
 
         self.failure_threshold = failure_threshold
         self.cooldown_minutes = cooldown_minutes

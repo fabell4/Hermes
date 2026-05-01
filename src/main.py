@@ -53,6 +53,7 @@ logger = logging.getLogger(__name__)
 
 
 def _build_loki_exporter() -> LokiExporter:
+    """Build Loki exporter, validating that LOKI_URL is set."""
     if not config.LOKI_URL:
         raise ValueError("LOKI_URL is required when Loki exporter is enabled.")
     return LokiExporter(url=config.LOKI_URL, job_label=config.LOKI_JOB_LABEL)

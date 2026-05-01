@@ -9,7 +9,8 @@ We release security updates for the following versions:
 | 1.0.x   | :white_check_mark: |
 | < 1.0   | :x:                |
 
-**Note:** Only the latest minor version within a major release receives security updates. We recommend upgrading to the latest release as soon as possible.
+**Note:** Only the latest minor version within a major release receives security updates. We
+recommend upgrading to the latest release as soon as possible.
 
 ---
 
@@ -22,10 +23,12 @@ We take the security of Hermes seriously. If you discover a security vulnerabili
 **DO NOT** open a public GitHub issue for security vulnerabilities.
 
 **Report via:**
+
 - **GitHub Security Advisories**: Use the "Security" tab → "Report a vulnerability"
-- **Email**: fabell.4@greenflametech.com
+- **Email**: <fabell.4@greenflametech.com>
 
 **Include in your report:**
+
 - Description of the vulnerability
 - Steps to reproduce the issue
 - Affected versions (if known)
@@ -43,6 +46,7 @@ We take the security of Hermes seriously. If you discover a security vulnerabili
 ### Coordinated Disclosure
 
 We follow a coordinated disclosure policy:
+
 - We'll work with you to understand and address the issue
 - We'll notify you before public disclosure
 - Typical embargo period: 90 days (negotiable for complex issues)
@@ -71,6 +75,7 @@ We use the following severity classifications:
 ### Notification Channels
 
 Security advisories are published via:
+
 1. [GitHub Security Advisories](https://github.com/fabell4/hermes/security/advisories)
 2. Release notes in [CHANGELOG.md](CHANGELOG.md)
 3. GitHub Discussions (for post-patch discussion)
@@ -82,26 +87,32 @@ Security advisories are published via:
 The following issues are **not** considered security vulnerabilities:
 
 ### User Configuration Issues
+
 - Self-inflicted misconfigurations (e.g., disabling API key authentication)
 - Running Hermes as root user (documented against in deployment guides)
 - Exposing the API to the internet without reverse proxy
 - Using weak API keys (minimum 32 characters enforced)
 
 ### Denial of Service
+
 - Resource exhaustion from legitimate API use (rate limiting is documented)
 - High-volume speed tests impacting network performance (user-controlled)
 
 ### Third-Party Dependencies
-- Vulnerabilities in `speedtest-cli` Python package (external library)
+
+- Vulnerabilities in third-party Python packages (requests, FastAPI, etc.)
 - Issues in user-specified alert endpoints (Webhook URLs, etc.)
 - Vulnerabilities in Prometheus/Loki/Grafana (separate projects)
+- Vulnerabilities in the Ookla speedtest CLI binary (external binary, updated via package manager)
 
 ### Low-Impact Findings
+
 - Version disclosure in HTTP headers (intended for debugging)
 - Verbose error messages in logs (required for troubleshooting)
 - Missing security headers on health check endpoint (`/health`)
 
 ### Test Code
+
 - Security issues only exploitable in test environments
 - Hardcoded credentials in `tests/` directory (not used in production)
 
@@ -110,6 +121,7 @@ The following issues are **not** considered security vulnerabilities:
 ## Security Best Practices
 
 For secure deployment of Hermes, please refer to:
+
 - [Security Documentation](https://fabell4.github.io/hermes/security.html)
 - [Security Audit Report](docs/SECURITY-AUDIT.md)
 - [Deployment Guide](https://fabell4.github.io/hermes/getting-started.html)
@@ -154,6 +166,7 @@ We recognize security researchers who responsibly disclose vulnerabilities:
 ## Contact
 
 For security-related questions (not vulnerability reports):
+
 - Open a [GitHub Discussion](https://github.com/fabell4/hermes/discussions)
 - Tag your discussion with the `security` label
 

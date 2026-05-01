@@ -91,7 +91,12 @@ See [Security Documentation](https://fabell4.github.io/hermes/security) for best
 
 ## 🛠️ Development Setup
 
+**Prerequisites:** Python 3.12+, Node.js 18+, and [Ookla speedtest CLI](https://www.speedtest.net/apps/cli)
+
 ```bash
+# Verify Ookla CLI is installed
+speedtest --version  # Should show "Speedtest by Ookla"
+
 # Create virtual environment
 python -m venv .venv
 .venv\Scripts\activate  # Windows
@@ -206,7 +211,7 @@ Key configuration options (see [Getting Started](https://fabell4.github.io/herme
 
 ## 🧪 Test Coverage
 
-- **397 tests passing** including 130+ API security tests
+- **426 tests passing** including 130+ API security tests
 - **92% code coverage** (1,529 statements, 133 missed)
 - **All ruff checks passing** (format + lint)
 - **All mypy type checks passing** (27 source files)

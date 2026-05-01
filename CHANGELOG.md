@@ -16,16 +16,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   supported versions, and coordinated disclosure policy for security researchers
 - **Official Ookla CLI integration** — Migrated from unofficial Python `speedtest-cli` library to
   official Ookla speedtest CLI binary for improved reliability and official support
-- **Defensive coding improvements** — Comprehensive defensive coding review completed with 8
-  critical/medium priority fixes implemented:
-  - Runtime config validation with schema enforcement and type checking
-  - Speed result validation with safe integer/float handling
-  - Thread-safe shared state access for AlertManager
-  - Enhanced failure logging for speedtest errors
-  - Atomic CSV file operations with proper error handling
-  - Alert provider URL validation (HTTP/HTTPS enforcement)
-  - SQLite lock timeout configuration (30 seconds)
-  - Better Prometheus error handling with graceful degradation
+- **Defensive coding improvements** — Comprehensive defensive coding review completed with **all
+  15 fixes implemented** (4 high + 7 medium + 4 low priority):
+  - Runtime config validation with schema enforcement and type checking (#2)
+  - Speed result validation with safe integer/float handling (#4)
+  - Thread-safe shared state access for AlertManager (#3)
+  - Enhanced failure logging for speedtest errors (#5)
+  - Atomic CSV file operations with proper error handling (#7)
+  - Alert provider URL validation (HTTP/HTTPS enforcement) (#9)
+  - SQLite lock timeout configuration (30 seconds) (#10)
+  - Better Prometheus error handling with graceful degradation (#11)
+  - Loki exporter URL validation with hostname and timeout checks (#12)
+  - Alert manager upper bounds (max 100 failures, max 1 week cooldown) (#13)
+  - Config rate limit validation (clamp negative values to 0) (#14)
+  - Runtime config interval bounds validation (1-10080 minutes) (#15)
 - **Code quality improvements** — Best practices review completed with 5 high/medium priority
   enhancements:
   - Alert provider factory module (`src/services/alert_provider_factory.py`) eliminates ~150
@@ -44,12 +48,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   - Static file middleware ordering to bypass middleware for asset serving (20% faster page
     loads)
 - **Quality assurance documentation** — Added comprehensive review reports:
-  - [docs/DEFENSIVE-CODING-REVIEW.md](docs/DEFENSIVE-CODING-REVIEW.md) — 15 issues analyzed, 8
-    implemented
+  - [docs/DEFENSIVE-CODING-REVIEW.md](docs/DEFENSIVE-CODING-REVIEW.md) — 15 issues analyzed, **15
+    implemented**
   - [docs/BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) — 13 issues analyzed, 5
     implemented
   - [docs/PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) — 9 issues
     analyzed, 3 implemented
+  - [docs/DOCUMENTATION-ACCURACY-REVIEW.md](docs/DOCUMENTATION-ACCURACY-REVIEW.md) — 6 HIGH + 3
+    LOW priority issues, **all 9 implemented**
+- **Deferred test coverage items completed (May 1, 2026)** — Implemented 4 deferred test coverage
+  items from v1.1 roadmap:
+  - H6: Alert provider network failure scenarios (6 tests) — Multi-provider failures, partial
+    success scenarios, different exception types
+  - H7: API main uncovered lines (12 tests) — SPA fallback and security headers middleware
+    coverage across all response types
+  - H8: SQLite migration idempotency (7 tests) — Fresh initialization, idempotent
+    re-initialization, missing column/index addition, concurrent migration safety
+  - M1: Missing docstrings — Enhanced documentation for shared_state.py, alert_manager functions,
+    and provider registration
+  - **Test suite expanded: 403 → 426 tests (+23 tests)**
+  - **All 426 tests passing with 92.32% code coverage**
 
 ### Changed
 
@@ -61,9 +79,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
-- **Code quality** — SonarQube finding resolved: `require_enabled` parameter now properly
+- **Code quality** — Maintained 92.32% coverage (426 tests passing) after refactoring, defensive
+  improvements, and deferred test coverage items
+- **Apprise provider initialization** — `APPRISE_CONFIG` environment variable now properly
   utilized in `register_apprise_provider()`
-- **Test coverage** — Maintained 91% coverage (344 tests passing) after refactoring
 
 ### Removed
 

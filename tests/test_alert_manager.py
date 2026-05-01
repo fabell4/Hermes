@@ -52,6 +52,30 @@ def test_alert_manager_raises_on_negative_cooldown():
         AlertManager(cooldown_minutes=-10)
 
 
+def test_alert_manager_raises_on_threshold_too_high():
+    """Alert manager raises ValueError for threshold above 100."""
+    with pytest.raises(ValueError, match="cannot exceed 100"):
+        AlertManager(failure_threshold=101)
+
+
+def test_alert_manager_raises_on_cooldown_too_high():
+    """Alert manager raises ValueError for cooldown above 10080 minutes (1 week)."""
+    with pytest.raises(ValueError, match="cannot exceed 10080"):
+        AlertManager(cooldown_minutes=10081)
+
+
+def test_alert_manager_accepts_maximum_valid_threshold():
+    """Alert manager accepts threshold of 100."""
+    manager = AlertManager(failure_threshold=100)
+    assert manager.failure_threshold == 100
+
+
+def test_alert_manager_accepts_maximum_valid_cooldown():
+    """Alert manager accepts cooldown of 10080 minutes (1 week)."""
+    manager = AlertManager(cooldown_minutes=10080)
+    assert manager.cooldown_minutes == 10080
+
+
 # ---------------------------------------------------------------------------
 # Provider Management
 # ---------------------------------------------------------------------------
@@ -362,3 +386,178 @@ def test_send_test_alert_handles_provider_failure():
     assert results == {"good": True, "bad": False}
     assert len(good_provider.alerts_sent) == 1
     bad_provider.send_alert.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# H6: Multi-Provider Network Failure Scenarios (v1.1 Test Coverage Gaps)
+# ---------------------------------------------------------------------------
+
+
+def test_all_providers_fail_alert_completes():
+    """Alert operation completes even when all providers fail."""
+    import requests
+
+    manager = AlertManager(failure_threshold=2, cooldown_minutes=0)
+
+    provider1 = Mock(spec=AlertProvider)
+    provider1.send_alert.side_effect = requests.exceptions.Timeout("Provider 1 timeout")
+
+    provider2 = Mock(spec=AlertProvider)
+    provider2.send_alert.side_effect = requests.exceptions.ConnectionError(
+        "Provider 2 unreachable"
+    )
+
+    provider3 = Mock(spec=AlertProvider)
+    provider3.send_alert.side_effect = RuntimeError("Provider 3 service error")
+
+    manager.add_provider("p1", provider1)
+    manager.add_provider("p2", provider2)
+    manager.add_provider("p3", provider3)
+
+    timestamp = datetime.now(timezone.utc)
+    manager.record_failure("Error 1", timestamp)
+    manager.record_failure("Error 2", timestamp)
+    manager._wait_for_pending_alerts()  # Wait for async alerts to complete
+
+    # All providers were attempted despite failures
+    provider1.send_alert.assert_called_once()
+    provider2.send_alert.assert_called_once()
+    provider3.send_alert.assert_called_once()
+
+    # Alert timestamp was still recorded
+    assert manager.last_alert_time == timestamp
+
+
+def test_partial_success_mixed_provider_failures(caplog):
+    """When some providers fail and others succeed, successful alerts are logged."""
+    import logging
+    import requests
+    import time
+
+    caplog.set_level(logging.INFO)
+
+    manager = AlertManager(failure_threshold=1, cooldown_minutes=0)
+
+    # Two working providers
+    working_provider1 = MockProvider()
+    working_provider2 = MockProvider()
+
+    # Two failing providers
+    timeout_provider = Mock(spec=AlertProvider)
+    timeout_provider.send_alert.side_effect = requests.exceptions.Timeout("Timeout")
+
+    error_provider = Mock(spec=AlertProvider)
+    error_provider.send_alert.side_effect = RuntimeError("Server error")
+
+    manager.add_provider("working1", working_provider1)
+    manager.add_provider("timeout", timeout_provider)
+    manager.add_provider("working2", working_provider2)
+    manager.add_provider("error", error_provider)
+
+    timestamp = datetime.now(timezone.utc)
+    manager.record_failure("Test error", timestamp)
+    manager._wait_for_pending_alerts(timeout=10.0)  # Longer timeout
+    time.sleep(0.2)  # Extra wait for async logging
+
+    # Verify working providers received the alert
+    assert len(working_provider1.alerts_sent) == 1
+    assert len(working_provider2.alerts_sent) == 1
+
+    # Verify failing providers were attempted
+    timeout_provider.send_alert.assert_called_once()
+    error_provider.send_alert.assert_called_once()
+
+    # Verify logging captured successes and failures
+    assert "Alert sent successfully via working1" in caplog.text
+    assert "Alert sent successfully via working2" in caplog.text
+    assert "Alert provider 'timeout' failed" in caplog.text
+    assert "Alert provider 'error' failed" in caplog.text
+
+
+def test_provider_failure_types_all_handled(caplog):
+    """Different exception types from providers are all caught and logged."""
+    import logging
+    import requests
+    import time
+
+    caplog.set_level(logging.ERROR)
+
+    manager = AlertManager(failure_threshold=1, cooldown_minutes=0)
+
+    # Different failure types
+    timeout_provider = Mock(spec=AlertProvider)
+    timeout_provider.send_alert.side_effect = requests.exceptions.Timeout("Timeout after 30s")
+
+    connection_provider = Mock(spec=AlertProvider)
+    connection_provider.send_alert.side_effect = requests.exceptions.ConnectionError(
+        "[Errno -2] Name or service not known"
+    )
+
+    http_provider = Mock(spec=AlertProvider)
+    http_provider.send_alert.side_effect = requests.exceptions.HTTPError("404 Not Found")
+
+    value_provider = Mock(spec=AlertProvider)
+    value_provider.send_alert.side_effect = ValueError("Invalid configuration")
+
+    manager.add_provider("timeout", timeout_provider)
+    manager.add_provider("connection", connection_provider)
+    manager.add_provider("http", http_provider)
+    manager.add_provider("value", value_provider)
+
+    timestamp = datetime.now(timezone.utc)
+    manager.record_failure("Test error", timestamp)
+    manager._wait_for_pending_alerts(timeout=10.0)  # Longer timeout
+    time.sleep(0.2)  # Extra wait for async logging
+
+    # All providers were attempted
+    timeout_provider.send_alert.assert_called_once()
+    connection_provider.send_alert.assert_called_once()
+    http_provider.send_alert.assert_called_once()
+    value_provider.send_alert.assert_called_once()
+
+    # All failures logged
+    assert "Alert provider 'timeout' failed" in caplog.text
+    assert "Alert provider 'connection' failed" in caplog.text
+    assert "Alert provider 'http' failed" in caplog.text
+    assert "Alert provider 'value' failed" in caplog.text
+
+
+def test_test_alert_all_providers_fail():
+    """send_test_alert handles all providers failing gracefully."""
+    import requests
+
+    manager = AlertManager()
+
+    provider1 = Mock(spec=AlertProvider)
+    provider1.send_alert.side_effect = requests.exceptions.Timeout("Timeout")
+
+    provider2 = Mock(spec=AlertProvider)
+    provider2.send_alert.side_effect = RuntimeError("Error")
+
+    manager.add_provider("p1", provider1)
+    manager.add_provider("p2", provider2)
+
+    results = manager.send_test_alert()
+
+    assert results == {"p1": False, "p2": False}
+    provider1.send_alert.assert_called_once()
+    provider2.send_alert.assert_called_once()
+
+
+def test_test_alert_partial_failure():
+    """send_test_alert reports mixed success/failure accurately."""
+    manager = AlertManager()
+
+    working = MockProvider()
+    failing = Mock(spec=AlertProvider)
+    failing.send_alert.side_effect = RuntimeError("Failed")
+
+    manager.add_provider("working", working)
+    manager.add_provider("failing", failing)
+    manager.add_provider("also_working", MockProvider())
+
+    results = manager.send_test_alert()
+
+    assert results["working"] is True
+    assert results["failing"] is False
+    assert results["also_working"] is True

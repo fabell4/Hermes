@@ -113,6 +113,42 @@ def test_init_rejects_custom_scheme() -> None:
         LokiExporter("ftp://localhost:3100")
 
 
+def test_init_rejects_url_without_hostname() -> None:
+    with pytest.raises(ValueError, match="must include a hostname"):
+        LokiExporter("http://")
+
+
+def test_init_rejects_negative_timeout() -> None:
+    with pytest.raises(ValueError, match="Timeout must be positive"):
+        LokiExporter("http://localhost:3100", timeout_seconds=-1)
+
+
+def test_init_rejects_zero_timeout() -> None:
+    with pytest.raises(ValueError, match="Timeout must be positive"):
+        LokiExporter("http://localhost:3100", timeout_seconds=0)
+
+
+def test_init_rejects_empty_job_label() -> None:
+    with pytest.raises(ValueError, match="job label cannot be empty"):
+        LokiExporter("http://localhost:3100", job_label="")
+
+
+def test_init_rejects_whitespace_only_job_label() -> None:
+    with pytest.raises(ValueError, match="job label cannot be empty"):
+        LokiExporter("http://localhost:3100", job_label="   ")
+
+
+def test_init_strips_job_label_whitespace() -> None:
+    exporter = LokiExporter("http://localhost:3100", job_label="  hermes_test  ")
+    assert exporter._job_label == "hermes_test"
+
+
+def test_init_warns_on_credentials_in_url(caplog) -> None:
+    with caplog.at_level("WARNING"):
+        LokiExporter("http://user:pass@localhost:3100")
+    assert "embedded credentials" in caplog.text
+
+
 def test_loki_timestamp_ns_with_naive_datetime() -> None:
     # SpeedResult now requires timezone-aware datetimes
     result = SpeedResult(

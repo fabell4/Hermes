@@ -9,7 +9,8 @@
 
 ## Executive Summary
 
-The Hermes project has a **strong test foundation** with 355 Python tests achieving 91.36% backend coverage. However, several **critical gaps** exist that should be addressed before v1.0:
+The Hermes project has a **strong test foundation** with 355 Python tests achieving 91.36%
+backend coverage. However, several **critical gaps** exist that should be addressed before v1.0:
 
 ### High Priority Issues
 
@@ -117,7 +118,7 @@ def test_register_all_providers_with_require_enabled_filters()
 **Missing Lines:** 125-149, 159, 161, 167-172, 337, 349-356, 368-392, 403-409, 472-473  
 **Impact:** Core application lifecycle
 
-#### Missing Test Scenarios
+#### Main Loop — Missing Test Scenarios
 
 1. **Build Alert Manager** (Lines 125-149)
 
@@ -173,7 +174,7 @@ def test_register_all_providers_with_require_enabled_filters()
    - ❌ No test for restoring paused state on startup
    - ❌ No test for scheduler state persistence across restarts
 
-#### Recommended Tests
+#### Main Loop — Recommended Tests
 
 **Test File:** `tests/test_main.py` (add to existing)
 
@@ -200,7 +201,7 @@ def test_main_loop_restores_paused_state()
 **Missing Lines:** 39, 63, 79, 93, 105-106, 119, 153-154, 208-217, 233-246, 264-265  
 **Impact:** Configuration persistence reliability
 
-#### Missing Test Scenarios
+#### Runtime Config — Missing Test Scenarios
 
 1. **Load Validation** (Lines 39, 63, 79, 93, 105-106, 119)
 
@@ -236,7 +237,7 @@ def test_main_loop_restores_paused_state()
    - ❌ No test for `set_alert_config()` with invalid provider names
    - ❌ No test for partial alert config updates (only some fields)
 
-#### Recommended Tests
+#### Runtime Config — Recommended Tests
 
 **Test File:** `tests/test_runtime_config.py` (add to existing)
 
@@ -260,7 +261,7 @@ def test_set_alert_config_partial_update_preserves_other_fields()
 **Missing Lines:** 41, 45-49, 85, 142, 181-183, 213, 240, 256-260, 306, 321  
 **Impact:** Alert reliability under error conditions
 
-#### Missing Test Scenarios
+#### Alert Provider Error Paths — Missing Test Scenarios
 
 1. **Webhook Provider URL Validation** (Lines 41, 45-49)
 
@@ -309,7 +310,7 @@ def test_set_alert_config_partial_update_preserves_other_fields()
    - ❌ No test for Apprise connection error
    - ❌ No test for Apprise HTTP 4xx/5xx errors
 
-#### Recommended Tests
+#### Alert Provider Error Paths — Recommended Tests
 
 **Test File:** `tests/test_alert_providers.py` (add to existing)
 
@@ -381,7 +382,7 @@ def test_apprise_provider_raises_on_http_500()
    - ❌ Error handling
    - ❌ Health check updates
 
-#### Recommended Tests
+#### Frontend Components — Recommended Tests
 
 **New Test Files:**
 
@@ -453,7 +454,7 @@ describe('HermesContext', () => {
 **Missing Lines:** 33-37, 44, 55, 73-77  
 **Impact:** Configuration defaults and validation
 
-#### Missing Test Scenarios
+#### Config Module — Missing Test Scenarios
 
 1. **API Key Validation** (Lines 73-77)
 
@@ -480,7 +481,8 @@ describe('HermesContext', () => {
 
 #### Recommendation
 
-**Decision:** DEFER — Lines 73-77 cannot be tested without subprocess isolation; lines 33-37, 44, 55 are sufficiently covered by indirect tests.
+**Decision:** DEFER — Lines 73-77 cannot be tested without subprocess isolation; lines 33-37,
+44, 55 are sufficiently covered by indirect tests.
 
 **Alternative:** Add integration test in `tests/test_config.py` that spawns subprocess to verify startup failure:
 
@@ -517,7 +519,9 @@ def test_api_key_length_validation_causes_startup_failure():
 
 **Root Cause:**
 
-The `/api/results` endpoint in `src/api/routes/results.py` uses SQLite connections with context managers, but SQLite's `Connection.__exit__` method **does NOT close the connection** — it only commits or rolls back transactions.
+The `/api/results` endpoint in `src/api/routes/results.py` uses SQLite connections with
+context managers, but SQLite's `Connection.__exit__` method **does NOT close the connection** —
+it only commits or rolls back transactions.
 
 ```python
 # Current code (lines 59-68)
@@ -527,7 +531,9 @@ with _connect() as conn:  # <-- __exit__ does NOT call close()
 ```
 
 From Python documentation:
-> "The `Connection` object can be used as a context manager that automatically commits or rolls back open transactions when leaving the body of the context manager. If there is an exception, the transaction is rolled back; otherwise, the transaction is committed."
+> "The `Connection` object can be used as a context manager that automatically commits or
+> rolls back open transactions when leaving the body of the context manager. If there is an
+> exception, the transaction is rolled back; otherwise, the transaction is committed."
 >
 > **Note:** The context manager does NOT close the connection.
 
@@ -652,16 +658,16 @@ All existing tests are **unit tests** or **API endpoint tests**. No integration 
 def test_full_speedtest_to_csv_export_flow(tmp_path, monkeypatch):
     """Run real speedtest, dispatch to CSV, verify file contents."""
     # Configure CSV exporter with temp directory
-    # Mock speedtest-cli to return predictable result
+    # Mock Ookla speedtest CLI to return predictable result
     # Run scheduler once
     # Verify CSV contains result row
 
 def test_alert_triggered_after_threshold_consecutive_failures(monkeypatch):
     """Simulate N failures, verify alert sent, then success clears state."""
-    # Mock speedtest-cli to fail N times
+    # Mock Ookla speedtest CLI to fail N times
     # Run scheduler N times
     # Verify alert provider received notification
-    # Mock speedtest-cli to succeed
+    # Mock Ookla speedtest CLI to succeed
     # Run scheduler once
     # Verify alert state cleared
 

@@ -56,6 +56,16 @@ def _get_csv_list(key: str, default: list[str]) -> list[str]:
     return parsed
 
 
+def _get_str(key: str, default: str) -> str:
+    """Read an env var as string, falling back to default if missing."""
+    value = os.getenv(key)
+    if value is None:
+        return default
+    # Strip whitespace and return default if result is empty
+    stripped = value.strip()
+    return stripped if stripped else default
+
+
 # --- Application ---
 APP_ENV: str = os.getenv("APP_ENV", "development")
 APP_VERSION: str = os.getenv("APP_VERSION", "dev")
@@ -78,7 +88,14 @@ if API_KEY is not None and len(API_KEY) < 32:
 
 # Maximum requests per API key per 60-second window on protected endpoints.
 # Set to 0 to disable rate limiting while keeping auth on.
-RATE_LIMIT_PER_MINUTE: int = _get_int("RATE_LIMIT_PER_MINUTE", 60)
+_raw_rate_limit = _get_int("RATE_LIMIT_PER_MINUTE", 60)
+RATE_LIMIT_PER_MINUTE: int = max(0, _raw_rate_limit)  # Clamp to non-negative
+
+if _raw_rate_limit < 0:
+    logging.warning(
+        "RATE_LIMIT_PER_MINUTE cannot be negative (%d), using 0 (disabled)",
+        _raw_rate_limit,
+    )
 
 # Maximum request body size in bytes (1 MB default)
 MAX_REQUEST_BODY_SIZE: int = _get_int("MAX_REQUEST_BODY_SIZE", 1_048_576)

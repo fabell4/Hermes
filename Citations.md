@@ -8,13 +8,15 @@
 
 ## Overview
 
-Here's what the refactor would look like to switch from the Python `speedtest-cli` library to the official Ookla CLI:
+Hermes uses the official Ookla CLI binary for speed testing instead of the unofficial Python
+`speedtest-cli` library. This migration provides improved reliability and official support from
+Ookla.
 
-## Implementation Changes
+## Implementation
 
-### 1. Dockerfile - Install Ookla CLI Binary
+### 1. Dockerfile - Ookla CLI Binary Installation
 
-After the apt-get install line (around line 27):
+The Dockerfile installs the official Ookla speedtest CLI:
 
 ```dockerfile
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -26,5 +28,5 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ### 2. Requirements
 
-Update the requirements.txt file to remove the Python speedtest-cli library if present,
-as we're now using the official Ookla CLI binary instead.
+The Python `speedtest-cli` library has been removed from requirements.txt. Hermes now invokes the
+official Ookla CLI binary directly via `subprocess`.
