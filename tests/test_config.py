@@ -3,6 +3,9 @@
 
 import subprocess
 import sys
+from pathlib import Path
+
+_REPO_ROOT = Path(__file__).parent.parent
 
 
 # ---------------------------------------------------------------------------
@@ -168,7 +171,7 @@ def test_short_api_key_causes_startup_failure():
             "PYTHONPATH": ".",
         },
         capture_output=True,
-        cwd="c:/Users/psywa/source/repos/projects/Hermes",
+        cwd=_REPO_ROOT,
     )
     assert result.returncode == 1
     assert b"API_KEY" in result.stderr
@@ -185,7 +188,7 @@ def test_valid_api_key_does_not_cause_startup_failure():
             "API_KEY": "a" * 32,
         },
         capture_output=True,
-        cwd="c:/Users/psywa/source/repos/projects/Hermes",
+        cwd=_REPO_ROOT,
     )
     assert result.returncode == 0
     assert b"ok" in result.stdout
