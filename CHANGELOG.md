@@ -12,6 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.2] - 2026-05-02
+
+### Fixed
+
+- **GitHub Pages build** — wrap Loki f-string JSON example in `{% raw %}` / `{% endraw %}` tags to
+  prevent Jekyll/Liquid from parsing `{{` / `}}` as template variables.
+- **Docs lint** — fix markdownlint MD013, MD031, and MD036 errors in
+  `PERFORMANCE-OPTIMIZATION-REVIEW.md`.
+
+---
+
 ## [0.4.1] - 2026-05-02
 
 ### Fixed
