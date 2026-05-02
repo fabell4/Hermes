@@ -330,7 +330,7 @@ def convert_pip_audit(report_path, base_dir):
                     rule_id=f"pip-audit:{vuln_id}",
                     severity="CRITICAL",
                     type_="VULNERABILITY",
-                    file_path="requirements.txt",
+                    file_path=normalise_path("requirements.txt", base_dir),
                     line=1,
                     message=message,
                 )
