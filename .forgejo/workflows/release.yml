@@ -63,6 +63,12 @@ jobs:
               --username "${{ secrets.GH_USERNAME }}" \
               --password-stdin
 
+      - name: Security gate — dependency vulnerability scan
+        run: |
+          python3 -m pip install --quiet pip-audit
+          python3 -m pip_audit -r requirements.txt
+          echo "pip-audit passed — no known vulnerabilities in dependencies"
+
       - name: Build image
         run: |
           docker build \
@@ -81,12 +87,6 @@ jobs:
         run: |
           docker push ghcr.io/${{ secrets.GH_USERNAME }}/hermes:${{ steps.version.outputs.version }}
           docker push ghcr.io/${{ secrets.GH_USERNAME }}/hermes:latest
-
-      - name: Security gate — dependency vulnerability scan
-        run: |
-          pip install pip-audit
-          pip-audit -r requirements.txt
-          echo "pip-audit passed — no known vulnerabilities in dependencies"
 
       - name: Push tag to public GitHub repo
         env:
