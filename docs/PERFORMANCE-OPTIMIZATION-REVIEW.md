@@ -704,6 +704,7 @@ def export(self, result: SpeedResult) -> None:
 **Recommendation:**
 Pre-serialize labels and build JSON manually (micro-optimization):
 
+{% raw %}
 ```python
 def export(self, result: SpeedResult) -> None:
     """Export result to Loki with optimized serialization."""
@@ -719,6 +720,7 @@ def export(self, result: SpeedResult) -> None:
     
     # ... rest of method unchanged ...
 ```
+{% endraw %}
 
 **Performance Improvement:** Saves 50-100 µs per export (negligible, not recommended unless profiling shows bottleneck).
 
