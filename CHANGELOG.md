@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.1-beta] - 2026-05-02
+
+### Fixed
+
+- **Release pipeline** — Security gate step in `release.yml` used bare `pip` which is absent in
+  `gft-ci-runner`; corrected to `python3 -m pip`. Gate also moved before image build/push so
+  vulnerabilities block the release before anything is published.
+
+---
+
 ## [0.4.3] - 2026-05-02
 
 ### Security
