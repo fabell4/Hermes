@@ -341,6 +341,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install trivy
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
       - name: Trivy dependency scan
         run: |
           trivy fs . \
