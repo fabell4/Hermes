@@ -478,6 +478,12 @@ jobs:
           name: semgrep-report
           path: .
 
+      - name: Download pip-audit report
+        uses: https://data.forgejo.org/actions/download-artifact@v3
+        with:
+          name: dependency-check-report
+          path: .
+
       - name: Download frontend coverage
         continue-on-error: true
         uses: https://data.forgejo.org/actions/download-artifact@v3
@@ -495,6 +501,7 @@ jobs:
             --vulture vulture-report.txt \
             --radon   radon-cc-report.json \
             --semgrep semgrep-report.json \
+            --pip-audit pip-audit-report.json \
             --outdir  .
 
       # --- Scan ---

@@ -289,6 +289,58 @@ def convert_semgrep(report_path, base_dir):
 
 
 # ---------------------------------------------------------------------------
+# pip-audit
+# ---------------------------------------------------------------------------
+def convert_pip_audit(report_path, base_dir):
+    """
+    Parse pip-audit JSON output and emit one VULNERABILITY issue per
+    vulnerable package version, anchored to requirements.txt line 1
+    (pip-audit does not provide source line numbers).
+    """
+    pairs = []
+    if not os.path.exists(report_path):
+        print(f"  [skip] pip-audit report not found: {report_path}")
+        return pairs
+
+    with open(report_path, encoding="utf-8") as f:
+        try:
+            data = json.load(f)
+        except json.JSONDecodeError:
+            print("  [skip] pip-audit report is not valid JSON")
+            return pairs
+
+    # pip-audit -f json produces either a list of dependency objects
+    # or {"dependencies": [...]} depending on version
+    deps = data if isinstance(data, list) else data.get("dependencies", [])
+
+    for dep in deps:
+        name = dep.get("name", "unknown")
+        version = dep.get("version", "unknown")
+        for vuln in dep.get("vulns", []):
+            vuln_id = vuln.get("id", "UNKNOWN")
+            fix_versions = ", ".join(vuln.get("fix_versions", [])) or "none available"
+            description = vuln.get("description", "").strip()
+            message = (
+                f"{vuln_id}: {name}=={version} is vulnerable. "
+                f"Fix in: {fix_versions}. {description}"
+            ).strip()
+            pairs.append(
+                make_issue(
+                    engine_id="pip-audit",
+                    rule_id=f"pip-audit:{vuln_id}",
+                    severity="CRITICAL",
+                    type_="VULNERABILITY",
+                    file_path="requirements.txt",
+                    line=1,
+                    message=message,
+                )
+            )
+
+    print(f"  pip-audit: {len(pairs)} issues")
+    return pairs
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 def write_report(pairs, output_path):
@@ -324,6 +376,11 @@ def main():
     parser.add_argument(
         "--semgrep", default="semgrep-report.json", help="Path to semgrep JSON report"
     )
+    parser.add_argument(
+        "--pip-audit",
+        default="pip-audit-report.json",
+        help="Path to pip-audit JSON report",
+    )
     parser.add_argument("--outdir", default=".", help="Directory to write output files")
     args = parser.parse_args()
 
@@ -342,6 +399,10 @@ def main():
     write_report(
         convert_semgrep(args.semgrep, base),
         os.path.join(args.outdir, "sonar-semgrep.json"),
+    )
+    write_report(
+        convert_pip_audit(args.pip_audit, base),
+        os.path.join(args.outdir, "sonar-pip-audit.json"),
     )
 
     print("Done.")
