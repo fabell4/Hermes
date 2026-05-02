@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.2-beta] - 2026-05-02
+
+### Fixed
+
+- **Release pipeline** — `gft-ci-runner` has no `pip` module at all; bootstrap it via
+  `python3 -m ensurepip` (falling back to `apt-get install python3-pip`) before installing
+  pip-audit in the security gate step.
+
+---
+
 ## [0.4.3.1-beta] - 2026-05-02
 
 ### Fixed

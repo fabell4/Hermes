@@ -65,6 +65,7 @@ jobs:
 
       - name: Security gate — dependency vulnerability scan
         run: |
+          python3 -m ensurepip --upgrade 2>/dev/null || apt-get install -y --no-install-recommends python3-pip
           python3 -m pip install --quiet pip-audit
           python3 -m pip_audit -r requirements.txt
           echo "pip-audit passed — no known vulnerabilities in dependencies"
