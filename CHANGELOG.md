@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.4-beta] - 2026-05-02
+
+### Fixed
+
+- **Release pipeline** — Debian bookworm enforces PEP 668 (externally-managed-environment),
+  blocking `pip install` system-wide. Added `--break-system-packages` to the `pip install`
+  invocation; safe because the security gate runs in a throwaway CI container.
+
+---
+
 ## [0.4.3.3-beta] - 2026-05-02
 
 ### Fixed

@@ -75,7 +75,9 @@ jobs:
           if ! python3 -m pip --version >/dev/null 2>&1; then
             curl -fsSL https://bootstrap.pypa.io/get-pip.py | python3 -
           fi
-          python3 -m pip install --quiet pip-audit
+          # Debian bookworm enforces PEP 668 (externally-managed-environment).
+          # This is a throwaway CI container so --break-system-packages is safe.
+          python3 -m pip install --quiet --break-system-packages pip-audit
           python3 -m pip_audit -r requirements.txt
           echo "pip-audit passed — no known vulnerabilities in dependencies"
 
