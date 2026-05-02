@@ -10,12 +10,31 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+---
+
+## [0.4.0-beta] - 2026-05-01
+
 ### Added
 
 - **Security policy** — Added [SECURITY.md](SECURITY.md) with vulnerability disclosure process,
   supported versions, and coordinated disclosure policy for security researchers
 - **Official Ookla CLI integration** — Migrated from unofficial Python `speedtest-cli` library to
   official Ookla speedtest CLI binary for improved reliability and official support
+- **Security audit and enhancements** — Comprehensive security review completed with all critical
+  issues addressed:
+  - API key length validation (32-character minimum enforced at startup)
+  - SSRF protection for alert URLs (blocks localhost, private IPs, link-local, non-HTTP schemes)
+  - Request body size limit middleware (1 MB default, configurable via `MAX_REQUEST_BODY_SIZE`)
+  - Configurable CORS origins (via `CORS_ORIGINS` environment variable)
+  - Test alert rate limiting (10-second cooldown with `Retry-After` header)
+  - Additional security headers (`X-Frame-Options: DENY`, `Referrer-Policy:
+    strict-origin-when-cross-origin`)
+  - `Retry-After` header on rate limit responses (429 status)
+- **Security documentation** — Added comprehensive security audit report
+  ([docs/SECURITY-AUDIT.md](docs/SECURITY-AUDIT.md)) and implementation summary
+  ([docs/SECURITY-ENHANCEMENTS.md](docs/SECURITY-ENHANCEMENTS.md))
+- **Security test coverage** — 130 API tests including 15 SSRF protection tests, 6 request size
+  limit tests, and 7 test alert rate limiting tests
 - **Defensive coding improvements** — Comprehensive defensive coding review completed with **all
   15 fixes implemented** (4 high + 7 medium + 4 low priority):
   - Runtime config validation with schema enforcement and type checking (#2)
@@ -56,18 +75,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
     analyzed, 3 implemented
   - [docs/DOCUMENTATION-ACCURACY-REVIEW.md](docs/DOCUMENTATION-ACCURACY-REVIEW.md) — 6 HIGH + 3
     LOW priority issues, **all 9 implemented**
-- **Deferred test coverage items completed (May 1, 2026)** — Implemented 4 deferred test coverage
-  items from v1.1 roadmap:
-  - H6: Alert provider network failure scenarios (6 tests) — Multi-provider failures, partial
-    success scenarios, different exception types
-  - H7: API main uncovered lines (12 tests) — SPA fallback and security headers middleware
-    coverage across all response types
-  - H8: SQLite migration idempotency (7 tests) — Fresh initialization, idempotent
-    re-initialization, missing column/index addition, concurrent migration safety
-  - M1: Missing docstrings — Enhanced documentation for shared_state.py, alert_manager functions,
-    and provider registration
-  - **Test suite expanded: 403 → 426 tests (+23 tests)**
-  - **All 426 tests passing with 92.32% code coverage**
+- **Expanded test coverage** — Implemented deferred test coverage items from v1.1 roadmap:
+  - Alert provider network failure scenarios (6 tests) — multi-provider failures, partial success,
+    different exception types
+  - API main uncovered lines (12 tests) — SPA fallback and security headers middleware coverage
+  - SQLite migration idempotency (7 tests) — fresh init, idempotent re-init, missing column/index
+    addition, concurrent migration safety
+  - Main loop tests (19 tests) — `build_alert_manager`, `update_alert_providers`,
+    `_build_health_status`, `_handle_scheduler_pause_toggle`, `_validate_loki_endpoint`,
+    `_validate_environment`, and `main()` startup restore
+  - Integration tests — end-to-end flows for speedtest→CSV/SQLite export, multi-exporter
+    dispatch, alert lifecycle, cooldown, runtime config persistence
+  - Runtime config edge cases (13 tests) — validation, cache behaviour, defense-in-depth paths
+  - Alert provider error paths (10 tests) — URL validation, timeout rejection, auth token, apprise
+    stateless mode, request error propagation
+  - Config module tests (18 tests) — `_get_int`, `_get_bool`, `_get_csv_list`, `_get_str`
+    helpers and API_KEY validation via subprocess
+  - Alert manager sync fallback (2 tests) — synchronous executor fallback path and timeout logging
+  - Frontend component tests — Layout, Dashboard, and Settings page tests
+    (`frontend/src/test/Layout.test.tsx`, `Dashboard.test.tsx`, `Settings.test.tsx`)
+  - **Test suite: 403 → 497 tests (+94 tests); coverage 92.32% → 96.16%**
+  - **All 497 Python tests passing, all 44 frontend tests passing**
 
 ### Changed
 
@@ -76,13 +104,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Type system** — All modules use modern Python 3.10+ union syntax consistently
 - **Speedtest implementation** — Replaced Python `speedtest-cli` package with official Ookla CLI
   binary invoked via subprocess for better reliability and official API support
+- **Test portability** — Subprocess tests in `test_config.py` now use a portable `Path`-derived
+  `cwd` instead of a hardcoded Windows path, fixing CI failures on Linux runners
 
 ### Fixed
 
-- **Code quality** — Maintained 92.32% coverage (426 tests passing) after refactoring, defensive
-  improvements, and deferred test coverage items
+- **Code quality** — Maintained 96.16% coverage (497 tests passing) after refactoring and all
+  defensive improvements
 - **Apprise provider initialization** — `APPRISE_CONFIG` environment variable now properly
   utilized in `register_apprise_provider()`
+- **Duplicate test name** — Renamed duplicate `test_apprise_provider_raises_on_request_error` in
+  `test_alert_providers.py` to prevent ruff F811 error
 
 ### Removed
 
@@ -91,37 +123,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **Type suppressions** — Removed mypy type ignore comments for speedtest-cli library (no longer
   needed with CLI-based implementation)
 
----
-
-## [1.0.0-beta] - 2026-04-29
-
-### Added
-
-- **Security audit and enhancements** — Comprehensive security review completed with all critical
-  issues addressed:
-  - API key length validation (32-character minimum enforced at startup)
-  - SSRF protection for alert URLs (blocks localhost, private IPs, link-local, non-HTTP schemes)
-  - Request body size limit middleware (1 MB default, configurable via `MAX_REQUEST_BODY_SIZE`)
-  - Configurable CORS origins (via `CORS_ORIGINS` environment variable)
-  - Test alert rate limiting (10-second cooldown with `Retry-After` header)
-  - Additional security headers (`X-Frame-Options: DENY`, `Referrer-Policy:
-    strict-origin-when-cross-origin`)
-  - `Retry-After` header on rate limit responses (429 status)
-- **Security documentation** — Added comprehensive security audit report
-  ([docs/SECURITY-AUDIT.md](docs/SECURITY-AUDIT.md)) and implementation summary
-  ([docs/SECURITY-ENHANCEMENTS.md](docs/SECURITY-ENHANCEMENTS.md))
-- **Security test coverage** — 130 API tests including 15 SSRF protection tests, 6 request size
-  limit tests, and 7 test alert rate limiting tests
-
-### Changed
-
-- **Enhanced API authentication** — API keys now validated for minimum length on startup,
-  application exits with helpful error message if key is too short
-
 ### Security
 
 - **CRITICAL: SSRF vulnerability fixed** — Alert URL validation now prevents attackers from
   targeting internal services, cloud metadata endpoints, or private network infrastructure
+- **Enhanced API authentication** — API keys now validated for minimum length (32 characters) on
+  startup; application exits with a helpful error message if the key is too short
 - **Defense-in-depth improvements** — Multiple security layers now protect production deployments
   (authentication + rate limiting + size limits + SSRF protection + security headers)
 
