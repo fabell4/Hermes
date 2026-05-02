@@ -33,6 +33,11 @@ jobs:
       - name: mypy (type checking)
         run: mypy src
 
+      - name: pip-audit (dependency vulnerability scan)
+        run: |
+          pip install pip-audit
+          pip-audit -r requirements.txt
+
       - name: Bandit (security scan)
         run: bandit -r src -ll
 
