@@ -12,6 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.1] - 2026-05-02
+
+### Fixed
+
+- **Alert manager race condition on Linux** — `_wait_for_pending_alerts()` now waits on the
+  specific `Future` objects returned by `executor.submit()` rather than a sentinel no-op task.
+  The previous approach could complete before alert tasks finished on Linux due to the thread
+  pool having multiple available workers, causing intermittent CI test failures.
+
+---
+
 ## [0.4.0-beta] - 2026-05-01
 
 ### Added
