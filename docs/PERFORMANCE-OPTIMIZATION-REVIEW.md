@@ -3,13 +3,16 @@
 **Project:** Hermes Speed Monitor  
 **Review Date:** 2026-04-30  
 **Scope:** Performance bottlenecks, resource utilization, scalability opportunities  
-**Prerequisites:** Security Audit ✅ | Defensive Coding Review ✅ | Best Practices Review ✅ | Modernization Review ✅ | Error Handling Review ✅ | Test Coverage Review ✅
+**Prerequisites:** Security Audit ✅ | Defensive Coding Review ✅ | Best Practices Review ✅ |
+Modernization Review ✅ | Error Handling Review ✅ | Test Coverage Review ✅
 
 ---
 
 ## Executive Summary
 
-This review identifies performance optimization opportunities in the Hermes codebase. The application performs well for its intended use case (periodic speed testing), but several improvements can enhance responsiveness, reduce resource consumption, and improve scalability.
+This review identifies performance optimization opportunities in the Hermes codebase. The application performs well
+for its intended use case (periodic speed testing), but several improvements can enhance responsiveness,
+reduce resource consumption, and improve scalability.
 
 **Overall Assessment:** ✅ **Performance is acceptable** with recommended improvements
 
@@ -25,9 +28,11 @@ This review identifies performance optimization opportunities in the Hermes code
 - 🔧 Prometheus label cardinality could grow unbounded
 - 🔧 No HTTP connection pooling for repeated HTTP calls
 
-**Previous Optimizations:** The Error Handling Review (issue M5, M6) already implemented runtime config caching and CSV pruning optimization. This review builds on those improvements.
+**Previous Optimizations:** The Error Handling Review (issue M5, M6) already implemented runtime config caching
+and CSV pruning optimization. This review builds on those improvements.
 
-**Recommendation:** Implement high priority optimizations before v1.0 release. Medium and low priority items can be tracked for v1.1 or monitored for actual impact.
+**Recommendation:** Implement high priority optimizations before v1.0 release. Medium and low priority items
+can be tracked for v1.1 or monitored for actual impact.
 
 ---
 
@@ -119,7 +124,8 @@ _MIGRATIONS: list[tuple[str, str]] = [
 ]
 ```
 
-**Note:** The migration system in `_init_db()` checks for missing columns via `PRAGMA table_info()`. For index migrations, use `PRAGMA index_list(results)` to check if index exists.
+**Note:** The migration system in `_init_db()` checks for missing columns via `PRAGMA table_info()`.
+For index migrations, use `PRAGMA index_list(results)` to check if index exists.
 
 **Performance Improvement:** 10-100x faster queries and pruning operations for tables with >1,000 rows.
 
@@ -249,7 +255,8 @@ def _maybe_send_alert(self, timestamp: datetime) -> None:
 
 **Performance Improvement:** Alert sending overhead reduced from 30s worst case to <1ms (non-blocking).
 
-**Test Alert Considerations:** The `send_test_alert()` method (lines 176-207) should remain synchronous so the API can return success/failure status to the UI.
+**Test Alert Considerations:** The `send_test_alert()` method (lines 176-207) should remain synchronous so
+the API can return success/failure status to the UI.
 
 **Estimated Effort:** 2-3 hours (implementation + testing)  
 **Breaking Changes:** None (behavior unchanged, just non-blocking)
@@ -293,7 +300,7 @@ if _DIST.is_dir():
 **Recommendation:**
 Mount static file serving BEFORE middleware, or use FastAPI sub-applications:
 
-**Option 1: Mount static files first (simplest)**
+##### Option 1: Mount static files first (simplest)
 
 ```python
 # Create app without middleware first
@@ -328,9 +335,10 @@ if _DIST.is_dir():
         return FileResponse(str(_DIST / "index.html"))
 ```
 
-**IMPORTANT:** FastAPI middleware applies to routes registered AFTER the middleware is added. By mounting static files before adding middleware, they bypass the middleware stack.
+**IMPORTANT:** FastAPI middleware applies to routes registered AFTER the middleware is added. By mounting static
+files before adding middleware, they bypass the middleware stack.
 
-**Option 2: Use sub-application for API (more complex but explicit)**
+##### Option 2: Use sub-application for API (more complex but explicit)
 
 ```python
 # Main app (no middleware)
@@ -357,7 +365,8 @@ if _DIST.is_dir():
 
 **Performance Improvement:** 100-200 µs per static asset request (10-20% faster page loads).
 
-**Note:** In production deployments, static files should be served by nginx/Caddy anyway, so this optimization primarily benefits development and Docker-only deployments.
+**Note:** In production deployments, static files should be served by nginx/Caddy anyway, so this optimization
+primarily benefits development and Docker-only deployments.
 
 **Estimated Effort:** 1 hour (testing needed to ensure middleware still works for API routes)  
 **Breaking Changes:** None (external behavior unchanged)
@@ -445,7 +454,8 @@ _DOWNLOAD = Gauge(
 )
 ```
 
-**Performance Improvement:** Memory usage reduced by 30-50% in Prometheus for deployments with multiple ISPs or frequently changing servers.
+**Performance Improvement:** Memory usage reduced by 30-50% in Prometheus for deployments with multiple ISPs or
+frequently changing servers.
 
 **Estimated Effort:** 1-2 hours (implementation + testing + documentation)  
 **Breaking Changes:** Existing Prometheus metrics will have fewer labels (queries need updating)
@@ -658,7 +668,8 @@ class WebhookProvider(AlertProvider):
 
 **Performance Improvement:** Saves 20-100ms per HTTP request (only benefits repeated alerts or Loki exports).
 
-**Note:** For Hermes's infrequent HTTP usage (1-3 requests per 15 minutes), the benefit is minimal. Connection pooling is more valuable if:
+**Note:** For Hermes's infrequent HTTP usage (1-3 requests per 15 minutes), the benefit is minimal.
+Connection pooling is more valuable if:
 
 1. Speedtest interval is reduced to <1 minute
 2. Multiple alerts are sent in quick succession
@@ -705,6 +716,7 @@ def export(self, result: SpeedResult) -> None:
 Pre-serialize labels and build JSON manually (micro-optimization):
 
 {% raw %}
+
 ```python
 def export(self, result: SpeedResult) -> None:
     """Export result to Loki with optimized serialization."""
@@ -720,6 +732,7 @@ def export(self, result: SpeedResult) -> None:
     
     # ... rest of method unchanged ...
 ```
+
 {% endraw %}
 
 **Performance Improvement:** Saves 50-100 µs per export (negligible, not recommended unless profiling shows bottleneck).
@@ -893,4 +906,5 @@ After implementing optimizations, verify:
 
 **Approval Status:** 🟡 **Pending implementation of high priority items**
 
-Once high priority optimizations are implemented and tested, the codebase will be **approved for v1.0 release** from a performance perspective.
+Once high priority optimizations are implemented and tested, the codebase will be **approved for v1.0 release**
+from a performance perspective.
