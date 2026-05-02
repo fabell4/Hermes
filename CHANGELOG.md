@@ -12,6 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.3-beta] - 2026-05-02
+
+### Fixed
+
+- **Release pipeline** — Security gate pip bootstrap now runs `apt-get update` before attempting
+  `apt-get install python3-pip` (stale package lists caused "Unable to locate package" on
+  `gft-ci-runner`). Added `get-pip.py` as a final fallback so the gate can never silently skip
+  installation and proceed with a broken `pip`.
+
+---
+
 ## [0.4.3.2-beta] - 2026-05-02
 
 ### Fixed
