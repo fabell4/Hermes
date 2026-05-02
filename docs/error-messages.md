@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Error Message Reference"
+---
+
 # Error Message Reference
 
 **Project:** Hermes Speed Monitor  

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Security Enhancements"
+---
+
 # Security Enhancements — Pre-v1.0 Release
 
 **Date:** 2026-04-29  

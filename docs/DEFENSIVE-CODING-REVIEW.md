@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Defensive Coding Review"
+---
+
 # Defensive Coding Review
 
 **Review Date:** April 30, 2026  

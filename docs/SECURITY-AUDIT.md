@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Security Audit Report"
+---
+
 # Security Audit Report — Hermes v1.0
 
 **Date:** 2026-04-29  

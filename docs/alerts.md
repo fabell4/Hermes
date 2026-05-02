@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Alert Configuration"
+---
+
 # Alert Configuration
 
 Hermes can send notifications when speed tests fail consecutively. Alerts are configurable via the UI Settings page or environment variables.

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "API Reference"
+---
+
 # API Reference
 
 Complete REST API documentation for the Hermes FastAPI backend.

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Error Handling Conventions"
+---
+
 # Error Handling Conventions
 
 **Project:** Hermes Speed Monitor  

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Architecture"
+---
+
 # Architecture Overview
 
 Hermes is designed as a distributed two-container system that periodically runs internet speed tests and

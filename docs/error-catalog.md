@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Error Catalog"
+---
+
 # Error Catalog
 
 **Project:** Hermes Speed Monitor  

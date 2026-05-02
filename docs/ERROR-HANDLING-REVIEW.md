@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Error Handling Review"
+---
+
 # Error Handling & Code Quality Review
 
 **Project:** Hermes Speed Monitor  

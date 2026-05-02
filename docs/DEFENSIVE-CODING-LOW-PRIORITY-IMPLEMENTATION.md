@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Defensive Coding Low-Priority Implementation"
+---
+
 # Defensive Coding Low-Priority Improvements
 
 **Implementation Date:** May 1, 2026  

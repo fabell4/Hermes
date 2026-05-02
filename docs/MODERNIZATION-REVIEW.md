@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Modernization Review"
+---
+
 # Modernization & Deprecation Review
 
 **Project:** Hermes Speed Monitor  

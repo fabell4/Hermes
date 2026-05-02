@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Best Practices Review"
+---
+
 # Best Practices & Code Simplification Review
 
 **Project:** Hermes Speed Monitor  

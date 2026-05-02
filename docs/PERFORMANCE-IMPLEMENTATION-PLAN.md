@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Performance Implementation Plan"
+---
+
 # Performance Optimization Implementation Plan
 
 **Review:** [PERFORMANCE-OPTIMIZATION-REVIEW.md](PERFORMANCE-OPTIMIZATION-REVIEW.md)  

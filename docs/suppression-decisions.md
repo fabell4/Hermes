@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Suppression Decisions"
+---
+
 # Suppression Comment Decisions
 
 This document records every lint/type suppression comment in the codebase, why it exists,
