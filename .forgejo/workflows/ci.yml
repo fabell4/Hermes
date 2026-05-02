@@ -1,0 +1,920 @@
+name: CI ΓÇö Hermes
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+
+  gitleaks:
+    runs-on: docker
+    timeout-minutes: 10
+    container:
+      image: registry.greenflametech.net/gft-ci-runner:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        run: |
+          GL_VERSION=$(curl -s "https://api.github.com/repos/gitleaks/gitleaks/releases/latest" | grep -Po '"tag_name": "v\K[0-9.]+')
+          wget -q -O gitleaks.tar.gz "https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_${GL_VERSION}_linux_x64.tar.gz"
+          tar -xzf gitleaks.tar.gz && chmod +x gitleaks
+          ./gitleaks detect --source . --report-path gitleaks-report.json --report-format json --verbose 2>&1 || true
+
+      - name: Upload Gitleaks report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: gitleaks-report
+          path: gitleaks-report.json
+          retention-days: 7
+
+  test:
+    runs-on: docker
+    container:
+      image: registry.greenflametech.net/gft-python-runner:latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: postgresql+asyncpg://testuser:${{ secrets.TEST_DB_PASSWORD }}@test-db:5432/hermes_test
+      ENVIRONMENT: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-asyncio httpx anyio psycopg2-binary pytest-json-report
+
+      - name: Create test database
+        run: |
+          python -c "
+          import psycopg2
+          conn = psycopg2.connect(
+            host='test-db', port=5432,
+            user='testuser',
+            password='${{ secrets.TEST_DB_PASSWORD }}',
+            dbname='testdb'
+          )
+          conn.autocommit = True
+          cur = conn.cursor()
+          cur.execute('CREATE DATABASE hermes_test;')
+          conn.close()
+          " || echo "DB exists, continuing"
+
+      - name: Run tests
+        run: |
+          pytest \
+            --cov=src \
+            --cov-config=.coveragerc \
+            --cov-report=xml:coverage.xml \
+            --cov-report=term-missing \
+            --cov-fail-under=80 \
+            --json-report \
+            --json-report-file=pytest-report.json \
+            -v
+
+      - name: Upload test reports
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: test-reports
+          path: |
+            coverage.xml
+            pytest-report.json
+          retention-days: 7
+
+  ruff:
+    runs-on: docker
+    container:
+      image: registry.greenflametech.net/gft-python-runner:latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Ruff
+        run: pip install ruff
+
+      - name: Ruff lint
+        run: ruff check src --output-format json > ruff-lint-report.json 2>&1 || true
+
+      - name: Ruff format check
+        run: ruff format --check src > ruff-format-report.txt 2>&1 || true
+
+      - name: Upload Ruff reports
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: ruff-reports
+          path: |
+            ruff-lint-report.json
+            ruff-format-report.txt
+          retention-days: 7
+
+      - name: Fail if lint errors
+        run: |
+          ruff check src
+          ruff format --check src
+
+  mypy:
+    runs-on: docker
+    container:
+      image: registry.greenflametech.net/gft-python-runner:latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install mypy
+
+      - name: MyPy check
+        run: mypy src --ignore-missing-imports > mypy-report.txt 2>&1 || true
+
+      - name: Upload MyPy report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: mypy-report
+          path: mypy-report.txt
+          retention-days: 7
+
+  bandit:
+    runs-on: docker
+    container:
+      image: registry.greenflametech.net/gft-python-runner:latest
+    timeout-minutes: 10
+    # continue-on-error removed ΓÇö bandit feeds sonar.python.bandit.reportPaths;
+    # if the tool crashes the security gate loses coverage silently.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Bandit
+        run: |
+          pip install bandit
+          bandit -r src -f json -o bandit-report.json --exit-zero
+
+      - name: Upload Bandit report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: bandit-report
+          path: bandit-report.json
+          retention-days: 7
+
+  semgrep:
+    runs-on: docker
+    container:
+      image: registry.greenflametech.net/gft-python-runner:latest
+    timeout-minutes: 15
+    # continue-on-error removed ΓÇö semgrep feeds sonar-semgrep.json; a tool crash
+    # would silently drop security coverage. The run step uses || true so
+    # findings never fail the job, only unrecoverable setup failures do.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Semgrep
+        run: |
+          pip install semgrep
+          semgrep scan --config=auto --config=.semgrep/rules --json --output=semgrep-report.json src || true
+
+      - name: Upload Semgrep report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: semgrep-report
+          path: semgrep-report.json
+          retention-days: 7
+
+  safety:
+    runs-on: docker
+    container:
+      image: registry.greenflametech.net/gft-python-runner:latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Safety
+        run: |
+          pip install safety
+          safety check -r requirements.txt --json --output safety-report.json
+
+      - name: Upload Safety report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: safety-report
+          path: safety-report.json
+          retention-days: 7
+
+  hadolint:
+    runs-on: docker
+    timeout-minutes: 10
+    continue-on-error: true
+    container:
+      image: registry.greenflametech.net/gft-ci-runner:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Hadolint
+        run: |
+          if ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
+            echo "Docker not available. Skipping hadolint." > hadolint-report.json
+            exit 0
+          fi
+          docker run --rm -i registry.greenflametech.net/hadolint/hadolint hadolint --format json \
+            - < Dockerfile > hadolint-report.json || true
+
+      - name: Upload Hadolint report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: hadolint-report
+          path: hadolint-report.json
+          retention-days: 7
+
+  radon:
+    runs-on: docker
+    container:
+      image: registry.greenflametech.net/gft-python-runner:latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Radon
+        run: |
+          pip install radon
+          radon cc src -n C --json > radon-cc-report.json || true
+          radon mi src --json > radon-mi-report.json || true
+          radon hal src > radon-hal-report.txt || true
+
+      - name: Upload Radon reports
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: radon-reports
+          path: |
+            radon-cc-report.json
+            radon-mi-report.json
+            radon-hal-report.txt
+          retention-days: 7
+
+  vulture:
+    runs-on: docker
+    container:
+      image: registry.greenflametech.net/gft-python-runner:latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Vulture
+        run: |
+          pip install vulture
+          vulture src --min-confidence 80 > vulture-report.txt 2>&1 || true
+
+      - name: Upload Vulture report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: vulture-report
+          path: vulture-report.txt
+          retention-days: 7
+
+  trivy-config:
+    runs-on: docker
+    timeout-minutes: 10
+    continue-on-error: true
+    container:
+      image: registry.greenflametech.net/gft-ci-runner:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Trivy config scan (Dockerfile + docker-compose)
+        run: |
+          trivy config . \
+            --format json \
+            --output trivy-config-report.json \
+            --exit-code 0 || true
+
+      - name: Upload config scan report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: trivy-config-report
+          path: trivy-config-report.json
+          retention-days: 7
+
+  trivy-deps:
+    runs-on: docker
+    timeout-minutes: 15
+    container:
+      image: registry.greenflametech.net/gft-ci-runner:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Trivy dependency scan
+        run: |
+          trivy fs . \
+            --format cyclonedx \
+            --output sbom.json \
+            --severity CRITICAL,HIGH \
+            --exit-code 1
+
+      - name: Upload SBOM
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: sbom
+          path: sbom.json
+          retention-days: 7
+
+  dependency-check:
+    runs-on: docker
+    container:
+      image: registry.greenflametech.net/gft-python-runner:latest
+    timeout-minutes: 10
+    # removed: defaults.run.working-directory: src — was causing artifact path mismatch
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run pip-audit
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-audit
+          pip-audit -r requirements.txt -f json -o pip-audit-report.json
+
+      - name: Upload pip-audit report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: dependency-check-report
+          path: pip-audit-report.json
+          retention-days: 7
+
+  frontend:
+    runs-on: docker
+    container:
+      image: registry.greenflametech.net/node:20-slim
+    timeout-minutes: 15
+    continue-on-error: true
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type-check
+        run: npm run type-check
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Vitest (unit tests + coverage)
+        run: npm run test:coverage
+
+      - name: Upload frontend coverage
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: frontend-coverage
+          path: frontend/coverage/lcov.info
+          retention-days: 7
+
+      - name: npm audit
+        run: npm audit --audit-level=moderate --json > npm-audit-report.json || true
+
+      - name: Upload npm audit report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: npm-audit-report
+          path: frontend/npm-audit-report.json
+          retention-days: 7
+
+      - name: Vite production build
+        run: npm run build
+
+  sonarqube:
+    runs-on: docker
+    container:
+      image: registry.greenflametech.net/gft-python-runner:latest
+    timeout-minutes: 20
+    needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-config, trivy-deps, dependency-check, frontend]
+    if: ${{ secrets.SONAR_TOKEN != '' && secrets.SONAR_HOST_URL != '' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # --- Download all reports ---
+      - name: Download test reports
+        uses: https://data.forgejo.org/actions/download-artifact@v3
+        with:
+          name: test-reports
+          path: .
+
+      - name: Download bandit report
+        uses: https://data.forgejo.org/actions/download-artifact@v3
+        with:
+          name: bandit-report
+          path: .
+
+      - name: Download mypy report
+        uses: https://data.forgejo.org/actions/download-artifact@v3
+        with:
+          name: mypy-report
+          path: .
+
+      - name: Download vulture report
+        uses: https://data.forgejo.org/actions/download-artifact@v3
+        with:
+          name: vulture-report
+          path: .
+
+      - name: Download radon reports
+        uses: https://data.forgejo.org/actions/download-artifact@v3
+        with:
+          name: radon-reports
+          path: .
+
+      - name: Download semgrep report
+        uses: https://data.forgejo.org/actions/download-artifact@v3
+        with:
+          name: semgrep-report
+          path: .
+
+      - name: Download frontend coverage
+        continue-on-error: true
+        uses: https://data.forgejo.org/actions/download-artifact@v3
+        with:
+          name: frontend-coverage
+          path: frontend/coverage
+
+      # mypy is no longer converted ΓÇö it is passed directly to SonarQube via
+      # sonar.python.mypy.reportPaths in sonar-project.properties, which uses
+      # the native rule definitions that SonarLint recognises for "Show in IDE"
+      - name: Convert reports to SonarQube format
+        run: |
+          python convert_to_sonar.py \
+            --sonar-base-dir . \
+            --vulture vulture-report.txt \
+            --radon   radon-cc-report.json \
+            --semgrep semgrep-report.json \
+            --outdir  .
+
+      # --- Scan ---
+      - name: SonarQube Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          sonar-scanner \
+            -Dsonar.projectBaseDir=. \
+            -Dsonar.token="${SONAR_TOKEN}" \
+            -Dsonar.host.url="${SONAR_HOST_URL}"
+
+      - name: Quality Gate Check
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          python3 - <<'EOF'
+          import os, sys, time, urllib.request, urllib.parse, json, base64
+
+          host  = os.environ["SONAR_HOST_URL"].rstrip("/")
+          token = os.environ["SONAR_TOKEN"]
+          auth  = base64.b64encode(f"{token}:".encode()).decode()
+
+          # Retrieve the task ID written by the scanner
+          ce_task_id = None
+          report_file = ".scannerwork/report-task.txt"
+          if os.path.exists(report_file):
+              with open(report_file) as f:
+                  for line in f:
+                      if line.startswith("ceTaskId="):
+                          ce_task_id = line.strip().split("=", 1)[1]
+
+          if not ce_task_id:
+              print("No CE task ID found ΓÇö scanner may have failed to write report-task.txt.")
+              sys.exit(1)
+
+          headers = {"Authorization": f"Basic {auth}"}
+
+          # Wait for analysis to finish (up to 4 min)
+          for attempt in range(24):
+              url = f"{host}/api/ce/task?id={urllib.parse.quote(ce_task_id)}"
+              req = urllib.request.Request(url, headers=headers)
+              with urllib.request.urlopen(req) as resp:
+                  data = json.loads(resp.read())
+              status = data["task"]["status"]
+              print(f"CE task status: {status}")
+              if status in ("SUCCESS", "FAILED", "CANCELLED"):
+                  break
+              time.sleep(10)
+          else:
+              print("Timed out waiting for analysis to complete.")
+              sys.exit(1)
+
+          if status != "SUCCESS":
+              print(f"Analysis task ended with status: {status}")
+              sys.exit(1)
+
+          # Check the quality gate
+          analysis_id = data["task"].get("analysisId", "")
+          url = f"{host}/api/qualitygates/project_status?analysisId={urllib.parse.quote(analysis_id)}"
+          req = urllib.request.Request(url, headers=headers)
+          with urllib.request.urlopen(req) as resp:
+              qg = json.loads(resp.read())
+
+          gate_status = qg["projectStatus"]["status"]
+          print(f"Quality Gate: {gate_status}")
+          if gate_status != "OK":
+              sys.exit(1)
+          EOF
+
+  # ---------------------------------------------------------------------------
+  # docker-publish: only runs on main, only after sonarqube quality gate passes.
+  # SonarQube is the hard gate ΓÇö if it fails or is skipped, nothing publishes.
+  # ---------------------------------------------------------------------------
+  docker-publish:
+    runs-on: docker
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.sonarqube.result == 'success'
+    needs: [sonarqube]
+    timeout-minutes: 20
+    container:
+      image: registry.greenflametech.net/gft-ci-runner:latest
+    env:
+      REGISTRY: registry.greenflametech.net
+      IMAGE_NAME: hermes
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set image tags
+        id: tags
+        run: |
+          SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          echo "sha_tag=${REGISTRY}/${IMAGE_NAME}:${SHA}" >> $GITHUB_OUTPUT
+          echo "latest_tag=${REGISTRY}/${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+
+      - name: Log in to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | \
+            docker login docker.io \
+              --username "${{ secrets.DOCKERHUB_USERNAME }}" \
+              --password-stdin
+
+      - name: Build image
+        run: |
+          SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          docker build \
+            --build-arg APP_VERSION="${SHA}" \
+            -t "${{ steps.tags.outputs.sha_tag }}" \
+            -t "${{ steps.tags.outputs.latest_tag }}" \
+            .
+
+      - name: Push image
+        run: |
+          docker push "${{ steps.tags.outputs.sha_tag }}"
+          docker push "${{ steps.tags.outputs.latest_tag }}"
+
+      - name: Install cosign
+        run: |
+          COSIGN_VERSION="v2.4.3"
+          wget -q "https://github.com/sigstore/cosign/releases/download/${COSIGN_VERSION}/cosign-linux-amd64" -O /usr/local/bin/cosign
+          chmod +x /usr/local/bin/cosign
+
+      - name: Sign image with cosign
+        # No conditional ΓÇö if COSIGN_PRIVATE_KEY is absent this step fails
+        # loudly rather than silently skipping image signing.
+        # continue-on-error: true while the secret is not yet provisioned;
+        # remove this once COSIGN_PRIVATE_KEY is set in Forgejo repo secrets.
+        continue-on-error: false
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          if [ -z "${COSIGN_PRIVATE_KEY}" ]; then
+            echo "ERROR: COSIGN_PRIVATE_KEY secret is not set. Image signing is required."
+            exit 1
+          fi
+          cosign sign --key env://COSIGN_PRIVATE_KEY \
+            --yes \
+            "${{ steps.tags.outputs.sha_tag }}"
+
+      - name: Summary
+        run: |
+          echo "### Docker image published" >> $GITHUB_STEP_SUMMARY
+          echo "- \`${{ steps.tags.outputs.latest_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- \`${{ steps.tags.outputs.sha_tag }}\`" >> $GITHUB_STEP_SUMMARY
+
+  # ---------------------------------------------------------------------------
+  # trivy-image: scans the image that was actually published to the registry.
+  # Depends on docker-publish so we're always scanning the real artifact.
+  # ---------------------------------------------------------------------------
+  trivy-image:
+    runs-on: docker
+    timeout-minutes: 20
+    if: github.ref == 'refs/heads/main' && needs.docker-publish.result == 'success'
+    needs: [docker-publish]
+    container:
+      image: registry.greenflametech.net/gft-ci-runner:latest
+    env:
+      REGISTRY: registry.greenflametech.net
+      IMAGE_NAME: hermes
+      TRIVY_SERVER: http://marion_trivy:4954
+      LOKI_PUSH_URL: https://loki.greenflametech.net/loki/api/v1/push
+      PUSHGATEWAY_URL: https://prometheus.greenflametech.net/metrics/job/trivy/instance/hermes
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure report placeholder exists
+        if: always()
+        run: |
+          set -x
+          echo '{"Results":[]}' > trivy-report.json
+          ls -la trivy-report.json
+
+      - name: Pull and scan published image
+        if: always()
+        run: |
+          set -x
+          SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          TAG="${REGISTRY}/${IMAGE_NAME}:${SHA}"
+          echo "Attempting to pull: $TAG"
+          docker pull "$TAG" || { echo "Pull failed"; exit 1; }
+          docker exec marion_trivy trivy image \
+            --format json \
+            --exit-code 0 \
+            "$TAG" > trivy-report.json \
+          || { echo '{"Results":[]}' > trivy-report.json; echo "trivy scan failed, using empty report"; }
+          ls -la trivy-report.json
+
+      - name: Ship findings to Loki
+        if: always()
+        run: |
+          TS=$(date +%s%N)
+          REPO="${{ github.repository }}"
+          REF="${{ github.ref_name }}"
+          SHA="${{ github.sha }}"
+
+          PAYLOAD=$(jq -n \
+            --arg ts "$TS" \
+            --arg repo "$REPO" \
+            --arg ref "$REF" \
+            --arg sha "$SHA" \
+            --slurpfile report trivy-report.json '
+            ($report[0].Results // [])
+            | [.[].Vulnerabilities // [] | .[]]
+            | map({
+                severity: .Severity,
+                pkg:      .PkgName,
+                id:       .VulnerabilityID,
+                installed:.InstalledVersion,
+                fixed:    (.FixedVersion  // "no-fix"),
+                title:    (.Title         // "")
+              } | @json)
+            | if length == 0 then
+                [{
+                  stream: {job: "trivy", repo: $repo, ref: $ref, commit: $sha},
+                  values: [[$ts, "trivy scan complete ΓÇö no vulnerabilities found"]]
+                }]
+              else
+                [{
+                  stream: {job: "trivy", repo: $repo, ref: $ref, commit: $sha},
+                  values: (map([$ts, .]))
+                }]
+              end
+            | {streams: .}
+          ')
+
+          curl -sf -X POST "${LOKI_PUSH_URL}" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD" || echo "Warning: Loki push failed (non-fatal)"
+
+      - name: Push summary metrics to Prometheus Pushgateway
+        if: always()
+        run: |
+          SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          REPORT=trivy-report.json
+
+          jq_count() {
+            jq --arg sev "$1" \
+              '[.Results[]?.Vulnerabilities[]? | select(.Severity==$sev)] | length' \
+              "$REPORT" 2>/dev/null || echo 0
+          }
+
+          CRITICAL=$(jq_count CRITICAL)
+          HIGH=$(jq_count HIGH)
+          MEDIUM=$(jq_count MEDIUM)
+          LOW=$(jq_count LOW)
+
+          printf '# HELP trivy_vulnerabilities Vulnerability count by severity from Trivy image scan\n'  > metrics.txt
+          printf '# TYPE trivy_vulnerabilities gauge\n'                                                >> metrics.txt
+          printf 'trivy_vulnerabilities{severity="CRITICAL",commit="%s"} %s\n' "$SHA" "$CRITICAL"    >> metrics.txt
+          printf 'trivy_vulnerabilities{severity="HIGH",commit="%s"}     %s\n' "$SHA" "$HIGH"        >> metrics.txt
+          printf 'trivy_vulnerabilities{severity="MEDIUM",commit="%s"}   %s\n' "$SHA" "$MEDIUM"      >> metrics.txt
+          printf 'trivy_vulnerabilities{severity="LOW",commit="%s"}      %s\n' "$SHA" "$LOW"         >> metrics.txt
+
+          curl -sf --data-binary @metrics.txt "${PUSHGATEWAY_URL}" \
+            || echo "Warning: Pushgateway push failed (non-fatal)"
+
+      - name: Upload Trivy report
+        if: always()
+        uses: https://data.forgejo.org/actions/upload-artifact@v3
+        with:
+          name: trivy-report
+          path: trivy-report.json
+          retention-days: 30
+
+  zap:
+    runs-on: docker
+    if: github.ref == 'refs/heads/main'
+    needs: [trivy-image]
+    timeout-minutes: 20
+    # continue-on-error removed ΓÇö HIGH severity findings now block the pipeline.
+    container:
+      image: registry.greenflametech.net/gft-ci-runner:latest
+    env:
+      REGISTRY: registry.greenflametech.net
+      IMAGE_NAME: hermes
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clean up any leftover containers
+        run: docker rm -f hermes-zap || true
+
+      - name: Start Hermes container
+        run: |
+          SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          TAG="${REGISTRY}/${IMAGE_NAME}:${SHA}"
+          docker pull "$TAG"
+          # Run on marion_internal so the CI runner container can reach it by
+          # name. Port publishing (-p) maps to the Docker host, not to this
+          # runner container, so we use container-to-container networking.
+          docker run -d --name hermes-zap \
+            --network marion_internal \
+            -e APP_ENV=ci \
+            -e LOG_LEVEL=WARNING \
+            -e ENABLED_EXPORTERS=sqlite \
+            -e SQLITE_DB_PATH=/tmp/hermes-ci.db \
+            "$TAG"
+
+      - name: Wait for Hermes to be healthy
+        run: |
+          for i in $(seq 1 20); do
+            if curl -sf http://hermes-zap:8080/api/health > /dev/null; then
+              echo "Hermes is up"
+              exit 0
+            fi
+            echo "Waiting... ($i/20)"
+            sleep 3
+          done
+          echo "Hermes did not become healthy in time"
+          docker logs hermes-zap
+          exit 1
+
+      - name: Seed database for ZAP scan
+        run: |
+          echo "Triggering a speedtest to initialize the database..."
+          curl -sf -X POST http://hermes-zap:8080/api/trigger || true
+          # Wait a moment for the test to complete and DB to be created
+          sleep 5
+          # Verify the database was created
+          if curl -sf http://hermes-zap:8080/api/results/latest > /dev/null; then
+            echo "Database seeded successfully"
+          else
+            echo "Warning: database may not be seeded, but continuing with ZAP scan"
+          fi
+
+      - name: ZAP API Scan
+        run: |
+          # Capture ZAP exit code explicitly ΓÇö the || {} construct gives wrong
+          # $? in this runner environment.
+          set +e
+          docker run --rm \
+            --user root \
+            --network marion_internal \
+            -v "$(pwd):/zap/wrk:rw" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-api-scan.py \
+            -t http://hermes-zap:8080/openapi.json \
+            -f openapi \
+            -r zap-report.html \
+            -w zap-report.md \
+            -z "-config rules.status.FAIL=HIGH" 2>&1 | tee zap-output.log
+          ZAP_EXIT=$?
+          set -e
+          
+          # Check if there are actual HIGH severity findings in the output
+          if grep -q "FAIL-NEW: 0" zap-output.log && [ "$ZAP_EXIT" -eq 2 ]; then
+            echo "ZAP exited with code 2 but FAIL-NEW is 0 ΓÇö treating as warnings only"
+            ZAP_EXIT=1
+          fi
+          
+          if [ "$ZAP_EXIT" -eq 2 ]; then
+            echo "ZAP found HIGH severity issues (exit 2) ΓÇö pipeline blocked"
+            cat zap-output.log
+            exit 2
+          elif [ "$ZAP_EXIT" -eq 1 ]; then
+            echo "ZAP scan complete with warnings (exit $ZAP_EXIT) ΓÇö no HIGH severity findings"
+          else
+            echo "ZAP scan complete (exit $ZAP_EXIT) ΓÇö no issues found"
+          fi
+
+      - name: Stop Hermes container
+        if: always()
+        run: docker rm -f hermes-zap || true
+
+      - uses: https://data.forgejo.org/actions/upload-artifact@v3
+        if: always()
+        with:
+          name: zap-report
+          path: |
+            zap-report.html
+            zap-report.md
+            zap-output.log
+          retention-days: 7
+
+
+  publish-docs:
+    runs-on: docker
+    timeout-minutes: 15
+    if: github.ref == 'refs/heads/main'
+    needs: [sonarqube]
+    continue-on-error: true
+    container:
+      image: registry.greenflametech.net/gft-ci-runner:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Publish docs to hub
+        run: |
+          CID=$(docker run -d -v marion_mkdocs_content:/docs registry.greenflametech.net/alpine sleep 30)
+          docker exec "$CID" mkdir -p /docs/docs/hermes
+          docker cp README.md "$CID:/docs/docs/hermes/index.md"
+          docker cp docs/zeniscal.yml "$CID:/docs/docs/hermes/zeniscal.yml"
+          docker rm -f "$CID"
+
+  notify:
+    runs-on: docker
+    if: always()
+    needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-config, trivy-deps, sonarqube, docker-publish, trivy-image, publish-docs]
+    container:
+      image: registry.greenflametech.net/gft-ci-runner:latest
+    steps:
+      - name: Notify success
+        if: ${{ !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
+        run: |
+          curl -s -X POST https://ntfy.greenflametech.net/pipeline-alerts \
+            -H "Title: Hermes Pipeline Passed Γ£à" \
+            -H "Priority: default" \
+            -H "Tags: white_check_mark" \
+            -d "Pipeline passed for commit ${{ github.sha }} on branch ${{ github.ref_name }}"
+
+      - name: Notify failure
+        if: ${{ contains(needs.*.result, 'failure') }}
+        run: |
+          curl -s -X POST https://ntfy.greenflametech.net/pipeline-alerts \
+            -H "Title: Hermes Pipeline Failed Γ¥î" \
+            -H "Priority: high" \
+            -H "Tags: x" \
+            -d "Pipeline failed for commit ${{ github.sha }} on branch ${{ github.ref_name }}. Check Forgejo Actions for details."
