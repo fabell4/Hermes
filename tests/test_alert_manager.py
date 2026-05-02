@@ -606,17 +606,20 @@ def test_maybe_send_alert_synchronous_fallback_when_executor_is_none(caplog):
 def test_wait_for_pending_alerts_logs_on_timeout(caplog):
     """_wait_for_pending_alerts logs a warning when the timeout elapses."""
     import logging
-    import concurrent.futures
-    from unittest.mock import patch, MagicMock
+    import threading
 
     manager = AlertManager()
 
-    # Patch the executor's submit to return a future that times out
-    mock_future = MagicMock(spec=concurrent.futures.Future)
-    mock_future.result.side_effect = concurrent.futures.TimeoutError()
+    # Submit a real blocking task and inject its future into _pending_futures
+    event = threading.Event()
+    future = AlertManager._executor.submit(event.wait, 5.0)
+    manager._pending_futures.append(future)
 
-    with patch.object(AlertManager._executor, "submit", return_value=mock_future):
+    try:
         with caplog.at_level(logging.WARNING):
             manager._wait_for_pending_alerts(timeout=0.001)
 
-    assert "Timeout" in caplog.text
+        assert "Timeout" in caplog.text
+    finally:
+        event.set()  # Unblock the background task
+        future.result(timeout=2.0)  # Wait for it to actually finish

@@ -59,6 +59,9 @@ class AlertManager:
 
         self._providers: dict[str, AlertProvider] = {}
 
+        # Futures for in-flight async alerts (used by _wait_for_pending_alerts)
+        self._pending_futures: list[concurrent.futures.Future[None]] = []
+
         # Initialize thread pool (lazy, only once)
         if AlertManager._executor is None:
             AlertManager._executor = concurrent.futures.ThreadPoolExecutor(
@@ -170,7 +173,7 @@ class AlertManager:
         # Submit all alerts to thread pool (non-blocking)
         if AlertManager._executor:
             for name, provider in self._providers.items():
-                AlertManager._executor.submit(
+                future: concurrent.futures.Future[None] = AlertManager._executor.submit(
                     self._send_alert_async,
                     name,
                     provider,
@@ -178,6 +181,7 @@ class AlertManager:
                     self._last_error or "Unknown error",
                     timestamp,
                 )
+                self._pending_futures.append(future)
             logger.debug("Submitted %d alert(s) to thread pool", len(self._providers))
         else:
             # Fallback to synchronous (should never happen, but defensive)
@@ -263,14 +267,13 @@ class AlertManager:
         Args:
             timeout: Maximum time to wait in seconds
         """
-        if AlertManager._executor:
-            # Submit a no-op task and wait for it to complete
-            # This ensures all previously submitted tasks are done
-            future = AlertManager._executor.submit(lambda: None)
-            try:
-                future.result(timeout=timeout)
-            except concurrent.futures.TimeoutError:
-                logger.warning("Timeout waiting for pending alerts to complete")
+        futures = self._pending_futures[:]
+        self._pending_futures.clear()
+        if not futures:
+            return
+        _done, not_done = concurrent.futures.wait(futures, timeout=timeout)
+        if not_done:
+            logger.warning("Timeout waiting for pending alerts to complete")
 
     def reset(self) -> None:
         """Reset all failure tracking and alert state (for testing)."""
@@ -278,4 +281,5 @@ class AlertManager:
         self._last_error = None
         self._last_failure_time = None
         self._last_alert_time = None
+        self._pending_futures.clear()
         logger.info("Alert manager state reset.")
