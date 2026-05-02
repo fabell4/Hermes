@@ -12,6 +12,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3] - 2026-05-02
+
+### Security
+
+- **CVE-2025-54121 (starlette)** — Upgrade `fastapi` 0.115.14 → 0.136.1 and pin `starlette==1.0.0`
+  to resolve two starlette vulnerabilities. The previous `fastapi` version capped starlette at
+  `<0.47.0`, leaving the transitive dependency on vulnerable 0.46.2.
+- **CVE-2025-62727 (starlette)** — Fixed by the same starlette upgrade above (fix available in 0.49.1).
+
+### Fixed
+
+- **Forgejo CI — trivy-deps job** — Added trivy installation step to the `trivy-deps` CI job.
+  Trivy is no longer present in the `gft-ci-runner` base image; the job now installs it at
+  runtime using the official install script.
+
+---
+
 ## [0.4.2] - 2026-05-02
 
 ### Fixed
