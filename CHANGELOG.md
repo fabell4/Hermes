@@ -12,6 +12,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.17-beta] - 2026-05-03
+
+### Chore
+
+- **GHCR** — Re-push to connect the container package to the public repository after repo recreation.
+
+---
+
 ## [0.4.3.16-beta] - 2026-05-03
 
 ### Fixed
