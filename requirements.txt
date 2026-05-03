@@ -8,29 +8,29 @@ python-dotenv==1.2.2
 tzlocal==5.3.1
 
 # --- Exporters ---
-prometheus_client==0.24.1
-requests==2.33.0
-types-requests==2.33.0.20260402
+prometheus_client==0.25.0
+requests==2.33.1
+types-requests==2.33.0.20260503
 
 # --- REST API ---
 fastapi==0.136.1
 starlette==1.0.0
-uvicorn[standard]==0.34.3
+uvicorn[standard]==0.46.0
 httpx==0.28.1
-aiofiles==24.1.0
+aiofiles==25.1.0
 
 # --- Testing / dev ---
 watchdog==6.0.0
 
 # --- Development / testing (excluded from production Docker build) ---
 pytest==9.0.3
-pytest-cov==6.0.0
+pytest-cov==7.1.0
 iniconfig==2.3.0
 pluggy==1.6.0
 Pygments==2.20.0
-ruff==0.15.8
-mypy==1.15.0
-bandit==1.8.0
-semgrep==1.99.0
-setuptools==78.1.1
-hypothesis==6.152.1
+ruff==0.15.12
+mypy==1.20.2
+bandit==1.9.4
+semgrep==1.161.0
+setuptools==82.0.1
+hypothesis==6.152.4
