@@ -124,7 +124,11 @@ jobs:
 
           GITHUB_REPO_URL="https://${GH_USERNAME}:${GH_PAT}@github.com/${GH_USERNAME}/Hermes.git"
           git remote add github "${GITHUB_REPO_URL}"
-          git push github public-release:refs/heads/main --force
+          # Push sanitized code to a release branch — pushing directly to main is blocked
+          # by GitHub branch protection (force-push restriction, required GPG signatures,
+          # required GitHub Pages status check). The tag push below is what drives the
+          # GitHub Release; the release branch lets users inspect the sanitized source.
+          git push github public-release:refs/heads/releases/${TAG} --force
 
           # Tag the sanitized commit and push to GitHub
           git tag -f "${TAG}"

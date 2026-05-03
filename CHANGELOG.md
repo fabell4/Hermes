@@ -12,6 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.6-beta] - 2026-05-02
+
+### Fixed
+
+- **Release pipeline** — Pushing sanitized code to `main` on the public GitHub repo is blocked
+  by branch protection rules (no force-push, required GPG-signed commits, required GitHub Pages
+  status check). Changed the push target from `refs/heads/main` to `refs/heads/releases/<tag>`,
+  which is unprotected. The GitHub Release is driven by the tag push, not the branch.
+
+---
+
 ## [0.4.3.5-beta] - 2026-05-02
 
 ### Fixed
