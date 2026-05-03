@@ -226,13 +226,26 @@ jobs:
           git config user.name "Hermes CI"
           git fetch --unshallow origin 2>/dev/null || true
 
-          # Remove branch protection from main — this repo is a CI-managed mirror;
-          # no PR workflow is needed and protection blocks the CI push.
-          HTTP_PROT=$(curl -s -o /dev/null -w "%{http_code}" -X DELETE \
+          # Remove all rulesets on the public repo — it is a CI-managed mirror;
+          # no PR workflow is needed and rulesets block the force-push to main.
+          # Also attempt classic branch protection deletion for belt-and-suspenders.
+          curl -s -X DELETE \
             -H "Authorization: Bearer ${GH_PAT}" \
             -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${GH_USERNAME}/Hermes/branches/main/protection")
-          echo "DELETE branch protection → HTTP ${HTTP_PROT}"
+            "https://api.github.com/repos/${GH_USERNAME}/Hermes/branches/main/protection" || true
+
+          RULESETS=$(curl -s \
+            -H "Authorization: Bearer ${GH_PAT}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GH_USERNAME}/Hermes/rulesets?includes_parents=false")
+          echo "Rulesets found: $(echo "${RULESETS}" | jq 'length')"
+          echo "${RULESETS}" | jq -r '.[].id' | while read -r ruleset_id; do
+            echo "Deleting ruleset ${ruleset_id}"
+            curl -s -X DELETE \
+              -H "Authorization: Bearer ${GH_PAT}" \
+              -H "Accept: application/vnd.github+json" \
+              "https://api.github.com/repos/${GH_USERNAME}/Hermes/rulesets/${ruleset_id}"
+          done
 
           git checkout -b public-release
 

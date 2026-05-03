@@ -12,6 +12,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.16-beta] - 2026-05-03
+
+### Fixed
+
+- **Release pipeline** — Public repo push was blocked by GitHub repository rulesets (not classic branch protection). Switched from `DELETE /branches/main/protection` to enumerating and deleting all rulesets via `GET /repos/.../rulesets` + `DELETE /repos/.../rulesets/{id}` before the force-push.
+
+---
+
 ## [0.4.3.15-beta] - 2026-05-03
 
 ### Fixed
