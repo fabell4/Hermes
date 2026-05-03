@@ -12,6 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.5-beta] - 2026-05-02
+
+### Fixed
+
+- **Release pipeline** — `pip-audit` creates an internal virtual environment for dependency
+  resolution, which failed because `ensurepip`/`venv` was not available on the runner.
+  Now installs `python3-full` (via apt) alongside `python3-pip`, which provides the required
+  venv support on Debian bookworm.
+
+---
+
 ## [0.4.3.4-beta] - 2026-05-02
 
 ### Fixed
