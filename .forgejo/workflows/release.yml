@@ -92,7 +92,7 @@ jobs:
         run: |
           apt-get update -qq
           apt-get install -y --no-install-recommends ruby-full build-essential zlib1g-dev
-          gem install bundler jekyll --no-document --quiet
+          gem install bundler jekyll jekyll-theme-hacker --no-document --quiet
           jekyll build --source docs --destination /tmp/jekyll-build --config docs/_config.yml
           echo "Jekyll build passed"
 

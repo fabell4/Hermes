@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.9-beta] - 2026-05-03
+
+### Fixed
+
+- **Release pipeline** — Jekyll validation step failed because `jekyll-theme-hacker` gem was
+  not installed alongside Jekyll. Added explicit `gem install jekyll-theme-hacker` to the
+  validate job so the theme is available during the docs build check.
+
+---
+
 ## [0.4.3.8-beta] - 2026-05-03
 
 ### Changed

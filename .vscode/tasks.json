@@ -66,6 +66,27 @@
 				"$pids = Get-NetTCPConnection -LocalPort 8501 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique; if ($pids) { $pids | ForEach-Object { Stop-Process -Id $_ -Force }; Write-Host 'Stopped Hermes UI.' } else { Write-Host 'Hermes UI is not running.' }"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Validate Jekyll Docs Build",
+			"type": "shell",
+			"command": "docker",
+			"args": [
+				"run",
+				"--rm",
+				"-v",
+				"${workspaceFolder}/docs:/docs",
+				"jekyll/jekyll:latest",
+				"sh", "-c",
+				"gem install jekyll-theme-hacker --no-document --quiet && jekyll build --source /docs --destination /tmp/jekyll-build --config /docs/_config.yml"
+			],
+			"group": "test",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"clear": true
+			},
+			"problemMatcher": []
 		}
 	]
 }
