@@ -12,6 +12,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.15-beta] - 2026-05-03
+
+### Fixed
+
+- **Release pipeline** — Eliminated the `releases/vX.Y.Z` branch on the public GitHub repo that was auto-triggering a blocked PR on every release. Sanitized code is now pushed directly to `main` on the public repo (which is a CI-managed mirror). Branch protection on `main` is removed by the CI before pushing. GitHub Pages source updated from `releases/${TAG}/docs` to `main/docs`.
+
+---
+
 ## [0.4.3.14-beta] - 2026-05-03
 
 ### Fixed
