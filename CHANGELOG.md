@@ -12,6 +12,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.14-beta] - 2026-05-03
+
+### Fixed
+
+- **Release pipeline** — GHCR package was not appearing in the repo's Packages section because GHCR defaults new packages to private. Added a post-push step that calls `PATCH /user/packages/container/hermes` to set visibility to public. Also ensured the `org.opencontainers.image.source` label is set dynamically at build time (correct repo case) and fixed the Dockerfile static label to use `Hermes` (capital H).
+
+---
+
 ## [0.4.3.13-beta] - 2026-05-03
 
 ### Fixed

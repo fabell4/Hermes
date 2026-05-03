@@ -149,10 +149,13 @@ jobs:
               --password-stdin
 
       - name: Build image
+        env:
+          GH_USERNAME: ${{ secrets.GH_USERNAME }}
         run: |
           CREATED=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           docker build \
             --build-arg APP_VERSION="${{ needs.validate.outputs.version }}" \
+            --label org.opencontainers.image.source="https://github.com/${GH_USERNAME}/Hermes" \
             --label org.opencontainers.image.version="${{ needs.validate.outputs.version }}" \
             --label org.opencontainers.image.revision="${{ github.sha }}" \
             --label org.opencontainers.image.created="${CREATED}" \
@@ -171,6 +174,23 @@ jobs:
         run: |
           docker push ghcr.io/${{ secrets.GH_USERNAME }}/hermes:${{ needs.validate.outputs.version }}
           docker push ghcr.io/${{ secrets.GH_USERNAME }}/hermes:latest
+
+      - name: Make GHCR package public
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          HTTP=$(curl -s -o /tmp/pkg_resp.json -w "%{http_code}" \
+            -X PATCH \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GH_PAT}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/user/packages/container/hermes" \
+            -d '{"visibility":"public"}')
+          echo "PATCH /user/packages/container/hermes → HTTP ${HTTP}"
+          if [ "${HTTP}" != "200" ]; then
+            echo "Response body:"; cat /tmp/pkg_resp.json
+            echo "Warning: could not set package visibility via API — set it manually in GitHub package settings."
+          fi
 
   # -------------------------------------------------------------------------
   # Job 3 — Publish public: sanitize + push to GitHub, create releases,

@@ -14,7 +14,7 @@ RUN npm run build
 # ---------------------------------------------------------------------------
 FROM python:3.13-slim
 
-LABEL org.opencontainers.image.source="https://github.com/fabell4/hermes"
+LABEL org.opencontainers.image.source="https://github.com/fabell4/Hermes"
 
 # Injected by the CI build pipeline from the git tag (e.g. v0.3.0 → 0.3.0).
 # Falls back to "dev" for local builds.
