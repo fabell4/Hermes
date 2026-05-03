@@ -178,22 +178,38 @@ jobs:
       - name: Make GHCR package public
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
+          GH_USERNAME: ${{ secrets.GH_USERNAME }}
         run: |
+          PKG_URL="https://api.github.com/user/packages/container/hermes"
+          AUTH=(-H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${GH_PAT}" -H "X-GitHub-Api-Version: 2022-11-28")
+
+          # Check current visibility first
+          GET_HTTP=$(curl -s -o /tmp/pkg_get.json -w "%{http_code}" "${AUTH[@]}" "${PKG_URL}")
+          echo "GET /user/packages/container/hermes → HTTP ${GET_HTTP}"
+          if [ "${GET_HTTP}" = "200" ]; then
+            VISIBILITY=$(python3 -c "import json,sys; d=json.load(open('/tmp/pkg_get.json')); print(d.get('visibility','unknown'))")
+            echo "Current package visibility: ${VISIBILITY}"
+            if [ "${VISIBILITY}" = "public" ]; then
+              echo "Package is already public — skipping PATCH."
+              exit 0
+            fi
+          else
+            echo "WARNING: Could not read package metadata (HTTP ${GET_HTTP}). Attempting PATCH anyway."
+          fi
+
+          # Attempt to set public
           HTTP=$(curl -s -o /tmp/pkg_resp.json -w "%{http_code}" \
-            -X PATCH \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${GH_PAT}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/user/packages/container/hermes" \
+            -X PATCH "${AUTH[@]}" "${PKG_URL}" \
             -d '{"visibility":"public"}')
           echo "PATCH /user/packages/container/hermes → HTTP ${HTTP}"
           cat /tmp/pkg_resp.json
-          if [ "${HTTP}" != "200" ]; then
-            echo "ERROR: Could not set GHCR package visibility to public (HTTP ${HTTP})."
-            echo "Ensure GH_PAT has the 'write:packages' scope."
-            exit 1
+          if [ "${HTTP}" = "200" ]; then
+            echo "GHCR package is now public."
+          else
+            echo "WARNING: Could not set GHCR package visibility (HTTP ${HTTP})."
+            echo "Check that GH_PAT has 'write:packages' scope and the Forgejo secret is up to date."
+            echo "If the package is already public (linked to public repo), this warning can be ignored."
           fi
-          echo "GHCR package is now public."
 
   # -------------------------------------------------------------------------
   # Job 3 — Publish public: sanitize + push to GitHub, create releases,

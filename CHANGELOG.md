@@ -12,6 +12,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.18-beta] - 2026-05-03
+
+### Fixed
+
+- **Release pipeline** — `Make GHCR package public` step no longer hard-fails on HTTP 404. Step now pre-checks current package visibility via GET; skips PATCH if already public (linked-to-public-repo case). On PATCH failure, emits a warning instead of blocking the build.
+
+---
+
 ## [0.4.3.17-beta] - 2026-05-03
 
 ### Chore
