@@ -71,3 +71,15 @@ jobs:
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
           GH_PAT: ${{ secrets.GH_PAT }}
         run: python scripts/create_github_release.py
+
+      - name: Update GitHub Pages source to latest release branch
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+          GH_USERNAME: ${{ secrets.GH_USERNAME }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          curl -fsSL -X PUT \
+            -H "Authorization: Bearer ${GH_PAT}" \
+            -H "Content-Type: application/json" \
+            "https://api.github.com/repos/${GH_USERNAME}/Hermes/pages" \
+            -d "{\"source\":{\"branch\":\"releases/${TAG}\",\"path\":\"/docs\"}}"
