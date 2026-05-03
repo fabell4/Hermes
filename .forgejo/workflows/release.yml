@@ -187,10 +187,13 @@ jobs:
             "https://api.github.com/user/packages/container/hermes" \
             -d '{"visibility":"public"}')
           echo "PATCH /user/packages/container/hermes → HTTP ${HTTP}"
+          cat /tmp/pkg_resp.json
           if [ "${HTTP}" != "200" ]; then
-            echo "Response body:"; cat /tmp/pkg_resp.json
-            echo "Warning: could not set package visibility via API — set it manually in GitHub package settings."
+            echo "ERROR: Could not set GHCR package visibility to public (HTTP ${HTTP})."
+            echo "Ensure GH_PAT has the 'write:packages' scope."
+            exit 1
           fi
+          echo "GHCR package is now public."
 
   # -------------------------------------------------------------------------
   # Job 3 — Publish public: sanitize + push to GitHub, create releases,
