@@ -12,6 +12,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.12-beta] - 2026-05-03
+
+### Chore
+
+- **Public repository** — Deleted and re-initialized the public GitHub repository; pushed fresh release to re-establish the `Hermes-public` remote and re-enable GitHub Pages.
+
+---
+
+## [0.4.3.11-beta] - 2026-05-03
+
+### Fixed
+
+- **Docs** — Added `repository` key to `docs/_config.yml` to resolve the `jekyll-github-metadata` plugin error during the Jekyll build validation step.
+
+---
+
 ## [0.4.3.10-beta] - 2026-05-03
 
 ### Fixed
