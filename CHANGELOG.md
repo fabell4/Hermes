@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.7-beta] - 2026-05-03
+
+### Fixed
+
+- **GitHub Pages** — Jekyll theme was not being applied because `baseurl` in `docs/_config.yml`
+  was set to `/hermes` (lowercase) while the repository is served at `/Hermes` (capital H).
+  GitHub Pages path resolution is case-sensitive, causing theme CSS/JS assets to 404.
+
+---
+
 ## [0.4.3.6-beta] - 2026-05-02
 
 ### Fixed
