@@ -25,6 +25,7 @@ navigation:
     url: /RELEASE-PROCESS
 
 # GitHub metadata
+repository: fabell4/Hermes
 github:
   repository_url: https://github.com/fabell4/hermes
   
