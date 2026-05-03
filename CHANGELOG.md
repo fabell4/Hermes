@@ -12,6 +12,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.8-beta] - 2026-05-03
+
+### Changed
+
+- **Release pipeline** — Consolidated into three explicit blocking jobs (`validate` →
+  `build-and-push` → `publish-public`). All quality and security gates (ruff, bandit,
+  pip-audit, pytest, Jekyll docs build) now run in `validate` and abort the pipeline before
+  any image is built or code reaches the public repo if they fail.
+- **Release pipeline** — Jekyll docs build validation added as a pre-publish gate; a broken
+  `_config.yml` or theme reference will now block the release rather than silently deploying
+  a broken Pages site.
+- **Release pipeline** — GitHub Pages source branch is now updated automatically to
+  `releases/<tag>` at the end of each release, ensuring the published docs always reflect
+  the latest release.
+- **Release pipeline** — Removed redundant `ghcr-publish.yml` GitHub Actions workflow;
+  Forgejo's `release.yml` owns the full build and publish lifecycle.
+- **GitHub CI** — `ci.yml` now also triggers on `releases/**` branches so the sanitized
+  public release code is validated on the GitHub side after each push.
+
+---
+
 ## [0.4.3.7-beta] - 2026-05-03
 
 ### Fixed
