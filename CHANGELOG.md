@@ -12,6 +12,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.19-beta] - 2026-05-03
+
+### Fixed
+
+- **Release pipeline** — GHCR package now auto-links to the public `fabell4/Hermes` repo. Added `.github/workflows/link-ghcr-package.yml` which re-pushes the image using `GITHUB_TOKEN` (required for GitHub's auto-link). The `publish-public` job now triggers this workflow via `workflow_dispatch` after each release push.
+
+---
+
 ## [0.4.3.18-beta] - 2026-05-03
 
 ### Fixed
