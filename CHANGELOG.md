@@ -12,6 +12,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.13-beta] - 2026-05-03
+
+### Fixed
+
+- **Release pipeline** — "Update GitHub Pages source" step no longer fails the job when GitHub Pages is not yet enabled on the public repository (added `continue-on-error: true`).
+
+---
+
 ## [0.4.3.12-beta] - 2026-05-03
 
 ### Chore

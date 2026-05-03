@@ -150,7 +150,12 @@ jobs:
 
       - name: Build image
         run: |
+          CREATED=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           docker build \
+            --build-arg APP_VERSION="${{ needs.validate.outputs.version }}" \
+            --label org.opencontainers.image.version="${{ needs.validate.outputs.version }}" \
+            --label org.opencontainers.image.revision="${{ github.sha }}" \
+            --label org.opencontainers.image.created="${CREATED}" \
             --tag registry.greenflametech.net/hermes:${{ needs.validate.outputs.version }} \
             --tag registry.greenflametech.net/hermes:latest \
             --tag ghcr.io/${{ secrets.GH_USERNAME }}/hermes:${{ needs.validate.outputs.version }} \
@@ -246,12 +251,38 @@ jobs:
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
           GH_PAT: ${{ secrets.GH_PAT }}
         run: |
-          curl -fsSL -X PUT \
-            -H "Authorization: Bearer ${GH_PAT}" \
-            -H "Content-Type: application/json" \
-            "https://api.github.com/repos/${GH_USERNAME}/Hermes/pages" \
-            -d "{\"source\":{\"branch\":\"releases/${TAG}\",\"path\":\"/docs\"}}"
-          echo "GitHub Pages source updated to releases/${TAG}"
+          PAGES_URL="https://api.github.com/repos/${GH_USERNAME}/Hermes/pages"
+          PAYLOAD="{\"source\":{\"branch\":\"releases/${TAG}\",\"path\":\"/docs\"}}"
+          AUTH_HEADER="Authorization: Bearer ${GH_PAT}"
+          CT_HEADER="Content-Type: application/json"
+
+          # Try POST first (initialises Pages on a fresh repo)
+          HTTP=$(curl -s -o /tmp/pages_resp.json -w "%{http_code}" -X POST \
+            -H "${AUTH_HEADER}" -H "${CT_HEADER}" \
+            "${PAGES_URL}" -d "${PAYLOAD}")
+          echo "POST /pages → HTTP ${HTTP}"
+
+          if [ "${HTTP}" = "201" ]; then
+            echo "GitHub Pages enabled on releases/${TAG}"
+          elif [ "${HTTP}" = "409" ] || [ "${HTTP}" = "422" ]; then
+            # Pages already exists — update the source branch
+            HTTP2=$(curl -s -o /tmp/pages_resp2.json -w "%{http_code}" -X PUT \
+              -H "${AUTH_HEADER}" -H "${CT_HEADER}" \
+              "${PAGES_URL}" -d "${PAYLOAD}")
+            echo "PUT /pages → HTTP ${HTTP2}"
+            [ "${HTTP2}" = "204" ] || { cat /tmp/pages_resp2.json; exit 1; }
+            echo "GitHub Pages source updated to releases/${TAG}"
+          else
+            cat /tmp/pages_resp.json
+            exit 1
+          fi
+
+      - name: Prepare Forgejo release assets
+        run: |
+          mkdir -p /tmp/release-assets
+          if [ -f /tmp/changelog_notes.txt ]; then
+            cp /tmp/changelog_notes.txt /tmp/release-assets/RELEASE-NOTES.md
+          fi
 
       - name: Delete existing Forgejo release (if any)
         env:
