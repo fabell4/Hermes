@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.10-beta] - 2026-05-03
+
+### Fixed
+
+- **Release pipeline** — Jekyll validation kept failing on missing gems (`jekyll-github-metadata`,
+  `jekyll-relative-links`). Replaced the ad-hoc `gem install` list with a `docs/Gemfile` so
+  bundler resolves all plugin dependencies. Workflow now runs `bundle install && bundle exec jekyll build`.
+
+---
+
 ## [0.4.3.9-beta] - 2026-05-03
 
 ### Fixed

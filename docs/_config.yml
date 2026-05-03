@@ -49,6 +49,7 @@ include:
 exclude:
   - Gemfile
   - Gemfile.lock
+  - Gemfile.lock
   - grafana-dashboard.json
   - suppression-decisions.md
   - zeniscal.yml
