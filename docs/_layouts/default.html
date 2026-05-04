@@ -8,6 +8,13 @@
     <link rel="icon" type="image/png" href="{{ '/assets/Hermes.png' | relative_url }}">
     <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
     <style>
+      /* Constrain header content to match body width */
+      header .inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+
       #sidebar nav ul {
         list-style: none;
         padding: 0;

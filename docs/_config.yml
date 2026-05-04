@@ -17,10 +17,20 @@ navigation:
     url: /architecture
   - title: API Reference
     url: /api-reference
-  - title: Security
-    url: /security
   - title: Alerts
     url: /alerts
+  - title: Security Guide
+    url: /security
+  - title: Security Audit
+    url: /SECURITY-AUDIT
+  - title: Security Enhancements
+    url: /SECURITY-ENHANCEMENTS
+  - title: Error Catalog
+    url: /error-catalog
+  - title: Error Handling Conventions
+    url: /error-handling-conventions
+  - title: Error Messages
+    url: /error-messages
   - title: Release Process
     url: /RELEASE-PROCESS
 
