@@ -2,8 +2,8 @@
 
 title: Hermes Documentation
 description: Self-hosted internet speed test monitoring with modern observability stack integration
-url: https://fabell4.github.io
-baseurl: /Hermes
+url: https://hermes-docs.greenflametech.com
+baseurl: ""
 
 theme: jekyll-theme-hacker
 
