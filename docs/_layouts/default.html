@@ -14,7 +14,9 @@
         margin: 0;
       }
       #sidebar nav ul li {
+        display: block;
         margin-bottom: 6px;
+        margin-right: 0;
       }
       #sidebar nav ul li a {
         color: #9ddcff;
@@ -63,11 +65,6 @@
       section#main-content {
         flex: 1;
         min-width: 0;
-      }
-      /* Override global nav li inline-block for sidebar vertical nav */
-      #sidebar nav ul li {
-        display: block;
-        margin-right: 0;
       }
       @media (max-width: 768px) {
         #content-wrapper .inner {
