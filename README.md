@@ -2,6 +2,8 @@
 
 ![Hermes logo](docs/assets/Hermes.png)
 
+![Hermes Dashboard](docs/assets/Hermes-Screenshot.png)
+
 **Hermes** is a self-hosted internet speed test monitoring solution that periodically tests your connection and exports
 results to multiple destinations. It features a modern React frontend, comprehensive REST API, and integrates seamlessly
 with your observability stack.

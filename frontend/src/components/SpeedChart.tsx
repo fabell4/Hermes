@@ -14,10 +14,19 @@ interface SpeedChartProps {
   readonly data: SpeedResult[]
 }
 
+interface ChartDataPoint {
+  time: string
+  Download: number
+  Upload: number
+  Ping: number
+  serverName: string
+}
+
 interface TooltipPayloadEntry {
   name: string
   value: number
   color: string
+  payload: ChartDataPoint
 }
 
 interface CustomTooltipProps {
@@ -28,9 +37,13 @@ interface CustomTooltipProps {
 
 function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload?.length) return null
+  const serverName = payload[0].payload.serverName
   return (
     <div className="bg-slate-900 border border-slate-700 p-3 rounded-lg shadow-xl">
       <p className="text-slate-300 text-sm mb-2">{label}</p>
+      {serverName && (
+        <p className="text-slate-500 text-xs mb-2">{serverName}</p>
+      )}
       {payload.map((entry) => (
         <div key={entry.name} className="flex items-center gap-2 text-sm">
           <div
@@ -59,6 +72,7 @@ export function SpeedChart({ data }: SpeedChartProps) {
       Download: Number(d.download_mbps.toFixed(1)),
       Upload: Number(d.upload_mbps.toFixed(1)),
       Ping: Number(d.ping_ms.toFixed(1)),
+      serverName: d.server_name,
     }))
 
   return (
