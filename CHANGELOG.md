@@ -12,6 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.22-beta] - 2026-05-04
+
+### Fixed
+
+- **Docs layout** — Pages site now renders a proper two-column layout with a sticky left-hand
+  sidebar. Added flexbox rules to `_layouts/default.html` since the hacker theme provides no
+  multi-column layout. Sidebar nav items now display vertically (overrides the global
+  `inline-block` rule from `style.scss`). Collapses to single column on mobile.
+
+---
+
 ## [0.4.3.21-beta] - 2026-05-04
 
 ### Fixed
