@@ -6,6 +6,8 @@
 results to multiple destinations. It features a modern React frontend, comprehensive REST API, and integrates seamlessly
 with your observability stack.
 
+📖 **[Documentation](https://hermes-docs.greenflametech.com/)**
+
 ---
 
 ## ✨ Features
