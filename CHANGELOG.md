@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.21-beta] - 2026-05-04
+
+### Fixed
+
+- **Release pipeline** — GitHub Pages API `POST /pages` returning HTTP 500 no longer fails the
+  publish job. Non-201/409/422 responses are now treated as a non-fatal warning so Docker image
+  publishing is not blocked by a transient GitHub infrastructure error.
+
+---
+
 ## [0.4.3.20-beta] - 2026-05-04
 
 ### Fixed

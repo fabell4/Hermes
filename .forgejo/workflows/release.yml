@@ -362,8 +362,8 @@ jobs:
             [ "${HTTP2}" = "204" ] || { cat /tmp/pages_resp2.json; exit 1; }
             echo "GitHub Pages source updated to main/docs"
           else
-            cat /tmp/pages_resp.json
-            exit 1
+            echo "::warning::GitHub Pages API returned HTTP ${HTTP} — skipping Pages update (non-fatal)."
+            cat /tmp/pages_resp.json || true
           fi
 
       - name: Prepare Forgejo release assets
