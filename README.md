@@ -1,6 +1,6 @@
 # Hermes
 
-![Hermes logo](docs/assets/Hermes.png)
+<img src="docs/assets/Hermes.png" width="80" alt="Hermes logo">
 
 ![Hermes Dashboard](docs/assets/Hermes-Screenshot.png)
 
