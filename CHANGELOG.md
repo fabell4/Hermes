@@ -12,6 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.24-beta] - 2026-05-04
+
+### Fixed
+
+- **Docs layout** — Header content now respects the same max-width and padding as the body,
+  preventing it from bleeding to the left edge of the screen.
+- **Docs navigation** — Added missing pages: Security Audit, Security Enhancements, Error Catalog,
+  Error Handling Conventions, and Error Messages.
+
+---
+
 ## [0.4.3.23-beta] - 2026-05-04
 
 ### Fixed
