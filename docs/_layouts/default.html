@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: "en-US" }}">
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
+    <style>
+      #sidebar nav ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      #sidebar nav ul li {
+        margin-bottom: 6px;
+      }
+      #sidebar nav ul li a {
+        color: #9ddcff;
+        text-decoration: none;
+        font-size: 0.9em;
+      }
+      #sidebar nav ul li a:hover {
+        color: #fff;
+        text-decoration: underline;
+      }
+      #sidebar nav ul li a.active {
+        color: #fff;
+        font-weight: bold;
+      }
+      #sidebar hr {
+        border-color: #3a3a3a;
+        margin: 12px 0;
+      }
+      #sidebar .sidebar-section-title {
+        font-size: 0.75em;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #666;
+        margin-bottom: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="inner">
+        <a href="{{ '/' | relative_url }}">
+          <h1>{{ site.title | default: site.github.repository_name }}</h1>
+        </a>
+        <h2>{{ site.description | default: site.github.project_tagline }}</h2>
+        {% if site.github.is_project_page %}
+          <a href="{{ site.github.repository_url }}" class="button"><small>View project on</small> GitHub</a>
+        {% endif %}
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          {{ content }}
+        </section>
+
+        <aside id="sidebar">
+          <nav>
+            <p class="sidebar-section-title">Navigation</p>
+            <ul>
+              {% for item in site.navigation %}
+                <li>
+                  <a href="{{ item.url | relative_url }}"
+                     {% if page.url == item.url or page.url == item.url | append: '.html' %}class="active"{% endif %}>
+                    {{ item.title }}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </nav>
+          <hr>
+          <p class="sidebar-section-title">Project</p>
+          <a href="{{ site.github.repository_url }}" class="button">
+            <small>View on</small> GitHub
+          </a>
+        </aside>
+      </div>
+    </div>
+
+    <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>
+  </body>
+</html>
