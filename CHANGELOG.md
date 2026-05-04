@@ -16,7 +16,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
-- **Release pipeline** — GHCR package now auto-links to the public `fabell4/Hermes` repo. Added `.github/workflows/link-ghcr-package.yml` which re-pushes the image using `GITHUB_TOKEN` (required for GitHub's auto-link). The `publish-public` job now triggers this workflow via `workflow_dispatch` after each release push.
+- **Release pipeline** — GHCR package now auto-links to the public `fabell4/Hermes` repo. Added
+  `.github/workflows/link-ghcr-package.yml` which re-pushes the image using `GITHUB_TOKEN`
+  (required for GitHub's auto-link). The `publish-public` job now triggers this workflow via
+  `workflow_dispatch` after each release push.
 
 ---
 
@@ -24,7 +27,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
-- **Release pipeline** — `Make GHCR package public` step no longer hard-fails on HTTP 404. Step now pre-checks current package visibility via GET; skips PATCH if already public (linked-to-public-repo case). On PATCH failure, emits a warning instead of blocking the build.
+- **Release pipeline** — `Make GHCR package public` step no longer hard-fails on HTTP 404. Step now
+  pre-checks current package visibility via GET; skips PATCH if already public
+  (linked-to-public-repo case). On PATCH failure, emits a warning instead of blocking the build.
 
 ---
 
@@ -40,7 +45,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
-- **Release pipeline** — Public repo push was blocked by GitHub repository rulesets (not classic branch protection). Switched from `DELETE /branches/main/protection` to enumerating and deleting all rulesets via `GET /repos/.../rulesets` + `DELETE /repos/.../rulesets/{id}` before the force-push.
+- **Release pipeline** — Public repo push was blocked by GitHub repository rulesets (not classic
+  branch protection). Switched from `DELETE /branches/main/protection` to enumerating and deleting
+  all rulesets via `GET /repos/.../rulesets` + `DELETE /repos/.../rulesets/{id}` before the
+  force-push.
 
 ---
 
@@ -48,7 +56,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
-- **Release pipeline** — Eliminated the `releases/vX.Y.Z` branch on the public GitHub repo that was auto-triggering a blocked PR on every release. Sanitized code is now pushed directly to `main` on the public repo (which is a CI-managed mirror). Branch protection on `main` is removed by the CI before pushing. GitHub Pages source updated from `releases/${TAG}/docs` to `main/docs`.
+- **Release pipeline** — Eliminated the `releases/vX.Y.Z` branch on the public GitHub repo that was
+  auto-triggering a blocked PR on every release. Sanitized code is now pushed directly to `main` on
+  the public repo (which is a CI-managed mirror). Branch protection on `main` is removed by the CI
+  before pushing. GitHub Pages source updated from `releases/${TAG}/docs` to `main/docs`.
 
 ---
 
@@ -56,7 +67,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
-- **Release pipeline** — GHCR package was not appearing in the repo's Packages section because GHCR defaults new packages to private. Added a post-push step that calls `PATCH /user/packages/container/hermes` to set visibility to public. Also ensured the `org.opencontainers.image.source` label is set dynamically at build time (correct repo case) and fixed the Dockerfile static label to use `Hermes` (capital H).
+- **Release pipeline** — GHCR package was not appearing in the repo's Packages section because GHCR
+  defaults new packages to private. Added a post-push step that calls
+  `PATCH /user/packages/container/hermes` to set visibility to public. Also ensured the
+  `org.opencontainers.image.source` label is set dynamically at build time (correct repo case) and
+  fixed the Dockerfile static label to use `Hermes` (capital H).
 
 ---
 
@@ -64,7 +79,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
-- **Release pipeline** — "Update GitHub Pages source" step no longer fails the job when GitHub Pages is not yet enabled on the public repository (added `continue-on-error: true`).
+- **Release pipeline** — "Update GitHub Pages source" step no longer fails the job when GitHub Pages
+  is not yet enabled on the public repository (added `continue-on-error: true`).
 
 ---
 
@@ -72,7 +88,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Chore
 
-- **Public repository** — Deleted and re-initialized the public GitHub repository; pushed fresh release to re-establish the `Hermes-public` remote and re-enable GitHub Pages.
+- **Public repository** — Deleted and re-initialized the public GitHub repository; pushed fresh
+  release to re-establish the `Hermes-public` remote and re-enable GitHub Pages.
 
 ---
 
@@ -80,7 +97,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
-- **Docs** — Added `repository` key to `docs/_config.yml` to resolve the `jekyll-github-metadata` plugin error during the Jekyll build validation step.
+- **Docs** — Added `repository` key to `docs/_config.yml` to resolve the `jekyll-github-metadata`
+  plugin error during the Jekyll build validation step.
 
 ---
 

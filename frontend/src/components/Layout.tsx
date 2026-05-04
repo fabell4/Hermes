@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Activity, LayoutDashboard, Settings, Menu, X, Zap, ArrowUpCircle } from 'lucide-react'
+import { LayoutDashboard, Settings, Menu, X, Zap, ArrowUpCircle } from 'lucide-react'
 import { useHermes } from '@/hooks/useHermes'
+import hermesLogo from '@/assets/logo.svg'
 
 const GITHUB_REPO = 'fabell4/hermes'
 
@@ -78,9 +79,7 @@ export function Layout({ children }: { readonly children: React.ReactNode }) {
         </button>
 
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-md bg-cyan-500/10 text-cyan-400">
-            <Activity size={18} />
-          </div>
+          <img src={hermesLogo} alt="Hermes" className="h-7 w-7" />
           <span className="font-bold text-slate-100 text-lg tracking-tight">
             Hermes
           </span>

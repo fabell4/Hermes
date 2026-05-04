@@ -3,9 +3,11 @@ layout: default
 title: "Hermes Documentation"
 ---
 
-# Hermes Documentation
+![Hermes logo](assets/logo.png)
 
-**Hermes** is a self-hosted internet speed test monitoring solution that periodically tests your connection and exports results to multiple destinations. It features a modern React frontend, comprehensive API, and integrates seamlessly with your observability stack.
+**Hermes** is a self-hosted internet speed test monitoring solution that periodically tests your
+connection and exports results to multiple destinations. It features a modern React frontend,
+comprehensive API, and integrates seamlessly with your observability stack.
 
 ---
 
@@ -184,7 +186,8 @@ See [Getting Started](getting-started) for the full variable list with descripti
 
 Hermes runs as two containers:
 
-- **hermes-scheduler** — Background worker running speed tests on schedule, exposing Prometheus metrics, and pushing to Loki
+- **hermes-scheduler** — Background worker running speed tests on schedule, exposing Prometheus
+  metrics, and pushing to Loki
 
 - **hermes-api** — FastAPI REST API serving the React frontend and providing programmatic access
 
