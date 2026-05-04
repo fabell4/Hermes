@@ -3,7 +3,7 @@ layout: default
 title: "Hermes Documentation"
 ---
 
-![Hermes logo](assets/Hermes.png)
+<img src="assets/Hermes.png" width="80" alt="Hermes logo">
 
 ![Hermes Dashboard](assets/Hermes-Screenshot.png)
 
