@@ -40,6 +40,45 @@
         color: #666;
         margin-bottom: 6px;
       }
+
+      /* ── Two-column layout ── */
+      #content-wrapper {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 20px 24px;
+      }
+      #content-wrapper .inner {
+        display: flex;
+        flex-direction: row;
+        gap: 2rem;
+        align-items: flex-start;
+      }
+      aside#sidebar {
+        width: 220px;
+        flex-shrink: 0;
+        order: -1;
+        position: sticky;
+        top: 20px;
+      }
+      section#main-content {
+        flex: 1;
+        min-width: 0;
+      }
+      /* Override global nav li inline-block for sidebar vertical nav */
+      #sidebar nav ul li {
+        display: block;
+        margin-right: 0;
+      }
+      @media (max-width: 768px) {
+        #content-wrapper .inner {
+          flex-direction: column;
+        }
+        aside#sidebar {
+          width: 100%;
+          position: static;
+          order: 0;
+        }
+      }
     </style>
   </head>
   <body>
