@@ -3,7 +3,7 @@ layout: default
 title: "Hermes Documentation"
 ---
 
-![Hermes logo](assets/logo.png)
+![Hermes logo](assets/Hermes.png)
 
 **Hermes** is a self-hosted internet speed test monitoring solution that periodically tests your
 connection and exports results to multiple destinations. It features a modern React frontend,

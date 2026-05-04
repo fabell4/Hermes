@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { LayoutDashboard, Settings, Menu, X, Zap, ArrowUpCircle } from 'lucide-react'
 import { useHermes } from '@/hooks/useHermes'
-import hermesLogo from '@/assets/logo.svg'
+import hermesLogo from '@/assets/Hermes.svg'
 
 const GITHUB_REPO = 'fabell4/hermes'
 
