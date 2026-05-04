@@ -12,6 +12,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.23-beta] - 2026-05-04
+
+### Fixed
+
+- **Docs layout** — Removed duplicate `#sidebar nav ul li` CSS selector (lint error). Merged
+  `display: block`, `margin-bottom`, and `margin-right` into a single rule.
+
+---
+
 ## [0.4.3.22-beta] - 2026-05-04
 
 ### Fixed
