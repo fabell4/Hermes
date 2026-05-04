@@ -12,6 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.4.3.20-beta] - 2026-05-04
+
+### Fixed
+
+- **Favicon not rendering** — SPA fallback route now serves root-level static files (e.g.
+  `favicon.png`, `robots.txt`) directly from the `dist` directory before falling back to
+  `index.html`. Previously, all non-asset paths returned `index.html`, causing the browser to
+  receive HTML when requesting the favicon.
+
+---
+
 ## [0.4.3.19-beta] - 2026-05-03
 
 ### Fixed

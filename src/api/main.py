@@ -190,7 +190,17 @@ def health() -> HealthResponse:
     responses={404: {"description": "Frontend not built — dist directory missing"}},
 )
 def spa_fallback(full_path: str) -> FileResponse:
-    """Return index.html for all non-API paths to support client-side routing."""
+    """Return static file if it exists in dist root, otherwise index.html for SPA routing."""
+    if not _DIST.is_dir():
+        raise HTTPException(status_code=404)
+
+    # Serve root-level static assets (e.g. favicon.png, robots.txt) directly.
+    # Path traversal guard: resolve() ensures the file is inside _DIST.
+    if full_path:
+        candidate = (_DIST / full_path).resolve()
+        if candidate.is_relative_to(_DIST.resolve()) and candidate.is_file():
+            return FileResponse(str(candidate))
+
     index = _DIST / "index.html"
     if not index.is_file():
         raise HTTPException(status_code=404)
