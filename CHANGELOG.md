@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.5-beta] - 2026-05-04
+
+### Changed
+
+- **Version milestone** — Bumped to v0.5-beta. Consolidates all 0.4.x-beta patch releases
+  including docs layout overhaul, sidebar navigation, release pipeline hardening, and
+  security/performance improvements.
+
+---
+
 ## [0.4.3.24-beta] - 2026-05-04
 
 ### Fixed
