@@ -137,9 +137,19 @@ class AlertManager:
                 last_error=last_error,
                 timestamp=timestamp,
             )
-            logger.info("Alert sent successfully via %s", name)
+            logger.info(
+                "Alert sent successfully via %s (pool_pending_approx=%d)",
+                name,
+                len([f for f in self._pending_futures if not f.done()]),
+            )
         except Exception as e:  # pylint: disable=broad-exception-caught  # NOSONAR
-            logger.error("Alert provider '%s' failed: %s", name, e, exc_info=True)
+            logger.error(
+                "Alert provider '%s' failed (pool_pending_approx=%d): %s",
+                name,
+                len([f for f in self._pending_futures if not f.done()]),
+                e,
+                exc_info=True,
+            )
 
     def _maybe_send_alert(self, timestamp: datetime) -> None:
         """Send alert if cooldown period has elapsed."""
@@ -172,6 +182,7 @@ class AlertManager:
 
         # Submit all alerts to thread pool (non-blocking)
         if AlertManager._executor:
+            new_futures: list[concurrent.futures.Future[None]] = []
             for name, provider in self._providers.items():
                 future: concurrent.futures.Future[None] = AlertManager._executor.submit(
                     self._send_alert_async,
@@ -181,8 +192,20 @@ class AlertManager:
                     self._last_error or "Unknown error",
                     timestamp,
                 )
+                new_futures.append(future)
                 self._pending_futures.append(future)
-            logger.debug("Submitted %d alert(s) to thread pool", len(self._providers))
+
+            # --- Thread pool statistics ---
+            # Prune completed futures before counting so the log reflects
+            # in-flight work only.
+            self._pending_futures = [f for f in self._pending_futures if not f.done()]
+            pending_count = len(self._pending_futures)
+            submitted_count = len(new_futures)
+            logger.info(
+                "Alert dispatch: submitted=%d provider(s), pending_in_pool=%d",
+                submitted_count,
+                pending_count,
+            )
         else:
             # Fallback to synchronous (should never happen, but defensive)
             logger.warning("Thread pool not initialized, sending alerts synchronously")

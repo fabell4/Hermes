@@ -13,6 +13,8 @@ import os
 import tempfile
 from pathlib import Path
 
+from src.types import AlertConfig, JsonDict
+
 logger = logging.getLogger(__name__)
 
 RUNTIME_CONFIG_PATH = Path("data/runtime_config.json")
@@ -123,7 +125,7 @@ def _validate_alert_config(data: dict, sanitized: dict) -> None:
         )
 
 
-def load() -> dict:
+def load() -> JsonDict:
     """
     Loads the runtime config from disk with validation.
     Returns an empty dict if the file doesn't exist yet.
@@ -174,7 +176,7 @@ def load() -> dict:
         return {}
 
 
-def save(data: dict) -> None:
+def save(data: JsonDict) -> None:
     """
     Writes the runtime config to disk atomically.
     Merges with existing values so unrelated keys are preserved.
@@ -438,7 +440,7 @@ def _load_alert_config_from_env() -> dict:
     }
 
 
-def get_alert_config() -> dict:
+def get_alert_config() -> AlertConfig:
     """
     Returns the alert configuration with defaults.
 
@@ -468,7 +470,7 @@ def get_alert_config() -> dict:
     return _load_alert_config_from_env()
 
 
-def set_alert_config(config: dict) -> None:
+def set_alert_config(config: AlertConfig) -> None:
     """
     Persists alert configuration to disk.
 

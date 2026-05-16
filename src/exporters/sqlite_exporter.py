@@ -162,16 +162,20 @@ class SQLiteExporter(BaseExporter):
         if not acquired:
             raise SQLiteLockTimeout(timeout=30.0, db_path=self.path)
 
+        pruned = False
         try:
             try:
                 with self._transaction() as conn:
                     conn.execute(_INSERT, row)
-                    self._prune(conn)
+                    pruned = self._prune(conn)
             except sqlite3.Error as e:
                 logger.error("Failed to write SQLite row: %s", e)
                 raise RuntimeError(f"SQLite write failed: {e}") from e
         finally:
             self._lock.release()
+
+        if pruned:
+            self._checkpoint_and_maybe_vacuum()
 
         logger.info(
             "SQLite row written — down: %sMbps up: %sMbps ping: %sms",
@@ -180,15 +184,21 @@ class SQLiteExporter(BaseExporter):
             result.ping_ms,
         )
 
-    def _prune(self, conn: sqlite3.Connection) -> None:
-        """Removes rows exceeding max_rows or older than retention_days."""
+    def _prune(self, conn: sqlite3.Connection) -> bool:
+        """Removes rows exceeding max_rows or older than retention_days.
+
+        Returns:
+            True if any rows were deleted, False otherwise.
+        """
         if not self.max_rows and not self.retention_days:
-            return
+            return False
+        deleted = False
         if self.retention_days:
             cutoff = (
                 datetime.now(timezone.utc) - timedelta(days=self.retention_days)
             ).isoformat()
             conn.execute("DELETE FROM results WHERE timestamp < ?", (cutoff,))
+            deleted = deleted or conn.execute("SELECT changes()").fetchone()[0] > 0
         if self.max_rows:
             conn.execute(
                 """
@@ -197,4 +207,55 @@ class SQLiteExporter(BaseExporter):
                 )
                 """,
                 (self.max_rows,),
+            )
+            deleted = deleted or conn.execute("SELECT changes()").fetchone()[0] > 0
+        return deleted
+
+    # ------------------------------------------------------------------
+    # WAL checkpoint + vacuum helpers (called after prune)
+    # ------------------------------------------------------------------
+
+    #: Fragmentation ratio above which VACUUM is triggered (20 %).
+    _VACUUM_THRESHOLD = 0.20
+
+    def _checkpoint_and_maybe_vacuum(self) -> None:
+        """Run a WAL checkpoint then VACUUM if fragmentation exceeds threshold.
+
+        Executed outside the write transaction so that both operations can
+        acquire the exclusive lock they need.  Failures are logged as warnings
+        and never propagate — pruning already succeeded.
+        """
+        try:
+            # isolation_level=None disables Python's implicit transaction wrapper
+            # so that VACUUM (which cannot run inside a transaction) succeeds.
+            conn = sqlite3.connect(
+                self.path, isolation_level=None, check_same_thread=False
+            )
+            try:
+                conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+                logger.debug("WAL checkpoint completed for %s", self.path)
+
+                row = conn.execute(
+                    "SELECT freelist_count, page_count FROM pragma_freelist_count, pragma_page_count"
+                ).fetchone()
+                if row is None:
+                    # Fallback: query pragmas individually
+                    freelist = conn.execute("PRAGMA freelist_count").fetchone()[0]
+                    page_count = conn.execute("PRAGMA page_count").fetchone()[0]
+                else:
+                    freelist, page_count = row
+
+                if page_count > 0 and freelist / page_count > self._VACUUM_THRESHOLD:
+                    logger.info(
+                        "SQLite fragmentation %.0f%% exceeds threshold — running VACUUM on %s",
+                        100.0 * freelist / page_count,
+                        self.path,
+                    )
+                    conn.execute("VACUUM")
+                    logger.info("VACUUM completed for %s", self.path)
+            finally:
+                conn.close()
+        except sqlite3.Error as exc:
+            logger.warning(
+                "SQLite checkpoint/vacuum failed (non-fatal): %s", exc
             )

@@ -6,6 +6,7 @@ import logging
 
 from prometheus_client import Gauge, start_http_server
 
+from src import config as app_config
 from src.exporters.base_exporter import BaseExporter
 from src.models.speed_result import SpeedResult
 
@@ -42,16 +43,41 @@ class PrometheusExporter(BaseExporter):
     A lightweight HTTP server is started on *port* the first time an instance
     is created.  Scrape the ``/metrics`` endpoint (e.g. with Grafana Alloy or
     Prometheus) to collect the data.
+
+    Label cardinality control
+    -------------------------
+    By default each unique (server_name, server_location, isp_name) combination
+    creates a separate Prometheus time series.  In environments with many
+    servers or ISPs this can grow without bound.  Set the environment variable
+    ``PROMETHEUS_DISABLE_LABELS=true`` to collapse all label values to empty
+    strings, keeping cardinality at exactly one time series per metric.
     """
 
     # Guard so the HTTP server is started at most once per process.
     _server_started: bool = False
 
-    def __init__(self, port: int = 8000) -> None:
+    def __init__(self, port: int = 8000, disable_labels: bool | None = None) -> None:
+        """
+        Args:
+            port: TCP port for the Prometheus metrics HTTP server.
+            disable_labels: When True, all label values are set to empty strings
+                to prevent unbounded cardinality.  Defaults to the value of the
+                ``PROMETHEUS_DISABLE_LABELS`` environment variable.
+        """
         if port <= 0 or port > 65535:
             raise ValueError(f"Invalid port number: {port}")
 
         self._port = port
+        # Resolve label behaviour: explicit arg takes precedence over env var.
+        self._disable_labels: bool = (
+            disable_labels if disable_labels is not None else app_config.PROMETHEUS_DISABLE_LABELS
+        )
+        if self._disable_labels:
+            logger.info(
+                "Prometheus label cardinality management enabled — "
+                "all label values collapsed to empty strings."
+            )
+
         if not PrometheusExporter._server_started:
             try:
                 start_http_server(port)
@@ -77,12 +103,20 @@ class PrometheusExporter(BaseExporter):
     # ------------------------------------------------------------------
 
     def export(self, result: SpeedResult) -> None:
-        """Update all Gauges with values from *result*."""
-        labels = {
-            "server_name": result.server_name or "",
-            "server_location": result.server_location or "",
-            "isp_name": result.isp_name or "",
-        }
+        """Update all Gauges with values from *result*.
+
+        When label cardinality management is active (``disable_labels=True``),
+        all label values are replaced with empty strings so that only a single
+        time series exists per metric.
+        """
+        if self._disable_labels:
+            labels = {"server_name": "", "server_location": "", "isp_name": ""}
+        else:
+            labels = {
+                "server_name": result.server_name or "",
+                "server_location": result.server_location or "",
+                "isp_name": result.isp_name or "",
+            }
         try:
             _DOWNLOAD.labels(**labels).set(result.download_mbps)
             _UPLOAD.labels(**labels).set(result.upload_mbps)
@@ -99,3 +133,4 @@ class PrometheusExporter(BaseExporter):
         except Exception as exc:  # pragma: no cover
             logger.error("Failed to update Prometheus gauges: %s", exc)
             raise
+

@@ -123,6 +123,10 @@ CSV_RETENTION_DAYS: int = _get_int("CSV_RETENTION_DAYS", 0)
 
 # --- Prometheus Exporter ---
 PROMETHEUS_PORT: int = _get_int("PROMETHEUS_PORT", 8000)
+# Set to true to collapse all time-series labels (server_name, server_location,
+# isp_name) to empty strings. Prevents unbounded cardinality when many servers
+# or ISPs are observed.
+PROMETHEUS_DISABLE_LABELS: bool = _get_bool("PROMETHEUS_DISABLE_LABELS", False)
 
 # --- Health Endpoint ---
 HEALTH_PORT: int = _get_int("HEALTH_PORT", 8080)

@@ -10,12 +10,10 @@ from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
-from src import config, runtime_config
+from src import runtime_config
 from src.api.auth import require_api_key
-from src.exporters.csv_exporter import CSVExporter
-from src.exporters.loki_exporter import LokiExporter
-from src.exporters.prometheus_exporter import PrometheusExporter
-from src.exporters.sqlite_exporter import SQLiteExporter
+from src import config
+from src.exporter_registry import EXPORTER_REGISTRY
 from src.result_dispatcher import ResultDispatcher
 from src.services.speedtest_runner import SpeedtestRunner
 
@@ -35,35 +33,18 @@ class TriggerResponse(BaseModel):
 
 def _run_test() -> None:
     """Execute a speed test in the background and write results via exporters."""
-
-    exporter_registry = {
-        "csv": lambda: CSVExporter(
-            path=config.CSV_LOG_PATH,
-            max_rows=config.CSV_MAX_ROWS,
-            retention_days=config.CSV_RETENTION_DAYS,
-        ),
-        "sqlite": lambda: SQLiteExporter(
-            path=config.SQLITE_DB_PATH,
-            max_rows=config.SQLITE_MAX_ROWS,
-            retention_days=config.SQLITE_RETENTION_DAYS,
-        ),
-        "prometheus": lambda: PrometheusExporter(port=config.PROMETHEUS_PORT),
-        "loki": lambda: (
-            LokiExporter(url=config.LOKI_URL, job_label=config.LOKI_JOB_LABEL)
-            if config.LOKI_URL
-            else None
-        ),
-    }
-
     enabled = runtime_config.get_enabled_exporters(config.ENABLED_EXPORTERS)
     dispatcher = ResultDispatcher()
     for name in enabled:
-        factory = exporter_registry.get(name)
+        factory = EXPORTER_REGISTRY.get(name)
         if factory is None:
             continue
-        exp = factory()
-        if exp is not None:
-            dispatcher.add_exporter(name, exp)
+        try:
+            exporter = factory()
+            if exporter is not None:
+                dispatcher.add_exporter(name, exporter)
+        except Exception as exc:  # pylint: disable=broad-exception-caught  # NOSONAR
+            logger.warning("Exporter '%s' could not be initialized: %s", name, exc)
 
     try:
         result = SpeedtestRunner().run()

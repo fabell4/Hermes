@@ -453,16 +453,18 @@ def test_poll_once_resume_calls_resume_job(monkeypatch):
 
 
 def test_build_loki_exporter_raises_without_url(monkeypatch):
-    monkeypatch.setattr(main_module.config, "LOKI_URL", "")
-    with pytest.raises(ValueError, match="LOKI_URL"):
-        main_module._build_loki_exporter()
+    import src.exporter_registry as reg
+    monkeypatch.setattr(reg.config, "LOKI_URL", "")
+    result = reg._build_loki()
+    assert result is None
 
 
 def test_build_loki_exporter_returns_loki_exporter(monkeypatch):
-    monkeypatch.setattr(main_module.config, "LOKI_URL", "http://localhost:3100")
-    monkeypatch.setattr(main_module.config, "LOKI_JOB_LABEL", "hermes")
+    import src.exporter_registry as reg
+    monkeypatch.setattr(reg.config, "LOKI_URL", "http://localhost:3100")
+    monkeypatch.setattr(reg.config, "LOKI_JOB_LABEL", "hermes")
 
-    exporter = main_module._build_loki_exporter()
+    exporter = reg._build_loki()
 
     assert isinstance(exporter, LokiExporter)
 

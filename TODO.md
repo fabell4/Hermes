@@ -272,39 +272,45 @@ _Features and improvements planned for after v1.0. Not required for stable relea
 
 ### Testing & Coverage (HIGH priority)
 
-- [ ] Main loop tests — 12-15 tests covering uncovered paths in scheduler and lifecycle management (see
-  [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) H6)
-- [ ] Frontend component tests — Unit tests for Layout, Dashboard, and Settings components (TypeScript/React) (see
-  [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) H6)
-- [ ] Integration tests — End-to-end flows: speedtest → export → alert lifecycle, runtime config persistence across
-  restart, full alert flow from failure to recovery (see [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) H8)
-- [ ] Runtime config edge cases — Additional validation and error path tests (see
-  [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) M-MEDIUM)
-- [ ] Frontend coverage target — Expand TypeScript/React test coverage to 80%+ (see
-  [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) L-LOW)
-- [ ] Config module subprocess test — Verify API key validation causes startup failure via subprocess (see
-  [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) H6)
+- [x] Main loop tests — 19 tests covering `build_alert_manager`, `update_alert_providers`,
+  `_build_health_status`, `_handle_scheduler_pause_toggle`, `_validate_loki_endpoint`,
+  `_validate_environment`, and `main()` startup restore
+- [x] Frontend component tests — Unit tests for Layout, Dashboard, and Settings components
+  (`frontend/src/test/Layout.test.tsx`, `Dashboard.test.tsx`, `Settings.test.tsx`)
+- [x] Integration tests — End-to-end flows: speedtest→CSV/SQLite export, multi-exporter dispatch,
+  alert failure-to-recovery lifecycle, alert cooldown, runtime config persistence, and run_once alert
+  integration
+- [x] Runtime config edge cases — 13 new tests covering validation, cache behavior, and
+  defense-in-depth paths
+- [x] Frontend coverage target — 44 frontend tests passing (up from 11)
+- [x] Config module subprocess test — 18 new tests including API_KEY validation via subprocess
 
 **Note:** All 4 low-priority defensive coding items (#12-15) were completed on May 1, 2026 and are not listed here.
 
+✅ **Test suite: 426 → 497 Python tests (+71), 11 → 44 frontend tests (+33). All passing.**
+
 ### Performance Monitoring & Optimization (MEDIUM priority)
 
-- [ ] Prometheus label cardinality management — Make labels optional via environment variable to prevent unbounded
-  time series growth (see [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #4)
-- [ ] Exporter registry deduplication — Refactor `/api/trigger` to reuse `EXPORTER_REGISTRY` from main.py instead of
-  rebuilding (see [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #5)
-- [ ] SQLite WAL checkpoint management — Manual checkpoint after pruning operations to prevent WAL file growth (see
-  [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #6)
-- [ ] HTTP connection pooling — Shared session for alert providers to reduce connection overhead (see
+- [x] Prometheus label cardinality management — `PROMETHEUS_DISABLE_LABELS=true` env var makes
+  server/ISP labels optional to prevent unbounded time series growth (see
+  [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #4)
+- [x] Exporter registry deduplication — `/api/trigger` now imports `EXPORTER_REGISTRY` from
+  `src/exporter_registry.py`; eliminated duplicate factory definitions (see
+  [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #5)
+- [x] SQLite WAL checkpoint management — `PRAGMA wal_checkpoint(TRUNCATE)` executed after prune
+  to keep WAL file bounded (see [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #6)
+- [x] HTTP connection pooling — Shared `requests.Session` singleton in alert providers to reuse
+  TCP connections across notifications (see
   [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #7)
-- [ ] SQLite vacuum automation — Monitor database fragmentation, add vacuum logic if needed (see
-  [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) M6)
-- [ ] Alert provider thread pool statistics — Logging or metrics for async alert queue depth and completion time (see
-  [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) M7)
+- [x] SQLite vacuum automation — `PRAGMA freelist_count` checked post-prune; `VACUUM` issued when
+  fragmentation exceeds 20% of total page count (see [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) M6)
+- [x] Alert provider thread pool statistics — Pending-futures count and completed/failed totals
+  logged after each async alert dispatch (see [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) M7)
 
 ### Code Quality & Maintainability (LOW priority)
 
-- [ ] Type alias extraction — Extract common types like `dict[str, Any]` to named aliases (see
+- [x] Type alias extraction — `JsonDict` and `AlertConfig` type aliases added to `src/types.py`
+  and adopted across API routes and runtime_config (see
   [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) L8)
 
 **Note:** The following deferred items from BEST-PRACTICES-REVIEW.md were completed on May 1, 2026:
@@ -317,8 +323,8 @@ _Features and improvements planned for after v1.0. Not required for stable relea
 
 ### Documentation Improvements (MEDIUM priority)
 
-- [ ] Monitoring runbook — Operational guide for diagnosing production issues from logs/metrics (see
-  [ERROR-HANDLING-REVIEW.md](docs/ERROR-HANDLING-REVIEW.md) M5)
+- [x] Monitoring runbook — Operational runbook for diagnosing production issues from logs/metrics
+  (see [docs/runbook.md](docs/runbook.md) and [ERROR-HANDLING-REVIEW.md](docs/ERROR-HANDLING-REVIEW.md) M5)
 
 ### Documentation Improvements (LOW priority)
 

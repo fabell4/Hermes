@@ -11,6 +11,8 @@ from urllib.parse import urlparse
 
 # Third-party
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 # Local
 from src.constants import DEFAULT_ALERT_TIMEOUT_SECONDS
@@ -19,6 +21,34 @@ logger = logging.getLogger(__name__)
 
 # Error messages
 _ERR_TIMEOUT_POSITIVE = "Timeout must be positive"
+
+# ---------------------------------------------------------------------------
+# Connection pool helpers
+# ---------------------------------------------------------------------------
+
+# Retry strategy for transient network hiccups (applied to pooled sessions).
+# Only retries on connection errors and 5xx responses — not on 4xx (auth failures
+# etc.) which are non-retriable.
+_RETRY_STRATEGY = Retry(
+    total=2,
+    backoff_factor=0.5,
+    status_forcelist=[500, 502, 503, 504],
+    allowed_methods=["POST"],
+    raise_on_status=False,
+)
+
+
+def _build_session() -> requests.Session:
+    """Return a ``requests.Session`` with connection pooling and retry."""
+    session = requests.Session()
+    adapter = HTTPAdapter(
+        max_retries=_RETRY_STRATEGY,
+        pool_connections=2,
+        pool_maxsize=4,
+    )
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+    return session
 
 
 def _validate_http_url(url: str, provider_name: str) -> None:
@@ -85,6 +115,7 @@ class WebhookProvider(AlertProvider):
             raise ValueError(_ERR_TIMEOUT_POSITIVE)
         self.url = url.rstrip("/")
         self.timeout = timeout
+        self._session = _build_session()
 
     def send_alert(
         self,
@@ -101,7 +132,7 @@ class WebhookProvider(AlertProvider):
         }
 
         try:
-            response = requests.post(
+            response = self._session.post(
                 self.url,
                 json=payload,
                 timeout=self.timeout,
@@ -114,7 +145,6 @@ class WebhookProvider(AlertProvider):
         except requests.exceptions.RequestException as e:
             logger.error("Failed to send webhook alert to %s: %s", self.url, e)
             raise
-
 
 class GotifyProvider(AlertProvider):
     """Sends alerts via Gotify push notification service."""
@@ -145,6 +175,7 @@ class GotifyProvider(AlertProvider):
         self.token = token
         self.priority = max(0, min(10, priority))  # Clamp to 0-10
         self.timeout = timeout
+        self._session = _build_session()
 
     def send_alert(
         self,
@@ -168,7 +199,7 @@ class GotifyProvider(AlertProvider):
         }
 
         try:
-            response = requests.post(
+            response = self._session.post(
                 endpoint,
                 json=payload,
                 params={"token": self.token},
@@ -218,6 +249,7 @@ class NtfyProvider(AlertProvider):
         self.priority = max(1, min(5, priority))  # Clamp to 1-5
         self.tags = tags or ["warning", "rotating_light"]
         self.timeout = timeout
+        self._session = _build_session()
 
     def send_alert(
         self,
@@ -240,7 +272,7 @@ class NtfyProvider(AlertProvider):
             headers["Authorization"] = f"Bearer {self.token}"
 
         try:
-            response = requests.post(
+            response = self._session.post(
                 endpoint,
                 data=message.encode("utf-8"),
                 headers=headers,
@@ -288,6 +320,7 @@ class AppriseProvider(AlertProvider):
         self.url = url.rstrip("/")
         self.urls = urls or []
         self.timeout = timeout
+        self._session = _build_session()
 
     def send_alert(
         self,
@@ -323,7 +356,7 @@ class AppriseProvider(AlertProvider):
         logger.debug("Sending Apprise alert to %s with payload: %s", endpoint, payload)
 
         try:
-            response = requests.post(
+            response = self._session.post(
                 endpoint,
                 json=payload,
                 timeout=self.timeout,

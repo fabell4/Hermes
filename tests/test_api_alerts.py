@@ -392,7 +392,7 @@ def test_post_alerts_test_succeeds_with_configured_providers():
     mock_response.raise_for_status = Mock()
 
     with patch("src.runtime_config.get_alert_config", return_value=mock_config):
-        with patch("requests.post", return_value=mock_response) as mock_post:
+        with patch("requests.Session.post", return_value=mock_response) as mock_post:
             response = client.post("/api/alerts/test")
             assert response.status_code == 200
 

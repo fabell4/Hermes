@@ -24,7 +24,7 @@ def test_webhook_provider_raises_on_empty_url():
         WebhookProvider(url="")
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_webhook_provider_sends_json_post(mock_post):
     """Webhook provider POSTs JSON payload."""
     mock_response = Mock()
@@ -48,7 +48,7 @@ def test_webhook_provider_sends_json_post(mock_post):
     assert call_args.kwargs["headers"]["Content-Type"] == "application/json"
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_webhook_provider_raises_on_request_error(mock_post):
     """Webhook provider raises on HTTP error."""
     import requests
@@ -77,7 +77,7 @@ def test_gotify_provider_raises_on_empty_token():
         GotifyProvider(url="https://gotify.example.com", token="")
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_gotify_provider_sends_message(mock_post):
     """Gotify provider sends formatted push notification."""
     mock_response = Mock()
@@ -132,7 +132,7 @@ def test_ntfy_provider_raises_on_empty_topic():
         NtfyProvider(topic="")
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_ntfy_provider_sends_notification(mock_post):
     """ntfy provider sends notification to topic."""
     mock_response = Mock()
@@ -186,7 +186,7 @@ def test_apprise_provider_raises_on_empty_url():
         AppriseProvider(url="")
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_apprise_provider_sends_notification(mock_post):
     """AppriseProvider sends notification via HTTP POST."""
     mock_response = Mock()
@@ -211,7 +211,7 @@ def test_apprise_provider_sends_notification(mock_post):
     assert call_args.kwargs["json"]["type"] == "warning"
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_apprise_provider_raises_on_request_error(mock_post):
     """AppriseProvider raises on HTTP error."""
     import requests
@@ -336,7 +336,7 @@ def test_ntfy_provider_rejects_non_positive_timeout():
 # ---------------------------------------------------------------------------
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_ntfy_provider_sends_with_auth_token(mock_post):
     """NtfyProvider adds Authorization header when token is provided."""
     mock_response = Mock()
@@ -359,7 +359,7 @@ def test_ntfy_provider_sends_with_auth_token(mock_post):
     assert call_args.kwargs["headers"]["Authorization"] == "Bearer mytoken123"
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_ntfy_provider_raises_on_request_error(mock_post):
     """NtfyProvider re-raises RequestException after logging."""
     import requests as req
@@ -380,7 +380,7 @@ def test_ntfy_provider_raises_on_request_error(mock_post):
 # ---------------------------------------------------------------------------
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_apprise_provider_stateless_mode_includes_urls(mock_post):
     """AppriseProvider includes 'urls' key in payload for stateless mode."""
     mock_response = Mock()
@@ -403,7 +403,7 @@ def test_apprise_provider_stateless_mode_includes_urls(mock_post):
     assert "ntfy://topic" in payload["urls"]
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_apprise_provider_url_with_notify_uses_as_is(mock_post):
     """AppriseProvider uses URL as-is when it already contains /notify."""
     mock_response = Mock()
@@ -423,7 +423,7 @@ def test_apprise_provider_url_with_notify_uses_as_is(mock_post):
     assert called_url == "http://apprise:8000/notify/myconfig"  # NOSONAR
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_apprise_provider_reraises_request_exception_with_logging(mock_post):
     """AppriseProvider re-raises RequestException after logging."""
     import requests as req
