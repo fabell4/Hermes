@@ -51,6 +51,9 @@ _EXPECTED_KEYS = frozenset(
         "server_name",
         "server_location",
         "server_id",
+        "packet_loss_pct",
+        "quality_score",
+        "sla_ok",
     }
 )
 

@@ -20,6 +20,9 @@ class SpeedResult:
     server_id: int | None = None
     jitter_ms: float | None = None
     isp_name: str | None = None
+    packet_loss_pct: float | None = None
+    quality_score: float | None = None
+    sla_ok: bool | None = None
 
     def __post_init__(self) -> None:
         """Validate field values after initialization."""
@@ -41,6 +44,14 @@ class SpeedResult:
         if self.server_id is not None and self.server_id < 0:
             raise ValueError(f"server_id cannot be negative: {self.server_id}")
 
+        # Validate packet loss (0–100 %)
+        if self.packet_loss_pct is not None and not (0.0 <= self.packet_loss_pct <= 100.0):
+            raise ValueError(f"packet_loss_pct must be 0–100: {self.packet_loss_pct}")
+
+        # Validate quality score (0–100)
+        if self.quality_score is not None and not (0.0 <= self.quality_score <= 100.0):
+            raise ValueError(f"quality_score must be 0–100: {self.quality_score}")
+
     def to_dict(self) -> dict[str, Any]:
         """Serializable dict — used by exporters and the web layer."""
         return {
@@ -53,4 +64,7 @@ class SpeedResult:
             "server_name": self.server_name,
             "server_location": self.server_location,
             "server_id": self.server_id,
+            "packet_loss_pct": self.packet_loss_pct,
+            "quality_score": self.quality_score,
+            "sla_ok": self.sla_ok,
         }

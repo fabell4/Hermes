@@ -35,6 +35,9 @@ class SpeedResultSchema(BaseModel):
     server_name: str
     server_location: str
     server_id: int | None = None
+    packet_loss_pct: float | None = None
+    quality_score: float | None = None
+    sla_ok: bool | None = None
 
 
 class ResultsPage(BaseModel):

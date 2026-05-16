@@ -23,7 +23,11 @@ class SpeedtestRunner:
     PATH manipulation attacks.
     """
 
-    def __init__(self, speedtest_path: str | None = None) -> None:
+    def __init__(
+        self,
+        speedtest_path: str | None = None,
+        server_id: int | None = None,
+    ) -> None:
         """
         Initialize runner.
 
@@ -31,9 +35,12 @@ class SpeedtestRunner:
             speedtest_path: Optional explicit path to speedtest binary.
                            If None, will be resolved from PATH on first use.
                            Used for testing and explicit binary location specification.
+            server_id: Optional Ookla server ID to pin tests to a specific server.
+                       If None, the CLI selects the nearest server automatically.
         """
         self._speedtest_path: str | None = speedtest_path
         self._path_resolved = speedtest_path is not None
+        self._server_id: int | None = server_id
 
     def _get_speedtest_path(self) -> str:
         """
@@ -82,13 +89,18 @@ class SpeedtestRunner:
             # Security: All arguments are hardcoded strings (no user input)
             # Uses absolute path to prevent PATH injection
             speedtest_path = self._get_speedtest_path()
+            cmd = [
+                speedtest_path,
+                "--accept-license",
+                "--accept-gdpr",
+                "--format=json",
+            ]
+            # Append server pin if configured — validated as positive int by config
+            if self._server_id is not None:
+                cmd.append(f"--server-id={self._server_id}")
+
             result = subprocess.run(  # nosec B603  # NOSONAR - No user input, hardcoded args only
-                [
-                    speedtest_path,
-                    "--accept-license",
-                    "--accept-gdpr",
-                    "--format=json",
-                ],
+                cmd,
                 capture_output=True,
                 text=True,
                 timeout=120,  # 2 minute timeout
@@ -113,6 +125,10 @@ class SpeedtestRunner:
             ping_ms = ping_data.get("latency", 0)
             jitter_ms = ping_data.get("jitter")
 
+            # Packet loss is reported as a top-level float (percentage, 0–100)
+            raw_loss = data.get("packetLoss")
+            packet_loss_pct = round(float(raw_loss), 2) if raw_loss is not None else None
+
             # Parse server_id as int (Ookla returns int, but ensure type safety)
             server_id_raw = server.get("id")
             server_id = int(server_id_raw) if server_id_raw is not None else None
@@ -127,6 +143,7 @@ class SpeedtestRunner:
                 server_id=server_id,
                 jitter_ms=round(jitter_ms, 2) if jitter_ms is not None else None,
                 isp_name=data.get("isp"),
+                packet_loss_pct=packet_loss_pct,
             )
 
         except subprocess.TimeoutExpired as exc:

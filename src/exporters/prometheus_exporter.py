@@ -35,6 +35,21 @@ _JITTER = Gauge(
     "Last measured jitter in milliseconds (None when not reported by server)",
     ["server_name", "server_location", "isp_name"],
 )
+_PACKET_LOSS = Gauge(
+    "hermes_packet_loss_pct",
+    "Last measured packet loss percentage (None when not reported by server)",
+    ["server_name", "server_location", "isp_name"],
+)
+_QUALITY_SCORE = Gauge(
+    "hermes_quality_score",
+    "Composite connection quality score 0–100 (higher is better)",
+    ["server_name", "server_location", "isp_name"],
+)
+_SLA_OK = Gauge(
+    "hermes_sla_ok",
+    "1 if last result met all configured SLA thresholds, 0 if breached, -1 if SLA disabled",
+    ["server_name", "server_location", "isp_name"],
+)
 
 
 class PrometheusExporter(BaseExporter):
@@ -123,12 +138,25 @@ class PrometheusExporter(BaseExporter):
             _PING.labels(**labels).set(result.ping_ms)
             if result.jitter_ms is not None:
                 _JITTER.labels(**labels).set(result.jitter_ms)
+            if result.packet_loss_pct is not None:
+                _PACKET_LOSS.labels(**labels).set(result.packet_loss_pct)
+            if result.quality_score is not None:
+                _QUALITY_SCORE.labels(**labels).set(result.quality_score)
+            # SLA: 1=pass, 0=fail, -1=disabled (not configured)
+            if result.sla_ok is not None:
+                _SLA_OK.labels(**labels).set(1.0 if result.sla_ok else 0.0)
+            else:
+                _SLA_OK.labels(**labels).set(-1.0)
             logger.debug(
-                "Prometheus gauges updated — down=%.2f up=%.2f ping=%.2f jitter=%s",
+                "Prometheus gauges updated — down=%.2f up=%.2f ping=%.2f "
+                "jitter=%s loss=%s quality=%s sla_ok=%s",
                 result.download_mbps,
                 result.upload_mbps,
                 result.ping_ms,
                 result.jitter_ms,
+                result.packet_loss_pct,
+                result.quality_score,
+                result.sla_ok,
             )
         except Exception as exc:  # pragma: no cover
             logger.error("Failed to update Prometheus gauges: %s", exc)

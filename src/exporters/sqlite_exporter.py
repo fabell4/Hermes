@@ -38,7 +38,10 @@ CREATE TABLE IF NOT EXISTS results (
     isp_name        TEXT,
     server_name     TEXT    NOT NULL,
     server_location TEXT    NOT NULL,
-    server_id       INTEGER
+    server_id       INTEGER,
+    packet_loss_pct REAL,
+    quality_score   REAL,
+    sla_ok          INTEGER
 )"""
 
 _CREATE_INDEX = (
@@ -48,10 +51,10 @@ _CREATE_INDEX = (
 _INSERT = """
 INSERT INTO results
     (timestamp, download_mbps, upload_mbps, ping_ms, jitter_ms, isp_name,
-     server_name, server_location, server_id)
+     server_name, server_location, server_id, packet_loss_pct, quality_score, sla_ok)
 VALUES
     (:timestamp, :download_mbps, :upload_mbps, :ping_ms, :jitter_ms, :isp_name,
-     :server_name, :server_location, :server_id)"""
+     :server_name, :server_location, :server_id, :packet_loss_pct, :quality_score, :sla_ok)"""
 
 
 class SQLiteExporter(BaseExporter):
@@ -106,6 +109,9 @@ class SQLiteExporter(BaseExporter):
             "idx_results_timestamp",
             "CREATE INDEX IF NOT EXISTS idx_results_timestamp ON results(timestamp DESC)",
         ),
+        ("packet_loss_pct", "ALTER TABLE results ADD COLUMN packet_loss_pct REAL"),
+        ("quality_score", "ALTER TABLE results ADD COLUMN quality_score REAL"),
+        ("sla_ok", "ALTER TABLE results ADD COLUMN sla_ok INTEGER"),
     ]
 
     def _init_db(self) -> None:
@@ -155,6 +161,14 @@ class SQLiteExporter(BaseExporter):
             "server_name": result.server_name,
             "server_location": result.server_location,
             "server_id": result.server_id,
+            "packet_loss_pct": result.packet_loss_pct,
+            "quality_score": result.quality_score,
+            # SQLite has no bool type; store as 1/0/NULL
+            "sla_ok": (
+                None
+                if result.sla_ok is None
+                else int(result.sla_ok)
+            ),
         }
 
         # Try to acquire lock with timeout to prevent deadlock

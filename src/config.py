@@ -115,6 +115,11 @@ SPEEDTEST_INTERVAL_MINUTES: int = get_interval_minutes(default=_env_interval)
 RUN_ON_STARTUP: bool = _get_bool("RUN_ON_STARTUP", True)
 ENABLED_EXPORTERS: list[str] = _get_csv_list("ENABLED_EXPORTERS", ["csv"])
 
+# Pin tests to a specific Ookla server ID for consistent baseline measurements.
+# Set to 0 (default) to let the CLI choose the closest server automatically.
+_raw_server_id: int = _get_int("SPEEDTEST_SERVER_ID", 0)
+SPEEDTEST_SERVER_ID: int | None = _raw_server_id if _raw_server_id > 0 else None
+
 # --- CSV Exporter ---
 # CSV_MAX_ROWS and CSV_RETENTION_DAYS default to 0, which means unlimited.
 CSV_LOG_PATH: Path = Path(os.getenv("CSV_LOG_PATH", "logs/results.csv"))
@@ -164,3 +169,17 @@ ALERT_NTFY_TAGS: list[str] = _get_csv_list(
 
 # Apprise alerting (API service endpoint)
 ALERT_APPRISE_URL: str | None = os.getenv("ALERT_APPRISE_URL") or None
+# --- SLA Monitoring ---
+# Thresholds for SLA checks. Set to 0 (default) to disable each check individually.
+# A result fails SLA if any configured threshold is breached.
+_raw_sla_dl: float = float(os.getenv("SLA_DOWNLOAD_MBPS", "0"))
+SLA_DOWNLOAD_MBPS: float | None = _raw_sla_dl if _raw_sla_dl > 0 else None
+
+_raw_sla_ul: float = float(os.getenv("SLA_UPLOAD_MBPS", "0"))
+SLA_UPLOAD_MBPS: float | None = _raw_sla_ul if _raw_sla_ul > 0 else None
+
+_raw_sla_ping: float = float(os.getenv("SLA_PING_MS_MAX", "0"))
+SLA_PING_MS_MAX: float | None = _raw_sla_ping if _raw_sla_ping > 0 else None
+
+_raw_sla_loss: float = float(os.getenv("SLA_PACKET_LOSS_MAX_PCT", "0"))
+SLA_PACKET_LOSS_MAX_PCT: float | None = _raw_sla_loss if _raw_sla_loss > 0 else None

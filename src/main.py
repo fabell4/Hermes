@@ -26,6 +26,8 @@ from .runtime_config import set_enabled_exporters, set_interval_minutes
 from .services.alert_manager import AlertManager
 from .services.alert_provider_factory import register_all_providers
 from .services.health_server import HealthServer
+from .services.quality_scorer import compute as compute_quality_score
+from .services.sla_monitor import SLAMonitor
 from .services.speedtest_runner import SpeedtestRunner
 from .types import AlertConfig
 
@@ -151,6 +153,7 @@ def run_once(
     service: SpeedtestRunner,
     dispatcher: ResultDispatcher,
     alert_manager: AlertManager | None = None,
+    sla_monitor: SLAMonitor | None = None,
 ) -> None:
     """
     Runs a single speedtest and dispatches the result to all exporters.
@@ -168,6 +171,29 @@ def run_once(
                 result.ping_ms,
                 result.server_name,
             )
+            # Compute quality score
+            result.quality_score = compute_quality_score(result)
+            logger.info("Quality score: %.1f / 100", result.quality_score)
+
+            # Evaluate SLA
+            _sla_monitor = sla_monitor or SLAMonitor()
+            sla_result = _sla_monitor.check(result)
+            result.sla_ok = sla_result.overall_ok
+
+            # Persist diagnostics in shared state for API
+            shared_state.set_last_diagnostics({
+                "quality_score": result.quality_score,
+                "sla_ok": result.sla_ok,
+                "packet_loss_pct": result.packet_loss_pct,
+                "sla_detail": {
+                    "download_ok": sla_result.download_ok,
+                    "upload_ok": sla_result.upload_ok,
+                    "ping_ok": sla_result.ping_ok,
+                    "packet_loss_ok": sla_result.packet_loss_ok,
+                    "overall_ok": sla_result.overall_ok,
+                },
+            })
+
             # Record success with alert manager
             if alert_manager:
                 alert_manager.record_success()
@@ -197,6 +223,7 @@ def build_scheduler(
     service: SpeedtestRunner,
     dispatcher: ResultDispatcher,
     alert_manager: AlertManager | None = None,
+    sla_monitor: SLAMonitor | None = None,
 ) -> BackgroundScheduler:
     """
     Configures and returns the background scheduler.
@@ -204,7 +231,7 @@ def build_scheduler(
     """
     scheduler = BackgroundScheduler()
     scheduler.add_job(
-        func=lambda: run_once(service, dispatcher, alert_manager),
+        func=lambda: run_once(service, dispatcher, alert_manager, sla_monitor),
         trigger=IntervalTrigger(minutes=config.SPEEDTEST_INTERVAL_MINUTES),
         id="speedtest_run",
         name="Scheduled speedtest run",
@@ -237,6 +264,7 @@ def _poll_once(
     last_paused: bool = False,
     last_alert_config: AlertConfig | None = None,
     last_next_run_time: str | None = None,
+    sla_monitor: SLAMonitor | None = None,
 ) -> tuple[int, list[str], bool, AlertConfig, str | None]:
     """
     Execute one poll cycle — checks runtime_config.json for UI-driven changes
@@ -272,7 +300,7 @@ def _poll_once(
     # --- React to "Run Now" trigger written by the UI ---
     if runtime_config.consume_run_trigger():
         logger.info("Run trigger detected — starting immediate test.")
-        run_once(service, dispatcher, alert_manager)
+        run_once(service, dispatcher, alert_manager, sla_monitor)
 
     # --- React to pause/resume toggle written by the UI ---
     current_paused = runtime_config.get_scheduler_paused()
@@ -394,9 +422,15 @@ def main():
 
     _validate_environment()
 
-    service = SpeedtestRunner()
+    service = SpeedtestRunner(server_id=config.SPEEDTEST_SERVER_ID)
     dispatcher = build_dispatcher()
     alert_manager = build_alert_manager()
+    sla_monitor = SLAMonitor(
+        min_download_mbps=config.SLA_DOWNLOAD_MBPS,
+        min_upload_mbps=config.SLA_UPLOAD_MBPS,
+        max_ping_ms=config.SLA_PING_MS_MAX,
+        max_packet_loss_pct=config.SLA_PACKET_LOSS_MAX_PCT,
+    )
 
     # Make alert_manager accessible to API routes
     shared_state.set_alert_manager(alert_manager)
@@ -404,10 +438,10 @@ def main():
     # Run immediately on startup if configured
     if config.RUN_ON_STARTUP:
         logger.info("RUN_ON_STARTUP is set — running initial test...")
-        run_once(service, dispatcher, alert_manager)
+        run_once(service, dispatcher, alert_manager, sla_monitor)
 
     # Start the background scheduler
-    scheduler = build_scheduler(service, dispatcher, alert_manager)
+    scheduler = build_scheduler(service, dispatcher, alert_manager, sla_monitor)
     scheduler.start()
 
     # Start the health endpoint
@@ -463,6 +497,7 @@ def main():
                 last_paused,
                 last_alert_config,
                 last_next_run_time,
+                sla_monitor,
             )
     except (KeyboardInterrupt, SystemExit):
         logger.info("Shutdown signal received — stopping scheduler...")

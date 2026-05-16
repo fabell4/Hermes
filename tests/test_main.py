@@ -380,6 +380,12 @@ def test_poll_once_trigger_fires_calls_run_once(monkeypatch):
     )
     monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
     monkeypatch.setattr(main_module.runtime_config, "set_last_run_at", lambda t: None)
+    monkeypatch.setattr(main_module, "compute_quality_score", lambda r: 85.0)
+    monkeypatch.setattr(
+        main_module,
+        "SLAMonitor",
+        lambda **kw: MagicMock(check=lambda r: MagicMock(overall_ok=True, download_ok=None, upload_ok=None, ping_ok=None, packet_loss_ok=None)),
+    )
 
     result = MagicMock()
     service.run.return_value = result
@@ -539,7 +545,7 @@ def test_main_shuts_down_cleanly_on_keyboard_interrupt(monkeypatch):
     monkeypatch.setattr(main_module, "SpeedtestRunner", MagicMock)
     monkeypatch.setattr(main_module, "build_dispatcher", MagicMock)
     monkeypatch.setattr(main_module, "build_alert_manager", MagicMock)
-    monkeypatch.setattr(main_module, "build_scheduler", lambda s, d, a: mock_scheduler)
+    monkeypatch.setattr(main_module, "build_scheduler", lambda s, d, a, m=None: mock_scheduler)
     monkeypatch.setattr(main_module, "HealthServer", MagicMock)
     monkeypatch.setattr(
         main_module.time, "sleep", MagicMock(side_effect=KeyboardInterrupt)
@@ -578,7 +584,7 @@ def test_main_run_on_startup_and_poll_loop(monkeypatch):
     monkeypatch.setattr(main_module, "SpeedtestRunner", MagicMock)
     monkeypatch.setattr(main_module, "build_dispatcher", MagicMock)
     monkeypatch.setattr(main_module, "build_alert_manager", MagicMock)
-    monkeypatch.setattr(main_module, "build_scheduler", lambda s, d, a: mock_scheduler)
+    monkeypatch.setattr(main_module, "build_scheduler", lambda s, d, a, m=None: mock_scheduler)
     monkeypatch.setattr(main_module, "HealthServer", MagicMock)
     # sleep succeeds once; _poll_once raises KeyboardInterrupt to exit the loop
     monkeypatch.setattr(main_module.time, "sleep", lambda _: None)
@@ -588,7 +594,7 @@ def test_main_run_on_startup_and_poll_loop(monkeypatch):
     # run_once needs mark_running/mark_done; service.run raises so no dispatch needed
     mock_svc = MagicMock()
     mock_svc.run.side_effect = RuntimeError("skip")
-    monkeypatch.setattr(main_module, "SpeedtestRunner", lambda: mock_svc)
+    monkeypatch.setattr(main_module, "SpeedtestRunner", lambda **kw: mock_svc)
 
     with pytest.raises(KeyboardInterrupt):
         main_module.main()
@@ -938,7 +944,7 @@ def test_main_restores_paused_state_on_startup(monkeypatch):
     monkeypatch.setattr(main_module, "SpeedtestRunner", MagicMock)
     monkeypatch.setattr(main_module, "build_dispatcher", MagicMock)
     monkeypatch.setattr(main_module, "build_alert_manager", MagicMock)
-    monkeypatch.setattr(main_module, "build_scheduler", lambda s, d, a: mock_scheduler)
+    monkeypatch.setattr(main_module, "build_scheduler", lambda s, d, a, m=None: mock_scheduler)
     monkeypatch.setattr(main_module, "HealthServer", MagicMock)
     monkeypatch.setattr(
         main_module.time, "sleep", MagicMock(side_effect=KeyboardInterrupt)
