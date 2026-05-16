@@ -821,7 +821,7 @@ def test_validate_loki_endpoint_timeout(mock_head, caplog):
     mock_head.side_effect = requests.exceptions.Timeout()
 
     with caplog.at_level(logging.WARNING):
-        _validate_loki_endpoint("http://loki:3100")
+        _validate_loki_endpoint("https://loki.example.com")
 
     assert "timed out" in caplog.text
 
@@ -832,7 +832,7 @@ def test_validate_loki_endpoint_connection_error(mock_head, caplog):
     mock_head.side_effect = requests.exceptions.ConnectionError("refused")
 
     with caplog.at_level(logging.WARNING):
-        _validate_loki_endpoint("http://loki:3100")
+        _validate_loki_endpoint("https://loki.example.com")
 
     assert "unreachable" in caplog.text
 
@@ -847,7 +847,7 @@ def test_validate_loki_endpoint_http_error(mock_head, caplog):
     mock_head.return_value = mock_response
 
     with caplog.at_level(logging.WARNING):
-        _validate_loki_endpoint("http://loki:3100")
+        _validate_loki_endpoint("https://loki.example.com")
 
     assert "HTTP error" in caplog.text
 
@@ -858,7 +858,7 @@ def test_validate_loki_endpoint_generic_request_error(mock_head, caplog):
     mock_head.side_effect = requests.exceptions.RequestException("ssl error")
 
     with caplog.at_level(logging.WARNING):
-        _validate_loki_endpoint("http://loki:3100")
+        _validate_loki_endpoint("https://loki.example.com")
 
     assert "validation failed" in caplog.text
 
@@ -871,7 +871,7 @@ def test_validate_loki_endpoint_success(mock_head):
     mock_head.return_value = mock_response
 
     # Should not raise
-    _validate_loki_endpoint("http://loki:3100")
+    _validate_loki_endpoint("https://loki.example.com")
     mock_head.assert_called_once()
 
 

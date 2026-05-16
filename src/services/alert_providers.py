@@ -47,7 +47,6 @@ def _build_session() -> requests.Session:
         pool_maxsize=4,
     )
     session.mount("https://", adapter)
-    session.mount("http://", adapter)
     return session
 
 
@@ -60,16 +59,16 @@ def _validate_http_url(url: str, provider_name: str) -> None:
         provider_name: Provider name for error messages
 
     Raises:
-        ValueError: If URL is invalid or not HTTP(S)
+        ValueError: If URL is invalid or not HTTPS
     """
     if not url or not url.strip():
         raise ValueError(f"{provider_name} URL cannot be empty")
 
     try:
         parsed = urlparse(url)
-        if parsed.scheme not in ("http", "https"):
+        if parsed.scheme != "https":
             raise ValueError(
-                f"{provider_name} URL must use http or https (got {parsed.scheme})"
+                f"{provider_name} URL must use https (got '{parsed.scheme}')"
             )
         if not parsed.hostname:
             raise ValueError(f"{provider_name} URL must include a hostname")
@@ -160,8 +159,7 @@ class GotifyProvider(AlertProvider):
         Initialize Gotify provider.
 
         Args:
-            url: Gotify server URL (e.g., https://gotify.example.com)
-            token: Application token for authentication
+            url: Gotify server URL (e.g., https://gotify.example.com)            token: Application token for authentication
             priority: Message priority (0-10, default 5)
             timeout: Request timeout in seconds
         """
@@ -312,11 +310,9 @@ class AppriseProvider(AlertProvider):
             timeout: Request timeout in seconds
 
         Raises:
-            ValueError: If URL is empty
+            ValueError: If URL is empty or not HTTPS
         """
-        if not url:
-            raise ValueError("Apprise API URL cannot be empty")
-
+        _validate_http_url(url, "Apprise")
         self.url = url.rstrip("/")
         self.urls = urls or []
         self.timeout = timeout

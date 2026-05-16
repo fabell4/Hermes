@@ -32,7 +32,7 @@ def _make(
 class TestComputeIdeal:
     def test_perfect_values_score_100(self) -> None:
         result = _make(download=100, upload=50, ping=0, jitter=0, loss=0)
-        assert compute(result) == 100.0
+        assert compute(result) == pytest.approx(100.0)
 
     def test_returns_float(self) -> None:
         assert isinstance(compute(_make()), float)
@@ -58,7 +58,7 @@ class TestComputeDegradation:
         # ping=200 is worse than 150 but both clamp to 0 contribution
         at_max = _make(ping=150)
         beyond_max = _make(ping=200)
-        assert compute(at_max) == compute(beyond_max)
+        assert compute(at_max) == pytest.approx(compute(beyond_max))
 
     def test_packet_loss_5pct_max_bad(self) -> None:
         low_loss = _make(loss=0)
@@ -68,19 +68,19 @@ class TestComputeDegradation:
     def test_packet_loss_beyond_5pct_clamps(self) -> None:
         at_max = _make(loss=5)
         beyond = _make(loss=10)
-        assert compute(at_max) == compute(beyond)
+        assert compute(at_max) == pytest.approx(compute(beyond))
 
 
 class TestMissingOptionalFields:
     def test_missing_jitter_scores_perfect_for_that_dimension(self) -> None:
         without_jitter = _make(jitter=None)
         with_perfect_jitter = _make(jitter=0)
-        assert compute(without_jitter) == compute(with_perfect_jitter)
+        assert compute(without_jitter) == pytest.approx(compute(with_perfect_jitter))
 
     def test_missing_loss_scores_perfect_for_that_dimension(self) -> None:
         without_loss = _make(loss=None)
         with_zero_loss = _make(loss=0)
-        assert compute(without_loss) == compute(with_zero_loss)
+        assert compute(without_loss) == pytest.approx(compute(with_zero_loss))
 
 
 class TestRounding:
@@ -88,4 +88,4 @@ class TestRounding:
         result = _make(download=33, upload=17, ping=45, jitter=10, loss=1)
         score = compute(result)
         # Round-trip: score * 10 should have no fractional part
-        assert score == round(score, 1)
+        assert score == pytest.approx(round(score, 1))

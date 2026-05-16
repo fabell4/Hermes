@@ -337,14 +337,36 @@ _Features and improvements planned for after v1.0. Not required for stable relea
 
 ---
 
-## v1.2+ — Feature Enhancements
+## v1.2 — Enhanced Diagnostics ✅
 
 ### Enhanced Diagnostics
 
-- [ ] Packet loss tracking — capture and log packet loss percentage from speedtest results
-- [ ] Server selection — allow pinning to specific server ID for consistent baseline testing
-- [ ] SLA monitoring — define speed thresholds (e.g., "download ≥100 Mbps") and track compliance percentage
-- [ ] Connection quality score — aggregate metric combining speed, latency, jitter, and packet loss
+- [x] Packet loss tracking — `packetLoss` extracted from Ookla JSON output; stored in
+  `SpeedResult.packet_loss_pct`; exported via CSV, SQLite, and new Prometheus gauge
+  `hermes_packet_loss_pct`
+- [x] Server selection — `SPEEDTEST_SERVER_ID` env var (default: auto); passes `--server-id=N`
+  to the CLI when set, enabling a consistent baseline server for every run
+- [x] SLA monitoring — `SLAMonitor` + `SLAResult` in `src/services/sla_monitor.py`; four
+  independent thresholds (`SLA_DOWNLOAD_MBPS`, `SLA_UPLOAD_MBPS`, `SLA_PING_MS_MAX`,
+  `SLA_PACKET_LOSS_MAX_PCT`); per-dimension pass/fail flags; `GET /api/diagnostics` endpoint;
+  `hermes_sla_ok` Prometheus gauge (1=pass, 0=fail, -1=disabled)
+- [x] Connection quality score — weighted composite 0–100 score in `src/services/quality_scorer.py`
+  (download 30%, upload 30%, ping 20%, jitter 10%, packet loss 10%); stored in
+  `SpeedResult.quality_score`; exported via all exporters and `hermes_quality_score` Prometheus gauge
+
+### Security Hardening
+
+- [x] HTTPS-only enforcement in alert providers — `_validate_http_url()` now accepts only `https`
+  (was `http` or `https`); `_build_session()` no longer mounts retry adapter on `http://`;
+  `AppriseProvider` now calls `_validate_http_url()` (previously had no scheme check); all test
+  fixtures migrated from `http://apprise:8000` to `https://apprise.example.com`; `# NOSONAR`
+  suppressions removed
+
+✅ **Test suite: 497 → 526 Python tests (+29). All passing. ruff clean. mypy clean.**
+
+---
+
+## v1.3+ — Feature Enhancements
 
 ### Data & Integration
 
