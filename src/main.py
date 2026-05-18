@@ -21,6 +21,7 @@ from . import config
 from . import runtime_config
 from . import shared_state
 from .exporter_registry import EXPORTER_REGISTRY
+from .log_formatter import JsonFormatter
 from .result_dispatcher import DispatchError, ResultDispatcher
 from .runtime_config import set_enabled_exporters, set_interval_minutes
 from .services.alert_manager import AlertManager
@@ -32,15 +33,21 @@ from .services.speedtest_runner import SpeedtestRunner
 from .types import AlertConfig
 
 # --- Logging setup ---
-logging.basicConfig(
-    level=getattr(logging, config.LOG_LEVEL, logging.INFO),
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[
-        logging.StreamHandler(sys.stdout),
-        logging.FileHandler("logs/hermes.log"),
-    ],
-)
+_log_level = getattr(logging, config.LOG_LEVEL, logging.INFO)
+if config.LOG_FORMAT == "json":
+    _log_formatter: logging.Formatter = JsonFormatter()
+else:
+    _log_formatter = logging.Formatter(
+        "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+_log_handlers: list[logging.Handler] = [
+    logging.StreamHandler(sys.stdout),
+    logging.FileHandler("logs/hermes.log"),
+]
+for _h in _log_handlers:
+    _h.setFormatter(_log_formatter)
+logging.basicConfig(level=_log_level, handlers=_log_handlers)
 logger = logging.getLogger(__name__)
 
 

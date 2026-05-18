@@ -70,6 +70,10 @@ def _get_str(key: str, default: str) -> str:
 APP_ENV: str = os.getenv("APP_ENV", "development")
 APP_VERSION: str = os.getenv("APP_VERSION", "dev")
 LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
+# Log output format: "text" (default, human-readable) or "json" (machine-parseable).
+# Set to "json" when using Grafana Alloy so the loki.process pipeline can extract
+# structured fields. All exporters (CSV, SQLite, Prometheus, Loki) are unaffected.
+LOG_FORMAT: str = _get_str("LOG_FORMAT", "text").lower()
 TIMEZONE: str = os.getenv("TZ", "UTC")
 
 # --- Authentication ---
