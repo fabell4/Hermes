@@ -18,6 +18,7 @@ class ExporterType(StrEnum):
     PROMETHEUS = "prometheus"
     LOKI = "loki"
     SQLITE = "sqlite"
+    INFLUXDB = "influxdb"
 
 
 class AlertProviderType(StrEnum):
@@ -38,6 +39,7 @@ EXPORTER_CSV = ExporterType.CSV
 EXPORTER_PROMETHEUS = ExporterType.PROMETHEUS
 EXPORTER_LOKI = ExporterType.LOKI
 EXPORTER_SQLITE = ExporterType.SQLITE
+EXPORTER_INFLUXDB = ExporterType.INFLUXDB
 
 PROVIDER_WEBHOOK = AlertProviderType.WEBHOOK
 PROVIDER_GOTIFY = AlertProviderType.GOTIFY

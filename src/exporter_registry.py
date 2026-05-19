@@ -18,6 +18,7 @@ from collections.abc import Callable
 from src import config
 from src.exporters.base_exporter import BaseExporter
 from src.exporters.csv_exporter import CSVExporter
+from src.exporters.influxdb_exporter import InfluxDBExporter
 from src.exporters.loki_exporter import LokiExporter
 from src.exporters.prometheus_exporter import PrometheusExporter
 from src.exporters.sqlite_exporter import SQLiteExporter
@@ -35,6 +36,27 @@ def _build_loki() -> LokiExporter | None:
     return LokiExporter(url=config.LOKI_URL, job_label=config.LOKI_JOB_LABEL)
 
 
+def _build_influxdb() -> InfluxDBExporter | None:
+    """Return an InfluxDBExporter if ``INFLUXDB_URL`` and ``INFLUXDB_TOKEN`` are configured."""
+    if not config.INFLUXDB_URL:
+        logger.warning(
+            "InfluxDB exporter is enabled but INFLUXDB_URL is not set — skipping."
+        )
+        return None
+    if not config.INFLUXDB_TOKEN:
+        logger.warning(
+            "InfluxDB exporter is enabled but INFLUXDB_TOKEN is not set — skipping."
+        )
+        return None
+    return InfluxDBExporter(
+        url=config.INFLUXDB_URL,
+        token=config.INFLUXDB_TOKEN,
+        org=config.INFLUXDB_ORG,
+        bucket=config.INFLUXDB_BUCKET,
+        timeout_ms=config.INFLUXDB_TIMEOUT_MS,
+    )
+
+
 # All known exporters and how to build them.
 # Keys are StrEnum values (strings) for runtime flexibility.
 EXPORTER_REGISTRY: dict[str, Callable[[], BaseExporter | None]] = {
@@ -50,4 +72,5 @@ EXPORTER_REGISTRY: dict[str, Callable[[], BaseExporter | None]] = {
         max_rows=config.SQLITE_MAX_ROWS,
         retention_days=config.SQLITE_RETENTION_DAYS,
     ),
+    "influxdb": _build_influxdb,
 }

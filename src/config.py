@@ -187,3 +187,10 @@ SLA_PING_MS_MAX: float | None = _raw_sla_ping if _raw_sla_ping > 0 else None
 
 _raw_sla_loss: float = float(os.getenv("SLA_PACKET_LOSS_MAX_PCT", "0"))
 SLA_PACKET_LOSS_MAX_PCT: float | None = _raw_sla_loss if _raw_sla_loss > 0 else None
+
+# --- InfluxDB Exporter ---
+INFLUXDB_URL: str | None = os.getenv("INFLUXDB_URL") or None
+INFLUXDB_TOKEN: str | None = os.getenv("INFLUXDB_TOKEN") or None
+INFLUXDB_ORG: str = _get_str("INFLUXDB_ORG", "hermes")
+INFLUXDB_BUCKET: str = _get_str("INFLUXDB_BUCKET", "speedtest")
+INFLUXDB_TIMEOUT_MS: int = _get_int("INFLUXDB_TIMEOUT_MS", 10_000)

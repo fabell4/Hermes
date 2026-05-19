@@ -371,7 +371,7 @@ _Features and improvements planned for after v1.0. Not required for stable relea
 ### Data & Integration
 
 - [x] Grafana Alloy agent integration — starter config and setup flow to scrape Hermes metrics and ship logs to Loki
-- [ ] InfluxDB exporter — optional time-series exporter; pairs with Grafana for long-term trend analysis and retention
+- [x] InfluxDB exporter — optional time-series exporter; pairs with Grafana for long-term trend analysis and retention
   policy management
 - [ ] Data export API — bulk export historical data (CSV dump, JSON export for migration/backup)
 - [ ] Result annotations — add notes to specific test results (e.g., "ISP maintenance", "router reboot", "storm")

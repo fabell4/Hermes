@@ -11,6 +11,7 @@ tzlocal==5.3.1
 prometheus_client==0.24.1
 requests==2.33.0
 types-requests==2.33.0.20260402
+influxdb-client==1.48.0
 
 # --- REST API ---
 fastapi==0.136.1
