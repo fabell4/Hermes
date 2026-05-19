@@ -8,7 +8,6 @@ import {
   Bell,
   Database,
   Clock,
-  Key,
   AlertCircle,
   CheckCircle,
   Save,
@@ -62,7 +61,7 @@ const METRIC_COLORS = [
 
 // ─── Sections ────────────────────────────────────────────────────────────────
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, children }: { readonly title: string; readonly children: React.ReactNode }) {
   return (
     <section className="space-y-4">
       <h2 className="text-lg font-semibold text-slate-200 border-b border-slate-800 pb-2">{title}</h2>
@@ -71,7 +70,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
-function Token({ label, value }: { label: string; value: string }) {
+function Token({ label, value }: { readonly label: string; readonly value: string }) {
   return (
     <div className="flex items-center justify-between py-1 text-sm">
       <span className="text-slate-400">{label}</span>
@@ -211,8 +210,9 @@ function Inputs() {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-900/40 border border-slate-800 rounded-2xl p-6">
       {/* Default input */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-slate-300">Default (cyan focus)</label>
+        <label htmlFor="sg-cyan-input" className="block text-sm font-medium text-slate-300">Default (cyan focus)</label>
         <input
+          id="sg-cyan-input"
           type="number"
           value={val}
           onChange={(e) => setVal(e.target.value)}
@@ -223,8 +223,9 @@ function Inputs() {
 
       {/* Amber focus */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-slate-300">Amber focus (API Key)</label>
+        <label htmlFor="sg-amber-input" className="block text-sm font-medium text-slate-300">Amber focus (API Key)</label>
         <input
+          id="sg-amber-input"
           type="password"
           placeholder="Enter API key…"
           autoComplete="current-password"
@@ -234,8 +235,9 @@ function Inputs() {
 
       {/* Orange focus */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-slate-300">Orange focus (Alerts)</label>
+        <label htmlFor="sg-orange-input" className="block text-sm font-medium text-slate-300">Orange focus (Alerts)</label>
         <input
+          id="sg-orange-input"
           type="number"
           defaultValue="3"
           className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
@@ -244,8 +246,9 @@ function Inputs() {
 
       {/* Textarea */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-slate-300">Textarea (mono)</label>
+        <label htmlFor="sg-mono-textarea" className="block text-sm font-medium text-slate-300">Textarea (mono)</label>
         <textarea
+          id="sg-mono-textarea"
           rows={3}
           placeholder="ntfy://ntfy.example.com/topic"
           className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 font-mono"
@@ -257,10 +260,18 @@ function Inputs() {
 
 // ─── Toggles ─────────────────────────────────────────────────────────────────
 
+function toggleActiveColor(isOn: boolean, index: number): string {
+  if (!isOn) return 'bg-slate-700'
+  return index === 2 ? 'bg-orange-500' : 'bg-cyan-500'
+}
+
 function Toggles() {
   const [states, setStates] = useState([true, false, true, false])
-  const colors = ['bg-cyan-500', 'bg-cyan-500', 'bg-orange-500', 'bg-slate-700']
   const labels = ['CSV Export', 'SQLite', 'Alerts enabled', 'ntfy']
+
+  const toggle = (i: number) => {
+    setStates((s) => s.map((v, j) => (j === i ? !v : v)))
+  }
 
   return (
     <div className="flex flex-wrap gap-6 items-center bg-slate-900/40 border border-slate-800 rounded-2xl p-6">
@@ -269,10 +280,8 @@ function Toggles() {
           <span className="text-sm text-slate-300">{label}</span>
           {/* Large toggle (h-5 w-9) */}
           <button
-            onClick={() => setStates((s) => s.map((v, j) => (j === i ? !v : v)))}
-            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-              states[i] ? (i === 2 ? 'bg-orange-500' : 'bg-cyan-500') : 'bg-slate-700'
-            }`}
+            onClick={() => toggle(i)}
+            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${toggleActiveColor(states[i], i)}`}
             aria-pressed={states[i]}
           >
             <span
