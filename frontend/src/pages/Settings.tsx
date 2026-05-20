@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Clock, Database, Eye, EyeOff, Key, Save, CheckCircle, Bell, Send } from 'lucide-react'
+import { Clock, Database, Download, Eye, EyeOff, Key, Save, CheckCircle, Bell, Send } from 'lucide-react'
 import { useHermes } from '@/hooks/useHermes'
 import type { RuntimeConfig, AlertConfig } from '@/types'
 import { api } from '@/lib/api'
@@ -744,6 +744,36 @@ export function Settings() {
           >
             {showKey ? <EyeOff size={15} /> : <Eye size={15} />}
           </button>
+        </div>
+      </div>
+
+      {/* Data Export */}
+      <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <Download size={18} className="text-teal-400" />
+          <h2 className="text-base font-semibold text-slate-200">Data Export</h2>
+        </div>
+        <p className="text-xs text-slate-500">
+          Download the full results history for backup or migration. Files are generated from the
+          live SQLite database.
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <a
+            href="/api/export/csv"
+            download
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border border-teal-500/30 transition-colors"
+          >
+            <Download size={15} />
+            Export CSV
+          </a>
+          <a
+            href="/api/export/json"
+            download
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border border-teal-500/30 transition-colors"
+          >
+            <Download size={15} />
+            Export JSON
+          </a>
         </div>
       </div>
 

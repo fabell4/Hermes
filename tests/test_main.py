@@ -60,7 +60,7 @@ def _make_mock_speedtest_json() -> str:
     )
 
 
-@patch("src.services.speedtest_runner.subprocess.run")
+@patch("src.providers.ookla.subprocess.run")
 def test_speedtest_runner_run_success(mock_run):
     mock_result = Mock()
     mock_result.stdout = _make_mock_speedtest_json()
@@ -193,14 +193,14 @@ def test_build_dispatcher_skips_loki_on_init_error(monkeypatch, caplog):
 # ---------------------------------------------------------------------------
 
 
-@patch("src.services.speedtest_runner.subprocess.run")
+@patch("src.providers.ookla.subprocess.run")
 def test_speedtest_runner_raises_on_timeout(mock_run):
     mock_run.side_effect = subprocess.TimeoutExpired(cmd=["speedtest"], timeout=120)
     with pytest.raises(RuntimeError, match="timed out"):
         SpeedtestRunner("/usr/bin/speedtest").run()
 
 
-@patch("src.services.speedtest_runner.subprocess.run")
+@patch("src.providers.ookla.subprocess.run")
 def test_speedtest_runner_raises_on_process_error(mock_run):
     mock_run.side_effect = subprocess.CalledProcessError(
         returncode=1, cmd=["speedtest"], stderr="network error"
@@ -209,7 +209,7 @@ def test_speedtest_runner_raises_on_process_error(mock_run):
         SpeedtestRunner("/usr/bin/speedtest").run()
 
 
-@patch("src.services.speedtest_runner.subprocess.run")
+@patch("src.providers.ookla.subprocess.run")
 def test_speedtest_runner_raises_on_json_decode_error(mock_run):
     mock_result = Mock()
     mock_result.stdout = "not valid json"
@@ -219,14 +219,14 @@ def test_speedtest_runner_raises_on_json_decode_error(mock_run):
         SpeedtestRunner("/usr/bin/speedtest").run()
 
 
-@patch("src.services.speedtest_runner.subprocess.run")
+@patch("src.providers.ookla.subprocess.run")
 def test_speedtest_runner_raises_on_file_not_found(mock_run):
     mock_run.side_effect = FileNotFoundError("speedtest not found")
     with pytest.raises(RuntimeError, match="not found"):
         SpeedtestRunner("/usr/bin/speedtest").run()
 
 
-@patch("src.services.speedtest_runner.subprocess.run")
+@patch("src.providers.ookla.subprocess.run")
 def test_speedtest_runner_retries_once_on_transient_failure(mock_run):
     """First attempt raises; second attempt succeeds — run() should return result."""
     # First call fails
@@ -241,7 +241,7 @@ def test_speedtest_runner_retries_once_on_transient_failure(mock_run):
     assert mock_run.call_count == 2
 
 
-@patch("src.services.speedtest_runner.subprocess.run")
+@patch("src.providers.ookla.subprocess.run")
 def test_speedtest_runner_raises_after_two_failures(mock_run):
     """Both attempts fail — run() should raise RuntimeError."""
     mock_run.side_effect = subprocess.TimeoutExpired(cmd=["speedtest"], timeout=120)

@@ -44,6 +44,12 @@ and why it cannot simply be removed.
 | ------------------ | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `except Exception` | `# pylint: disable=broad-exception-caught` | The trigger endpoint runs a speedtest in a background task. Any exception that escapes would be swallowed by the task runner with no visibility. The broad catch ensures the error is logged and a meaningful response is returned to the caller. |
 
+### `src/api/routes/results.py`
+
+| Line | Suppression | Reason |
+| ---- | ----------- | ------ |
+| `raise HTTPException(status_code=503, ...)` in `_connect()` | `# NOSONAR` (S8415) | Sonar S8415 requires every raised `HTTPException` to be documented in a route's `responses` parameter. `_connect()` is a shared helper — the 503 **is** documented via `responses=_503` (or `responses={**_503, ...}`) on every route that calls it (`get_results`, `get_latest_result`, `update_note`). Sonar cannot trace the exception through helper functions, making this a false positive. |
+
 ---
 
 ## TypeScript / Frontend

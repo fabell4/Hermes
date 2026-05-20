@@ -112,6 +112,7 @@ class SQLiteExporter(BaseExporter):
         ("packet_loss_pct", "ALTER TABLE results ADD COLUMN packet_loss_pct REAL"),
         ("quality_score", "ALTER TABLE results ADD COLUMN quality_score REAL"),
         ("sla_ok", "ALTER TABLE results ADD COLUMN sla_ok INTEGER"),
+        ("note", "ALTER TABLE results ADD COLUMN note TEXT"),
     ]
 
     def _init_db(self) -> None:

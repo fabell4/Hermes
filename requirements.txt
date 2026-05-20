@@ -13,6 +13,9 @@ requests==2.33.0
 types-requests==2.33.0.20260402
 influxdb-client==1.48.0
 
+# --- Test Providers ---
+websockets==16.0
+
 # --- REST API ---
 fastapi==0.136.1
 starlette==1.0.0

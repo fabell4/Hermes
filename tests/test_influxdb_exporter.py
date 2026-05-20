@@ -3,12 +3,19 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch, call
+from typing import NamedTuple
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from src.exporters.influxdb_exporter import InfluxDBExporter, _MEASUREMENT
 from src.models.speed_result import SpeedResult
+
+
+class _ExporterFixture(NamedTuple):
+    exporter: InfluxDBExporter
+    mock_client: MagicMock
+    mock_write_api: MagicMock
 
 
 # ---------------------------------------------------------------------------
@@ -34,11 +41,11 @@ def _sample_result(**kwargs) -> SpeedResult:
     return SpeedResult(**defaults)
 
 
-def _make_exporter(url="https://influxdb.example.com:8086", **kwargs):
+def _make_exporter(url: str = "https://influxdb.example.com:8086", **kwargs) -> _ExporterFixture:
     """Return an InfluxDBExporter with the client patched out."""
     with patch("src.exporters.influxdb_exporter.InfluxDBClient") as mock_cls:
-        mock_client = MagicMock()
-        mock_write_api = MagicMock()
+        mock_client: MagicMock = MagicMock()
+        mock_write_api: MagicMock = MagicMock()
         mock_client.write_api.return_value = mock_write_api
         mock_cls.return_value = mock_client
 
@@ -49,10 +56,7 @@ def _make_exporter(url="https://influxdb.example.com:8086", **kwargs):
             bucket="speedtest",
             **kwargs,
         )
-        # Attach mocks so tests can inspect calls
-        exporter._mock_client = mock_client
-        exporter._mock_write_api = mock_write_api
-        return exporter
+        return _ExporterFixture(exporter, mock_client, mock_write_api)
 
 
 # ---------------------------------------------------------------------------
@@ -61,11 +65,11 @@ def _make_exporter(url="https://influxdb.example.com:8086", **kwargs):
 
 class TestInfluxDBExporterInit:
     def test_valid_https_url(self):
-        e = _make_exporter(url="https://influxdb.example.com:8086")
+        e = _make_exporter(url="https://influxdb.example.com:8086").exporter
         assert e._url == "https://influxdb.example.com:8086"
 
     def test_valid_http_url(self):
-        e = _make_exporter(url="http://localhost:8086")
+        e = _make_exporter(url="http://localhost:8086").exporter
         assert e._url == "http://localhost:8086"
 
     def test_empty_url_raises(self):
@@ -78,7 +82,7 @@ class TestInfluxDBExporterInit:
 
     def test_invalid_scheme_raises(self):
         with pytest.raises(ValueError, match="http or https"):
-            InfluxDBExporter(url="ftp://bad", token="t", org="o", bucket="b")
+            InfluxDBExporter(url="ws://bad", token="t", org="o", bucket="b")
 
     def test_url_without_hostname_raises(self):
         with pytest.raises(ValueError, match="hostname"):
@@ -113,7 +117,7 @@ class TestInfluxDBExporterInit:
             )
 
     def test_strips_whitespace_from_org_and_bucket(self):
-        e = _make_exporter()
+        e = _make_exporter().exporter
         assert e._org == "myorg"
         assert e._bucket == "speedtest"
 
@@ -214,36 +218,34 @@ class TestBuildPoint:
 
 class TestExport:
     def test_export_calls_write_api(self):
-        exporter = _make_exporter()
-        result = _sample_result()
-        exporter.export(result)
-        exporter._mock_write_api.write.assert_called_once()
-        call_kwargs = exporter._mock_write_api.write.call_args
-        assert call_kwargs.kwargs["bucket"] == "speedtest"
+        fixture = _make_exporter()
+        fixture.exporter.export(_sample_result())
+        fixture.mock_write_api.write.assert_called_once()
+        assert fixture.mock_write_api.write.call_args.kwargs["bucket"] == "speedtest"
 
     def test_export_wraps_influxdb_error(self):
         from influxdb_client.client.exceptions import InfluxDBError
 
-        exporter = _make_exporter()
+        fixture = _make_exporter()
         mock_response = MagicMock()
         mock_response.status = 401
-        exporter._mock_write_api.write.side_effect = InfluxDBError(
+        fixture.mock_write_api.write.side_effect = InfluxDBError(
             response=mock_response, message="Unauthorized"
         )
 
         with pytest.raises(RuntimeError, match="InfluxDB write failed"):
-            exporter.export(_sample_result())
+            fixture.exporter.export(_sample_result())
 
     def test_export_wraps_generic_exception(self):
-        exporter = _make_exporter()
-        exporter._mock_write_api.write.side_effect = ConnectionRefusedError("refused")
+        fixture = _make_exporter()
+        fixture.mock_write_api.write.side_effect = ConnectionRefusedError("refused")
 
         with pytest.raises(RuntimeError, match="InfluxDB write failed"):
-            exporter.export(_sample_result())
+            fixture.exporter.export(_sample_result())
 
     def test_export_full_result_no_optional_fields(self):
         """Export should not raise when all optional fields are None."""
-        exporter = _make_exporter()
+        fixture = _make_exporter()
         result = _sample_result(
             jitter_ms=None,
             packet_loss_pct=None,
@@ -251,8 +253,8 @@ class TestExport:
             sla_ok=None,
             server_id=None,
         )
-        exporter.export(result)  # should not raise
-        exporter._mock_write_api.write.assert_called_once()
+        fixture.exporter.export(result)  # should not raise
+        fixture.mock_write_api.write.assert_called_once()
 
 
 # ---------------------------------------------------------------------------
@@ -261,7 +263,7 @@ class TestExport:
 
 class TestClose:
     def test_close_calls_write_api_and_client(self):
-        exporter = _make_exporter()
-        exporter.close()
-        exporter._mock_write_api.close.assert_called_once()
-        exporter._mock_client.close.assert_called_once()
+        fixture = _make_exporter()
+        fixture.exporter.close()
+        fixture.mock_write_api.close.assert_called_once()
+        fixture.mock_client.close.assert_called_once()

@@ -96,4 +96,12 @@ export const api = {
   testAlerts(): Promise<TestAlertResponse> {
     return request('/alerts/test', { method: 'POST' })
   },
+
+  /** Set or clear the annotation note on a specific result. */
+  updateNote(id: number, note: string | null): Promise<SpeedResult> {
+    return request(`/results/${id}/note`, {
+      method: 'PUT',
+      body: JSON.stringify({ note }),
+    })
+  },
 }

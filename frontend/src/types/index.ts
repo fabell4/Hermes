@@ -13,6 +13,7 @@ export interface SpeedResult {
   server_name: string
   server_location: string
   server_id: number | null
+  note?: string | null
 }
 
 export interface RuntimeConfig {

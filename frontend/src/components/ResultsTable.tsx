@@ -1,7 +1,109 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown, ChevronUp, Download } from 'lucide-react'
+import { ChevronDown, ChevronUp, Download, Pencil } from 'lucide-react'
 import type { SpeedResult } from '@/types'
+import { api } from '@/lib/api'
+
+// ---------------------------------------------------------------------------
+// NoteCell — inline editable annotation for a single result row
+// ---------------------------------------------------------------------------
+
+interface NoteCellProps {
+  readonly resultId: number
+  readonly initialNote: string | null | undefined
+}
+
+function NoteCell({ resultId, initialNote }: NoteCellProps) {
+  const [note, setNote] = useState(initialNote ?? '')
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [hasError, setHasError] = useState(false)
+  const savedRef = useRef(false)
+
+  // Keep local note in sync when parent data refreshes (not while editing)
+  useEffect(() => {
+    if (!editing) setNote(initialNote ?? '')
+  }, [initialNote, editing])
+
+  const startEdit = () => {
+    setDraft(note)
+    setEditing(true)
+    setHasError(false)
+    savedRef.current = false
+  }
+
+  const save = async () => {
+    if (saving || savedRef.current) return
+    savedRef.current = true
+    setSaving(true)
+    try {
+      const updated = await api.updateNote(resultId, draft.trim() || null)
+      setNote(updated.note ?? '')
+      setEditing(false)
+    } catch {
+      setHasError(true)
+      savedRef.current = false
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const cancel = () => {
+    setEditing(false)
+    setHasError(false)
+    savedRef.current = false
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') { e.preventDefault(); void save() }
+    if (e.key === 'Escape') cancel()
+  }
+
+  if (editing) {
+    return (
+      <input
+        autoFocus
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onKeyDown={handleKeyDown}
+        onBlur={() => void save()}
+        maxLength={500}
+        placeholder="Add a note…"
+        className={`w-full min-w-[120px] bg-slate-950 border rounded px-2 py-0.5 text-xs text-slate-200 focus:outline-none transition-colors ${
+          hasError ? 'border-red-500 focus:border-red-400' : 'border-cyan-500 focus:border-cyan-400'
+        } ${saving ? 'opacity-60' : ''}`}
+      />
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={startEdit}
+      className="group flex items-center gap-1 text-left w-full max-w-[180px]"
+      title={note || 'Click to add a note'}
+    >
+      {note ? (
+        <>
+          <span className="text-amber-400/80 text-xs truncate">{note}</span>
+          <Pencil
+            size={10}
+            className="shrink-0 text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity"
+          />
+        </>
+      ) : (
+        <span className="text-slate-600 text-xs italic opacity-0 group-hover:opacity-100 transition-opacity">
+          + note
+        </span>
+      )}
+    </button>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// ResultsTable
+// ---------------------------------------------------------------------------
 
 interface ResultsTableProps {
   readonly data: SpeedResult[]
@@ -88,6 +190,7 @@ export function ResultsTable({ data }: ResultsTableProps) {
                     <th className="px-4 py-3 font-medium">Jitter</th>
                     <th className="px-4 py-3 font-medium">ISP</th>
                     <th className="px-4 py-3 font-medium">Server</th>
+                    <th className="px-4 py-3 font-medium">Note</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/50">
@@ -116,6 +219,9 @@ export function ResultsTable({ data }: ResultsTableProps) {
                       </td>
                       <td className="px-4 py-3 text-slate-400 truncate max-w-[140px]">
                         {row.server_name}
+                      </td>
+                      <td className="px-4 py-2">
+                        <NoteCell resultId={row.id} initialNote={row.note} />
                       </td>
                     </tr>
                   ))}

@@ -47,7 +47,7 @@ def _run_test() -> None:
             logger.warning("Exporter '%s' could not be initialized: %s", name, exc)
 
     try:
-        result = SpeedtestRunner().run()
+        result = SpeedtestRunner(server_id=config.SPEEDTEST_SERVER_ID).run()
         dispatcher.dispatch(result)
         logger.info(
             "Manual trigger complete: %.1f / %.1f Mbps, %.1f ms",

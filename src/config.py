@@ -124,6 +124,34 @@ ENABLED_EXPORTERS: list[str] = _get_csv_list("ENABLED_EXPORTERS", ["csv"])
 _raw_server_id: int = _get_int("SPEEDTEST_SERVER_ID", 0)
 SPEEDTEST_SERVER_ID: int | None = _raw_server_id if _raw_server_id > 0 else None
 
+# Ordered list of test providers to try. The first provider is primary (retried
+# once on failure); subsequent providers are fallbacks tried once each.
+# Valid values: "ookla", "ndt7", "custom". Default: ookla only.
+_VALID_PROVIDER_TYPES = {"ookla", "ndt7", "custom"}
+_raw_providers = _get_csv_list("SPEEDTEST_PROVIDERS", ["ookla"])
+_invalid_providers = [p for p in _raw_providers if p not in _VALID_PROVIDER_TYPES]
+if _invalid_providers:
+    logging.warning(
+        "SPEEDTEST_PROVIDERS contains unknown values %s; ignoring. Valid: %s",
+        _invalid_providers,
+        sorted(_VALID_PROVIDER_TYPES),
+    )
+SPEEDTEST_PROVIDERS: list[str] = [
+    p for p in _raw_providers if p in _VALID_PROVIDER_TYPES
+] or ["ookla"]
+
+# --- Custom HTTP Provider ---
+# Download URL is required to use the custom provider.
+# Upload URL is optional; upload measurement is skipped if absent.
+SPEEDTEST_CUSTOM_URL_DOWNLOAD: str | None = os.getenv("SPEEDTEST_CUSTOM_URL_DOWNLOAD") or None
+SPEEDTEST_CUSTOM_URL_UPLOAD: str | None = os.getenv("SPEEDTEST_CUSTOM_URL_UPLOAD") or None
+# Max seconds to stream during download test (also used as upload payload duration).
+SPEEDTEST_CUSTOM_DURATION_S: int = max(1, _get_int("SPEEDTEST_CUSTOM_DURATION_S", 10))
+# Parallel download connections. Phase 4 multi-connection support.
+SPEEDTEST_CUSTOM_CONNECTIONS: int = max(1, _get_int("SPEEDTEST_CUSTOM_CONNECTIONS", 1))
+# Upload payload size in MB.
+SPEEDTEST_CUSTOM_CHUNK_SIZE_MB: int = max(1, _get_int("SPEEDTEST_CUSTOM_CHUNK_SIZE_MB", 25))
+
 # --- CSV Exporter ---
 # CSV_MAX_ROWS and CSV_RETENTION_DAYS default to 0, which means unlimited.
 CSV_LOG_PATH: Path = Path(os.getenv("CSV_LOG_PATH", "logs/results.csv"))

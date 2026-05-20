@@ -46,5 +46,17 @@ PROVIDER_GOTIFY = AlertProviderType.GOTIFY
 PROVIDER_NTFY = AlertProviderType.NTFY
 PROVIDER_APPRISE = AlertProviderType.APPRISE
 
+class ProviderType(StrEnum):
+    """Valid test provider type identifiers.
+
+    StrEnum provides type safety while maintaining string compatibility.
+    Values can be compared directly with strings: ProviderType.OOKLA == "ookla" is True.
+    """
+
+    OOKLA = "ookla"
+    NDT7 = "ndt7"
+    CUSTOM = "custom"
+
+
 # Default values
 DEFAULT_ALERT_TIMEOUT_SECONDS = 10

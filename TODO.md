@@ -373,13 +373,15 @@ _Features and improvements planned for after v1.0. Not required for stable relea
 - [x] Grafana Alloy agent integration — starter config and setup flow to scrape Hermes metrics and ship logs to Loki
 - [x] InfluxDB exporter — optional time-series exporter; pairs with Grafana for long-term trend analysis and retention
   policy management
-- [ ] Data export API — bulk export historical data (CSV dump, JSON export for migration/backup)
-- [ ] Result annotations — add notes to specific test results (e.g., "ISP maintenance", "router reboot", "storm")
+- [x] Data export API — bulk export historical data (CSV dump, JSON export for migration/backup)
+- [x] Result annotations — add notes to specific test results (e.g., "ISP maintenance", "router reboot", "storm")
 
 ### Testing Improvements
 
-- [ ] Alternative test providers — support fast.com (Netflix), Google speed test, or custom endpoints as backup when
-  Ookla is down
+- [x] Alternative test providers — NDT7 (M-Lab WebSocket) and Custom HTTP endpoint providers implemented as
+  fallbacks when Ookla is unavailable. Configured via `SPEEDTEST_PROVIDERS` (ordered comma-separated chain, e.g.
+  `ookla,ndt7`). Primary provider retried once before falling back. fast.com (Puppeteer/150 MB overhead) and
+  speedtest-cli (rate-limited) were evaluated and rejected.
 - [ ] IPv4/IPv6 selection — force tests over specific protocol to isolate dual-stack issues
 - [ ] Custom test parameters — configure test duration, number of connections, chunk size
 - [ ] Multi-server testing — run tests against multiple servers and compare/aggregate results
