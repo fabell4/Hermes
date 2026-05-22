@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Generator
 
 from src.exporters.base_exporter import BaseExporter
+from src.models.outage_event import OutageEvent
 from src.models.speed_result import SpeedResult
 
 logger = logging.getLogger(__name__)
@@ -47,6 +48,32 @@ CREATE TABLE IF NOT EXISTS results (
 _CREATE_INDEX = (
     "CREATE INDEX IF NOT EXISTS idx_results_timestamp ON results(timestamp DESC)"
 )
+
+_CREATE_OUTAGE_TABLE = """
+CREATE TABLE IF NOT EXISTS outage_events (
+    id                      INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_type              TEXT    NOT NULL,
+    timestamp               TEXT    NOT NULL,
+    duration_seconds        REAL,
+    isp_name                TEXT,
+    asn                     TEXT,
+    bgp_unstable            INTEGER,
+    cloudflare_outage_desc  TEXT,
+    probe_results           TEXT    NOT NULL
+)"""
+
+_CREATE_OUTAGE_INDEX = (
+    "CREATE INDEX IF NOT EXISTS idx_outage_events_timestamp "
+    "ON outage_events(timestamp DESC)"
+)
+
+_INSERT_OUTAGE = """
+INSERT INTO outage_events
+    (event_type, timestamp, duration_seconds, isp_name, asn,
+     bgp_unstable, cloudflare_outage_desc, probe_results)
+VALUES
+    (:event_type, :timestamp, :duration_seconds, :isp_name, :asn,
+     :bgp_unstable, :cloudflare_outage_desc, :probe_results)"""
 
 _INSERT = """
 INSERT INTO results
@@ -113,6 +140,8 @@ class SQLiteExporter(BaseExporter):
         ("quality_score", "ALTER TABLE results ADD COLUMN quality_score REAL"),
         ("sla_ok", "ALTER TABLE results ADD COLUMN sla_ok INTEGER"),
         ("note", "ALTER TABLE results ADD COLUMN note TEXT"),
+        ("add_outage_events_table", _CREATE_OUTAGE_TABLE),
+        ("idx_outage_events_timestamp", _CREATE_OUTAGE_INDEX),
     ]
 
     def _init_db(self) -> None:
@@ -143,6 +172,10 @@ class SQLiteExporter(BaseExporter):
                     if name not in existing_indexes:
                         conn.execute(ddl)
                         logger.info("Migrated SQLite schema: added index '%s'", name)
+                elif name.startswith("add_") and "table" in name:
+                    # CREATE TABLE migration — safe to run every time (IF NOT EXISTS)
+                    conn.execute(ddl)
+                    logger.debug("Ensured table via migration '%s'", name)
                 else:
                     # Column migration
                     if name not in existing_columns:
@@ -197,6 +230,38 @@ class SQLiteExporter(BaseExporter):
             result.download_mbps,
             result.upload_mbps,
             result.ping_ms,
+        )
+
+    def export_outage_event(self, event: OutageEvent) -> None:
+        """Persist a single OutageEvent row to the outage_events table."""
+        row = {
+            "event_type": str(event.event_type),
+            "timestamp": event.timestamp.isoformat(),
+            "duration_seconds": event.duration_seconds,
+            "isp_name": event.isp_name,
+            "asn": event.asn,
+            "bgp_unstable": (
+                None if event.bgp_unstable is None else int(event.bgp_unstable)
+            ),
+            "cloudflare_outage_desc": event.cloudflare_outage_desc,
+            "probe_results": event.probe_results,
+        }
+        acquired = self._lock.acquire(timeout=30.0)
+        if not acquired:
+            raise SQLiteLockTimeout(timeout=30.0, db_path=self.path)
+        try:
+            try:
+                with self._transaction() as conn:
+                    conn.execute(_INSERT_OUTAGE, row)
+            except sqlite3.Error as e:
+                logger.error("Failed to write outage_event row: %s", e)
+                raise RuntimeError(f"SQLite write failed: {e}") from e
+        finally:
+            self._lock.release()
+        logger.info(
+            "Outage event recorded — type: %s timestamp: %s",
+            event.event_type,
+            event.timestamp.isoformat(),
         )
 
     def _prune(self, conn: sqlite3.Connection) -> bool:

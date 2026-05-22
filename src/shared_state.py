@@ -11,6 +11,7 @@ Thread Safety:
 from __future__ import annotations
 
 import threading
+from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -18,6 +19,8 @@ if TYPE_CHECKING:
 
 _alert_manager: AlertManager | None = None
 _last_diagnostics: dict[str, Any] | None = None
+_outage_in_progress: bool = False
+_outage_start_time: datetime | None = None
 _lock = threading.Lock()
 
 
@@ -68,3 +71,29 @@ def get_last_diagnostics() -> dict[str, Any] | None:
     """Return the latest diagnostics dict, or None if no run has completed yet."""
     with _lock:
         return _last_diagnostics
+
+
+def set_outage_in_progress(value: bool) -> None:
+    """Thread-safe setter for the outage-in-progress flag."""
+    global _outage_in_progress
+    with _lock:
+        _outage_in_progress = value
+
+
+def get_outage_in_progress() -> bool:
+    """Return True when an outage is currently in progress."""
+    with _lock:
+        return _outage_in_progress
+
+
+def set_outage_start_time(value: datetime | None) -> None:
+    """Thread-safe setter for the outage start timestamp."""
+    global _outage_start_time
+    with _lock:
+        _outage_start_time = value
+
+
+def get_outage_start_time() -> datetime | None:
+    """Return the UTC timestamp when the current outage started, or None."""
+    with _lock:
+        return _outage_start_time

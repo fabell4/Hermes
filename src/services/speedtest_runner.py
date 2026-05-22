@@ -8,7 +8,6 @@ from src import config
 from src.constants import ProviderType
 from src.models.speed_result import SpeedResult
 from src.providers.base import BaseTestProvider
-from src.providers.custom_http import CustomHttpProvider
 from src.providers.ndt7 import NDT7Provider
 from src.providers.ookla import OoklaProvider
 
@@ -23,7 +22,7 @@ class SpeedtestRunner:
     providers are tried once each.
 
     When called with no arguments, builds the provider list from
-    SPEEDTEST_PROVIDERS, SPEEDTEST_SERVER_ID, and SPEEDTEST_CUSTOM_URL_* config.
+    SPEEDTEST_PROVIDERS and SPEEDTEST_SERVER_ID config.
     """
 
     def __init__(
@@ -63,16 +62,6 @@ class SpeedtestRunner:
                 )
             elif name == ProviderType.NDT7:
                 providers.append(NDT7Provider())
-            elif name == ProviderType.CUSTOM:
-                providers.append(
-                    CustomHttpProvider(
-                        download_url=config.SPEEDTEST_CUSTOM_URL_DOWNLOAD,
-                        upload_url=config.SPEEDTEST_CUSTOM_URL_UPLOAD,
-                        duration_s=config.SPEEDTEST_CUSTOM_DURATION_S,
-                        connections=config.SPEEDTEST_CUSTOM_CONNECTIONS,
-                        chunk_size_mb=config.SPEEDTEST_CUSTOM_CHUNK_SIZE_MB,
-                    )
-                )
         if not providers:
             # Should not happen due to config validation, but be defensive
             _log.warning("No valid providers found in config; defaulting to Ookla.")

@@ -101,10 +101,22 @@ class AlertManager:
         """
         Record a failed speedtest run and trigger alerts if threshold is reached.
 
+        No-op when an outage is already in progress — the outage alert covers
+        the failure notification.
+
         Args:
             error: Error message from the failed attempt
             timestamp: When the failure occurred (defaults to now)
         """
+        # Import here to avoid circular dependency at module load time.
+        from src import shared_state
+
+        if shared_state.get_outage_in_progress():
+            logger.debug(
+                "record_failure() skipped — outage already in progress. Error: %s", error
+            )
+            return
+
         if timestamp is None:
             timestamp = datetime.now(timezone.utc)
 
@@ -306,3 +318,74 @@ class AlertManager:
         self._last_alert_time = None
         self._pending_futures.clear()
         logger.info("Alert manager state reset.")
+
+    def record_outage_start(
+        self,
+        isp_name: str | None = None,
+        bgp_context: str | None = None,
+        timestamp: datetime | None = None,
+    ) -> None:
+        """Record that an outage has started and send an alert to all providers.
+
+        Sets ``SharedState.outage_in_progress = True`` and resets the
+        consecutive-failure counter so that individual speedtest failures
+        during the outage are not double-reported.
+
+        Args:
+            isp_name:    ISP name for the alert message, if known.
+            bgp_context: Human-readable BGP/Cloudflare enrichment string, or None.
+            timestamp:   When the outage started (defaults to now).
+        """
+        from src import shared_state
+
+        if timestamp is None:
+            timestamp = datetime.now(timezone.utc)
+
+        shared_state.set_outage_in_progress(True)
+        shared_state.set_outage_start_time(timestamp)
+        self._consecutive_failures = 0
+
+        parts: list[str] = ["Connectivity lost — outage detected"]
+        if isp_name:
+            parts.append(f"ISP: {isp_name}")
+        if bgp_context:
+            parts.append(bgp_context)
+        self._last_error = " | ".join(parts)
+        self._last_failure_time = timestamp
+
+        logger.warning("Outage started: %s", self._last_error)
+        self._maybe_send_alert(timestamp)
+
+    def record_outage_recovered(
+        self,
+        duration_s: float,
+        timestamp: datetime | None = None,
+    ) -> None:
+        """Record that connectivity has been restored and send a recovery alert.
+
+        Sets ``SharedState.outage_in_progress = False``.
+
+        Args:
+            duration_s: How long the outage lasted in seconds.
+            timestamp:  When recovery was detected (defaults to now).
+        """
+        from src import shared_state
+
+        if timestamp is None:
+            timestamp = datetime.now(timezone.utc)
+
+        shared_state.set_outage_in_progress(False)
+        shared_state.set_outage_start_time(None)
+
+        minutes, secs = divmod(int(duration_s), 60)
+        duration_str = (
+            f"{minutes}m {secs}s" if minutes else f"{secs}s"
+        )
+        self._last_error = f"Connectivity restored after {duration_str}"
+        self._last_failure_time = timestamp
+
+        logger.info("Outage recovered: %s", self._last_error)
+
+        # Bypass cooldown — recovery notifications are always sent.
+        self._last_alert_time = None
+        self._maybe_send_alert(timestamp)

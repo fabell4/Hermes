@@ -378,21 +378,26 @@ _Features and improvements planned for after v1.0. Not required for stable relea
 
 ### Testing Improvements
 
-- [x] Alternative test providers — NDT7 (M-Lab WebSocket) and Custom HTTP endpoint providers implemented as
-  fallbacks when Ookla is unavailable. Configured via `SPEEDTEST_PROVIDERS` (ordered comma-separated chain, e.g.
-  `ookla,ndt7`). Primary provider retried once before falling back. fast.com (Puppeteer/150 MB overhead) and
-  speedtest-cli (rate-limited) were evaluated and rejected.
-- [ ] IPv4/IPv6 selection — force tests over specific protocol to isolate dual-stack issues
-- [ ] Custom test parameters — configure test duration, number of connections, chunk size
-- [ ] Multi-server testing — run tests against multiple servers and compare/aggregate results
+- [x] Alternative test providers — NDT7 (M-Lab WebSocket) provider implemented as a
+  fallback when Ookla is unavailable. Configured via `SPEEDTEST_PROVIDERS` (ordered comma-separated
+  chain, e.g. `ookla,ndt7`). Primary provider retried once before falling back. Custom HTTP,
+  fast.com (Puppeteer/150 MB overhead), and speedtest-cli (rate-limited) were evaluated and
+  rejected — custom HTTP removed in v1.3 as it produces non-neutral measurements unsuitable
+  for ISP dispute or historical comparison.
+- ~~IPv4/IPv6 selection — force tests over specific protocol to isolate dual-stack issues~~ — removed;
+  Ookla supports `--ip-version` but NDT7 does not; niche use case not worth partial support.
+- ~~Custom test parameters — configure test duration, number of connections, chunk size~~ — removed;
+  custom HTTP provider dropped in v1.3 (non-neutral measurements; Ookla/NDT7 do not expose these params)
+- ~~Multi-server testing — run tests against multiple servers and compare/aggregate results~~ — removed;
+  diagnostic use case, not a monitoring use case; architectural cost not justified for homelab target
 
 ### Analysis & Insights
 
-- [ ] Result validation — flag suspicious results (impossibly high speeds, timeouts, inconsistent values)
-- [ ] Anomaly detection — automatically flag results that deviate significantly from baseline
-- [ ] Time-of-day analysis — show average speeds by hour/day to identify congestion patterns
-- [ ] Trend analysis — month-over-month comparison, degradation detection
-- [ ] Outage detection — detect and log complete connectivity loss (different from slow speeds)
+- [x] Anomaly detection — flag results that deviate significantly from a rolling baseline (replaces standalone result validation;
+statistical outlier detection covers both impossible values and genuine anomalies)
+- [x] Time-of-day analysis — show average speeds by hour/day to identify congestion patterns
+- [x] Trend analysis — month-over-month comparison, degradation detection
+- [x] Outage detection — detect and log complete connectivity loss (different from slow speeds)
 
 ### UI/UX Enhancements
 

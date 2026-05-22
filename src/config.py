@@ -126,8 +126,8 @@ SPEEDTEST_SERVER_ID: int | None = _raw_server_id if _raw_server_id > 0 else None
 
 # Ordered list of test providers to try. The first provider is primary (retried
 # once on failure); subsequent providers are fallbacks tried once each.
-# Valid values: "ookla", "ndt7", "custom". Default: ookla only.
-_VALID_PROVIDER_TYPES = {"ookla", "ndt7", "custom"}
+# Valid values: "ookla", "ndt7". Default: ookla only.
+_VALID_PROVIDER_TYPES = {"ookla", "ndt7"}
 _raw_providers = _get_csv_list("SPEEDTEST_PROVIDERS", ["ookla"])
 _invalid_providers = [p for p in _raw_providers if p not in _VALID_PROVIDER_TYPES]
 if _invalid_providers:
@@ -139,18 +139,6 @@ if _invalid_providers:
 SPEEDTEST_PROVIDERS: list[str] = [
     p for p in _raw_providers if p in _VALID_PROVIDER_TYPES
 ] or ["ookla"]
-
-# --- Custom HTTP Provider ---
-# Download URL is required to use the custom provider.
-# Upload URL is optional; upload measurement is skipped if absent.
-SPEEDTEST_CUSTOM_URL_DOWNLOAD: str | None = os.getenv("SPEEDTEST_CUSTOM_URL_DOWNLOAD") or None
-SPEEDTEST_CUSTOM_URL_UPLOAD: str | None = os.getenv("SPEEDTEST_CUSTOM_URL_UPLOAD") or None
-# Max seconds to stream during download test (also used as upload payload duration).
-SPEEDTEST_CUSTOM_DURATION_S: int = max(1, _get_int("SPEEDTEST_CUSTOM_DURATION_S", 10))
-# Parallel download connections. Phase 4 multi-connection support.
-SPEEDTEST_CUSTOM_CONNECTIONS: int = max(1, _get_int("SPEEDTEST_CUSTOM_CONNECTIONS", 1))
-# Upload payload size in MB.
-SPEEDTEST_CUSTOM_CHUNK_SIZE_MB: int = max(1, _get_int("SPEEDTEST_CUSTOM_CHUNK_SIZE_MB", 25))
 
 # --- CSV Exporter ---
 # CSV_MAX_ROWS and CSV_RETENTION_DAYS default to 0, which means unlimited.
@@ -222,3 +210,20 @@ INFLUXDB_TOKEN: str | None = os.getenv("INFLUXDB_TOKEN") or None
 INFLUXDB_ORG: str = _get_str("INFLUXDB_ORG", "hermes")
 INFLUXDB_BUCKET: str = _get_str("INFLUXDB_BUCKET", "speedtest")
 INFLUXDB_TIMEOUT_MS: int = _get_int("INFLUXDB_TIMEOUT_MS", 10_000)
+
+# --- Outage Detection ---
+# TCP probe endpoints (host:port). A majority-vote quorum of these must fail for
+# a round to count as a failure.
+OUTAGE_PROBE_HOSTS: list[str] = _get_csv_list(
+    "OUTAGE_PROBE_HOSTS", ["1.1.1.1:53", "8.8.8.8:53", "9.9.9.9:53"]
+)
+# Seconds to wait for each TCP probe before counting it as failed.
+OUTAGE_PROBE_TIMEOUT: int = _get_int("OUTAGE_PROBE_TIMEOUT", 3)
+# Number of consecutive failure rounds required before declaring an outage.
+OUTAGE_PROBE_FAILURE_THRESHOLD: int = _get_int("OUTAGE_PROBE_FAILURE_THRESHOLD", 2)
+# Minimum number of probes that must fail per round to count that round as a failure.
+OUTAGE_PROBE_QUORUM: int = _get_int("OUTAGE_PROBE_QUORUM", 2)
+# Enable RIPE Stat BGP enrichment in outage alerts (opt-in, no API key needed).
+OUTAGE_ISP_CHECK_ENABLED: bool = _get_bool("OUTAGE_ISP_CHECK_ENABLED", False)
+# Cloudflare API token for Radar annotation enrichment. Leave unset to disable.
+CLOUDFLARE_API_TOKEN: str | None = os.getenv("CLOUDFLARE_API_TOKEN") or None

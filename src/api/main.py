@@ -27,7 +27,7 @@ from starlette.responses import FileResponse, JSONResponse
 from src import config as app_config
 from src import runtime_config as rc
 from src import shared_state
-from src.api.routes import alerts, config, diagnostics, export, results, trigger
+from src.api.routes import alerts, analysis, config, diagnostics, export, outages, results, trigger
 from src.services.alert_manager import AlertManager
 from src.services.alert_provider_factory import register_all_providers
 
@@ -153,6 +153,8 @@ app.include_router(config.router, prefix="/api")
 app.include_router(alerts.router, prefix="/api")
 app.include_router(diagnostics.router, prefix="/api")
 app.include_router(export.router, prefix="/api")
+app.include_router(analysis.router, prefix="/api")
+app.include_router(outages.router, prefix="/api")
 
 
 class HealthResponse(BaseModel):

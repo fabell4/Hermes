@@ -55,8 +55,26 @@ class ProviderType(StrEnum):
 
     OOKLA = "ookla"
     NDT7 = "ndt7"
-    CUSTOM = "custom"
+
+
+class OutageEventType(StrEnum):
+    """Outage event type identifiers for the outage detection subsystem.
+
+    StrEnum provides type safety while maintaining string compatibility.
+    Values can be compared directly with strings.
+    """
+
+    CONNECTIVITY_LOST = "connectivity_lost"
+    CONNECTIVITY_RESTORED = "connectivity_restored"
+    SPEEDTEST_SERVER_UNREACHABLE = "speedtest_server_unreachable"
+    DNS_FAILURE = "dns_failure"
 
 
 # Default values
 DEFAULT_ALERT_TIMEOUT_SECONDS = 10
+
+# Outage probe defaults
+DEFAULT_PROBE_HOSTS: list[str] = ["1.1.1.1:53", "8.8.8.8:53", "9.9.9.9:53"]
+DEFAULT_PROBE_TIMEOUT: int = 3
+DEFAULT_PROBE_FAILURE_THRESHOLD: int = 2
+DEFAULT_PROBE_QUORUM: int = 2

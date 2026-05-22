@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 import sys
 import time
+from datetime import datetime, timezone
 
 # Third-party
 import requests
@@ -27,6 +28,7 @@ from .runtime_config import set_enabled_exporters, set_interval_minutes
 from .services.alert_manager import AlertManager
 from .services.alert_provider_factory import register_all_providers
 from .services.health_server import HealthServer
+from .services.outage_detector import ConnectivityStatus, OutageDetector
 from .services.quality_scorer import compute as compute_quality_score
 from .services.sla_monitor import SLAMonitor
 from .services.speedtest_runner import SpeedtestRunner
@@ -156,72 +158,210 @@ def update_alert_providers(manager: AlertManager, alert_config: dict) -> None:
     runtime_config.set_alert_config(alert_config)
 
 
+def _dispatch_outage_event(
+    dispatcher: ResultDispatcher,
+    event: "OutageEvent",  # type: ignore[name-defined]
+) -> None:
+    """Dispatch an OutageEvent to all exporters that support it (best-effort)."""
+    for name, exporter in dispatcher._exporters.items():
+        export_fn = getattr(exporter, "export_outage_event", None)
+        if export_fn is not None:
+            try:
+                export_fn(event)
+            except Exception as exc:  # pylint: disable=broad-except  # NOSONAR
+                logger.warning(
+                    "Exporter '%s' failed to record outage event: %s", name, exc
+                )
+
+
+def _handle_connectivity_down(
+    outage_detector: OutageDetector,
+    dispatcher: ResultDispatcher,
+    alert_manager: AlertManager | None,
+    now: datetime,
+) -> None:
+    """Handle a DOWN probe result — persist the outage event and alert."""
+    from .constants import OutageEventType
+    from .models.outage_event import OutageEvent
+
+    probe_summary = outage_detector.get_probe_summary()
+    logger.warning("Outage detected — skipping speedtest. %s", probe_summary)
+
+    isp_name: str | None = None
+    bgp_context: str | None = None
+    asn = outage_detector.get_isp_asn()
+    bgp_unstable: bool | None = None
+    cf_desc: str | None = None
+
+    if asn:
+        bgp_unstable = outage_detector.check_bgp_stability(asn)
+        cf_desc = outage_detector.check_cloudflare_outage(asn)
+        if bgp_unstable:
+            bgp_context = f"BGP instability detected for AS{asn}"
+        if cf_desc:
+            bgp_context = (bgp_context + f" | {cf_desc}") if bgp_context else cf_desc
+
+    _dispatch_outage_event(
+        dispatcher,
+        OutageEvent(
+            event_type=OutageEventType.CONNECTIVITY_LOST,
+            timestamp=now,
+            probe_results=probe_summary,
+            isp_name=isp_name,
+            asn=asn,
+            bgp_unstable=bgp_unstable,
+            cloudflare_outage_desc=cf_desc,
+        ),
+    )
+    if alert_manager and not shared_state.get_outage_in_progress():
+        alert_manager.record_outage_start(
+            isp_name=isp_name,
+            bgp_context=bgp_context,
+            timestamp=now,
+        )
+
+
+def _handle_connectivity_restored(
+    outage_detector: OutageDetector,
+    dispatcher: ResultDispatcher,
+    alert_manager: AlertManager | None,
+    now: datetime,
+) -> None:
+    """Fire CONNECTIVITY_RESTORED event and notify the alert manager."""
+    from .constants import OutageEventType
+    from .models.outage_event import OutageEvent
+
+    start_time = shared_state.get_outage_start_time()
+    duration_s = (now - start_time).total_seconds() if start_time else 0.0
+    probe_summary = outage_detector.get_probe_summary()
+    _dispatch_outage_event(
+        dispatcher,
+        OutageEvent(
+            event_type=OutageEventType.CONNECTIVITY_RESTORED,
+            timestamp=now,
+            probe_results=probe_summary,
+            duration_seconds=duration_s,
+        ),
+    )
+    if alert_manager:
+        alert_manager.record_outage_recovered(duration_s=duration_s, timestamp=now)
+
+
+def _process_speedtest_result(
+    result,
+    dispatcher: ResultDispatcher,
+    alert_manager: AlertManager | None,
+    sla_monitor: SLAMonitor | None,
+) -> None:
+    """Log, score, evaluate SLA, persist diagnostics, and dispatch the result."""
+    logger.info(
+        "Test complete — Down: %sMbps | Up: %sMbps | Ping: %sms | Server: %s",
+        result.download_mbps,
+        result.upload_mbps,
+        result.ping_ms,
+        result.server_name,
+    )
+    result.quality_score = compute_quality_score(result)
+    logger.info("Quality score: %.1f / 100", result.quality_score)
+
+    _sla_monitor = sla_monitor or SLAMonitor()
+    sla_result = _sla_monitor.check(result)
+    result.sla_ok = sla_result.overall_ok
+
+    shared_state.set_last_diagnostics({
+        "quality_score": result.quality_score,
+        "sla_ok": result.sla_ok,
+        "packet_loss_pct": result.packet_loss_pct,
+        "sla_detail": {
+            "download_ok": sla_result.download_ok,
+            "upload_ok": sla_result.upload_ok,
+            "ping_ok": sla_result.ping_ok,
+            "packet_loss_ok": sla_result.packet_loss_ok,
+            "overall_ok": sla_result.overall_ok,
+        },
+    })
+
+    if alert_manager:
+        alert_manager.record_success()
+
+    try:
+        dispatcher.dispatch(result)
+        runtime_config.set_last_run_at(result.timestamp.isoformat())
+    except DispatchError as e:
+        logger.warning("Dispatch completed with failures:")
+        for name, error in e.failures.items():
+            logger.warning("  [%s] %s", name, error)
+        runtime_config.set_last_run_at(result.timestamp.isoformat())
+
+
+def _handle_speedtest_error(
+    exc: RuntimeError,
+    outage_detector: OutageDetector | None,
+    dispatcher: ResultDispatcher,
+    alert_manager: AlertManager | None,
+    now: datetime,
+) -> None:
+    """Log the failure, classify socket errors as outage events, and alert."""
+    import socket
+    from .constants import OutageEventType
+    from .models.outage_event import OutageEvent
+
+    logger.error("Speedtest failed: %s", exc, exc_info=True)
+
+    cause = exc.__cause__
+    if outage_detector is not None:
+        if isinstance(cause, socket.gaierror):
+            event_type: OutageEventType | None = OutageEventType.DNS_FAILURE
+        elif isinstance(cause, (socket.timeout, ConnectionError)):
+            event_type = OutageEventType.SPEEDTEST_SERVER_UNREACHABLE
+        else:
+            event_type = None
+
+        if event_type is not None:
+            _dispatch_outage_event(
+                dispatcher,
+                OutageEvent(
+                    event_type=event_type,
+                    timestamp=now,
+                    probe_results=f"Speedtest exception: {cause}",
+                ),
+            )
+
+    if alert_manager:
+        alert_manager.record_failure(str(exc))
+
+
 def run_once(
     service: SpeedtestRunner,
     dispatcher: ResultDispatcher,
     alert_manager: AlertManager | None = None,
     sla_monitor: SLAMonitor | None = None,
+    outage_detector: OutageDetector | None = None,
 ) -> None:
     """
     Runs a single speedtest and dispatches the result to all exporters.
     Called by the scheduler and importable by the Streamlit/web layer.
     """
     runtime_config.mark_running()
+    now = datetime.now(timezone.utc)
     try:
+        if outage_detector is not None:
+            status = outage_detector.check_connectivity()
+            if status == ConnectivityStatus.DOWN:
+                _handle_connectivity_down(outage_detector, dispatcher, alert_manager, now)
+                return
+            if shared_state.get_outage_in_progress():
+                _handle_connectivity_restored(outage_detector, dispatcher, alert_manager, now)
+
         logger.info("Starting speedtest run...")
         try:
             result = service.run()
-            logger.info(
-                "Test complete — Down: %sMbps | Up: %sMbps | Ping: %sms | Server: %s",
-                result.download_mbps,
-                result.upload_mbps,
-                result.ping_ms,
-                result.server_name,
-            )
-            # Compute quality score
-            result.quality_score = compute_quality_score(result)
-            logger.info("Quality score: %.1f / 100", result.quality_score)
-
-            # Evaluate SLA
-            _sla_monitor = sla_monitor or SLAMonitor()
-            sla_result = _sla_monitor.check(result)
-            result.sla_ok = sla_result.overall_ok
-
-            # Persist diagnostics in shared state for API
-            shared_state.set_last_diagnostics({
-                "quality_score": result.quality_score,
-                "sla_ok": result.sla_ok,
-                "packet_loss_pct": result.packet_loss_pct,
-                "sla_detail": {
-                    "download_ok": sla_result.download_ok,
-                    "upload_ok": sla_result.upload_ok,
-                    "ping_ok": sla_result.ping_ok,
-                    "packet_loss_ok": sla_result.packet_loss_ok,
-                    "overall_ok": sla_result.overall_ok,
-                },
-            })
-
-            # Record success with alert manager
-            if alert_manager:
-                alert_manager.record_success()
+            _process_speedtest_result(result, dispatcher, alert_manager, sla_monitor)
         except RuntimeError as e:
-            logger.error("Speedtest failed: %s", e, exc_info=True)
-            # Record failure with alert manager
-            if alert_manager:
-                alert_manager.record_failure(str(e))
-
-            # In development, make failures more visible
+            _handle_speedtest_error(e, outage_detector, dispatcher, alert_manager, now)
             if config.APP_ENV == "development":
                 logger.critical("Speedtest failure in development mode")
             return
-        try:
-            dispatcher.dispatch(result)
-            runtime_config.set_last_run_at(result.timestamp.isoformat())
-        except DispatchError as e:
-            logger.warning("Dispatch completed with failures:")
-            for name, error in e.failures.items():
-                logger.warning("  [%s] %s", name, error)
-            runtime_config.set_last_run_at(result.timestamp.isoformat())
     finally:
         runtime_config.mark_done()
 
@@ -231,6 +371,7 @@ def build_scheduler(
     dispatcher: ResultDispatcher,
     alert_manager: AlertManager | None = None,
     sla_monitor: SLAMonitor | None = None,
+    outage_detector: OutageDetector | None = None,
 ) -> BackgroundScheduler:
     """
     Configures and returns the background scheduler.
@@ -238,7 +379,7 @@ def build_scheduler(
     """
     scheduler = BackgroundScheduler()
     scheduler.add_job(
-        func=lambda: run_once(service, dispatcher, alert_manager, sla_monitor),
+        func=lambda: run_once(service, dispatcher, alert_manager, sla_monitor, outage_detector),
         trigger=IntervalTrigger(minutes=config.SPEEDTEST_INTERVAL_MINUTES),
         id="speedtest_run",
         name="Scheduled speedtest run",
@@ -438,6 +579,23 @@ def main():
         max_ping_ms=config.SLA_PING_MS_MAX,
         max_packet_loss_pct=config.SLA_PACKET_LOSS_MAX_PCT,
     )
+    outage_detector = OutageDetector(
+        probe_hosts=config.OUTAGE_PROBE_HOSTS,
+        probe_timeout=config.OUTAGE_PROBE_TIMEOUT,
+        failure_threshold=config.OUTAGE_PROBE_FAILURE_THRESHOLD,
+        quorum=config.OUTAGE_PROBE_QUORUM,
+        isp_check_enabled=config.OUTAGE_ISP_CHECK_ENABLED,
+        cloudflare_token=config.CLOUDFLARE_API_TOKEN,
+    )
+    logger.info(
+        "Outage detector configured — probes: %s | timeout: %ss | "
+        "failure_threshold: %d | quorum: %d | isp_check: %s",
+        config.OUTAGE_PROBE_HOSTS,
+        config.OUTAGE_PROBE_TIMEOUT,
+        config.OUTAGE_PROBE_FAILURE_THRESHOLD,
+        config.OUTAGE_PROBE_QUORUM,
+        config.OUTAGE_ISP_CHECK_ENABLED,
+    )
 
     # Make alert_manager accessible to API routes
     shared_state.set_alert_manager(alert_manager)
@@ -445,10 +603,10 @@ def main():
     # Run immediately on startup if configured
     if config.RUN_ON_STARTUP:
         logger.info("RUN_ON_STARTUP is set — running initial test...")
-        run_once(service, dispatcher, alert_manager, sla_monitor)
+        run_once(service, dispatcher, alert_manager, sla_monitor, outage_detector)
 
     # Start the background scheduler
-    scheduler = build_scheduler(service, dispatcher, alert_manager, sla_monitor)
+    scheduler = build_scheduler(service, dispatcher, alert_manager, sla_monitor, outage_detector)
     scheduler.start()
 
     # Start the health endpoint

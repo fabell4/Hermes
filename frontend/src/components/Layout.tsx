@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { LayoutDashboard, Settings, Menu, X, Zap, ArrowUpCircle } from 'lucide-react'
+import { LayoutDashboard, Settings, Menu, X, Zap, ArrowUpCircle, BarChart2 } from 'lucide-react'
 import { useHermes } from '@/hooks/useHermes'
 import hermesLogo from '@/assets/Hermes.png'
 
@@ -33,6 +33,7 @@ function useUpdateCheck(currentVersion: string | undefined) {
 
 const NAV_ITEMS = [
   { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/analysis', label: 'Analysis', icon: BarChart2 },
   { to: '/settings', label: 'Settings', icon: Settings },
 ]
 
