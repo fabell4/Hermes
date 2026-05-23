@@ -14,6 +14,7 @@ _BASE_CONFIG = {
     "interval_minutes": 30,
     "enabled_exporters": ["csv", "sqlite"],
     "scanning_enabled": True,
+    "test_window": {"enabled": False, "start_hour": 8, "end_hour": 22},
 }
 
 _RUNTIME_LOAD = {"scanning_disabled": False}

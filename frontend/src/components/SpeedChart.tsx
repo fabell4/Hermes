@@ -9,6 +9,7 @@ import {
   Legend,
 } from 'recharts'
 import type { SpeedResult } from '@/types'
+import { useTheme } from '@/hooks/useTheme'
 
 interface SpeedChartProps {
   readonly data: SpeedResult[]
@@ -39,10 +40,10 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload?.length) return null
   const serverName = payload[0].payload.serverName
   return (
-    <div className="bg-slate-900 border border-slate-700 p-3 rounded-lg shadow-xl">
-      <p className="text-slate-300 text-sm mb-2">{label}</p>
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3 rounded-lg shadow-xl">
+      <p className="text-slate-700 dark:text-slate-300 text-sm mb-2">{label}</p>
       {serverName && (
-        <p className="text-slate-500 text-xs mb-2">{serverName}</p>
+        <p className="text-slate-400 dark:text-slate-500 text-xs mb-2">{serverName}</p>
       )}
       {payload.map((entry) => (
         <div key={entry.name} className="flex items-center gap-2 text-sm">
@@ -50,8 +51,8 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
             className="w-2 h-2 rounded-full"
             style={{ backgroundColor: entry.color }}
           />
-          <span className="text-slate-400">{entry.name}:</span>
-          <span className="font-medium text-slate-200">
+          <span className="text-slate-500 dark:text-slate-400">{entry.name}:</span>
+          <span className="font-medium text-slate-800 dark:text-slate-200">
             {entry.value} {entry.name === 'Ping' ? 'ms' : 'Mbps'}
           </span>
         </div>
@@ -61,6 +62,11 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 }
 
 export function SpeedChart({ data }: SpeedChartProps) {
+  const { theme } = useTheme()
+  const gridColor = theme === 'dark' ? '#1e293b' : '#e2e8f0'
+  const axisColor = theme === 'dark' ? '#64748b' : '#94a3b8'
+  const dotStroke = theme === 'dark' ? '#0f172a' : '#ffffff'
+
   const chartData = data
     .slice()
     .reverse()
@@ -82,17 +88,17 @@ export function SpeedChart({ data }: SpeedChartProps) {
           data={chartData}
           margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
         >
-          <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
           <XAxis
             dataKey="time"
-            stroke="#64748b"
+            stroke={axisColor}
             fontSize={12}
             tickLine={false}
             axisLine={false}
             dy={10}
           />
           <YAxis
-            stroke="#64748b"
+            stroke={axisColor}
             fontSize={12}
             tickLine={false}
             axisLine={false}
@@ -106,7 +112,7 @@ export function SpeedChart({ data }: SpeedChartProps) {
             stroke="#22d3ee"
             strokeWidth={2}
             dot={false}
-            activeDot={{ r: 5, fill: '#22d3ee', stroke: '#0f172a', strokeWidth: 2 }}
+            activeDot={{ r: 5, fill: '#22d3ee', stroke: dotStroke, strokeWidth: 2 }}
           />
           <Line
             type="monotone"
@@ -114,7 +120,7 @@ export function SpeedChart({ data }: SpeedChartProps) {
             stroke="#a78bfa"
             strokeWidth={2}
             dot={false}
-            activeDot={{ r: 5, fill: '#a78bfa', stroke: '#0f172a', strokeWidth: 2 }}
+            activeDot={{ r: 5, fill: '#a78bfa', stroke: dotStroke, strokeWidth: 2 }}
           />
           <Line
             type="monotone"
@@ -122,7 +128,7 @@ export function SpeedChart({ data }: SpeedChartProps) {
             stroke="#fbbf24"
             strokeWidth={2}
             dot={false}
-            activeDot={{ r: 5, fill: '#fbbf24', stroke: '#0f172a', strokeWidth: 2 }}
+            activeDot={{ r: 5, fill: '#fbbf24', stroke: dotStroke, strokeWidth: 2 }}
           />
         </LineChart>
       </ResponsiveContainer>

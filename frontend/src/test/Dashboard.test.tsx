@@ -15,6 +15,10 @@ vi.mock('framer-motion', () => ({
     div: ({ children, ...props }: React.ComponentPropsWithRef<'div'>) => <div {...props}>{children}</div>,
   },
   AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  Reorder: {
+    Group: ({ children, ...props }: React.ComponentPropsWithRef<'ul'>) => <ul {...props}>{children}</ul>,
+    Item: ({ children, ...props }: React.ComponentPropsWithRef<'li'>) => <li {...props}>{children}</li>,
+  },
 }))
 
 // Mock child components that have complex rendering
@@ -234,5 +238,78 @@ describe('Dashboard', () => {
   it('shows scheduler running status with last run time', () => {
     renderDashboard()
     expect(screen.getByText(/Scheduler running/i)).toBeInTheDocument()
+  })
+
+  it('renders Customize button', () => {
+    renderDashboard()
+    expect(screen.getByRole('button', { name: /customize dashboard/i })).toBeInTheDocument()
+  })
+
+  it('shows customize panel when Customize is clicked', () => {
+    renderDashboard()
+    fireEvent.click(screen.getByRole('button', { name: /customize dashboard/i }))
+    expect(screen.getByText('Metric Cards — drag to reorder')).toBeInTheDocument()
+    expect(screen.getByText('Sections')).toBeInTheDocument()
+  })
+
+  it('can hide and restore chart section via customize panel', () => {
+    vi.mocked(useHermes).mockReturnValue({
+      results: [MOCK_RESULT],
+      latest: MOCK_RESULT,
+      health: MOCK_HEALTH,
+      config: null,
+      alerts: null,
+      loading: false,
+      isTesting: false,
+      error: null,
+      runTest: vi.fn(),
+      updateConfig: vi.fn(),
+      updateAlerts: vi.fn(),
+      refresh: vi.fn(),
+    })
+    renderDashboard()
+    expect(screen.getByTestId('speed-chart')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /customize dashboard/i }))
+    fireEvent.click(screen.getByRole('button', { name: /hide performance history/i }))
+    expect(screen.queryByTestId('speed-chart')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /show performance history/i }))
+    expect(screen.getByTestId('speed-chart')).toBeInTheDocument()
+  })
+
+  it('can hide result log section via customize panel', () => {
+    vi.mocked(useHermes).mockReturnValue({
+      results: [MOCK_RESULT],
+      latest: MOCK_RESULT,
+      health: MOCK_HEALTH,
+      config: null,
+      alerts: null,
+      loading: false,
+      isTesting: false,
+      error: null,
+      runTest: vi.fn(),
+      updateConfig: vi.fn(),
+      updateAlerts: vi.fn(),
+      refresh: vi.fn(),
+    })
+    renderDashboard()
+    expect(screen.getByTestId('results-table')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /customize dashboard/i }))
+    fireEvent.click(screen.getByRole('button', { name: /hide result log/i }))
+    expect(screen.queryByTestId('results-table')).not.toBeInTheDocument()
+  })
+
+  it('shows all four metric card labels in the customize panel', () => {
+    renderDashboard()
+    fireEvent.click(screen.getByRole('button', { name: /customize dashboard/i }))
+    expect(screen.getByRole('button', { name: /hide download/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /hide upload/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /hide ping/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /hide jitter/i })).toBeInTheDocument()
+  })
+
+  it('shows reset to defaults button in customize panel', () => {
+    renderDashboard()
+    fireEvent.click(screen.getByRole('button', { name: /customize dashboard/i }))
+    expect(screen.getByText('Reset to defaults')).toBeInTheDocument()
   })
 })

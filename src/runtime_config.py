@@ -125,6 +125,53 @@ def _validate_alert_config(data: dict, sanitized: dict) -> None:
         )
 
 
+def _validate_test_window(data: dict, sanitized: dict) -> None:
+    """Validate and sanitize test_window field."""
+    if "test_window" not in data:
+        return
+
+    tw = data["test_window"]
+    if not isinstance(tw, dict):
+        logger.warning(
+            "test_window is not a dict — discarding: %s",
+            type(tw).__name__,
+        )
+        return
+
+    result: dict = {}
+
+    if "enabled" in tw and not isinstance(tw["enabled"], bool):
+        logger.warning(
+            "test_window.enabled is not a bool — discarding: %s",
+            type(tw["enabled"]).__name__,
+        )
+    elif "enabled" in tw:
+        result["enabled"] = tw["enabled"]
+
+    for key, lo, hi in (("start_hour", 0, 23), ("end_hour", 1, 24)):
+        if key in tw:
+            try:
+                val = int(tw[key])
+                if lo <= val <= hi:
+                    result[key] = val
+                else:
+                    logger.warning(
+                        "test_window.%s (%d) out of range [%d, %d] — discarding.",
+                        key,
+                        val,
+                        lo,
+                        hi,
+                    )
+            except (ValueError, TypeError):
+                logger.warning(
+                    "test_window.%s is not an integer — discarding: %s",
+                    key,
+                    tw[key],
+                )
+
+    sanitized["test_window"] = result
+
+
 def load() -> JsonDict:
     """
     Loads the runtime config from disk with validation.
@@ -164,6 +211,7 @@ def load() -> JsonDict:
         _validate_scheduler_paused(data, sanitized)
         _validate_timestamp_fields(data, sanitized)
         _validate_alert_config(data, sanitized)
+        _validate_test_window(data, sanitized)
 
         # Update cache
         _config_cache = sanitized
@@ -272,6 +320,30 @@ def get_enabled_exporters(default: list[str]) -> list[str]:
 def set_enabled_exporters(exporters: list[str]) -> None:
     """Persists the enabled exporters list to disk."""
     save({"enabled_exporters": exporters})
+
+
+# Default test window configuration: disabled, 08:00–22:00 UTC
+_DEFAULT_TEST_WINDOW: dict = {"enabled": False, "start_hour": 8, "end_hour": 22}
+
+
+def get_test_window() -> dict:
+    """
+    Returns the test window configuration.
+    Keys: enabled (bool), start_hour (int 0-23), end_hour (int 1-24).
+    Falls back to defaults if not set.
+    """
+    data = load()
+    tw = data.get("test_window", {})
+    return {
+        "enabled": tw.get("enabled", _DEFAULT_TEST_WINDOW["enabled"]),
+        "start_hour": tw.get("start_hour", _DEFAULT_TEST_WINDOW["start_hour"]),
+        "end_hour": tw.get("end_hour", _DEFAULT_TEST_WINDOW["end_hour"]),
+    }
+
+
+def set_test_window(window: dict) -> None:
+    """Persists the test window configuration to disk."""
+    save({"test_window": window})
 
 
 # --- Run trigger ---

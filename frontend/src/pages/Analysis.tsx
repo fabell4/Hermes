@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion } from 'framer-motion'
 import {
   BarChart,
@@ -13,6 +13,8 @@ import {
   Legend,
 } from 'recharts'
 import { AlertTriangle, TrendingDown, TrendingUp, Clock, BarChart2, Minus } from 'lucide-react'
+import { useTheme } from '@/hooks/useTheme'
+import { ChartExportButton } from '@/components/ChartExportButton'
 import type {
   AnnotatedResult,
   AnomalyFlag,
@@ -88,13 +90,13 @@ function AnomaliesTab({ data, loading, error }: AnomaliesTabProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-4 flex-wrap">
-        <div className="px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-800">
+        <div className="px-4 py-3 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
           <p className="text-xs text-slate-500 mb-0.5">Anomalies (last 50)</p>
           <p className="text-2xl font-bold text-amber-400">{anomalous.length}</p>
         </div>
-        <div className="px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-800">
+        <div className="px-4 py-3 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
           <p className="text-xs text-slate-500 mb-0.5">Anomaly rate</p>
-          <p className="text-2xl font-bold text-slate-200">{pct}%</p>
+          <p className="text-2xl font-bold text-slate-800 dark:text-slate-200">{pct}%</p>
         </div>
       </div>
 
@@ -103,10 +105,10 @@ function AnomaliesTab({ data, loading, error }: AnomaliesTabProps) {
       )}
 
       {anomalous.length > 0 && (
-        <div className="overflow-x-auto rounded-xl border border-slate-800">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
+              <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
                 <th className="text-left px-4 py-3">Time</th>
                 <th className="text-right px-4 py-3">↓ Mbps</th>
                 <th className="text-right px-4 py-3">↑ Mbps</th>
@@ -116,17 +118,17 @@ function AnomaliesTab({ data, loading, error }: AnomaliesTabProps) {
             </thead>
             <tbody>
               {anomalous.map((r) => (
-                <tr key={r.id} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
-                  <td className="px-4 py-3 text-slate-300 whitespace-nowrap">
+                <tr key={r.id} className="border-b border-slate-200/50 dark:border-slate-800/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/30 transition-colors">
+                  <td className="px-4 py-3 text-slate-700 dark:text-slate-300 whitespace-nowrap">
                     {new Date(r.timestamp).toLocaleString()}
                   </td>
-                  <td className="px-4 py-3 text-right font-mono text-slate-200">
+                  <td className="px-4 py-3 text-right font-mono text-slate-800 dark:text-slate-200">
                     {r.download_mbps.toFixed(1)}
                   </td>
-                  <td className="px-4 py-3 text-right font-mono text-slate-200">
+                  <td className="px-4 py-3 text-right font-mono text-slate-800 dark:text-slate-200">
                     {r.upload_mbps.toFixed(1)}
                   </td>
-                  <td className="px-4 py-3 text-right font-mono text-slate-200">
+                  <td className="px-4 py-3 text-right font-mono text-slate-800 dark:text-slate-200">
                     {r.ping_ms.toFixed(1)}
                   </td>
                   <td className="px-4 py-3">
@@ -161,13 +163,13 @@ interface TimeTooltipProps {
 function TimeTooltip({ active, payload, label }: TimeTooltipProps) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-slate-900 border border-slate-700 p-3 rounded-lg shadow-xl">
-      <p className="text-slate-300 text-sm mb-2">{label}:00–{label}:59</p>
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3 rounded-lg shadow-xl">
+      <p className="text-slate-700 dark:text-slate-300 text-sm mb-2">{label}:00–{label}:59</p>
       {payload.map((e) => (
         <div key={e.name} className="flex items-center gap-2 text-sm">
           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: e.color }} />
-          <span className="text-slate-400">{e.name}:</span>
-          <span className="font-medium text-slate-200">
+          <span className="text-slate-500 dark:text-slate-400">{e.name}:</span>
+          <span className="font-medium text-slate-800 dark:text-slate-200">
             {e.value} {e.name === 'Ping' ? 'ms' : 'Mbps'}
           </span>
         </div>
@@ -177,6 +179,12 @@ function TimeTooltip({ active, payload, label }: TimeTooltipProps) {
 }
 
 function TimeOfDayTab({ data, loading, error }: TimeOfDayTabProps) {
+  const chartsRef = useRef<HTMLDivElement>(null)
+  const { theme } = useTheme()
+  const gridColor = theme === 'dark' ? '#1e293b' : '#e2e8f0'
+  const axisColor = theme === 'dark' ? '#64748b' : '#94a3b8'
+  const legendColor = theme === 'dark' ? '#94a3b8' : '#64748b'
+
   if (loading) return <p className="text-slate-400 text-sm">Loading…</p>
   if (error) return <p className="text-red-400 text-sm">{error}</p>
   if (data.length === 0) return <p className="text-slate-400 text-sm">No data available yet.</p>
@@ -191,26 +199,30 @@ function TimeOfDayTab({ data, loading, error }: TimeOfDayTabProps) {
 
   return (
     <div className="space-y-6">
-      <p className="text-slate-400 text-sm">
-        Average speeds by hour of day (UTC). Dips reveal congestion windows.
-      </p>
+      <div className="flex items-start justify-between gap-4">
+        <p className="text-slate-500 dark:text-slate-400 text-sm">
+          Average speeds by hour of day (UTC). Dips reveal congestion windows.
+        </p>
+        <ChartExportButton containerRef={chartsRef} filename="hermes-time-of-day" />
+      </div>
+      <div ref={chartsRef} className="space-y-6">
       <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
             <XAxis
               dataKey="hour"
-              stroke="#64748b"
+              stroke={axisColor}
               fontSize={11}
               tickLine={false}
               axisLine={false}
               dy={8}
-              label={{ value: 'Hour (UTC)', position: 'insideBottom', offset: -2, fill: '#64748b', fontSize: 11 }}
+              label={{ value: 'Hour (UTC)', position: 'insideBottom', offset: -2, fill: axisColor, fontSize: 11 }}
             />
-            <YAxis stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} dx={-8} />
+            <YAxis stroke={axisColor} fontSize={11} tickLine={false} axisLine={false} dx={-8} />
             <Tooltip content={<TimeTooltip />} />
             <Legend
-              wrapperStyle={{ paddingTop: 12, fontSize: 12, color: '#94a3b8' }}
+              wrapperStyle={{ paddingTop: 12, fontSize: 12, color: legendColor }}
             />
             <Bar dataKey="Download" fill="#06b6d4" radius={[2, 2, 0, 0]} />
             <Bar dataKey="Upload" fill="#8b5cf6" radius={[2, 2, 0, 0]} />
@@ -221,13 +233,14 @@ function TimeOfDayTab({ data, loading, error }: TimeOfDayTabProps) {
         <p className="text-xs text-slate-500 mb-2">Ping latency by hour</p>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 4, right: 10, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-            <XAxis dataKey="hour" stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} dy={8} />
-            <YAxis stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} dx={-8} />
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+            <XAxis dataKey="hour" stroke={axisColor} fontSize={11} tickLine={false} axisLine={false} dy={8} />
+            <YAxis stroke={axisColor} fontSize={11} tickLine={false} axisLine={false} dx={-8} />
             <Tooltip content={<TimeTooltip />} />
             <Bar dataKey="Ping" fill="#f59e0b" radius={[2, 2, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
+      </div>
       </div>
     </div>
   )
@@ -252,13 +265,13 @@ interface TrendTooltipProps {
 function TrendTooltip({ active, payload, label }: TrendTooltipProps) {
   if (!active || !payload?.length) return null
   return (
-    <div className="bg-slate-900 border border-slate-700 p-3 rounded-lg shadow-xl">
-      <p className="text-slate-300 text-sm mb-2">{label}</p>
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3 rounded-lg shadow-xl">
+      <p className="text-slate-700 dark:text-slate-300 text-sm mb-2">{label}</p>
       {payload.map((e) => (
         <div key={e.name} className="flex items-center gap-2 text-sm">
           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: e.color }} />
-          <span className="text-slate-400">{e.name}:</span>
-          <span className="font-medium text-slate-200">
+          <span className="text-slate-500 dark:text-slate-400">{e.name}:</span>
+          <span className="font-medium text-slate-800 dark:text-slate-200">
             {e.value} {e.name === 'Ping' ? 'ms' : 'Mbps'}
           </span>
         </div>
@@ -268,6 +281,12 @@ function TrendTooltip({ active, payload, label }: TrendTooltipProps) {
 }
 
 function TrendsTab({ data, loading, error }: TrendsTabProps) {
+  const chartsRef = useRef<HTMLDivElement>(null)
+  const { theme } = useTheme()
+  const gridColor = theme === 'dark' ? '#1e293b' : '#e2e8f0'
+  const axisColor = theme === 'dark' ? '#64748b' : '#94a3b8'
+  const legendColor = theme === 'dark' ? '#94a3b8' : '#64748b'
+
   if (loading) return <p className="text-slate-400 text-sm">Loading…</p>
   if (error) return <p className="text-red-400 text-sm">{error}</p>
   if (!data || data.months_available === 0) {
@@ -305,7 +324,7 @@ function TrendsTab({ data, loading, error }: TrendsTabProps) {
             { label: 'Upload slope', slope: data.upload_slope, invert: false },
             { label: 'Ping slope', slope: data.ping_slope, invert: true },
           ].map(({ label, slope, invert }) => (
-            <div key={label} className="px-4 py-3 rounded-xl bg-slate-900/60 border border-slate-800">
+            <div key={label} className="px-4 py-3 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
               <p className="text-xs text-slate-500 mb-1">{label} (Mbps or ms / month)</p>
               <SlopeIndicator slope={slope} invert={invert} />
             </div>
@@ -314,14 +333,19 @@ function TrendsTab({ data, loading, error }: TrendsTabProps) {
       )}
 
       {/* Monthly trend chart */}
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Monthly bandwidth &amp; ping trends</p>
+        <ChartExportButton containerRef={chartsRef} filename="hermes-trends" />
+      </div>
+      <div ref={chartsRef} className="space-y-4">
       <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-            <XAxis dataKey="month" stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} dy={8} />
-            <YAxis stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} dx={-8} />
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+            <XAxis dataKey="month" stroke={axisColor} fontSize={11} tickLine={false} axisLine={false} dy={8} />
+            <YAxis stroke={axisColor} fontSize={11} tickLine={false} axisLine={false} dx={-8} />
             <Tooltip content={<TrendTooltip />} />
-            <Legend wrapperStyle={{ paddingTop: 12, fontSize: 12, color: '#94a3b8' }} />
+            <Legend wrapperStyle={{ paddingTop: 12, fontSize: 12, color: legendColor }} />
             <Line type="monotone" dataKey="Download" stroke="#06b6d4" dot={{ r: 4 }} strokeWidth={2} />
             <Line type="monotone" dataKey="Upload" stroke="#8b5cf6" dot={{ r: 4 }} strokeWidth={2} />
           </LineChart>
@@ -331,20 +355,21 @@ function TrendsTab({ data, loading, error }: TrendsTabProps) {
         <p className="text-xs text-slate-500 mb-2">Average ping per month</p>
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData} margin={{ top: 4, right: 10, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-            <XAxis dataKey="month" stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} dy={8} />
-            <YAxis stroke="#64748b" fontSize={11} tickLine={false} axisLine={false} dx={-8} />
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} vertical={false} />
+            <XAxis dataKey="month" stroke={axisColor} fontSize={11} tickLine={false} axisLine={false} dy={8} />
+            <YAxis stroke={axisColor} fontSize={11} tickLine={false} axisLine={false} dx={-8} />
             <Tooltip content={<TrendTooltip />} />
             <Line type="monotone" dataKey="Ping" stroke="#f59e0b" dot={{ r: 4 }} strokeWidth={2} />
           </LineChart>
         </ResponsiveContainer>
       </div>
+      </div>
 
       {/* Monthly table */}
-      <div className="overflow-x-auto rounded-xl border border-slate-800">
+      <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
+            <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-500 text-xs uppercase tracking-wide">
               <th className="text-left px-4 py-3">Month</th>
               <th className="text-right px-4 py-3">Samples</th>
               <th className="text-right px-4 py-3">Avg ↓ Mbps</th>
@@ -354,12 +379,12 @@ function TrendsTab({ data, loading, error }: TrendsTabProps) {
           </thead>
           <tbody>
             {[...data.monthly_stats].reverse().map((m) => (
-              <tr key={m.month} className="border-b border-slate-800/50 hover:bg-slate-800/30 transition-colors">
-                <td className="px-4 py-3 text-slate-300 font-mono">{m.month}</td>
-                <td className="px-4 py-3 text-right text-slate-400">{m.sample_count}</td>
-                <td className="px-4 py-3 text-right font-mono text-cyan-400">{m.avg_download_mbps.toFixed(1)}</td>
-                <td className="px-4 py-3 text-right font-mono text-violet-400">{m.avg_upload_mbps.toFixed(1)}</td>
-                <td className="px-4 py-3 text-right font-mono text-amber-400">{m.avg_ping_ms.toFixed(1)}</td>
+              <tr key={m.month} className="border-b border-slate-200/50 dark:border-slate-800/50 hover:bg-slate-100/50 dark:hover:bg-slate-800/30 transition-colors">
+                <td className="px-4 py-3 text-slate-700 dark:text-slate-300 font-mono">{m.month}</td>
+                <td className="px-4 py-3 text-right text-slate-500 dark:text-slate-400">{m.sample_count}</td>
+                <td className="px-4 py-3 text-right font-mono text-cyan-500 dark:text-cyan-400">{m.avg_download_mbps.toFixed(1)}</td>
+                <td className="px-4 py-3 text-right font-mono text-violet-500 dark:text-violet-400">{m.avg_upload_mbps.toFixed(1)}</td>
+                <td className="px-4 py-3 text-right font-mono text-amber-500 dark:text-amber-400">{m.avg_ping_ms.toFixed(1)}</td>
               </tr>
             ))}
           </tbody>
@@ -442,14 +467,14 @@ export function Analysis() {
       className="space-y-6"
     >
       <div>
-        <h1 className="text-2xl font-bold text-slate-100">Analysis</h1>
-        <p className="text-slate-400 text-sm mt-0.5">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Analysis</h1>
+        <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">
           Anomaly detection, time-of-day patterns, and month-over-month trends
         </p>
       </div>
 
       {/* Tab bar */}
-      <div className="flex gap-1 p-1 rounded-xl bg-slate-900/60 border border-slate-800 w-fit">
+      <div className="flex gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 w-fit">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
@@ -457,7 +482,7 @@ export function Analysis() {
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               tab === id
                 ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/50'
             }`}
           >
             <Icon size={15} />
@@ -467,7 +492,7 @@ export function Analysis() {
       </div>
 
       {/* Tab content */}
-      <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 md:p-6">
+      <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-6">
         {tab === 'anomalies' && (
           <AnomaliesTab data={anomalies} loading={anomaliesLoading} error={anomaliesError} />
         )}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Clock, Database, Download, Eye, EyeOff, Key, Save, CheckCircle, Bell, Send } from 'lucide-react'
+import { CalendarClock, Clock, Database, Download, Eye, EyeOff, Key, Save, CheckCircle, Bell, Send } from 'lucide-react'
 import { useHermes } from '@/hooks/useHermes'
 import type { RuntimeConfig, AlertConfig } from '@/types'
 import { api } from '@/lib/api'
@@ -16,7 +16,7 @@ type TestAlertStatus = 'idle' | 'sending' | 'success' | 'error'
 
 function getTestButtonClassName(status: TestAlertStatus): string {
   if (status === 'sending') {
-    return 'bg-slate-700 text-slate-400 cursor-not-allowed'
+    return 'bg-slate-100 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
   }
   if (status === 'success') {
     return 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
@@ -72,10 +72,10 @@ function renderExporterItem(exp: typeof ALL_EXPORTERS[number], enabled: boolean,
   return (
     <div
       key={exp.id}
-      className="flex items-center justify-between p-3 rounded-lg bg-slate-800/30 border border-slate-700/50"
+      className="flex items-center justify-between p-3 rounded-lg bg-slate-100/50 dark:bg-slate-800/30 border border-slate-200/50 dark:border-slate-700/50"
     >
       <div>
-        <div className="text-sm font-medium text-slate-200">
+        <div className="text-sm font-medium text-slate-800 dark:text-slate-200">
           {exp.label}
         </div>
         <div className="text-xs text-slate-500">{exp.desc}</div>
@@ -83,7 +83,7 @@ function renderExporterItem(exp: typeof ALL_EXPORTERS[number], enabled: boolean,
       <button
         onClick={onToggle}
         className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-          enabled ? 'bg-cyan-500' : 'bg-slate-700'
+          enabled ? 'bg-cyan-500' : 'bg-slate-300 dark:bg-slate-700'
         }`}
         aria-pressed={enabled}
       >
@@ -115,6 +115,40 @@ function renderSaveButton(saved: boolean, onClick: () => void) {
   )
 }
 
+function formatHour(h: number): string {
+  return h === 24 ? '24:00' : String(h).padStart(2, '0') + ':00'
+}
+
+async function sendTestAlerts(
+  setTestStatus: (status: TestAlertStatus) => void,
+  setTestMessage: (message: string) => void
+): Promise<void> {
+  setTestStatus('sending')
+  setTestMessage('')
+  try {
+    const response = await api.testAlerts()
+    // Map API status to UI status
+    if (response.status === 'success' || response.status === 'partial') {
+      setTestStatus('success')
+    } else {
+      // 'failed' or 'no_providers'
+      setTestStatus('error')
+    }
+    setTestMessage(response.message)
+    setTimeout(() => {
+      setTestStatus('idle')
+      setTestMessage('')
+    }, 5000)
+  } catch (error) {
+    setTestStatus('error')
+    setTestMessage(error instanceof Error ? error.message : 'Failed to send test alerts')
+    setTimeout(() => {
+      setTestStatus('idle')
+      setTestMessage('')
+    }, 5000)
+  }
+}
+
 async function saveSettings(
   draft: RuntimeConfig,
   alertsDraft: AlertConfig,
@@ -133,29 +167,67 @@ async function saveSettings(
   setTimeout(() => setSaved(false), 2500)
 }
 
-export function Settings() {
-  const { config, alerts, updateConfig, updateAlerts } = useHermes()
+function useSettingsDrafts(config: RuntimeConfig | null, alerts: AlertConfig | null) {
   const [draft, setDraft] = useState<RuntimeConfig | null>(null)
   const [alertsDraft, setAlertsDraft] = useState<AlertConfig | null>(null)
+
+  // Initialize local drafts once when config/alerts first load.
+  // Don't continuously sync to avoid overwriting user's unsaved changes.
+  useEffect(() => {
+    if (config && !draft) setDraft({ ...config })
+  }, [config, draft])
+
+  useEffect(() => {
+    if (alerts && !alertsDraft) setAlertsDraft({ ...alerts })
+  }, [alerts, alertsDraft])
+
+  return { draft, setDraft, alertsDraft, setAlertsDraft }
+}
+
+function windowDescription(tw: { start_hour: number; end_hour: number }): string {
+  if (tw.start_hour < tw.end_hour) {
+    return `Tests run between ${String(tw.start_hour).padStart(2, '0')}:00 and ${formatHour(tw.end_hour)} UTC.`
+  }
+  return `Overnight window — tests run from ${String(tw.start_hour).padStart(2, '0')}:00 UTC, wrapping past midnight to ${String(tw.end_hour).padStart(2, '0')}:00 UTC.`
+}
+
+function renderApiKeyInput(
+  apiKey: string,
+  showKey: boolean,
+  setApiKey: (val: string) => void,
+  setShowKey: (fn: (prev: boolean) => boolean) => void
+) {
+  return (
+    <div className="relative">
+      <input
+        id="api-key"
+        type={showKey ? 'text' : 'password'}
+        value={apiKey}
+        onChange={(e) => setApiKey(e.target.value)}
+        placeholder="Enter API key\u2026"
+        autoComplete="current-password"
+        className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2 pr-10 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all"
+      />
+      <button
+        type="button"
+        onClick={() => setShowKey((v) => !v)}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors"
+        aria-label={showKey ? 'Hide API key' : 'Show API key'}
+      >
+        {showKey ? <EyeOff size={15} /> : <Eye size={15} />}
+      </button>
+    </div>
+  )
+}
+
+export function Settings() {
+  const { config, alerts, updateConfig, updateAlerts } = useHermes()
+  const { draft, setDraft, alertsDraft, setAlertsDraft } = useSettingsDrafts(config, alerts)
   const [saved, setSaved] = useState(false)
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('hermes_api_key') ?? '')
   const [showKey, setShowKey] = useState(false)
   const [testStatus, setTestStatus] = useState<TestAlertStatus>('idle')
   const [testMessage, setTestMessage] = useState('')
-
-  // Initialize local drafts once when config/alerts first load
-  // Don't continuously sync to avoid overwriting user's unsaved changes
-  useEffect(() => {
-    if (config && !draft) {
-      setDraft({ ...config })
-    }
-  }, [config, draft])
-
-  useEffect(() => {
-    if (alerts && !alertsDraft) {
-      setAlertsDraft({ ...alerts })
-    }
-  }, [alerts, alertsDraft])
 
   if (!draft || !alertsDraft) {
     return (
@@ -167,32 +239,7 @@ export function Settings() {
 
   const handleSave = () => saveSettings(draft, alertsDraft, apiKey, updateConfig, updateAlerts, setSaved)
 
-  const handleTestAlerts = async () => {
-    setTestStatus('sending')
-    setTestMessage('')
-    try {
-      const response = await api.testAlerts()
-      // Map API status to UI status
-      if (response.status === 'success' || response.status === 'partial') {
-        setTestStatus('success')
-      } else {
-        // 'failed' or 'no_providers'
-        setTestStatus('error')
-      }
-      setTestMessage(response.message)
-      setTimeout(() => {
-        setTestStatus('idle')
-        setTestMessage('')
-      }, 5000)
-    } catch (error) {
-      setTestStatus('error')
-      setTestMessage(error instanceof Error ? error.message : 'Failed to send test alerts')
-      setTimeout(() => {
-        setTestStatus('idle')
-        setTestMessage('')
-      }, 5000)
-    }
-  }
+  const handleTestAlerts = () => sendTestAlerts(setTestStatus, setTestMessage)
 
   const toggleExporter = (id: string) => {
     setDraft(toggleExporterInConfig(draft, id))
@@ -205,25 +252,25 @@ export function Settings() {
       className="max-w-3xl space-y-6"
     >
       <div>
-        <h1 className="text-2xl font-bold text-slate-100">Settings</h1>
-        <p className="text-slate-400 text-sm mt-0.5">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Settings</h1>
+        <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">
           Configure the test interval and active exporters.
         </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Interval */}
-        <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Clock size={18} className="text-cyan-400" />
-            <h2 className="text-base font-semibold text-slate-200">
+            <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">
               Test Interval
             </h2>
           </div>
           <div>
             <label
               htmlFor="interval-minutes"
-              className="block text-sm font-medium text-slate-300 mb-2"
+              className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2"
             >
               Interval (minutes)
             </label>
@@ -246,17 +293,17 @@ export function Settings() {
                     : d
                 )
               }
-              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2 text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
+              className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all"
             />
             <p className="text-xs text-slate-500 mt-1">Minimum 5 minutes.</p>
           </div>
         </div>
 
         {/* Exporters */}
-        <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4">
           <div className="flex items-center gap-2">
             <Database size={18} className="text-violet-400" />
-            <h2 className="text-base font-semibold text-slate-200">
+            <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">
               Exporters
             </h2>
           </div>
@@ -274,18 +321,18 @@ export function Settings() {
 
       {/* Alerts */}
       {alertsDraft && (
-        <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 space-y-4">
+        <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Bell size={18} className="text-orange-400" />
-              <h2 className="text-base font-semibold text-slate-200">Alerts</h2>
+              <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">Alerts</h2>
             </div>
             <button
               onClick={() =>
                 setAlertsDraft((d) => (d ? { ...d, enabled: !d.enabled } : d))
               }
               className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                alertsDraft.enabled ? 'bg-orange-500' : 'bg-slate-700'
+                alertsDraft.enabled ? 'bg-orange-500' : 'bg-slate-300 dark:bg-slate-700'
               }`}
               aria-pressed={alertsDraft.enabled}
             >
@@ -306,7 +353,7 @@ export function Settings() {
               {/* Threshold and Cooldown */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="failure-threshold" className="block text-sm font-medium text-slate-300 mb-2">
+                  <label htmlFor="failure-threshold" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     Failure Threshold
                   </label>
                   <input
@@ -328,14 +375,14 @@ export function Settings() {
                           : d
                       )
                     }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                   />
                   <p className="text-xs text-slate-500 mt-1">
                     Alert after N failures
                   </p>
                 </div>
                 <div>
-                  <label htmlFor="cooldown-minutes" className="block text-sm font-medium text-slate-300 mb-2">
+                  <label htmlFor="cooldown-minutes" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                     Cooldown Period (minutes)
                   </label>
                   <input
@@ -357,7 +404,7 @@ export function Settings() {
                           : d
                       )
                     }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                    className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
                   />
                   <p className="text-xs text-slate-500 mt-1">
                     Time between alerts
@@ -366,9 +413,9 @@ export function Settings() {
               </div>
 
               {/* Webhook Provider */}
-              <div className="border-t border-slate-700 pt-4">
+              <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-medium text-slate-300">Webhook</h3>
+                  <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">Webhook</h3>
                   <button
                     onClick={() =>
                       setAlertsDraft((d) =>
@@ -387,7 +434,7 @@ export function Settings() {
                       )
                     }
                     className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors ${
-                      alertsDraft.providers.webhook.enabled ? 'bg-cyan-500' : 'bg-slate-700'
+                      alertsDraft.providers.webhook.enabled ? 'bg-cyan-500' : 'bg-slate-300 dark:bg-slate-700'
                     }`}
                   >
                     <span
@@ -415,15 +462,15 @@ export function Settings() {
                           : d
                       )
                     }
-                    className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                    className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                   />
                 )}
               </div>
 
               {/* Gotify Provider */}
-              <div className="border-t border-slate-700 pt-4">
+              <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-medium text-slate-300">Gotify</h3>
+                  <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">Gotify</h3>
                   <button
                     onClick={() =>
                       setAlertsDraft((d) =>
@@ -442,7 +489,7 @@ export function Settings() {
                       )
                     }
                     className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors ${
-                      alertsDraft.providers.gotify.enabled ? 'bg-cyan-500' : 'bg-slate-700'
+                      alertsDraft.providers.gotify.enabled ? 'bg-cyan-500' : 'bg-slate-300 dark:bg-slate-700'
                     }`}
                   >
                     <span
@@ -471,7 +518,7 @@ export function Settings() {
                             : d
                         )
                       }
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                      className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                     />
                     <input
                       type="password"
@@ -490,16 +537,16 @@ export function Settings() {
                             : d
                         )
                       }
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                      className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                     />
                   </div>
                 )}
               </div>
 
               {/* ntfy Provider */}
-              <div className="border-t border-slate-700 pt-4">
+              <div className="border-t border-slate-200 dark:border-slate-700 pt-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-medium text-slate-300">ntfy</h3>
+                  <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300">ntfy</h3>
                   <button
                     onClick={() =>
                       setAlertsDraft((d) =>
@@ -518,7 +565,7 @@ export function Settings() {
                       )
                     }
                     className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors ${
-                      alertsDraft.providers.ntfy.enabled ? 'bg-cyan-500' : 'bg-slate-700'
+                      alertsDraft.providers.ntfy.enabled ? 'bg-cyan-500' : 'bg-slate-300 dark:bg-slate-700'
                     }`}
                   >
                     <span
@@ -547,7 +594,7 @@ export function Settings() {
                             : d
                         )
                       }
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                      className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                     />
                     <input
                       type="password"
@@ -566,7 +613,7 @@ export function Settings() {
                             : d
                         )
                       }
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                      className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                     />
                     <input
                       type="url"
@@ -585,17 +632,17 @@ export function Settings() {
                             : d
                         )
                       }
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                      className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                     />
                   </div>
                 )}
               </div>
 
               {/* Apprise Provider */}
-              <div className="border-t border-slate-800 pt-3">
+              <div className="border-t border-slate-200 dark:border-slate-800 pt-3">
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <span className="text-sm font-medium text-slate-300">Apprise</span>
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Apprise</span>
                     <p className="text-xs text-slate-500 mt-0.5">
                       100+ services (Discord, Telegram, Slack, etc.)
                     </p>
@@ -619,7 +666,7 @@ export function Settings() {
                       )
                     }
                     className={`relative inline-flex h-4 w-8 items-center rounded-full transition-colors ${
-                      alertsDraft.providers.apprise.enabled ? 'bg-cyan-500' : 'bg-slate-700'
+                      alertsDraft.providers.apprise.enabled ? 'bg-cyan-500' : 'bg-slate-300 dark:bg-slate-700'
                     }`}
                   >
                     <span
@@ -648,7 +695,7 @@ export function Settings() {
                             : d
                         )
                       }
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+                      className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
                     />
                     <p className="text-xs text-slate-500">
                       Full URL with config ID (e.g., https://apprise.example.com/notify/myconfig) or base URL for stateless mode with service URLs below.
@@ -676,7 +723,7 @@ export function Settings() {
                         )
                       }
                       rows={3}
-                      className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 font-mono"
+                      className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 font-mono"
                     />
                     <p className="text-xs text-slate-500">
                       See{' '}
@@ -695,7 +742,7 @@ export function Settings() {
               </div>
 
               {/* Test Alert Button */}
-              <div className="pt-4 border-t border-slate-700/50">
+              <div className="pt-4 border-t border-slate-200/50 dark:border-slate-700/50">
                 <button
                   onClick={handleTestAlerts}
                   disabled={testStatus === 'sending'}
@@ -716,42 +763,129 @@ export function Settings() {
         </div>
       )}
 
-      {/* API Key */}
-      <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 space-y-4">
-        <div className="flex items-center gap-2">
-          <Key size={18} className="text-amber-400" />
-          <h2 className="text-base font-semibold text-slate-200">API Key</h2>
-        </div>
-        <p className="text-xs text-slate-500">
-          Required when the server has <code className="text-slate-400">API_KEY</code> configured.
-          Leave blank for unauthenticated deployments.
-        </p>
-        <div className="relative">
-          <input
-            id="api-key"
-            type={showKey ? 'text' : 'password'}
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="Enter API key…"
-            autoComplete="current-password"
-            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2 pr-10 text-slate-200 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all"
-          />
+      {/* Test Window */}
+      <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <CalendarClock size={18} className="text-indigo-400" />
+            <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">Test Window</h2>
+          </div>
           <button
             type="button"
-            onClick={() => setShowKey((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
-            aria-label={showKey ? 'Hide API key' : 'Show API key'}
+            onClick={() =>
+              setDraft((d) =>
+                d
+                  ? {
+                      ...d,
+                      test_window: { ...d.test_window, enabled: !d.test_window.enabled },
+                    }
+                  : d
+              )
+            }
+            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+              draft.test_window.enabled ? 'bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'
+            }`}
+            aria-pressed={draft.test_window.enabled}
+            aria-label="Enable test window"
           >
-            {showKey ? <EyeOff size={15} /> : <Eye size={15} />}
+            <span
+              className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${
+                draft.test_window.enabled ? 'translate-x-5' : 'translate-x-1'
+              }`}
+            />
           </button>
         </div>
+        <p className="text-xs text-slate-500">
+          Restrict automated tests to specific hours to avoid counting against data caps.
+          Manual &ldquo;Run Now&rdquo; tests are always allowed.
+        </p>
+        {draft.test_window.enabled && (
+          <div className="space-y-4 pt-1">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="tw-start" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Start hour (UTC)
+                </label>
+                <select
+                  id="tw-start"
+                  value={draft.test_window.start_hour}
+                  onChange={(e) =>
+                    setDraft((d) =>
+                      d
+                        ? {
+                            ...d,
+                            test_window: {
+                              ...d.test_window,
+                              start_hour: Number.parseInt(e.target.value, 10),
+                            },
+                          }
+                        : d
+                    )
+                  }
+                  className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                >
+                  {Array.from({ length: 24 }, (_, i) => (
+                    <option key={i} value={i}>
+                      {String(i).padStart(2, '0')}:00
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="tw-end" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  End hour (UTC)
+                </label>
+                <select
+                  id="tw-end"
+                  value={draft.test_window.end_hour}
+                  onChange={(e) =>
+                    setDraft((d) =>
+                      d
+                        ? {
+                            ...d,
+                            test_window: {
+                              ...d.test_window,
+                              end_hour: Number.parseInt(e.target.value, 10),
+                            },
+                          }
+                        : d
+                    )
+                  }
+                  className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                >
+                  {Array.from({ length: 24 }, (_, i) => i + 1).map((h) => (
+                    <option key={h} value={h}>
+                      {h === 24 ? '24:00 (midnight)' : `${String(h).padStart(2, '0')}:00`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <p className="text-xs text-slate-500">
+              {windowDescription(draft.test_window)}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* API Key */}
+      <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <Key size={18} className="text-amber-400" />
+          <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">API Key</h2>
+        </div>
+        <p className="text-xs text-slate-500">
+          Required when the server has <code className="text-slate-600 dark:text-slate-400">API_KEY</code> configured.
+          Leave blank for unauthenticated deployments.
+        </p>
+        {renderApiKeyInput(apiKey, showKey, setApiKey, setShowKey)}
       </div>
 
       {/* Data Export */}
-      <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-6 space-y-4">
+      <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Download size={18} className="text-teal-400" />
-          <h2 className="text-base font-semibold text-slate-200">Data Export</h2>
+          <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">Data Export</h2>
         </div>
         <p className="text-xs text-slate-500">
           Download the full results history for backup or migration. Files are generated from the

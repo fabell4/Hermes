@@ -27,6 +27,7 @@ def test_request_at_size_limit_accepted():
                 "interval_minutes": 60,
                 "enabled_exporters": ["csv"],
                 "scanning_enabled": True,
+                "test_window": {"enabled": False, "start_hour": 8, "end_hour": 22},
             },
             headers={"Content-Length": "100"},
         )

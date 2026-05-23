@@ -366,6 +366,28 @@ def run_once(
         runtime_config.mark_done()
 
 
+def _is_within_test_window() -> bool:
+    """
+    Return True if the current UTC hour falls within the configured test window.
+
+    When the window is disabled, always returns True (no restriction).
+    Supports overnight windows where start_hour > end_hour (e.g. 22–06).
+    end_hour is exclusive: end_hour=22 means tests run through 21:59 UTC.
+    """
+    window = runtime_config.get_test_window()
+    if not window.get("enabled", False):
+        return True
+
+    start = window.get("start_hour", 0)
+    end = window.get("end_hour", 24)
+    hour = datetime.now(timezone.utc).hour
+
+    if start < end:
+        return start <= hour < end
+    # Overnight window (e.g. start=22, end=6): active when hour >= 22 OR hour < 6
+    return hour >= start or hour < end
+
+
 def build_scheduler(
     service: SpeedtestRunner,
     dispatcher: ResultDispatcher,
@@ -377,9 +399,21 @@ def build_scheduler(
     Configures and returns the background scheduler.
     Does not start it — caller decides when to start.
     """
+
+    def _scheduled_run() -> None:
+        if not _is_within_test_window():
+            window = runtime_config.get_test_window()
+            logger.info(
+                "Skipping scheduled test — outside test window (%02d:00–%02d:00 UTC).",
+                window.get("start_hour", 0),
+                window.get("end_hour", 24),
+            )
+            return
+        run_once(service, dispatcher, alert_manager, sla_monitor, outage_detector)
+
     scheduler = BackgroundScheduler()
     scheduler.add_job(
-        func=lambda: run_once(service, dispatcher, alert_manager, sla_monitor, outage_detector),
+        func=_scheduled_run,
         trigger=IntervalTrigger(minutes=config.SPEEDTEST_INTERVAL_MINUTES),
         id="speedtest_run",
         name="Scheduled speedtest run",

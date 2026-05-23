@@ -22,6 +22,7 @@ from src.main import (
     update_exporters,
     _build_health_status,
     _handle_scheduler_pause_toggle,
+    _is_within_test_window,
     _poll_once,
     _validate_environment,
     _validate_loki_endpoint,
@@ -1010,3 +1011,100 @@ def test_poll_once_alert_config_changed(monkeypatch):
 
     assert len(updated_configs) == 1
     assert returned_alert_config == new_alert_config
+
+
+# ---------------------------------------------------------------------------
+# _is_within_test_window()
+# ---------------------------------------------------------------------------
+
+
+def test_is_within_test_window_disabled_always_true(monkeypatch):
+    """_is_within_test_window() returns True when the test window is disabled."""
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_test_window",
+        lambda: {"enabled": False, "start_hour": 0, "end_hour": 6},
+    )
+    assert _is_within_test_window() is True
+
+
+def test_is_within_test_window_inside_window(monkeypatch):
+    """_is_within_test_window() returns True when current UTC hour is inside the window."""
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_test_window",
+        lambda: {"enabled": True, "start_hour": 8, "end_hour": 22},
+    )
+    # Mock datetime.now() to return 14:00 UTC
+    fixed = datetime(2024, 1, 1, 14, 0, 0, tzinfo=timezone.utc)
+    with patch("src.main.datetime") as mock_dt:
+        mock_dt.now.return_value = fixed
+        assert _is_within_test_window() is True
+
+
+def test_is_within_test_window_outside_window(monkeypatch):
+    """_is_within_test_window() returns False when current UTC hour is outside the window."""
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_test_window",
+        lambda: {"enabled": True, "start_hour": 8, "end_hour": 22},
+    )
+    # Mock datetime.now() to return 02:00 UTC
+    fixed = datetime(2024, 1, 1, 2, 0, 0, tzinfo=timezone.utc)
+    with patch("src.main.datetime") as mock_dt:
+        mock_dt.now.return_value = fixed
+        assert _is_within_test_window() is False
+
+
+def test_is_within_test_window_at_start_boundary(monkeypatch):
+    """_is_within_test_window() returns True at exactly start_hour (inclusive)."""
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_test_window",
+        lambda: {"enabled": True, "start_hour": 8, "end_hour": 22},
+    )
+    fixed = datetime(2024, 1, 1, 8, 0, 0, tzinfo=timezone.utc)
+    with patch("src.main.datetime") as mock_dt:
+        mock_dt.now.return_value = fixed
+        assert _is_within_test_window() is True
+
+
+def test_is_within_test_window_at_end_boundary_exclusive(monkeypatch):
+    """_is_within_test_window() returns False at exactly end_hour (exclusive)."""
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_test_window",
+        lambda: {"enabled": True, "start_hour": 8, "end_hour": 22},
+    )
+    fixed = datetime(2024, 1, 1, 22, 0, 0, tzinfo=timezone.utc)
+    with patch("src.main.datetime") as mock_dt:
+        mock_dt.now.return_value = fixed
+        assert _is_within_test_window() is False
+
+
+def test_is_within_test_window_overnight_inside(monkeypatch):
+    """_is_within_test_window() handles overnight windows (start_hour > end_hour) — inside."""
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_test_window",
+        lambda: {"enabled": True, "start_hour": 22, "end_hour": 6},
+    )
+    # 23:00 should be inside an overnight window of 22–06
+    fixed = datetime(2024, 1, 1, 23, 0, 0, tzinfo=timezone.utc)
+    with patch("src.main.datetime") as mock_dt:
+        mock_dt.now.return_value = fixed
+        assert _is_within_test_window() is True
+
+
+def test_is_within_test_window_overnight_outside(monkeypatch):
+    """_is_within_test_window() handles overnight windows — outside (daytime)."""
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_test_window",
+        lambda: {"enabled": True, "start_hour": 22, "end_hour": 6},
+    )
+    # 14:00 should be outside an overnight window of 22–06
+    fixed = datetime(2024, 1, 1, 14, 0, 0, tzinfo=timezone.utc)
+    with patch("src.main.datetime") as mock_dt:
+        mock_dt.now.return_value = fixed
+        assert _is_within_test_window() is False

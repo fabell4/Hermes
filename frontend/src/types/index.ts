@@ -20,6 +20,13 @@ export interface RuntimeConfig {
   interval_minutes: number
   enabled_exporters: string[]
   scanning_enabled: boolean
+  test_window: TestWindow
+}
+
+export interface TestWindow {
+  enabled: boolean
+  start_hour: number  // 0–23 UTC, inclusive
+  end_hour: number    // 1–24 UTC, exclusive (24 = midnight)
 }
 
 export interface HealthStatus {

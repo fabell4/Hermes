@@ -401,11 +401,11 @@ statistical outlier detection covers both impossible values and genuine anomalie
 
 ### UI/UX Enhancements
 
-- [ ] Light theme toggle — add light mode option to React UI
-- [ ] Result filtering — filter history by date range, speed threshold, server
-- [ ] Dashboard customization — choose which metrics to display, rearrange cards
-- [ ] Export charts — download charts as PNG/SVG for reports
-- [ ] Scheduled test windows — only run tests during specific hours (avoid counting against data caps)
+- [x] Light theme toggle — add light mode option to React UI
+- [x] Result filtering — filter history by date range, speed threshold, server
+- [x] Dashboard customization — choose which metrics to display, rearrange cards
+- [x] Export charts — download charts as PNG/SVG for reports
+- [x] Scheduled test windows — only run tests during specific hours (avoid counting against data caps)
 
 ### Security & Infrastructure
 

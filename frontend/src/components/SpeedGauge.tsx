@@ -2,17 +2,20 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Download, Upload, Activity, Wifi } from 'lucide-react'
 import type { SpeedResult } from '@/types'
+import type { MetricId } from '@/hooks/useDashboardConfig'
 
 interface SpeedGaugeProps {
   readonly isTesting: boolean
   readonly latest: SpeedResult | null
+  readonly metricOrder?: MetricId[]
+  readonly hiddenMetrics?: MetricId[]
 }
 
 function randomBetween(min: number, max: number) {
   return min + Math.random() * (max - min) // NOSONAR — UI animation only, not used for security or crypto
 }
 
-export function SpeedGauge({ isTesting, latest }: SpeedGaugeProps) {
+export function SpeedGauge({ isTesting, latest, metricOrder, hiddenMetrics = [] }: SpeedGaugeProps) {
   const [animated, setAnimated] = useState({
     download: 0,
     upload: 0,
@@ -43,8 +46,9 @@ export function SpeedGauge({ isTesting, latest }: SpeedGaugeProps) {
         jitter: latest?.jitter_ms ?? 0,
       }
 
-  const metrics = [
+  const allMetrics = [
     {
+      id: 'Download' as MetricId,
       label: 'Download',
       value: display.download,
       unit: 'Mbps',
@@ -54,6 +58,7 @@ export function SpeedGauge({ isTesting, latest }: SpeedGaugeProps) {
       border: 'border-cyan-500/20',
     },
     {
+      id: 'Upload' as MetricId,
       label: 'Upload',
       value: display.upload,
       unit: 'Mbps',
@@ -63,6 +68,7 @@ export function SpeedGauge({ isTesting, latest }: SpeedGaugeProps) {
       border: 'border-violet-500/20',
     },
     {
+      id: 'Ping' as MetricId,
       label: 'Ping',
       value: display.ping,
       unit: 'ms',
@@ -72,6 +78,7 @@ export function SpeedGauge({ isTesting, latest }: SpeedGaugeProps) {
       border: 'border-amber-500/20',
     },
     {
+      id: 'Jitter' as MetricId,
       label: 'Jitter',
       value: display.jitter,
       unit: 'ms',
@@ -82,21 +89,36 @@ export function SpeedGauge({ isTesting, latest }: SpeedGaugeProps) {
     },
   ]
 
+  // Apply custom order if provided, then filter out hidden metrics
+  const metricMap = Object.fromEntries(allMetrics.map((m) => [m.id, m]))
+  const orderedIds = metricOrder ?? allMetrics.map((m) => m.id)
+  const metrics = orderedIds
+    .map((id) => metricMap[id])
+    .filter((m) => m !== undefined && !hiddenMetrics.includes(m.id))
+
+  if (metrics.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-24 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 text-slate-400 dark:text-slate-500 text-sm">
+        All metric cards are hidden. Use Customize to show them.
+      </div>
+    )
+  }
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       {metrics.map((metric, i) => (
         <motion.div
-          key={metric.label}
+          key={metric.id}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: i * 0.08 }}
-          className={`relative overflow-hidden rounded-2xl border ${metric.border} bg-slate-900/50 p-5 flex flex-col items-center justify-center text-center`}
+          className={`relative overflow-hidden rounded-2xl border ${metric.border} bg-white dark:bg-slate-900/50 p-5 flex flex-col items-center justify-center text-center`}
         >
           <div className={`absolute top-0 left-0 w-full h-0.5 ${metric.bg}`} />
           <div className={`p-2.5 rounded-full ${metric.bg} ${metric.color} mb-3`}>
             <metric.icon size={20} />
           </div>
-          <div className="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">
+          <div className="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">
             {metric.label}
           </div>
           <div className="flex items-baseline gap-1">
@@ -107,7 +129,7 @@ export function SpeedGauge({ isTesting, latest }: SpeedGaugeProps) {
             >
               {metric.value.toFixed(1)}
             </span>
-            <span className="text-slate-500 text-sm font-medium">
+            <span className="text-slate-400 dark:text-slate-500 text-sm font-medium">
               {metric.unit}
             </span>
           </div>
