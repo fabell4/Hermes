@@ -27,6 +27,7 @@ _VALID_CONFIG_BODY = {
     "interval_minutes": 60,
     "enabled_exporters": ["csv"],
     "scanning_enabled": True,
+    "test_window": {"enabled": False, "start_hour": 22, "end_hour": 6},
 }
 
 # ---------------------------------------------------------------------------

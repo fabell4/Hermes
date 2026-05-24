@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import time
 
 from src import config
 from src.constants import ProviderType
@@ -17,9 +18,9 @@ _log = logging.getLogger(__name__)
 class SpeedtestRunner:
     """Orchestrates speed test providers with automatic fallback.
 
-    Tries each provider in order. The primary provider (index 0) is retried once
-    on transient failure before falling back to the next provider. Subsequent
-    providers are tried once each.
+    Tries each provider in order. The primary provider (index 0) is retried
+    ``primary_retries - 1`` times on transient failure before falling back to
+    the next provider. Subsequent providers are tried once each.
 
     When called with no arguments, builds the provider list from
     SPEEDTEST_PROVIDERS and SPEEDTEST_SERVER_ID config.
@@ -30,6 +31,8 @@ class SpeedtestRunner:
         speedtest_path: str | None = None,
         server_id: int | None = None,
         providers: list[BaseTestProvider] | None = None,
+        primary_retries: int = 2,
+        retry_backoff_seconds: float = 0.0,
     ) -> None:
         """
         Initialize the runner.
@@ -40,10 +43,16 @@ class SpeedtestRunner:
                        Pass None to use the configured default.
             providers: Explicit ordered list of providers (used in tests). When
                        supplied, speedtest_path and server_id are ignored.
+            primary_retries: Total attempts for the primary provider (≥1).
+                             2 means one retry on failure (default).
+            retry_backoff_seconds: Seconds to wait between primary-provider
+                                   retry attempts. 0 disables backoff (default).
         """
         self._speedtest_path = speedtest_path
         # Explicit server_id overrides config; None defers to config.
         self._server_id = server_id if server_id is not None else config.SPEEDTEST_SERVER_ID
+        self._primary_retries = max(1, primary_retries)
+        self._retry_backoff_seconds = max(0.0, retry_backoff_seconds)
         if providers is not None:
             self._providers = providers
         else:
@@ -76,24 +85,28 @@ class SpeedtestRunner:
     def _attempt_provider(
         self, provider: BaseTestProvider, is_primary: bool
     ) -> SpeedResult:
-        """Try a single provider, retrying once if it is the primary.
+        """Try a single provider, retrying up to ``_primary_retries`` times if primary.
 
         Raises:
             RuntimeError: If all attempts for this provider fail.
         """
-        attempts = 2 if is_primary else 1
+        attempts = self._primary_retries if is_primary else 1
         last_exc: RuntimeError | None = None
         for attempt in range(attempts):
             try:
                 return provider.run()
             except RuntimeError as exc:
                 last_exc = exc
-                if is_primary and attempt == 0:
+                if is_primary and attempt < attempts - 1:
                     _log.warning(
-                        "Provider '%s' attempt 1 failed (%s) — retrying.",
+                        "Provider '%s' attempt %d/%d failed (%s) — retrying.",
                         provider.name,
+                        attempt + 1,
+                        attempts,
                         exc,
                     )
+                    if self._retry_backoff_seconds > 0:
+                        time.sleep(self._retry_backoff_seconds)
         assert last_exc is not None  # always set: loop runs ≥ 1 times
         raise last_exc
 

@@ -407,19 +407,19 @@ statistical outlier detection covers both impossible values and genuine anomalie
 - [x] Export charts — download charts as PNG/SVG for reports
 - [x] Scheduled test windows — only run tests during specific hours (avoid counting against data caps)
 
-### Security & Infrastructure
-
-- [ ] API key rotation mechanism — support rotating keys without restart, or multiple valid keys
-- [ ] Multi-user support — per-user API keys with access control and audit trails
-- [ ] Distributed rate limiting — migrate from in-process state to Redis for multi-instance deployments
-- [ ] Secrets vault integration — integrate with HashiCorp Vault or similar for production secret management
-- [ ] Strict-Transport-Security header — add HSTS header for HTTPS-only deployments
-
 ---
 
 ## Archived (Deprecated/Superseded)
 
 _Items that were completed but are no longer part of the active codebase._
+
+### Security & Infrastructure (out of scope — enterprise features, not applicable to homelab target)
+
+- ~~API key rotation mechanism~~ — env var change + restart is sufficient for homelab; live rotation is an enterprise concern
+- ~~Multi-user support~~ — homelab is single-user; per-user keys and audit trails are enterprise scope
+- ~~Distributed rate limiting (Redis)~~ — single-instance deployment; in-process state is correct for homelab
+- ~~Secrets vault integration~~ — HashiCorp Vault and equivalents are enterprise tooling; `.env` file is the homelab standard
+- ~~Strict-Transport-Security header~~ — HSTS is handled at the reverse proxy layer (Nginx/Caddy/Traefik) in homelab deployments
 
 ### Streamlit UI (replaced by React + FastAPI)
 

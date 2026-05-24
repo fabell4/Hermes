@@ -37,6 +37,25 @@ def _get_int(key: str, default: int) -> int:
         return default
 
 
+def _get_positive_int(key: str, default: int, minimum: int = 1) -> int:
+    """Read an env var as int and enforce a minimum value.
+
+    Falls back to *default* if the env var is absent, non-integer, or below
+    *minimum*. A warning is emitted whenever the configured value is rejected.
+    """
+    value = _get_int(key, default)
+    if value < minimum:
+        logging.warning(
+            "Config: %s=%d is below the minimum allowed value (%d), using default %d",
+            key,
+            value,
+            minimum,
+            default,
+        )
+        return default
+    return value
+
+
 def _get_bool(key: str, default: bool) -> bool:
     """Read an env var as bool. Accepts 'true/false', '1/0', 'yes/no' (case insensitive)."""
     value = os.getenv(key)
@@ -113,7 +132,7 @@ CORS_ORIGINS: str = os.getenv(
 
 # --- Scheduler ---
 # Runtime config takes priority over env var
-_env_interval: int = _get_int("SPEEDTEST_INTERVAL_MINUTES", 60)
+_env_interval: int = _get_positive_int("SPEEDTEST_INTERVAL_MINUTES", 60, minimum=1)
 SPEEDTEST_INTERVAL_MINUTES: int = get_interval_minutes(default=_env_interval)
 
 RUN_ON_STARTUP: bool = _get_bool("RUN_ON_STARTUP", True)
@@ -147,14 +166,14 @@ CSV_MAX_ROWS: int = _get_int("CSV_MAX_ROWS", 0)
 CSV_RETENTION_DAYS: int = _get_int("CSV_RETENTION_DAYS", 0)
 
 # --- Prometheus Exporter ---
-PROMETHEUS_PORT: int = _get_int("PROMETHEUS_PORT", 8000)
+PROMETHEUS_PORT: int = _get_positive_int("PROMETHEUS_PORT", 8000, minimum=1)
 # Set to true to collapse all time-series labels (server_name, server_location,
 # isp_name) to empty strings. Prevents unbounded cardinality when many servers
 # or ISPs are observed.
 PROMETHEUS_DISABLE_LABELS: bool = _get_bool("PROMETHEUS_DISABLE_LABELS", False)
 
 # --- Health Endpoint ---
-HEALTH_PORT: int = _get_int("HEALTH_PORT", 8080)
+HEALTH_PORT: int = _get_positive_int("HEALTH_PORT", 8080, minimum=1)
 
 # --- SQLite Exporter ---
 SQLITE_DB_PATH: str = os.getenv("SQLITE_DB_PATH", "data/hermes.db")
@@ -215,7 +234,7 @@ INFLUXDB_TIMEOUT_MS: int = _get_int("INFLUXDB_TIMEOUT_MS", 10_000)
 # TCP probe endpoints (host:port). A majority-vote quorum of these must fail for
 # a round to count as a failure.
 OUTAGE_PROBE_HOSTS: list[str] = _get_csv_list(
-    "OUTAGE_PROBE_HOSTS", ["1.1.1.1:53", "8.8.8.8:53", "9.9.9.9:53"]
+    "OUTAGE_PROBE_HOSTS", ["1.1.1.1:53", "8.8.8.8:53", "9.9.9.9:53"]  # NOSONAR - well-known public DNS resolvers (Cloudflare, Google, Quad9) used as connectivity probe targets
 )
 # Seconds to wait for each TCP probe before counting it as failed.
 OUTAGE_PROBE_TIMEOUT: int = _get_int("OUTAGE_PROBE_TIMEOUT", 3)

@@ -105,7 +105,7 @@ def validate_alert_url(url: str, field_name: str) -> None:
     """Validate alert provider URL to prevent Server-Side Request Forgery (SSRF).
 
     Blocks:
-    - Non-HTTP(S) schemes (file://, ftp://, etc.)
+    - Non-HTTPS schemes (http://, file://, ftp://, etc.)
     - Localhost addresses
     - Unspecified addresses (0.0.0.0, ::)
     - Private IP ranges (RFC 1918, RFC 4193)
@@ -125,11 +125,12 @@ def validate_alert_url(url: str, field_name: str) -> None:
     try:
         parsed = urlparse(url)
 
-        # Only allow http/https schemes
-        if parsed.scheme not in ("http", "https"):
+        # Only allow https:// — all provider constructors require HTTPS; accepting
+        # http:// here would produce a silent failure when the provider is initialised.
+        if parsed.scheme != "https":
             raise HTTPException(
                 status_code=422,
-                detail=f"{field_name}: Only http:// and https:// URLs are allowed (got {parsed.scheme}://).",
+                detail=f"{field_name}: Only https:// URLs are allowed (got {parsed.scheme}://).",
             )
 
         if not parsed.hostname:

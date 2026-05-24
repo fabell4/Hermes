@@ -4,6 +4,7 @@
 
 import logging
 from src.exporters.base_exporter import BaseExporter
+from src.models.outage_event import OutageEvent
 from src.models.speed_result import SpeedResult
 
 logger = logging.getLogger(__name__)
@@ -85,3 +86,18 @@ class ResultDispatcher:
     def exporter_names(self) -> list[str]:
         """Returns the names of all currently registered exporters."""
         return list(self._exporters.keys())
+
+    def dispatch_outage_event(self, event: OutageEvent) -> None:
+        """Send an OutageEvent to all registered exporters (best-effort).
+
+        Every exporter is attempted regardless of individual failures; errors are
+        logged as warnings and never re-raised so that outage recording never
+        interrupts the main scheduling loop.
+        """
+        for name, exporter in self._exporters.items():
+            try:
+                exporter.export_outage_event(event)
+            except Exception as exc:  # pylint: disable=broad-exception-caught  # NOSONAR
+                logger.warning(
+                    "Exporter '%s' failed to record outage event: %s", name, exc
+                )

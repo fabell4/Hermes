@@ -158,22 +158,6 @@ def update_alert_providers(manager: AlertManager, alert_config: dict) -> None:
     runtime_config.set_alert_config(alert_config)
 
 
-def _dispatch_outage_event(
-    dispatcher: ResultDispatcher,
-    event: "OutageEvent",  # type: ignore[name-defined]
-) -> None:
-    """Dispatch an OutageEvent to all exporters that support it (best-effort)."""
-    for name, exporter in dispatcher._exporters.items():
-        export_fn = getattr(exporter, "export_outage_event", None)
-        if export_fn is not None:
-            try:
-                export_fn(event)
-            except Exception as exc:  # pylint: disable=broad-except  # NOSONAR
-                logger.warning(
-                    "Exporter '%s' failed to record outage event: %s", name, exc
-                )
-
-
 def _handle_connectivity_down(
     outage_detector: OutageDetector,
     dispatcher: ResultDispatcher,
@@ -201,8 +185,7 @@ def _handle_connectivity_down(
         if cf_desc:
             bgp_context = (bgp_context + f" | {cf_desc}") if bgp_context else cf_desc
 
-    _dispatch_outage_event(
-        dispatcher,
+    dispatcher.dispatch_outage_event(
         OutageEvent(
             event_type=OutageEventType.CONNECTIVITY_LOST,
             timestamp=now,
@@ -211,7 +194,7 @@ def _handle_connectivity_down(
             asn=asn,
             bgp_unstable=bgp_unstable,
             cloudflare_outage_desc=cf_desc,
-        ),
+        )
     )
     if alert_manager and not shared_state.get_outage_in_progress():
         alert_manager.record_outage_start(
@@ -234,14 +217,13 @@ def _handle_connectivity_restored(
     start_time = shared_state.get_outage_start_time()
     duration_s = (now - start_time).total_seconds() if start_time else 0.0
     probe_summary = outage_detector.get_probe_summary()
-    _dispatch_outage_event(
-        dispatcher,
+    dispatcher.dispatch_outage_event(
         OutageEvent(
             event_type=OutageEventType.CONNECTIVITY_RESTORED,
             timestamp=now,
             probe_results=probe_summary,
             duration_seconds=duration_s,
-        ),
+        )
     )
     if alert_manager:
         alert_manager.record_outage_recovered(duration_s=duration_s, timestamp=now)
@@ -318,13 +300,12 @@ def _handle_speedtest_error(
             event_type = None
 
         if event_type is not None:
-            _dispatch_outage_event(
-                dispatcher,
+            dispatcher.dispatch_outage_event(
                 OutageEvent(
                     event_type=event_type,
                     timestamp=now,
                     probe_results=f"Speedtest exception: {cause}",
-                ),
+                )
             )
 
     if alert_manager:
