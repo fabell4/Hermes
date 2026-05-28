@@ -72,18 +72,18 @@ export function Layout({ children }: { readonly children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100">
       {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-40 h-14 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-950/90 backdrop-blur flex items-center px-4 gap-3">
+      <header className="fixed top-0 left-0 right-0 z-40 h-16 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-950/90 backdrop-blur flex items-center px-4 gap-3">
         <button
           className="lg:hidden p-2 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors"
           onClick={() => setMobileOpen((o) => !o)}
           aria-label="Toggle menu"
         >
-          {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
 
-        <div className="flex items-center gap-2">
-          <img src={hermesLogo} alt="Hermes" className="h-7 w-7" />
-          <span className="font-bold text-slate-900 dark:text-slate-100 text-lg tracking-tight">
+        <div className="flex items-center gap-2.5">
+          <img src={hermesLogo} alt="Hermes" className="h-9 w-9" />
+          <span className="font-bold text-slate-900 dark:text-slate-100 text-xl tracking-tight">
             Hermes
           </span>
           <span className="hidden sm:inline text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
@@ -115,16 +115,16 @@ export function Layout({ children }: { readonly children: React.ReactNode }) {
         {/* Theme toggle */}
         <button
           onClick={toggleTheme}
-          className="p-2 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors"
+          className="p-2.5 rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors"
           aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
         >
-          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
         </button>
       </header>
 
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex flex-col fixed top-14 left-0 bottom-0 w-56 border-r border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-950/50">
+      <aside className="hidden lg:flex flex-col fixed top-16 left-0 bottom-0 w-56 border-r border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-950/50">
         {sidebar}
       </aside>
 
@@ -144,7 +144,7 @@ export function Layout({ children }: { readonly children: React.ReactNode }) {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'tween', duration: 0.22 }}
-              className="fixed top-14 left-0 bottom-0 w-56 z-40 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 lg:hidden"
+              className="fixed top-16 left-0 bottom-0 w-56 z-40 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 lg:hidden"
             >
               {sidebar}
             </motion.div>
@@ -153,7 +153,7 @@ export function Layout({ children }: { readonly children: React.ReactNode }) {
       </AnimatePresence>
 
       {/* Main content */}
-      <main className="pt-14 lg:ml-56 min-h-screen">
+      <main className="pt-16 lg:ml-56 min-h-screen">
         <div className="max-w-6xl mx-auto p-4 md:p-6">{children}</div>
       </main>
     </div>
