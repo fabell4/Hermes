@@ -106,7 +106,7 @@ function formatCell(row: SpeedResult, col: ColumnId): string {
     case 'ping_ms':
       return `${row.ping_ms.toFixed(1)} ms`
     case 'jitter_ms':
-      return row.jitter_ms != null ? `${row.jitter_ms.toFixed(1)} ms` : '—'
+      return row.jitter_ms == null ? '—' : `${row.jitter_ms.toFixed(1)} ms`
     case 'isp_name':
       return row.isp_name ?? '—'
     case 'server_name':
@@ -142,10 +142,12 @@ function cellClass(col: ColumnId): string {
 async function exportToCsv(filters: FilterState, visibleCols: ColumnId[]) {
   const allRows: SpeedResult[] = []
   let page = 1
-  while (true) {
+  let total = Infinity
+  while (allRows.length < total) {
     const result = await api.getResultsFiltered(buildApiFilter(filters, page))
+    total = result.total
     allRows.push(...result.results)
-    if (allRows.length >= result.total) break
+    if (allRows.length >= total) break
     page++
   }
 
@@ -154,7 +156,7 @@ async function exportToCsv(filters: FilterState, visibleCols: ColumnId[]) {
     COLUMNS.filter((c) => visibleCols.includes(c.id)).map((c) => {
       const raw = row[c.id as keyof SpeedResult]
       const val = raw == null ? '' : String(raw)
-      return val.includes(',') || val.includes('"') ? `"${val.replace(/"/g, '""')}"` : val
+      return val.includes(',') || val.includes('"') ? `"${val.replaceAll('"', '""')}"` : val
     })
   )
 
@@ -523,11 +525,12 @@ export function Reports() {
 
       {/* Results table */}
       <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
-        {loading ? (
+        {loading && (
           <div className="p-12 text-center">
             <div className="inline-block w-5 h-5 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin" />
           </div>
-        ) : results.length === 0 ? (
+        )}
+        {!loading && results.length === 0 ? (
           <div className="py-16 text-center text-slate-500 dark:text-slate-400">
             <FileText size={40} className="mx-auto mb-3 opacity-30" />
             <p>No results found{activeFilters > 0 ? ' for the selected filters' : ''}.</p>
@@ -609,7 +612,7 @@ export function Reports() {
         {!loading && total > 0 && total <= PAGE_SIZE && (
           <div className="px-4 py-3 border-t border-slate-100 dark:border-slate-800">
             <span className="text-xs text-slate-500 dark:text-slate-400">
-              {total} result{total !== 1 ? 's' : ''}
+              {total} result{total === 1 ? '' : 's'}
             </span>
           </div>
         )}
