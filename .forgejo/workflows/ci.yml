@@ -2,9 +2,9 @@ name: CI ΓÇö Hermes
 
 on:
   push:
-    branches: ["**"]
+    branches-ignore: ["dependabot/**", "renovate/**"]
   pull_request:
-    branches: ["**"]
+    branches-ignore: ["dependabot/**", "renovate/**"]
 
 concurrency:
   group: ci-${{ github.ref }}
