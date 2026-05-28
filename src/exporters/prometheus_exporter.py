@@ -143,7 +143,10 @@ class PrometheusExporter(BaseExporter):
         if result.quality_score is not None:
             _QUALITY_SCORE.labels(**labels).set(result.quality_score)
         # SLA: 1=pass, 0=fail, -1=disabled (not configured)
-        sla_value = -1.0 if result.sla_ok is None else (1.0 if result.sla_ok else 0.0)
+        if result.sla_ok is None:
+            sla_value = -1.0
+        else:
+            sla_value = 1.0 if result.sla_ok else 0.0
         _SLA_OK.labels(**labels).set(sla_value)
 
     # ------------------------------------------------------------------

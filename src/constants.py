@@ -75,7 +75,13 @@ class OutageEventType(StrEnum):
 DEFAULT_ALERT_TIMEOUT_SECONDS = 10
 
 # Outage probe defaults
-DEFAULT_PROBE_HOSTS: list[str] = ["1.1.1.1:53", "8.8.8.8:53", "9.9.9.9:53"]
+# NOSONAR: hardcoded IPs are well-known public DNS resolvers (Cloudflare, Google, Quad9)
+# used as default connectivity probe targets. Overridable via configuration.
+DEFAULT_PROBE_HOSTS: list[str] = [
+    "1.1.1.1:53",  # NOSONAR - Cloudflare DNS
+    "8.8.8.8:53",  # NOSONAR - Google DNS
+    "9.9.9.9:53",  # NOSONAR - Quad9 DNS
+]
 DEFAULT_PROBE_TIMEOUT: int = 3
 DEFAULT_PROBE_FAILURE_THRESHOLD: int = 2
 DEFAULT_PROBE_QUORUM: int = 2
