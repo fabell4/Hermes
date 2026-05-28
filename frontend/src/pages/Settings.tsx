@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { CalendarClock, Clock, Database, Download, Eye, EyeOff, Key, Save, CheckCircle } from 'lucide-react'
+import { Bell, CalendarClock, Clock, Database, Download, Eye, EyeOff, Key, Save, CheckCircle, XCircle } from 'lucide-react'
 import { useHermes } from '@/hooks/useHermes'
-import type { RuntimeConfig } from '@/types'
+import { api } from '@/lib/api'
+import type { AlertConfig, RuntimeConfig } from '@/types'
 
 const ALL_EXPORTERS = [
   { id: 'csv', label: 'CSV Export', desc: 'Append results to a local CSV file' },
@@ -74,8 +75,10 @@ function formatHour(h: number): string {
 
 async function saveSettings(
   draft: RuntimeConfig,
+  alertsDraft: AlertConfig | null,
   apiKey: string,
   updateConfig: (config: RuntimeConfig) => Promise<void>,
+  updateAlerts: (alerts: AlertConfig) => Promise<void>,
   setSaved: (saved: boolean) => void
 ) {
   if (apiKey) {
@@ -84,6 +87,7 @@ async function saveSettings(
     localStorage.removeItem('hermes_api_key')
   }
   await updateConfig(draft)
+  if (alertsDraft) await updateAlerts(alertsDraft)
   setSaved(true)
   setTimeout(() => setSaved(false), 2500)
 }
@@ -136,12 +140,20 @@ function renderApiKeyInput(
   )
 }
 
+type TestAlertState = 'idle' | 'sending' | 'success' | 'error'
+
 export function Settings() {
-  const { config, updateConfig } = useHermes()
+  const { config, alerts, updateConfig, updateAlerts } = useHermes()
   const { draft, setDraft } = useSettingsDraft(config)
+  const [alertsDraft, setAlertsDraft] = useState<AlertConfig | null>(null)
   const [saved, setSaved] = useState(false)
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('hermes_api_key') ?? '')
   const [showKey, setShowKey] = useState(false)
+  const [testAlertState, setTestAlertState] = useState<TestAlertState>('idle')
+
+  useEffect(() => {
+    if (alerts && !alertsDraft) setAlertsDraft({ ...alerts })
+  }, [alerts, alertsDraft])
 
   if (!draft) {
     return (
@@ -151,11 +163,35 @@ export function Settings() {
     )
   }
 
-  const handleSave = () => saveSettings(draft, apiKey, updateConfig, setSaved)
+  const handleSave = () => saveSettings(draft, alertsDraft, apiKey, updateConfig, updateAlerts, setSaved)
+
+  const handleTestAlert = async () => {
+    setTestAlertState('sending')
+    try {
+      await api.testAlerts()
+      setTestAlertState('success')
+    } catch {
+      setTestAlertState('error')
+    } finally {
+      setTimeout(() => setTestAlertState('idle'), 3000)
+    }
+  }
 
   const toggleExporter = (id: string) => {
     setDraft(toggleExporterInConfig(draft, id))
   }
+
+  const testAlertButtonClass = (() => {
+    if (testAlertState === 'success') return 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+    if (testAlertState === 'error') return 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+    return 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30'
+  })()
+
+  const testAlertContent = (() => {
+    if (testAlertState === 'success') return <><CheckCircle size={15} /><span>Test Sent Successfully</span></>
+    if (testAlertState === 'error') return <><XCircle size={15} /><span>Test Failed</span></>
+    return <><Bell size={15} /><span>Send Test Notification</span></>
+  })()
 
   return (
     <motion.div
@@ -379,6 +415,25 @@ export function Settings() {
             Export JSON
           </a>
         </div>
+      </div>
+
+      {/* Alerts */}
+      <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <Bell size={18} className="text-rose-400" />
+          <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">Alerts</h2>
+        </div>
+        <p className="text-xs text-slate-500">
+          Send a test notification to verify your alert providers are configured correctly.
+        </p>
+        <button
+          type="button"
+          onClick={handleTestAlert}
+          disabled={testAlertState === 'sending'}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${testAlertButtonClass}`}
+        >
+          {testAlertContent}
+        </button>
       </div>
 
       {/* Save */}
