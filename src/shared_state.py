@@ -2,7 +2,7 @@
 
 This module provides thread-safe access to singleton instances that need to be
 shared between the main scheduler process and the API process. Currently manages
-the AlertManager instance.
+the AlertManager instance and the latest SLA/diagnostics status.
 
 Thread Safety:
     All functions use an internal lock to ensure thread-safe access to shared state.
@@ -11,12 +11,16 @@ Thread Safety:
 from __future__ import annotations
 
 import threading
-from typing import TYPE_CHECKING
+from datetime import datetime
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from src.services.alert_manager import AlertManager
 
 _alert_manager: AlertManager | None = None
+_last_diagnostics: dict[str, Any] | None = None
+_outage_in_progress: bool = False
+_outage_start_time: datetime | None = None
 _lock = threading.Lock()
 
 
@@ -54,3 +58,42 @@ def get_alert_manager() -> AlertManager | None:
     """
     with _lock:
         return _alert_manager
+
+
+def set_last_diagnostics(diagnostics: dict[str, Any]) -> None:
+    """Store the latest per-run diagnostics (quality score, SLA result) for API access."""
+    global _last_diagnostics
+    with _lock:
+        _last_diagnostics = diagnostics
+
+
+def get_last_diagnostics() -> dict[str, Any] | None:
+    """Return the latest diagnostics dict, or None if no run has completed yet."""
+    with _lock:
+        return _last_diagnostics
+
+
+def set_outage_in_progress(value: bool) -> None:
+    """Thread-safe setter for the outage-in-progress flag."""
+    global _outage_in_progress
+    with _lock:
+        _outage_in_progress = value
+
+
+def get_outage_in_progress() -> bool:
+    """Return True when an outage is currently in progress."""
+    with _lock:
+        return _outage_in_progress
+
+
+def set_outage_start_time(value: datetime | None) -> None:
+    """Thread-safe setter for the outage start timestamp."""
+    global _outage_start_time
+    with _lock:
+        _outage_start_time = value
+
+
+def get_outage_start_time() -> datetime | None:
+    """Return the UTC timestamp when the current outage started, or None."""
+    with _lock:
+        return _outage_start_time

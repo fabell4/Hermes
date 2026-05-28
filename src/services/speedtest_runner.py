@@ -1,145 +1,140 @@
-"""SpeedtestRunner — wraps Ookla CLI, runs a test, and returns a SpeedResult."""
+"""SpeedtestRunner — orchestrates test providers with automatic fallback."""
 
-import json
+from __future__ import annotations
+
 import logging
-import shutil
-import subprocess  # nosec B404  # NOSONAR - Required to invoke Ookla CLI executable
-from datetime import datetime
-from typing import Any
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+import time
 
 from src import config
+from src.constants import ProviderType
 from src.models.speed_result import SpeedResult
+from src.providers.base import BaseTestProvider
+from src.providers.ndt7 import NDT7Provider
+from src.providers.ookla import OoklaProvider
 
 _log = logging.getLogger(__name__)
 
 
 class SpeedtestRunner:
-    """
-    Runs a speed test using official Ookla CLI and returns results as SpeedResult.
-    Retries once on transient failure before raising.
+    """Orchestrates speed test providers with automatic fallback.
 
-    Security: Uses absolute path to speedtest binary (resolved lazily) to prevent
-    PATH manipulation attacks.
+    Tries each provider in order. The primary provider (index 0) is retried
+    ``primary_retries - 1`` times on transient failure before falling back to
+    the next provider. Subsequent providers are tried once each.
+
+    When called with no arguments, builds the provider list from
+    SPEEDTEST_PROVIDERS and SPEEDTEST_SERVER_ID config.
     """
 
-    def __init__(self, speedtest_path: str | None = None) -> None:
+    def __init__(
+        self,
+        speedtest_path: str | None = None,
+        server_id: int | None = None,
+        providers: list[BaseTestProvider] | None = None,
+        primary_retries: int = 2,
+        retry_backoff_seconds: float = 0.0,
+    ) -> None:
         """
-        Initialize runner.
+        Initialize the runner.
 
         Args:
-            speedtest_path: Optional explicit path to speedtest binary.
-                           If None, will be resolved from PATH on first use.
-                           Used for testing and explicit binary location specification.
+            speedtest_path: Passed to OoklaProvider. Ignored when providers is given.
+            server_id: Overrides config.SPEEDTEST_SERVER_ID for OoklaProvider.
+                       Pass None to use the configured default.
+            providers: Explicit ordered list of providers (used in tests). When
+                       supplied, speedtest_path and server_id are ignored.
+            primary_retries: Total attempts for the primary provider (≥1).
+                             2 means one retry on failure (default).
+            retry_backoff_seconds: Seconds to wait between primary-provider
+                                   retry attempts. 0 disables backoff (default).
         """
-        self._speedtest_path: str | None = speedtest_path
-        self._path_resolved = speedtest_path is not None
+        self._speedtest_path = speedtest_path
+        # Explicit server_id overrides config; None defers to config.
+        self._server_id = (
+            server_id if server_id is not None else config.SPEEDTEST_SERVER_ID
+        )
+        self._primary_retries = max(1, primary_retries)
+        self._retry_backoff_seconds = max(0.0, retry_backoff_seconds)
+        if providers is not None:
+            self._providers = providers
+        else:
+            self._providers = self._build_providers()
 
-    def _get_speedtest_path(self) -> str:
-        """
-        Resolve and cache the speedtest binary path.
+    def _build_providers(self) -> list[BaseTestProvider]:
+        """Build the provider list from SPEEDTEST_PROVIDERS config."""
+        providers: list[BaseTestProvider] = []
+        for name in config.SPEEDTEST_PROVIDERS:
+            if name == ProviderType.OOKLA:
+                providers.append(
+                    OoklaProvider(
+                        speedtest_path=self._speedtest_path,
+                        server_id=self._server_id,
+                    )
+                )
+            elif name == ProviderType.NDT7:
+                providers.append(NDT7Provider())
+        if not providers:
+            # Should not happen due to config validation, but be defensive
+            _log.warning("No valid providers found in config; defaulting to Ookla.")
+            providers.append(
+                OoklaProvider(
+                    speedtest_path=self._speedtest_path,
+                    server_id=self._server_id,
+                )
+            )
+        return providers
 
-        Returns:
-            Absolute path to speedtest binary.
+    def _attempt_provider(
+        self, provider: BaseTestProvider, is_primary: bool
+    ) -> SpeedResult:
+        """Try a single provider, retrying up to ``_primary_retries`` times if primary.
 
         Raises:
-            RuntimeError: If speedtest CLI not found in PATH.
+            RuntimeError: If all attempts for this provider fail.
         """
-        if not self._path_resolved:
-            speedtest_path = shutil.which("speedtest")
-            if speedtest_path is None:
-                raise RuntimeError(
-                    "Ookla speedtest CLI not found in PATH. "
-                    "Install from https://www.speedtest.net/apps/cli"
-                )
-            self._speedtest_path = speedtest_path
-            self._path_resolved = True
-            _log.debug("Using speedtest binary at: %s", self._speedtest_path)
-
-        # Type narrowing: after _path_resolved is True, _speedtest_path is str
-        if self._speedtest_path is None:  # pragma: no cover
-            raise RuntimeError("Speedtest path not resolved.")
-        return self._speedtest_path
-
-    def run(self) -> SpeedResult:
-        """Run the speed test, retrying once on transient failure."""
-        last_exc: Exception | None = None
-        for attempt in range(2):
+        attempts = self._primary_retries if is_primary else 1
+        last_exc: RuntimeError | None = None
+        for attempt in range(attempts):
             try:
-                return self._attempt()
+                return provider.run()
             except RuntimeError as exc:
                 last_exc = exc
-                if attempt == 0:
-                    _log.warning("Speedtest attempt 1 failed (%s) — retrying.", exc)
+                if is_primary and attempt < attempts - 1:
+                    _log.warning(
+                        "Provider '%s' attempt %d/%d failed (%s) — retrying.",
+                        provider.name,
+                        attempt + 1,
+                        attempts,
+                        exc,
+                    )
+                    if self._retry_backoff_seconds > 0:
+                        time.sleep(self._retry_backoff_seconds)
+        if last_exc is None:  # pragma: no cover
+            raise RuntimeError("Provider loop completed without capturing an exception")
+        raise last_exc
+
+    def run(self) -> SpeedResult:
+        """Run the speed test, trying providers in order with fallback.
+
+        The primary provider is retried once on failure. All subsequent providers
+        are attempted once each. Raises RuntimeError if every provider fails.
+        """
+        if not self._providers:
+            raise RuntimeError("No test providers configured.")
+
+        last_exc: Exception | None = None
+        for i, provider in enumerate(self._providers):
+            try:
+                return self._attempt_provider(provider, is_primary=(i == 0))
+            except RuntimeError as exc:
+                last_exc = exc
+                if i + 1 < len(self._providers):
+                    _log.warning(
+                        "Provider '%s' failed — falling back to '%s'.",
+                        provider.name,
+                        self._providers[i + 1].name,
+                    )
+
         if last_exc is None:  # pragma: no cover
             raise RuntimeError("Speedtest failed with no recorded exception.")
         raise last_exc
-
-    def _attempt(self) -> SpeedResult:
-        """Execute a single speed test attempt using Ookla CLI."""
-        try:
-            # Run speedtest CLI with JSON output and accept license automatically
-            # Security: All arguments are hardcoded strings (no user input)
-            # Uses absolute path to prevent PATH injection
-            speedtest_path = self._get_speedtest_path()
-            result = subprocess.run(  # nosec B603  # NOSONAR - No user input, hardcoded args only
-                [
-                    speedtest_path,
-                    "--accept-license",
-                    "--accept-gdpr",
-                    "--format=json",
-                ],
-                capture_output=True,
-                text=True,
-                timeout=120,  # 2 minute timeout
-                check=True,
-            )
-
-            data: dict[str, Any] = json.loads(result.stdout)
-
-            # Parse timezone
-            _tz_name = config.TIMEZONE
-            try:
-                _tz = ZoneInfo(_tz_name)
-            except ZoneInfoNotFoundError:
-                _tz = ZoneInfo("UTC")
-
-            # Extract values from Ookla JSON format
-            # Bandwidth is in bytes/s, multiply by 8 for bits/s
-            server = data.get("server", {})
-            download_bps = data.get("download", {}).get("bandwidth", 0) * 8
-            upload_bps = data.get("upload", {}).get("bandwidth", 0) * 8
-            ping_data = data.get("ping", {})
-            ping_ms = ping_data.get("latency", 0)
-            jitter_ms = ping_data.get("jitter")
-
-            # Parse server_id as int (Ookla returns int, but ensure type safety)
-            server_id_raw = server.get("id")
-            server_id = int(server_id_raw) if server_id_raw is not None else None
-
-            return SpeedResult(
-                timestamp=datetime.now(_tz),
-                download_mbps=round(download_bps / 1_000_000, 2),
-                upload_mbps=round(upload_bps / 1_000_000, 2),
-                ping_ms=round(ping_ms, 2),
-                server_name=server.get("name", "Unknown"),
-                server_location=f"{server.get('location', '')}, {server.get('country', '')}",
-                server_id=server_id,
-                jitter_ms=round(jitter_ms, 2) if jitter_ms is not None else None,
-                isp_name=data.get("isp"),
-            )
-
-        except subprocess.TimeoutExpired as exc:
-            raise RuntimeError("Speedtest timed out after 120 seconds.") from exc
-
-        except subprocess.CalledProcessError as exc:
-            stderr = exc.stderr or ""
-            raise RuntimeError(
-                f"Speedtest CLI failed (exit {exc.returncode}): {stderr.strip()}"
-            ) from exc
-
-        except (json.JSONDecodeError, KeyError, TypeError) as exc:
-            raise RuntimeError(f"Failed to parse speedtest output: {exc}") from exc
-
-        except FileNotFoundError as exc:
-            raise RuntimeError("Speedtest CLI not found — check installation.") from exc

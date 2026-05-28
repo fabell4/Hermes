@@ -176,7 +176,8 @@ def test_run_test_registers_csv_exporter():
     mock_runner = MagicMock()
     mock_runner.return_value.run.return_value = result
     mock_dispatcher = MagicMock()
-    mock_csv = MagicMock()
+    mock_csv_instance = MagicMock()
+    mock_registry = {"csv": lambda: mock_csv_instance}
 
     trigger_module._test_lock.acquire()  # pylint: disable=protected-access
     with (
@@ -186,7 +187,7 @@ def test_run_test_registers_csv_exporter():
             return_value=["csv"],
         ),
         patch("src.api.routes.trigger.ResultDispatcher", mock_dispatcher),
-        patch("src.api.routes.trigger.CSVExporter", mock_csv),
+        patch("src.api.routes.trigger.EXPORTER_REGISTRY", mock_registry),
     ):
         trigger_module._run_test()
 

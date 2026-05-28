@@ -11,10 +11,14 @@ tzlocal==5.3.1
 prometheus_client==0.24.1
 requests==2.33.0
 types-requests==2.33.0.20260402
+influxdb-client==1.48.0
+
+# --- Test Providers ---
+websockets==16.0
 
 # --- REST API ---
 fastapi==0.136.1
-starlette==1.0.0
+starlette==1.0.1
 uvicorn[standard]==0.34.3
 httpx==0.28.1
 aiofiles==24.1.0

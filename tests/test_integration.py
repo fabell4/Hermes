@@ -76,7 +76,7 @@ def test_speedtest_to_csv_export_lifecycle(tmp_path):
     dispatcher = ResultDispatcher()
     dispatcher.add_exporter("csv", exporter)
 
-    with patch("src.services.speedtest_runner.subprocess.run") as mock_run:
+    with patch("src.providers.ookla.subprocess.run") as mock_run:
         mock_run.return_value = Mock(
             stdout=json.dumps(
                 {

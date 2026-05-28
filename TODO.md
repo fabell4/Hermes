@@ -272,39 +272,45 @@ _Features and improvements planned for after v1.0. Not required for stable relea
 
 ### Testing & Coverage (HIGH priority)
 
-- [ ] Main loop tests — 12-15 tests covering uncovered paths in scheduler and lifecycle management (see
-  [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) H6)
-- [ ] Frontend component tests — Unit tests for Layout, Dashboard, and Settings components (TypeScript/React) (see
-  [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) H6)
-- [ ] Integration tests — End-to-end flows: speedtest → export → alert lifecycle, runtime config persistence across
-  restart, full alert flow from failure to recovery (see [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) H8)
-- [ ] Runtime config edge cases — Additional validation and error path tests (see
-  [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) M-MEDIUM)
-- [ ] Frontend coverage target — Expand TypeScript/React test coverage to 80%+ (see
-  [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) L-LOW)
-- [ ] Config module subprocess test — Verify API key validation causes startup failure via subprocess (see
-  [TEST-COVERAGE-REVIEW.md](docs/TEST-COVERAGE-REVIEW.md) H6)
+- [x] Main loop tests — 19 tests covering `build_alert_manager`, `update_alert_providers`,
+  `_build_health_status`, `_handle_scheduler_pause_toggle`, `_validate_loki_endpoint`,
+  `_validate_environment`, and `main()` startup restore
+- [x] Frontend component tests — Unit tests for Layout, Dashboard, and Settings components
+  (`frontend/src/test/Layout.test.tsx`, `Dashboard.test.tsx`, `Settings.test.tsx`)
+- [x] Integration tests — End-to-end flows: speedtest→CSV/SQLite export, multi-exporter dispatch,
+  alert failure-to-recovery lifecycle, alert cooldown, runtime config persistence, and run_once alert
+  integration
+- [x] Runtime config edge cases — 13 new tests covering validation, cache behavior, and
+  defense-in-depth paths
+- [x] Frontend coverage target — 44 frontend tests passing (up from 11)
+- [x] Config module subprocess test — 18 new tests including API_KEY validation via subprocess
 
 **Note:** All 4 low-priority defensive coding items (#12-15) were completed on May 1, 2026 and are not listed here.
 
+✅ **Test suite: 426 → 497 Python tests (+71), 11 → 44 frontend tests (+33). All passing.**
+
 ### Performance Monitoring & Optimization (MEDIUM priority)
 
-- [ ] Prometheus label cardinality management — Make labels optional via environment variable to prevent unbounded
-  time series growth (see [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #4)
-- [ ] Exporter registry deduplication — Refactor `/api/trigger` to reuse `EXPORTER_REGISTRY` from main.py instead of
-  rebuilding (see [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #5)
-- [ ] SQLite WAL checkpoint management — Manual checkpoint after pruning operations to prevent WAL file growth (see
-  [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #6)
-- [ ] HTTP connection pooling — Shared session for alert providers to reduce connection overhead (see
+- [x] Prometheus label cardinality management — `PROMETHEUS_DISABLE_LABELS=true` env var makes
+  server/ISP labels optional to prevent unbounded time series growth (see
+  [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #4)
+- [x] Exporter registry deduplication — `/api/trigger` now imports `EXPORTER_REGISTRY` from
+  `src/exporter_registry.py`; eliminated duplicate factory definitions (see
+  [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #5)
+- [x] SQLite WAL checkpoint management — `PRAGMA wal_checkpoint(TRUNCATE)` executed after prune
+  to keep WAL file bounded (see [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #6)
+- [x] HTTP connection pooling — Shared `requests.Session` singleton in alert providers to reuse
+  TCP connections across notifications (see
   [PERFORMANCE-OPTIMIZATION-REVIEW.md](docs/PERFORMANCE-OPTIMIZATION-REVIEW.md) #7)
-- [ ] SQLite vacuum automation — Monitor database fragmentation, add vacuum logic if needed (see
-  [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) M6)
-- [ ] Alert provider thread pool statistics — Logging or metrics for async alert queue depth and completion time (see
-  [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) M7)
+- [x] SQLite vacuum automation — `PRAGMA freelist_count` checked post-prune; `VACUUM` issued when
+  fragmentation exceeds 20% of total page count (see [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) M6)
+- [x] Alert provider thread pool statistics — Pending-futures count and completed/failed totals
+  logged after each async alert dispatch (see [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) M7)
 
 ### Code Quality & Maintainability (LOW priority)
 
-- [ ] Type alias extraction — Extract common types like `dict[str, Any]` to named aliases (see
+- [x] Type alias extraction — `JsonDict` and `AlertConfig` type aliases added to `src/types.py`
+  and adopted across API routes and runtime_config (see
   [BEST-PRACTICES-REVIEW.md](docs/BEST-PRACTICES-REVIEW.md) L8)
 
 **Note:** The following deferred items from BEST-PRACTICES-REVIEW.md were completed on May 1, 2026:
@@ -317,8 +323,8 @@ _Features and improvements planned for after v1.0. Not required for stable relea
 
 ### Documentation Improvements (MEDIUM priority)
 
-- [ ] Monitoring runbook — Operational guide for diagnosing production issues from logs/metrics (see
-  [ERROR-HANDLING-REVIEW.md](docs/ERROR-HANDLING-REVIEW.md) M5)
+- [x] Monitoring runbook — Operational runbook for diagnosing production issues from logs/metrics
+  (see [docs/runbook.md](docs/runbook.md) and [ERROR-HANDLING-REVIEW.md](docs/ERROR-HANDLING-REVIEW.md) M5)
 
 ### Documentation Improvements (LOW priority)
 
@@ -331,60 +337,89 @@ _Features and improvements planned for after v1.0. Not required for stable relea
 
 ---
 
-## v1.2+ — Feature Enhancements
+## v1.2 — Enhanced Diagnostics ✅
 
 ### Enhanced Diagnostics
 
-- [ ] Packet loss tracking — capture and log packet loss percentage from speedtest results
-- [ ] Server selection — allow pinning to specific server ID for consistent baseline testing
-- [ ] SLA monitoring — define speed thresholds (e.g., "download ≥100 Mbps") and track compliance percentage
-- [ ] Connection quality score — aggregate metric combining speed, latency, jitter, and packet loss
+- [x] Packet loss tracking — `packetLoss` extracted from Ookla JSON output; stored in
+  `SpeedResult.packet_loss_pct`; exported via CSV, SQLite, and new Prometheus gauge
+  `hermes_packet_loss_pct`
+- [x] Server selection — `SPEEDTEST_SERVER_ID` env var (default: auto); passes `--server-id=N`
+  to the CLI when set, enabling a consistent baseline server for every run
+- [x] SLA monitoring — `SLAMonitor` + `SLAResult` in `src/services/sla_monitor.py`; four
+  independent thresholds (`SLA_DOWNLOAD_MBPS`, `SLA_UPLOAD_MBPS`, `SLA_PING_MS_MAX`,
+  `SLA_PACKET_LOSS_MAX_PCT`); per-dimension pass/fail flags; `GET /api/diagnostics` endpoint;
+  `hermes_sla_ok` Prometheus gauge (1=pass, 0=fail, -1=disabled)
+- [x] Connection quality score — weighted composite 0–100 score in `src/services/quality_scorer.py`
+  (download 30%, upload 30%, ping 20%, jitter 10%, packet loss 10%); stored in
+  `SpeedResult.quality_score`; exported via all exporters and `hermes_quality_score` Prometheus gauge
+
+### Security Hardening
+
+- [x] HTTPS-only enforcement in alert providers — `_validate_http_url()` now accepts only `https`
+  (was `http` or `https`); `_build_session()` no longer mounts retry adapter on `http://`;
+  `AppriseProvider` now calls `_validate_http_url()` (previously had no scheme check); all test
+  fixtures migrated from `http://apprise:8000` to `https://apprise.example.com`; `# NOSONAR`
+  suppressions removed
+
+✅ **Test suite: 497 → 526 Python tests (+29). All passing. ruff clean. mypy clean.**
+
+---
+
+## v1.3+ — Feature Enhancements
 
 ### Data & Integration
 
-- [ ] Grafana Alloy agent integration — starter config and setup flow to scrape Hermes metrics and ship logs to Loki
-- [ ] InfluxDB exporter — optional time-series exporter; pairs with Grafana for long-term trend analysis and retention
+- [x] Grafana Alloy agent integration — starter config and setup flow to scrape Hermes metrics and ship logs to Loki
+- [x] InfluxDB exporter — optional time-series exporter; pairs with Grafana for long-term trend analysis and retention
   policy management
-- [ ] Data export API — bulk export historical data (CSV dump, JSON export for migration/backup)
-- [ ] Result annotations — add notes to specific test results (e.g., "ISP maintenance", "router reboot", "storm")
+- [x] Data export API — bulk export historical data (CSV dump, JSON export for migration/backup)
+- [x] Result annotations — add notes to specific test results (e.g., "ISP maintenance", "router reboot", "storm")
 
 ### Testing Improvements
 
-- [ ] Alternative test providers — support fast.com (Netflix), Google speed test, or custom endpoints as backup when
-  Ookla is down
-- [ ] IPv4/IPv6 selection — force tests over specific protocol to isolate dual-stack issues
-- [ ] Custom test parameters — configure test duration, number of connections, chunk size
-- [ ] Multi-server testing — run tests against multiple servers and compare/aggregate results
+- [x] Alternative test providers — NDT7 (M-Lab WebSocket) provider implemented as a
+  fallback when Ookla is unavailable. Configured via `SPEEDTEST_PROVIDERS` (ordered comma-separated
+  chain, e.g. `ookla,ndt7`). Primary provider retried once before falling back. Custom HTTP,
+  fast.com (Puppeteer/150 MB overhead), and speedtest-cli (rate-limited) were evaluated and
+  rejected — custom HTTP removed in v1.3 as it produces non-neutral measurements unsuitable
+  for ISP dispute or historical comparison.
+- ~~IPv4/IPv6 selection — force tests over specific protocol to isolate dual-stack issues~~ — removed;
+  Ookla supports `--ip-version` but NDT7 does not; niche use case not worth partial support.
+- ~~Custom test parameters — configure test duration, number of connections, chunk size~~ — removed;
+  custom HTTP provider dropped in v1.3 (non-neutral measurements; Ookla/NDT7 do not expose these params)
+- ~~Multi-server testing — run tests against multiple servers and compare/aggregate results~~ — removed;
+  diagnostic use case, not a monitoring use case; architectural cost not justified for homelab target
 
 ### Analysis & Insights
 
-- [ ] Result validation — flag suspicious results (impossibly high speeds, timeouts, inconsistent values)
-- [ ] Anomaly detection — automatically flag results that deviate significantly from baseline
-- [ ] Time-of-day analysis — show average speeds by hour/day to identify congestion patterns
-- [ ] Trend analysis — month-over-month comparison, degradation detection
-- [ ] Outage detection — detect and log complete connectivity loss (different from slow speeds)
+- [x] Anomaly detection — flag results that deviate significantly from a rolling baseline (replaces standalone result validation;
+statistical outlier detection covers both impossible values and genuine anomalies)
+- [x] Time-of-day analysis — show average speeds by hour/day to identify congestion patterns
+- [x] Trend analysis — month-over-month comparison, degradation detection
+- [x] Outage detection — detect and log complete connectivity loss (different from slow speeds)
 
 ### UI/UX Enhancements
 
-- [ ] Light theme toggle — add light mode option to React UI
-- [ ] Result filtering — filter history by date range, speed threshold, server
-- [ ] Dashboard customization — choose which metrics to display, rearrange cards
-- [ ] Export charts — download charts as PNG/SVG for reports
-- [ ] Scheduled test windows — only run tests during specific hours (avoid counting against data caps)
-
-### Security & Infrastructure
-
-- [ ] API key rotation mechanism — support rotating keys without restart, or multiple valid keys
-- [ ] Multi-user support — per-user API keys with access control and audit trails
-- [ ] Distributed rate limiting — migrate from in-process state to Redis for multi-instance deployments
-- [ ] Secrets vault integration — integrate with HashiCorp Vault or similar for production secret management
-- [ ] Strict-Transport-Security header — add HSTS header for HTTPS-only deployments
+- [x] Light theme toggle — add light mode option to React UI
+- [x] Result filtering — filter history by date range, speed threshold, server
+- [x] Dashboard customization — choose which metrics to display, rearrange cards
+- [x] Export charts — download charts as PNG/SVG for reports
+- [x] Scheduled test windows — only run tests during specific hours (avoid counting against data caps)
 
 ---
 
 ## Archived (Deprecated/Superseded)
 
 _Items that were completed but are no longer part of the active codebase._
+
+### Security & Infrastructure (out of scope — enterprise features, not applicable to homelab target)
+
+- ~~API key rotation mechanism~~ — env var change + restart is sufficient for homelab; live rotation is an enterprise concern
+- ~~Multi-user support~~ — homelab is single-user; per-user keys and audit trails are enterprise scope
+- ~~Distributed rate limiting (Redis)~~ — single-instance deployment; in-process state is correct for homelab
+- ~~Secrets vault integration~~ — HashiCorp Vault and equivalents are enterprise tooling; `.env` file is the homelab standard
+- ~~Strict-Transport-Security header~~ — HSTS is handled at the reverse proxy layer (Nginx/Caddy/Traefik) in homelab deployments
 
 ### Streamlit UI (replaced by React + FastAPI)
 

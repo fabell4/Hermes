@@ -8,6 +8,7 @@ nav:
   - API Reference: api-reference.md
   - Security: security.md
   - Alerts: alerts.md
+  - Grafana Alloy: alloy.md
   - Release Process: RELEASE-PROCESS.md
   - Security Audit: SECURITY-AUDIT.md
   - Security Enhancements: SECURITY-ENHANCEMENTS.md

@@ -33,6 +33,7 @@ title: "Error Catalog"
 | Rate limit exceeded | `HTTPException(429)` | Medium | Too many requests from client | Implement backoff, reduce request frequency |
 
 **Prevention:**
+
 - Always send `X-Api-Key` header
 - Store API key securely (environment variable, secrets vault)
 - Implement client-side rate limiting
@@ -47,6 +48,7 @@ title: "Error Catalog"
 | Runtime config save failed | `HTTPException(500)` | High | Filesystem error saving config | Check permissions, disk space |
 
 **Prevention:**
+
 - Validate payload before sending (client-side validation)
 - Ensure data directory is writable
 - Use atomic writes (handled by backend)
@@ -62,6 +64,7 @@ title: "Error Catalog"
 | Database query failed | `HTTPException(500)` | High | SQLite error during query | Check database integrity, reduce page_size |
 
 **Prevention:**
+
 - Enable SQLite exporter
 - Trigger first speedtest after deployment
 - Use reasonable page sizes (≤100)
@@ -76,6 +79,7 @@ title: "Error Catalog"
 | Trigger file write failed | Internal | Medium | Filesystem error | Check permissions on data directory |
 
 **Prevention:**
+
 - Monitor system resources (threads, memory)
 - Ensure data directory is writable
 - Don't trigger tests too frequently (respect rate limits)
@@ -95,6 +99,7 @@ title: "Error Catalog"
 | SSRF protection triggered | `HTTPException(400)` | High | URL points to private IP | Use public URLs only (not 127.0.0.1, 10.x, etc.) |
 
 **Prevention:**
+
 - Validate alert configuration before submitting
 - Use only public URLs for webhooks (no localhost, private IPs)
 - Keep threshold reasonable (2-5 failures)
@@ -115,6 +120,7 @@ title: "Error Catalog"
 | Invalid LOKI_TIMEOUT | `ValueError` | Medium | Timeout not positive | Use positive integer (seconds) |
 
 **Prevention:**
+
 - Use `.env.example` as template
 - Generate secure random API key
 - Validate environment variables before deployment
@@ -136,6 +142,7 @@ title: "Error Catalog"
 | Temp file cleanup failed | Warning | Low | Orphaned temp file | Non-fatal, temp file remains |
 
 **Prevention:**
+
 - Don't manually edit runtime_config.json (use API)
 - Ensure data directory is writable
 - Monitor disk space
@@ -156,6 +163,7 @@ title: "Error Catalog"
 | All exporters failed | `DispatchError` | High | Every exporter failed | Check system health, connectivity |
 
 **Prevention:**
+
 - Always register at least one exporter
 - Monitor exporter health (Prometheus, Loki, SQLite)
 - Test exporters individually before enabling
@@ -176,6 +184,7 @@ title: "Error Catalog"
 | Max rows exceeded (prune disabled) | Warning | Low | File growing unbounded | Enable pruning or manual cleanup |
 
 **Prevention:**
+
 - Ensure logs/ directory exists and is writable
 - Enable pruning (max_rows or retention_days)
 - Monitor file size: `du -h logs/results.csv`
@@ -194,6 +203,7 @@ title: "Error Catalog"
 | Label cardinality too high | Warning | Low | Too many unique label combinations | Disable dynamic labels if needed |
 
 **Prevention:**
+
 - Use dedicated port for Prometheus (9090-9100)
 - Check port availability before starting: `netstat -an | grep :9090`
 - Monitor metric cardinality (avoid unbounded ISP labels)
@@ -216,6 +226,7 @@ title: "Error Catalog"
 | Loki push rejected (HTTP error) | `RuntimeError` | High | Loki returned 4xx/5xx | Check Loki logs, verify auth/tenant |
 
 **Prevention:**
+
 - Test Loki connectivity before enabling: `curl http://loki:3100/ready`
 - Use reasonable timeout (5-10 seconds)
 - Monitor Loki health and resource usage
@@ -236,6 +247,7 @@ title: "Error Catalog"
 | Disk full during write | `OSError` | Critical | No space for database growth | Free disk space or increase volume size |
 
 **Prevention:**
+
 - Use WAL mode (enabled by default) for better concurrency
 - Monitor database size: `du -h data/results.db`
 - Regular integrity checks: `sqlite3 data/results.db "PRAGMA integrity_check;"`
@@ -247,23 +259,29 @@ title: "Error Catalog"
 
 ## Services
 
-### Speedtest Runner (`src/services/speedtest_runner.py`)
+### Speedtest Runner (`src/services/speedtest_runner.py` + `src/providers/`)
 
-| Error | Type | Severity | Cause | Remediation |
-|-------|------|----------|-------|-------------|
-| speedtest-cli not found | `FileNotFoundError` | Critical | Command not installed | Install: `pip install speedtest-cli` |
-| Speedtest execution failed | `RuntimeError` | High | Command returned non-zero | Check internet connectivity |
-| Speedtest timed out (>120s) | `TimeoutError` | High | Test didn't complete in time | Check network speed, ISP issues |
-| JSON parse failed | `ValueError` | High | Invalid JSON from speedtest | Update speedtest-cli, check stderr |
-| Result validation failed | `ValueError` | Medium | Missing required fields | Update speedtest-cli version |
-| All retry attempts exhausted | `RuntimeError` | High | Both attempts failed | Check persistent connectivity issues |
+| Error | Provider | Severity | Cause | Remediation |
+|-------|----------|----------|-------|-------------|
+| Ookla CLI not found | `ookla` | Critical | Binary not installed or not in PATH | Install from <https://www.speedtest.net/apps/cli> |
+| Speedtest execution failed | `ookla` | High | CLI returned non-zero exit code | Check internet connectivity; run `speedtest` manually |
+| Speedtest timed out (>120s) | `ookla` | High | Test did not complete in time | Check network speed or ISP issues |
+| JSON parse failed | `ookla` | High | Invalid output from Ookla CLI | Update Ookla CLI; inspect stderr in logs |
+| NDT7 locate request failed | `ndt7` | High | Cannot reach M-Lab Locate API | Check outbound HTTPS; M-Lab may be at capacity |
+| NDT7 WebSocket error | `ndt7` | High | WebSocket connection dropped | Check firewall; verify WSS (port 443) is allowed |
+| Custom HTTP download failed | `custom` | High | Request to download URL failed | Verify `SPEEDTEST_CUSTOM_URL_DOWNLOAD` is reachable |
+| Custom HTTP upload failed | `custom` | Medium | POST to upload URL failed | Verify `SPEEDTEST_CUSTOM_URL_UPLOAD` accepts POST |
+| Custom URL scheme invalid | `custom` | Critical | Non-HTTP/S scheme in URL | Only `http://` and `https://` URLs are accepted |
+| All providers exhausted | all | High | Every provider in the chain failed | Check connectivity; review per-provider errors above |
 
 **Prevention:**
-- Verify speedtest-cli is installed: `speedtest --version`
-- Test manually: `speedtest --json`
-- Check internet connectivity: `ping 8.8.8.8`
+
+- Verify Ookla CLI (if used): `speedtest --version`
+- Test Ookla manually: `speedtest --format=json`
+- For `ndt7`: ensure outbound WSS traffic is allowed on port 443
+- For `custom`: confirm download/upload URLs respond before deploying
 - Monitor consecutive failure count for alerts
-- Verify ISP is not blocking speedtest traffic
+- Configure a fallback chain, e.g., `SPEEDTEST_PROVIDERS=ookla,ndt7`
 
 ---
 
@@ -277,6 +295,7 @@ title: "Error Catalog"
 | Alert send timed out | Warning | Medium | Provider didn't respond | Check provider health, network |
 
 **Prevention:**
+
 - Test alert providers before enabling
 - Monitor alert provider health
 - Don't set threshold too low (avoid alert storms)
@@ -400,7 +419,7 @@ docker-compose logs | grep "Alert.*failed"
 
 ### Speedtest Failures
 
-```
+``` text
 Speedtest fails
 ├─ Error: "command not found"
 │  └─ Fix: Install speedtest-cli
@@ -416,7 +435,7 @@ Speedtest fails
 
 ### Exporter Failures
 
-```
+``` text
 Exporter fails
 ├─ CSV Exporter
 │  ├─ Error: "Permission denied"
@@ -444,7 +463,7 @@ Exporter fails
 
 ### API Authentication Failures
 
-```
+``` text
 API request fails
 ├─ Status: 401 (Unauthorized)
 │  └─ Fix: Add X-Api-Key header

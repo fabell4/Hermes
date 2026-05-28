@@ -22,6 +22,7 @@ from src.main import (
     update_exporters,
     _build_health_status,
     _handle_scheduler_pause_toggle,
+    _is_within_test_window,
     _poll_once,
     _validate_environment,
     _validate_loki_endpoint,
@@ -60,7 +61,7 @@ def _make_mock_speedtest_json() -> str:
     )
 
 
-@patch("src.services.speedtest_runner.subprocess.run")
+@patch("src.providers.ookla.subprocess.run")
 def test_speedtest_runner_run_success(mock_run):
     mock_result = Mock()
     mock_result.stdout = _make_mock_speedtest_json()
@@ -193,14 +194,14 @@ def test_build_dispatcher_skips_loki_on_init_error(monkeypatch, caplog):
 # ---------------------------------------------------------------------------
 
 
-@patch("src.services.speedtest_runner.subprocess.run")
+@patch("src.providers.ookla.subprocess.run")
 def test_speedtest_runner_raises_on_timeout(mock_run):
     mock_run.side_effect = subprocess.TimeoutExpired(cmd=["speedtest"], timeout=120)
     with pytest.raises(RuntimeError, match="timed out"):
         SpeedtestRunner("/usr/bin/speedtest").run()
 
 
-@patch("src.services.speedtest_runner.subprocess.run")
+@patch("src.providers.ookla.subprocess.run")
 def test_speedtest_runner_raises_on_process_error(mock_run):
     mock_run.side_effect = subprocess.CalledProcessError(
         returncode=1, cmd=["speedtest"], stderr="network error"
@@ -209,7 +210,7 @@ def test_speedtest_runner_raises_on_process_error(mock_run):
         SpeedtestRunner("/usr/bin/speedtest").run()
 
 
-@patch("src.services.speedtest_runner.subprocess.run")
+@patch("src.providers.ookla.subprocess.run")
 def test_speedtest_runner_raises_on_json_decode_error(mock_run):
     mock_result = Mock()
     mock_result.stdout = "not valid json"
@@ -219,14 +220,14 @@ def test_speedtest_runner_raises_on_json_decode_error(mock_run):
         SpeedtestRunner("/usr/bin/speedtest").run()
 
 
-@patch("src.services.speedtest_runner.subprocess.run")
+@patch("src.providers.ookla.subprocess.run")
 def test_speedtest_runner_raises_on_file_not_found(mock_run):
     mock_run.side_effect = FileNotFoundError("speedtest not found")
     with pytest.raises(RuntimeError, match="not found"):
         SpeedtestRunner("/usr/bin/speedtest").run()
 
 
-@patch("src.services.speedtest_runner.subprocess.run")
+@patch("src.providers.ookla.subprocess.run")
 def test_speedtest_runner_retries_once_on_transient_failure(mock_run):
     """First attempt raises; second attempt succeeds — run() should return result."""
     # First call fails
@@ -241,7 +242,7 @@ def test_speedtest_runner_retries_once_on_transient_failure(mock_run):
     assert mock_run.call_count == 2
 
 
-@patch("src.services.speedtest_runner.subprocess.run")
+@patch("src.providers.ookla.subprocess.run")
 def test_speedtest_runner_raises_after_two_failures(mock_run):
     """Both attempts fail — run() should raise RuntimeError."""
     mock_run.side_effect = subprocess.TimeoutExpired(cmd=["speedtest"], timeout=120)
@@ -380,6 +381,20 @@ def test_poll_once_trigger_fires_calls_run_once(monkeypatch):
     )
     monkeypatch.setattr(main_module.runtime_config, "set_next_run_at", lambda t: None)
     monkeypatch.setattr(main_module.runtime_config, "set_last_run_at", lambda t: None)
+    monkeypatch.setattr(main_module, "compute_quality_score", lambda r: 85.0)
+    monkeypatch.setattr(
+        main_module,
+        "SLAMonitor",
+        lambda **kw: MagicMock(
+            check=lambda r: MagicMock(
+                overall_ok=True,
+                download_ok=None,
+                upload_ok=None,
+                ping_ok=None,
+                packet_loss_ok=None,
+            )
+        ),
+    )
 
     result = MagicMock()
     service.run.return_value = result
@@ -453,16 +468,20 @@ def test_poll_once_resume_calls_resume_job(monkeypatch):
 
 
 def test_build_loki_exporter_raises_without_url(monkeypatch):
-    monkeypatch.setattr(main_module.config, "LOKI_URL", "")
-    with pytest.raises(ValueError, match="LOKI_URL"):
-        main_module._build_loki_exporter()
+    import src.exporter_registry as reg
+
+    monkeypatch.setattr(reg.config, "LOKI_URL", "")
+    result = reg._build_loki()
+    assert result is None
 
 
 def test_build_loki_exporter_returns_loki_exporter(monkeypatch):
-    monkeypatch.setattr(main_module.config, "LOKI_URL", "http://localhost:3100")
-    monkeypatch.setattr(main_module.config, "LOKI_JOB_LABEL", "hermes")
+    import src.exporter_registry as reg
 
-    exporter = main_module._build_loki_exporter()
+    monkeypatch.setattr(reg.config, "LOKI_URL", "http://localhost:3100")
+    monkeypatch.setattr(reg.config, "LOKI_JOB_LABEL", "hermes")
+
+    exporter = reg._build_loki()
 
     assert isinstance(exporter, LokiExporter)
 
@@ -537,7 +556,9 @@ def test_main_shuts_down_cleanly_on_keyboard_interrupt(monkeypatch):
     monkeypatch.setattr(main_module, "SpeedtestRunner", MagicMock)
     monkeypatch.setattr(main_module, "build_dispatcher", MagicMock)
     monkeypatch.setattr(main_module, "build_alert_manager", MagicMock)
-    monkeypatch.setattr(main_module, "build_scheduler", lambda s, d, a: mock_scheduler)
+    monkeypatch.setattr(
+        main_module, "build_scheduler", lambda s, d, a, m=None, o=None: mock_scheduler
+    )
     monkeypatch.setattr(main_module, "HealthServer", MagicMock)
     monkeypatch.setattr(
         main_module.time, "sleep", MagicMock(side_effect=KeyboardInterrupt)
@@ -576,7 +597,9 @@ def test_main_run_on_startup_and_poll_loop(monkeypatch):
     monkeypatch.setattr(main_module, "SpeedtestRunner", MagicMock)
     monkeypatch.setattr(main_module, "build_dispatcher", MagicMock)
     monkeypatch.setattr(main_module, "build_alert_manager", MagicMock)
-    monkeypatch.setattr(main_module, "build_scheduler", lambda s, d, a: mock_scheduler)
+    monkeypatch.setattr(
+        main_module, "build_scheduler", lambda s, d, a, m=None, o=None: mock_scheduler
+    )
     monkeypatch.setattr(main_module, "HealthServer", MagicMock)
     # sleep succeeds once; _poll_once raises KeyboardInterrupt to exit the loop
     monkeypatch.setattr(main_module.time, "sleep", lambda _: None)
@@ -586,7 +609,7 @@ def test_main_run_on_startup_and_poll_loop(monkeypatch):
     # run_once needs mark_running/mark_done; service.run raises so no dispatch needed
     mock_svc = MagicMock()
     mock_svc.run.side_effect = RuntimeError("skip")
-    monkeypatch.setattr(main_module, "SpeedtestRunner", lambda: mock_svc)
+    monkeypatch.setattr(main_module, "SpeedtestRunner", lambda **kw: mock_svc)
 
     with pytest.raises(KeyboardInterrupt):
         main_module.main()
@@ -813,7 +836,7 @@ def test_validate_loki_endpoint_timeout(mock_head, caplog):
     mock_head.side_effect = requests.exceptions.Timeout()
 
     with caplog.at_level(logging.WARNING):
-        _validate_loki_endpoint("http://loki:3100")
+        _validate_loki_endpoint("https://loki.example.com")
 
     assert "timed out" in caplog.text
 
@@ -824,7 +847,7 @@ def test_validate_loki_endpoint_connection_error(mock_head, caplog):
     mock_head.side_effect = requests.exceptions.ConnectionError("refused")
 
     with caplog.at_level(logging.WARNING):
-        _validate_loki_endpoint("http://loki:3100")
+        _validate_loki_endpoint("https://loki.example.com")
 
     assert "unreachable" in caplog.text
 
@@ -839,7 +862,7 @@ def test_validate_loki_endpoint_http_error(mock_head, caplog):
     mock_head.return_value = mock_response
 
     with caplog.at_level(logging.WARNING):
-        _validate_loki_endpoint("http://loki:3100")
+        _validate_loki_endpoint("https://loki.example.com")
 
     assert "HTTP error" in caplog.text
 
@@ -850,7 +873,7 @@ def test_validate_loki_endpoint_generic_request_error(mock_head, caplog):
     mock_head.side_effect = requests.exceptions.RequestException("ssl error")
 
     with caplog.at_level(logging.WARNING):
-        _validate_loki_endpoint("http://loki:3100")
+        _validate_loki_endpoint("https://loki.example.com")
 
     assert "validation failed" in caplog.text
 
@@ -863,7 +886,7 @@ def test_validate_loki_endpoint_success(mock_head):
     mock_head.return_value = mock_response
 
     # Should not raise
-    _validate_loki_endpoint("http://loki:3100")
+    _validate_loki_endpoint("https://loki.example.com")
     mock_head.assert_called_once()
 
 
@@ -936,7 +959,9 @@ def test_main_restores_paused_state_on_startup(monkeypatch):
     monkeypatch.setattr(main_module, "SpeedtestRunner", MagicMock)
     monkeypatch.setattr(main_module, "build_dispatcher", MagicMock)
     monkeypatch.setattr(main_module, "build_alert_manager", MagicMock)
-    monkeypatch.setattr(main_module, "build_scheduler", lambda s, d, a: mock_scheduler)
+    monkeypatch.setattr(
+        main_module, "build_scheduler", lambda s, d, a, m=None, o=None: mock_scheduler
+    )
     monkeypatch.setattr(main_module, "HealthServer", MagicMock)
     monkeypatch.setattr(
         main_module.time, "sleep", MagicMock(side_effect=KeyboardInterrupt)
@@ -1002,3 +1027,100 @@ def test_poll_once_alert_config_changed(monkeypatch):
 
     assert len(updated_configs) == 1
     assert returned_alert_config == new_alert_config
+
+
+# ---------------------------------------------------------------------------
+# _is_within_test_window()
+# ---------------------------------------------------------------------------
+
+
+def test_is_within_test_window_disabled_always_true(monkeypatch):
+    """_is_within_test_window() returns True when the test window is disabled."""
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_test_window",
+        lambda: {"enabled": False, "start_hour": 0, "end_hour": 6},
+    )
+    assert _is_within_test_window() is True
+
+
+def test_is_within_test_window_inside_window(monkeypatch):
+    """_is_within_test_window() returns True when current UTC hour is inside the window."""
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_test_window",
+        lambda: {"enabled": True, "start_hour": 8, "end_hour": 22},
+    )
+    # Mock datetime.now() to return 14:00 UTC
+    fixed = datetime(2024, 1, 1, 14, 0, 0, tzinfo=timezone.utc)
+    with patch("src.main.datetime") as mock_dt:
+        mock_dt.now.return_value = fixed
+        assert _is_within_test_window() is True
+
+
+def test_is_within_test_window_outside_window(monkeypatch):
+    """_is_within_test_window() returns False when current UTC hour is outside the window."""
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_test_window",
+        lambda: {"enabled": True, "start_hour": 8, "end_hour": 22},
+    )
+    # Mock datetime.now() to return 02:00 UTC
+    fixed = datetime(2024, 1, 1, 2, 0, 0, tzinfo=timezone.utc)
+    with patch("src.main.datetime") as mock_dt:
+        mock_dt.now.return_value = fixed
+        assert _is_within_test_window() is False
+
+
+def test_is_within_test_window_at_start_boundary(monkeypatch):
+    """_is_within_test_window() returns True at exactly start_hour (inclusive)."""
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_test_window",
+        lambda: {"enabled": True, "start_hour": 8, "end_hour": 22},
+    )
+    fixed = datetime(2024, 1, 1, 8, 0, 0, tzinfo=timezone.utc)
+    with patch("src.main.datetime") as mock_dt:
+        mock_dt.now.return_value = fixed
+        assert _is_within_test_window() is True
+
+
+def test_is_within_test_window_at_end_boundary_exclusive(monkeypatch):
+    """_is_within_test_window() returns False at exactly end_hour (exclusive)."""
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_test_window",
+        lambda: {"enabled": True, "start_hour": 8, "end_hour": 22},
+    )
+    fixed = datetime(2024, 1, 1, 22, 0, 0, tzinfo=timezone.utc)
+    with patch("src.main.datetime") as mock_dt:
+        mock_dt.now.return_value = fixed
+        assert _is_within_test_window() is False
+
+
+def test_is_within_test_window_overnight_inside(monkeypatch):
+    """_is_within_test_window() handles overnight windows (start_hour > end_hour) — inside."""
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_test_window",
+        lambda: {"enabled": True, "start_hour": 22, "end_hour": 6},
+    )
+    # 23:00 should be inside an overnight window of 22–06
+    fixed = datetime(2024, 1, 1, 23, 0, 0, tzinfo=timezone.utc)
+    with patch("src.main.datetime") as mock_dt:
+        mock_dt.now.return_value = fixed
+        assert _is_within_test_window() is True
+
+
+def test_is_within_test_window_overnight_outside(monkeypatch):
+    """_is_within_test_window() handles overnight windows — outside (daytime)."""
+    monkeypatch.setattr(
+        main_module.runtime_config,
+        "get_test_window",
+        lambda: {"enabled": True, "start_hour": 22, "end_hour": 6},
+    )
+    # 14:00 should be outside an overnight window of 22–06
+    fixed = datetime(2024, 1, 1, 14, 0, 0, tzinfo=timezone.utc)
+    with patch("src.main.datetime") as mock_dt:
+        mock_dt.now.return_value = fixed
+        assert _is_within_test_window() is False

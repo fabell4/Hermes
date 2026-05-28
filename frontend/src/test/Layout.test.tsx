@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { Layout } from '@/components/Layout'
+import { ThemeProvider } from '@/context/ThemeContext'
 import type { HealthStatus } from '@/types'
 
 // Mock the useHermes hook
@@ -35,7 +36,9 @@ const mockHealth: HealthStatus = {
 function renderLayout(children = <div>content</div>) {
   return render(
     <MemoryRouter>
-      <Layout>{children}</Layout>
+      <ThemeProvider>
+        <Layout>{children}</Layout>
+      </ThemeProvider>
     </MemoryRouter>
   )
 }
@@ -156,5 +159,18 @@ describe('Layout', () => {
     renderLayout()
     // fetch should not be called for dev versions
     expect(mockFetch).not.toHaveBeenCalled()
+  })
+
+  it('renders the theme toggle button', () => {
+    renderLayout()
+    const toggleButton = screen.getByRole('button', { name: /switch to (light|dark) mode/i })
+    expect(toggleButton).toBeInTheDocument()
+  })
+
+  it('theme toggle button switches aria-label when clicked', () => {
+    renderLayout()
+    const toggleButton = screen.getByRole('button', { name: /switch to light mode/i })
+    fireEvent.click(toggleButton)
+    expect(screen.getByRole('button', { name: /switch to dark mode/i })).toBeInTheDocument()
   })
 })

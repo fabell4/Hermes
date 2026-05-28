@@ -86,8 +86,8 @@ def test_valid_https_url_accepted(auth_enabled):
     assert response.status_code == 200
 
 
-def test_valid_http_url_accepted(auth_enabled):
-    """Valid HTTP URL should be accepted."""
+def test_http_url_rejected(auth_enabled):
+    """Plain HTTP URL must be rejected — provider constructors require HTTPS."""
     response = client.put(
         "/api/alerts",
         json={
@@ -97,7 +97,7 @@ def test_valid_http_url_accepted(auth_enabled):
             "providers": {
                 "webhook": {
                     "enabled": True,
-                    "url": "http://hooks.example.com:8080/webhook",
+                    "url": "http://hooks.example.com:8080/webhook",  # NOSONAR - intentional HTTP test vector
                 },
                 "gotify": {"enabled": False, "url": "", "token": "", "priority": 5},
                 "ntfy": {
@@ -113,7 +113,8 @@ def test_valid_http_url_accepted(auth_enabled):
         },
         headers={"X-Api-Key": "test-key-32-characters-long-abc"},
     )
-    assert response.status_code == 200
+    assert response.status_code == 422
+    assert "https://" in response.json()["detail"]
 
 
 def test_empty_url_accepted(auth_enabled):
@@ -177,7 +178,7 @@ def test_file_scheme_rejected(auth_enabled):
 
 
 def test_ftp_scheme_rejected(auth_enabled):
-    """ftp:// scheme should be rejected."""
+    """ftp:// scheme should be rejected."""  # NOSONAR - intentional FTP test vector
     response = client.put(
         "/api/alerts",
         json={
@@ -188,7 +189,7 @@ def test_ftp_scheme_rejected(auth_enabled):
                 "webhook": {"enabled": False, "url": ""},
                 "gotify": {
                     "enabled": True,
-                    "url": "ftp://internal.server/path",
+                    "url": "ftp://internal.server/path",  # NOSONAR - intentional FTP test vector
                     "token": "x",
                     "priority": 5,
                 },
@@ -206,7 +207,9 @@ def test_ftp_scheme_rejected(auth_enabled):
         headers={"X-Api-Key": "test-key-32-characters-long-abc"},
     )
     assert response.status_code == 422
-    assert "ftp://" in response.json()["detail"].lower()
+    assert (
+        "ftp://" in response.json()["detail"].lower()
+    )  # NOSONAR - assertion against test vector
 
 
 def test_data_scheme_rejected(auth_enabled):
@@ -251,7 +254,7 @@ def test_localhost_hostname_rejected(auth_enabled):
             "failure_threshold": 3,
             "cooldown_minutes": 60,
             "providers": {
-                "webhook": {"enabled": True, "url": "http://localhost:6379/"},
+                "webhook": {"enabled": True, "url": "https://localhost:6379/"},
                 "gotify": {"enabled": False, "url": "", "token": "", "priority": 5},
                 "ntfy": {
                     "enabled": False,
@@ -289,7 +292,7 @@ def test_ipv4_localhost_rejected(auth_enabled):
                     "priority": 3,
                     "tags": [],
                 },
-                "apprise": {"enabled": True, "url": "http://127.0.0.1:8000/notify"},
+                "apprise": {"enabled": True, "url": "https://127.0.0.1:8000/notify"},
             },
         },
         headers={"X-Api-Key": "test-key-32-characters-long-abc"},
@@ -307,7 +310,7 @@ def test_ipv6_localhost_rejected(auth_enabled):
             "failure_threshold": 3,
             "cooldown_minutes": 60,
             "providers": {
-                "webhook": {"enabled": True, "url": "http://[::1]:8080/hook"},
+                "webhook": {"enabled": True, "url": "https://[::1]:8080/hook"},
                 "gotify": {"enabled": False, "url": "", "token": "", "priority": 5},
                 "ntfy": {
                     "enabled": False,
@@ -340,7 +343,10 @@ def test_private_ip_10_rejected(auth_enabled):
             "failure_threshold": 3,
             "cooldown_minutes": 60,
             "providers": {
-                "webhook": {"enabled": True, "url": "http://10.0.0.1:8080/webhook"},
+                "webhook": {
+                    "enabled": True,
+                    "url": "https://10.0.0.1:8080/webhook",
+                },  # NOSONAR - intentional RFC1918 test vector
                 "gotify": {"enabled": False, "url": "", "token": "", "priority": 5},
                 "ntfy": {
                     "enabled": False,
@@ -371,7 +377,7 @@ def test_private_ip_192_rejected(auth_enabled):
                 "webhook": {"enabled": False, "url": ""},
                 "gotify": {
                     "enabled": True,
-                    "url": "http://192.168.1.1/gotify",
+                    "url": "https://192.168.1.1/gotify",  # NOSONAR - intentional RFC1918 test vector
                     "token": "x",
                     "priority": 5,
                 },
@@ -405,7 +411,7 @@ def test_private_ip_172_rejected(auth_enabled):
                 "gotify": {"enabled": False, "url": "", "token": "", "priority": 5},
                 "ntfy": {
                     "enabled": True,
-                    "url": "http://172.20.0.5:5000",
+                    "url": "https://172.20.0.5:5000",  # NOSONAR - intentional RFC1918 test vector
                     "topic": "test",
                     "token": "",
                     "priority": 3,
@@ -431,7 +437,7 @@ def test_link_local_rejected(auth_enabled):
             "providers": {
                 "webhook": {
                     "enabled": True,
-                    "url": "http://169.254.169.254/latest/meta-data/",
+                    "url": "https://169.254.169.254/latest/meta-data/",  # NOSONAR - intentional link-local SSRF test vector
                 },
                 "gotify": {"enabled": False, "url": "", "token": "", "priority": 5},
                 "ntfy": {
@@ -465,7 +471,7 @@ def test_url_without_hostname_rejected(auth_enabled):
             "failure_threshold": 3,
             "cooldown_minutes": 60,
             "providers": {
-                "webhook": {"enabled": True, "url": "http://"},
+                "webhook": {"enabled": True, "url": "https://"},
                 "gotify": {"enabled": False, "url": "", "token": "", "priority": 5},
                 "ntfy": {
                     "enabled": False,
@@ -495,7 +501,7 @@ def test_multiple_provider_urls_validated(auth_enabled):
                 "webhook": {"enabled": True, "url": "https://valid.example.com"},
                 "gotify": {
                     "enabled": True,
-                    "url": "http://localhost:8080",
+                    "url": "https://localhost:8080",
                     "token": "x",
                     "priority": 5,
                 },

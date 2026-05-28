@@ -137,7 +137,10 @@ This single-image design simplifies builds and deployments while enabling flexib
 **Key Components:**
 
 - **`main.py`** — Entry point, wires scheduler and watches for trigger file
-- **`SpeedtestRunner`** — Executes official Ookla speedtest CLI and parses JSON results
+- **`SpeedtestRunner`** — Orchestrates speed test providers with automatic fallback; primary provider is retried once
+before falling back to the next in the configured chain
+- **`src/providers/`** — Pluggable test provider implementations: `OoklaProvider` (Ookla CLI), `NDT7Provider`
+(M-Lab WebSocket), `CustomHttpProvider` (user-supplied HTTP endpoints)
 - **`SpeedResult`** — Data model capturing download, upload, ping, jitter, ISP, timestamp
 - **`ResultDispatcher`** — Fans out results to all enabled exporters
 - **`AlertManager`** — Tracks consecutive failures and sends notifications
@@ -156,6 +159,13 @@ This single-image design simplifies builds and deployments while enabling flexib
 
 - `SPEEDTEST_INTERVAL_MINUTES` — Test frequency (default: 60)
 - `RUN_ON_STARTUP` — Run test immediately on start (default: true)
+- `SPEEDTEST_PROVIDERS` — Ordered, comma-separated provider chain (default: `ookla`); values: `ookla`, `ndt7`, `custom`
+- `SPEEDTEST_SERVER_ID` — Pin Ookla tests to a specific server ID (default: auto-select)
+- `SPEEDTEST_CUSTOM_URL_DOWNLOAD` — Download URL for the `custom` provider (required when `custom` is in the chain)
+- `SPEEDTEST_CUSTOM_URL_UPLOAD` — Upload URL for the `custom` provider (optional)
+- `SPEEDTEST_CUSTOM_DURATION_S` — Download stream duration in seconds (default: 10)
+- `SPEEDTEST_CUSTOM_CONNECTIONS` — Parallel download connections (default: 1)
+- `SPEEDTEST_CUSTOM_CHUNK_SIZE_MB` — Upload payload size in MB (default: 25)
 - `ENABLED_EXPORTERS` — Comma-separated list: `csv`, `sqlite`, `prometheus`, `loki`
 - `PROMETHEUS_PORT` — Port for metrics endpoint (default: 8000)
 - `LOKI_URL` — Loki push endpoint (e.g., `http://loki:3100`)
@@ -459,8 +469,13 @@ Hermes/
 │   │   └── routes/                    # API endpoint modules (config, results, trigger, alerts)
 │   ├── models/
 │   │   └── speed_result.py            # SpeedResult dataclass — shared data contract
+│   ├── providers/
+│   │   ├── base.py                    # BaseTestProvider ABC — provider interface
+│   │   ├── ookla.py                   # OoklaProvider — Ookla CLI subprocess runner
+│   │   ├── ndt7.py                    # NDT7Provider — M-Lab WebSocket speed test
+│   │   └── custom_http.py             # CustomHttpProvider — user-supplied HTTP endpoints
 │   ├── services/
-│   │   ├── speedtest_runner.py        # SpeedtestRunner — runs test, returns SpeedResult
+│   │   ├── speedtest_runner.py        # SpeedtestRunner — orchestrates providers with fallback
 │   │   ├── alert_manager.py           # AlertManager — tracks failures and sends alerts
 │   │   ├── alert_providers.py         # Alert provider implementations (Webhook, Gotify, ntfy, Apprise)
 │   │   ├── alert_provider_factory.py  # Shared alert provider registration logic

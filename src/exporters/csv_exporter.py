@@ -5,6 +5,7 @@ import logging
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from src.exporters.base_exporter import BaseExporter
+from src.models.outage_event import OutageEvent
 from src.models.speed_result import SpeedResult
 
 logger = logging.getLogger(__name__)
@@ -20,6 +21,21 @@ FIELDNAMES = [
     "server_name",
     "server_location",
     "server_id",
+    "packet_loss_pct",
+    "quality_score",
+    "sla_ok",
+]
+
+# Column order for the outage_events CSV sidecar file
+OUTAGE_FIELDNAMES = [
+    "event_type",
+    "timestamp",
+    "duration_seconds",
+    "isp_name",
+    "asn",
+    "bgp_unstable",
+    "cloudflare_outage_desc",
+    "probe_results",
 ]
 
 
@@ -50,6 +66,8 @@ class CSVExporter(BaseExporter):
         self.path = Path(path)
         self.max_rows = max_rows
         self.retention_days = retention_days
+        # Outage events are written to a sidecar file in the same directory.
+        self._outage_path = self.path.parent / "outage_events.csv"
         self._ensure_file()
 
     def _ensure_file(self) -> None:
@@ -102,6 +120,38 @@ class CSVExporter(BaseExporter):
                 e,
                 exc_info=True,
             )
+
+    def export_outage_event(self, event: OutageEvent) -> None:
+        """Append a single OutageEvent row to the outage_events.csv sidecar file."""
+        if not self._outage_path.exists():
+            self._outage_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(self._outage_path, mode="w", newline="", encoding="utf-8") as f:
+                writer = csv.DictWriter(f, fieldnames=OUTAGE_FIELDNAMES)
+                writer.writeheader()
+            logger.info("Created outage events CSV at: %s", self._outage_path)
+
+        row = {
+            "event_type": str(event.event_type),
+            "timestamp": event.timestamp.isoformat(),
+            "duration_seconds": event.duration_seconds,
+            "isp_name": event.isp_name,
+            "asn": event.asn,
+            "bgp_unstable": event.bgp_unstable,
+            "cloudflare_outage_desc": event.cloudflare_outage_desc,
+            "probe_results": event.probe_results,
+        }
+        try:
+            with open(self._outage_path, mode="a", newline="", encoding="utf-8") as f:
+                writer = csv.DictWriter(f, fieldnames=OUTAGE_FIELDNAMES)
+                writer.writerow(row)
+            logger.info(
+                "Outage CSV row written — type: %s timestamp: %s",
+                event.event_type,
+                event.timestamp.isoformat(),
+            )
+        except OSError as e:
+            logger.error("Failed to write outage CSV row: %s", e)
+            raise
 
     def _filter_by_retention(self, rows: list[dict[str, str]]) -> list[dict[str, str]]:
         """Filter rows older than retention_days."""

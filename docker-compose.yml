@@ -19,6 +19,7 @@ services:
     environment:
       APP_ENV: "${APP_ENV:-production}"
       LOG_LEVEL: "${LOG_LEVEL:-INFO}"
+      LOG_FORMAT: "${LOG_FORMAT:-text}"
       TZ: "${TZ:-UTC}"
       SPEEDTEST_INTERVAL_MINUTES: "${SPEEDTEST_INTERVAL_MINUTES:-60}"
       RUN_ON_STARTUP: "${RUN_ON_STARTUP:-true}"
@@ -63,6 +64,7 @@ services:
       APP_ENV: "${APP_ENV:-production}"
       APP_VERSION: "${APP_VERSION:-dev}"
       LOG_LEVEL: "${LOG_LEVEL:-INFO}"
+      LOG_FORMAT: "${LOG_FORMAT:-text}"
       TZ: "${TZ:-UTC}"
       SPEEDTEST_INTERVAL_MINUTES: "${SPEEDTEST_INTERVAL_MINUTES:-60}"
       ENABLED_EXPORTERS: "${ENABLED_EXPORTERS:-csv}"
@@ -70,6 +72,45 @@ services:
       SQLITE_DB_PATH: "data/hermes.db"
       API_KEY: "${API_KEY:-}"
       RATE_LIMIT_PER_MINUTE: "${RATE_LIMIT_PER_MINUTE:-60}"
+    env_file:
+      - path: .env
+        required: false
+    depends_on:
+      - hermes-scheduler
+
+  # ── Grafana Alloy agent (optional) ──────────────────────────────────────────
+  # Scrapes Hermes /metrics and tails container logs, then ships both to your
+  # observability backend.
+  #
+  # Start with:  docker compose --profile alloy up -d
+  # Stop with:   docker compose --profile alloy down
+  #
+  # Required env vars (set in .env or export in shell):
+  #   PROMETHEUS_REMOTE_WRITE_URL  e.g. http://prometheus:9090/api/v1/write
+  #   LOKI_PUSH_URL                e.g. http://loki:3100/loki/api/v1/push
+  #
+  # For structured log parsing, also set in .env (applies to hermes-scheduler/api):
+  #   LOG_FORMAT=json
+  hermes-alloy:
+    image: grafana/alloy:latest
+    container_name: hermes-alloy
+    profiles: ["alloy"]
+    restart: unless-stopped
+    command:
+      - run
+      - /etc/alloy/config.alloy
+      - --server.http.listen-addr=0.0.0.0:12345
+      - --stability.level=generally-available
+    ports:
+      - "12345:12345"       # Alloy UI + self-metrics endpoint
+    volumes:
+      - ./alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      PROMETHEUS_REMOTE_WRITE_URL: "${PROMETHEUS_REMOTE_WRITE_URL:-}"
+      LOKI_PUSH_URL: "${LOKI_PUSH_URL:-http://loki:3100/loki/api/v1/push}"
+      HERMES_METRICS_ADDRESS: "${HERMES_METRICS_ADDRESS:-hermes-scheduler:8000}"
+      ALLOY_LOG_LEVEL: "${ALLOY_LOG_LEVEL:-info}"
     env_file:
       - path: .env
         required: false

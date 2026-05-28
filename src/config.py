@@ -37,6 +37,25 @@ def _get_int(key: str, default: int) -> int:
         return default
 
 
+def _get_positive_int(key: str, default: int, minimum: int = 1) -> int:
+    """Read an env var as int and enforce a minimum value.
+
+    Falls back to *default* if the env var is absent, non-integer, or below
+    *minimum*. A warning is emitted whenever the configured value is rejected.
+    """
+    value = _get_int(key, default)
+    if value < minimum:
+        logging.warning(
+            "Config: %s=%d is below the minimum allowed value (%d), using default %d",
+            key,
+            value,
+            minimum,
+            default,
+        )
+        return default
+    return value
+
+
 def _get_bool(key: str, default: bool) -> bool:
     """Read an env var as bool. Accepts 'true/false', '1/0', 'yes/no' (case insensitive)."""
     value = os.getenv(key)
@@ -70,6 +89,10 @@ def _get_str(key: str, default: str) -> str:
 APP_ENV: str = os.getenv("APP_ENV", "development")
 APP_VERSION: str = os.getenv("APP_VERSION", "dev")
 LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
+# Log output format: "text" (default, human-readable) or "json" (machine-parseable).
+# Set to "json" when using Grafana Alloy so the loki.process pipeline can extract
+# structured fields. All exporters (CSV, SQLite, Prometheus, Loki) are unaffected.
+LOG_FORMAT: str = _get_str("LOG_FORMAT", "text").lower()
 TIMEZONE: str = os.getenv("TZ", "UTC")
 
 # --- Authentication ---
@@ -109,11 +132,32 @@ CORS_ORIGINS: str = os.getenv(
 
 # --- Scheduler ---
 # Runtime config takes priority over env var
-_env_interval: int = _get_int("SPEEDTEST_INTERVAL_MINUTES", 60)
+_env_interval: int = _get_positive_int("SPEEDTEST_INTERVAL_MINUTES", 60, minimum=1)
 SPEEDTEST_INTERVAL_MINUTES: int = get_interval_minutes(default=_env_interval)
 
 RUN_ON_STARTUP: bool = _get_bool("RUN_ON_STARTUP", True)
 ENABLED_EXPORTERS: list[str] = _get_csv_list("ENABLED_EXPORTERS", ["csv"])
+
+# Pin tests to a specific Ookla server ID for consistent baseline measurements.
+# Set to 0 (default) to let the CLI choose the closest server automatically.
+_raw_server_id: int = _get_int("SPEEDTEST_SERVER_ID", 0)
+SPEEDTEST_SERVER_ID: int | None = _raw_server_id if _raw_server_id > 0 else None
+
+# Ordered list of test providers to try. The first provider is primary (retried
+# once on failure); subsequent providers are fallbacks tried once each.
+# Valid values: "ookla", "ndt7". Default: ookla only.
+_VALID_PROVIDER_TYPES = {"ookla", "ndt7"}
+_raw_providers = _get_csv_list("SPEEDTEST_PROVIDERS", ["ookla"])
+_invalid_providers = [p for p in _raw_providers if p not in _VALID_PROVIDER_TYPES]
+if _invalid_providers:
+    logging.warning(
+        "SPEEDTEST_PROVIDERS contains unknown values %s; ignoring. Valid: %s",
+        _invalid_providers,
+        sorted(_VALID_PROVIDER_TYPES),
+    )
+SPEEDTEST_PROVIDERS: list[str] = [
+    p for p in _raw_providers if p in _VALID_PROVIDER_TYPES
+] or ["ookla"]
 
 # --- CSV Exporter ---
 # CSV_MAX_ROWS and CSV_RETENTION_DAYS default to 0, which means unlimited.
@@ -122,10 +166,14 @@ CSV_MAX_ROWS: int = _get_int("CSV_MAX_ROWS", 0)
 CSV_RETENTION_DAYS: int = _get_int("CSV_RETENTION_DAYS", 0)
 
 # --- Prometheus Exporter ---
-PROMETHEUS_PORT: int = _get_int("PROMETHEUS_PORT", 8000)
+PROMETHEUS_PORT: int = _get_positive_int("PROMETHEUS_PORT", 8000, minimum=1)
+# Set to true to collapse all time-series labels (server_name, server_location,
+# isp_name) to empty strings. Prevents unbounded cardinality when many servers
+# or ISPs are observed.
+PROMETHEUS_DISABLE_LABELS: bool = _get_bool("PROMETHEUS_DISABLE_LABELS", False)
 
 # --- Health Endpoint ---
-HEALTH_PORT: int = _get_int("HEALTH_PORT", 8080)
+HEALTH_PORT: int = _get_positive_int("HEALTH_PORT", 8080, minimum=1)
 
 # --- SQLite Exporter ---
 SQLITE_DB_PATH: str = os.getenv("SQLITE_DB_PATH", "data/hermes.db")
@@ -160,3 +208,42 @@ ALERT_NTFY_TAGS: list[str] = _get_csv_list(
 
 # Apprise alerting (API service endpoint)
 ALERT_APPRISE_URL: str | None = os.getenv("ALERT_APPRISE_URL") or None
+# --- SLA Monitoring ---
+# Thresholds for SLA checks. Set to 0 (default) to disable each check individually.
+# A result fails SLA if any configured threshold is breached.
+_raw_sla_dl: float = float(os.getenv("SLA_DOWNLOAD_MBPS", "0"))
+SLA_DOWNLOAD_MBPS: float | None = _raw_sla_dl if _raw_sla_dl > 0 else None
+
+_raw_sla_ul: float = float(os.getenv("SLA_UPLOAD_MBPS", "0"))
+SLA_UPLOAD_MBPS: float | None = _raw_sla_ul if _raw_sla_ul > 0 else None
+
+_raw_sla_ping: float = float(os.getenv("SLA_PING_MS_MAX", "0"))
+SLA_PING_MS_MAX: float | None = _raw_sla_ping if _raw_sla_ping > 0 else None
+
+_raw_sla_loss: float = float(os.getenv("SLA_PACKET_LOSS_MAX_PCT", "0"))
+SLA_PACKET_LOSS_MAX_PCT: float | None = _raw_sla_loss if _raw_sla_loss > 0 else None
+
+# --- InfluxDB Exporter ---
+INFLUXDB_URL: str | None = os.getenv("INFLUXDB_URL") or None
+INFLUXDB_TOKEN: str | None = os.getenv("INFLUXDB_TOKEN") or None
+INFLUXDB_ORG: str = _get_str("INFLUXDB_ORG", "hermes")
+INFLUXDB_BUCKET: str = _get_str("INFLUXDB_BUCKET", "speedtest")
+INFLUXDB_TIMEOUT_MS: int = _get_int("INFLUXDB_TIMEOUT_MS", 10_000)
+
+# --- Outage Detection ---
+# TCP probe endpoints (host:port). A majority-vote quorum of these must fail for
+# a round to count as a failure.
+OUTAGE_PROBE_HOSTS: list[str] = _get_csv_list(
+    "OUTAGE_PROBE_HOSTS",
+    [],
+)
+# Seconds to wait for each TCP probe before counting it as failed.
+OUTAGE_PROBE_TIMEOUT: int = _get_int("OUTAGE_PROBE_TIMEOUT", 3)
+# Number of consecutive failure rounds required before declaring an outage.
+OUTAGE_PROBE_FAILURE_THRESHOLD: int = _get_int("OUTAGE_PROBE_FAILURE_THRESHOLD", 2)
+# Minimum number of probes that must fail per round to count that round as a failure.
+OUTAGE_PROBE_QUORUM: int = _get_int("OUTAGE_PROBE_QUORUM", 2)
+# Enable RIPE Stat BGP enrichment in outage alerts (opt-in, no API key needed).
+OUTAGE_ISP_CHECK_ENABLED: bool = _get_bool("OUTAGE_ISP_CHECK_ENABLED", False)
+# Cloudflare API token for Radar annotation enrichment. Leave unset to disable.
+CLOUDFLARE_API_TOKEN: str | None = os.getenv("CLOUDFLARE_API_TOKEN") or None

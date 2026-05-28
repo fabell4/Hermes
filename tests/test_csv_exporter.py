@@ -324,6 +324,9 @@ def test_csv_schema_complete_with_all_fields(tmp_path):
             "server_name",
             "server_location",
             "server_id",
+            "packet_loss_pct",
+            "quality_score",
+            "sla_ok",
         ]
 
         # Verify data values

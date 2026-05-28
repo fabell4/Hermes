@@ -28,39 +28,39 @@ class LokiExporter(BaseExporter):
         timeout_seconds: float = 5.0,
         static_labels: dict[str, str] | None = None,
     ) -> None:
+        self._validate(url, job_label, timeout_seconds)
+        stripped = url.strip()
+        self._push_url = self._build_push_url(stripped)
+        self._job_label = job_label.strip()
+        self._timeout_seconds = timeout_seconds
+        self._static_labels = static_labels or {}
+
+    @staticmethod
+    def _validate(url: str, job_label: str, timeout_seconds: float) -> None:
+        """Validate constructor arguments; raises ValueError for any invalid input."""
         if not url or not url.strip():
             raise ValueError("Loki URL is required")
 
         stripped = url.strip()
         parsed = urlparse(stripped)
 
-        # Validate scheme
         if parsed.scheme not in ("http", "https"):
             raise ValueError(f"Loki URL must use http or https, got: '{parsed.scheme}'")
 
-        # Validate hostname exists
         if not parsed.hostname:
             raise ValueError("Loki URL must include a hostname")
 
-        # Warn if URL contains credentials
         if parsed.username or parsed.password:
             logger.warning(
                 "Loki URL contains embedded credentials. "
                 "Consider using environment variables or a reverse proxy for authentication."
             )
 
-        # Validate timeout
         if timeout_seconds <= 0:
             raise ValueError("Timeout must be positive")
 
-        # Validate job label
         if not job_label or not job_label.strip():
             raise ValueError("Loki job label cannot be empty")
-
-        self._push_url = self._build_push_url(stripped)
-        self._job_label = job_label.strip()
-        self._timeout_seconds = timeout_seconds
-        self._static_labels = static_labels or {}
 
     @staticmethod
     def _build_push_url(url: str) -> str:

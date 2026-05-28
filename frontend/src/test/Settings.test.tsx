@@ -31,6 +31,7 @@ const MOCK_CONFIG: RuntimeConfig = {
   interval_minutes: 60,
   enabled_exporters: ['csv'],
   scanning_enabled: true,
+  test_window: { enabled: false, start_hour: 8, end_hour: 22 },
 }
 
 const MOCK_ALERTS: AlertConfig = {
@@ -231,5 +232,44 @@ describe('Settings', () => {
     renderSettings()
     expect(screen.getByText('Prometheus')).toBeInTheDocument()
     expect(screen.getByText('Loki')).toBeInTheDocument()
+  })
+
+  it('renders Test Window section', () => {
+    renderSettings()
+    expect(screen.getByText('Test Window')).toBeInTheDocument()
+  })
+
+  it('does not show hour selectors when test window is disabled', () => {
+    renderSettings()
+    expect(screen.queryByLabelText(/start hour/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/end hour/i)).not.toBeInTheDocument()
+  })
+
+  it('shows hour selectors when test window toggle is enabled', () => {
+    renderSettings()
+    const toggle = screen.getByRole('button', { name: /enable test window/i })
+    fireEvent.click(toggle)
+    expect(screen.getByLabelText(/start hour/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/end hour/i)).toBeInTheDocument()
+  })
+
+  it('shows hour selectors when config already has test_window enabled', () => {
+    vi.mocked(useHermes).mockReturnValue({
+      results: [],
+      latest: null,
+      health: null,
+      config: { ...MOCK_CONFIG, test_window: { enabled: true, start_hour: 6, end_hour: 22 } },
+      alerts: MOCK_ALERTS,
+      loading: false,
+      isTesting: false,
+      error: null,
+      runTest: vi.fn(),
+      updateConfig: vi.fn(),
+      updateAlerts: vi.fn(),
+      refresh: vi.fn(),
+    })
+    renderSettings()
+    expect(screen.getByLabelText(/start hour/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/end hour/i)).toBeInTheDocument()
   })
 })

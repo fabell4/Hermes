@@ -11,11 +11,19 @@
   }
 
   body {
+    @apply bg-white text-slate-900;
+  }
+
+  .dark body {
     @apply bg-slate-950 text-slate-100;
   }
 
   * {
     scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+
+  .dark * {
     scrollbar-color: #334155 transparent;
   }
 
@@ -29,7 +37,11 @@
   }
 
   *::-webkit-scrollbar-thumb {
-    background-color: #334155;
+    background-color: #cbd5e1;
     border-radius: 9999px;
+  }
+
+  .dark *::-webkit-scrollbar-thumb {
+    background-color: #334155;
   }
 }

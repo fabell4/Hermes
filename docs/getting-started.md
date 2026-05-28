@@ -132,6 +132,13 @@ curl -o .env https://raw.githubusercontent.com/fabell4/hermes/main/.env.example
 | `ENABLED_EXPORTERS` | `csv` | Comma-separated: `csv`, `sqlite`, `prometheus`, `loki` |
 | `SPEEDTEST_INTERVAL_MINUTES` | `60` | How often to run speed tests |
 | `RUN_ON_STARTUP` | `true` | Run a test immediately on container start |
+| `SPEEDTEST_PROVIDERS` | `ookla` | Ordered comma-separated provider chain: `ookla`, `ndt7`, `custom` |
+| `SPEEDTEST_SERVER_ID` | *(auto)* | Pin Ookla tests to a specific server ID |
+| `SPEEDTEST_CUSTOM_URL_DOWNLOAD` | *(unset)* | Download URL for the `custom` provider (required when using `custom`) |
+| `SPEEDTEST_CUSTOM_URL_UPLOAD` | *(unset)* | Upload URL for the `custom` provider (optional) |
+| `SPEEDTEST_CUSTOM_DURATION_S` | `10` | Download stream duration in seconds for `custom` provider |
+| `SPEEDTEST_CUSTOM_CONNECTIONS` | `1` | Parallel download connections for `custom` provider |
+| `SPEEDTEST_CUSTOM_CHUNK_SIZE_MB` | `25` | Upload payload size in MB for `custom` provider |
 | `CSV_LOG_PATH` | `logs/results.csv` | Path to CSV results file |
 | `CSV_MAX_ROWS` | `0` (unlimited) | Maximum CSV rows to keep |
 | `CSV_RETENTION_DAYS` | `0` (unlimited) | Delete CSV rows older than N days |
@@ -204,11 +211,12 @@ For production deployment without Docker:
 **Prerequisites:**
 
 - Python 3.12+
-- **Ookla speedtest CLI** — Download and install from <https://www.speedtest.net/apps/cli>
+- **Ookla speedtest CLI** — Required only when using the `ookla` provider (default). Download from <https://www.speedtest.net/apps/cli>
   - On Debian/Ubuntu: Follow the official installation script
   - On macOS: `brew install speedtest-cli` (official Ookla CLI)
   - On Windows: Download the installer from the official Ookla website
   - The `speedtest` binary must be available in your system PATH
+  - Not required when using only `ndt7` or `custom` providers
 
 ```bash
 # Install Python 3.12+
@@ -260,7 +268,7 @@ For local development with hot reload:
 - Python 3.12+
 - Node.js 18+
 - Virtual environment (venv)
-- **Ookla speedtest CLI** — Install from <https://www.speedtest.net/apps/cli>
+- **Ookla speedtest CLI** — Required only for the `ookla` provider (default). Install from <https://www.speedtest.net/apps/cli>
 
 ### Backend Setup
 

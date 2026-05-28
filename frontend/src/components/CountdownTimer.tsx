@@ -26,7 +26,7 @@ export function CountdownTimer({ nextRun }: CountdownTimerProps) {
   const almostDue = timeLeft < 60_000
 
   return (
-    <div className="flex items-center gap-2 text-slate-400 bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-700/50">
+    <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 bg-slate-100/50 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-200/50 dark:border-slate-700/50">
       <Clock
         size={15}
         className={almostDue ? 'text-amber-400 animate-pulse' : ''}
@@ -34,7 +34,7 @@ export function CountdownTimer({ nextRun }: CountdownTimerProps) {
       <span className="text-sm font-mono font-medium">
         {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
       </span>
-      <span className="hidden sm:inline text-xs text-slate-500">
+      <span className="hidden sm:inline text-xs text-slate-400 dark:text-slate-500">
         until next test
       </span>
     </div>

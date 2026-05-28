@@ -172,6 +172,22 @@ Hermes includes a pre-built Grafana dashboard (`docs/grafana-dashboard.json`):
    - Test failure annotations
    - ISP tracking
 
+### Grafana Alloy Agent
+
+Hermes ships a ready-to-use [Grafana Alloy](https://grafana.com/docs/alloy/latest/) config
+(`alloy/config.alloy`) that scrapes the `/metrics` endpoint and tails container logs:
+
+```bash
+# Add to .env
+PROMETHEUS_REMOTE_WRITE_URL=http://prometheus:9090/api/v1/write
+LOKI_PUSH_URL=http://loki:3100/loki/api/v1/push
+
+# Start Hermes + Alloy
+docker compose --profile alloy up -d
+```
+
+See [Grafana Alloy Integration](https://fabell4.github.io/hermes/alloy) for the full setup guide.
+
 ---
 
 ## 🐳 Docker Image

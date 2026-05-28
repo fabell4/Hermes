@@ -13,6 +13,16 @@ from src.services.alert_providers import (
     create_provider,
 )
 
+# Test fixture URL that intentionally uses an unsupported scheme to exercise
+# the scheme-validation branch of _validate_http_url (requires https).
+# Uses a made-up scheme so no real-protocol security hotspot is introduced.
+_INVALID_SCHEME_URL = "invalid://example.com/hook"
+
+# Base URL for a local Apprise instance used across AppriseProvider tests.
+# HTTPS is used even in tests so no clear-text hotspot is introduced; the
+# requests.Session is fully mocked so the scheme does not affect test outcomes.
+_APPRISE_URL = "https://apprise.example.com"
+
 
 # ---------------------------------------------------------------------------
 # WebhookProvider
@@ -24,7 +34,7 @@ def test_webhook_provider_raises_on_empty_url():
         WebhookProvider(url="")
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_webhook_provider_sends_json_post(mock_post):
     """Webhook provider POSTs JSON payload."""
     mock_response = Mock()
@@ -48,7 +58,7 @@ def test_webhook_provider_sends_json_post(mock_post):
     assert call_args.kwargs["headers"]["Content-Type"] == "application/json"
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_webhook_provider_raises_on_request_error(mock_post):
     """Webhook provider raises on HTTP error."""
     import requests
@@ -77,7 +87,7 @@ def test_gotify_provider_raises_on_empty_token():
         GotifyProvider(url="https://gotify.example.com", token="")
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_gotify_provider_sends_message(mock_post):
     """Gotify provider sends formatted push notification."""
     mock_response = Mock()
@@ -132,7 +142,7 @@ def test_ntfy_provider_raises_on_empty_topic():
         NtfyProvider(topic="")
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_ntfy_provider_sends_notification(mock_post):
     """ntfy provider sends notification to topic."""
     mock_response = Mock()
@@ -186,7 +196,7 @@ def test_apprise_provider_raises_on_empty_url():
         AppriseProvider(url="")
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_apprise_provider_sends_notification(mock_post):
     """AppriseProvider sends notification via HTTP POST."""
     mock_response = Mock()
@@ -194,7 +204,7 @@ def test_apprise_provider_sends_notification(mock_post):
     mock_response.text = "ok"
     mock_post.return_value = mock_response
 
-    provider = AppriseProvider(url="http://apprise:8000")  # NOSONAR
+    provider = AppriseProvider(url=_APPRISE_URL)
     timestamp = datetime(2026, 4, 26, 12, 0, 0, tzinfo=timezone.utc)
 
     provider.send_alert(
@@ -205,20 +215,20 @@ def test_apprise_provider_sends_notification(mock_post):
 
     mock_post.assert_called_once()
     call_args = mock_post.call_args
-    assert call_args.args[0] == "http://apprise:8000/notify"  # NOSONAR
+    assert call_args.args[0] == f"{_APPRISE_URL}/notify"
     assert "3 consecutive" in call_args.kwargs["json"]["title"]
     assert "Connection timeout" in call_args.kwargs["json"]["body"]
     assert call_args.kwargs["json"]["type"] == "warning"
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_apprise_provider_raises_on_request_error(mock_post):
     """AppriseProvider raises on HTTP error."""
     import requests
 
     mock_post.side_effect = requests.exceptions.RequestException("Service unavailable")
 
-    provider = AppriseProvider(url="http://apprise:8000")  # NOSONAR
+    provider = AppriseProvider(url=_APPRISE_URL)
     timestamp = datetime(2026, 4, 26, 12, 0, 0, tzinfo=timezone.utc)
 
     with pytest.raises(requests.exceptions.RequestException):
@@ -271,11 +281,11 @@ def test_create_provider_ntfy():
 def test_create_provider_apprise():
     """Factory creates apprise provider."""
     config = {
-        "url": "http://apprise:8000",  # NOSONAR
+        "url": _APPRISE_URL,
     }
     provider = create_provider("apprise", config)
     assert isinstance(provider, AppriseProvider)
-    assert provider.url == "http://apprise:8000"  # NOSONAR
+    assert provider.url == _APPRISE_URL
 
 
 def test_create_provider_unknown_type():
@@ -296,16 +306,21 @@ def test_create_provider_case_insensitive():
 # ---------------------------------------------------------------------------
 
 
-def test_validate_http_url_non_http_scheme():
-    """Providers reject URLs with non-HTTP schemes."""
-    with pytest.raises(ValueError, match="must use http or https"):
-        WebhookProvider(url="ftp://example.com/hook")
+def test_validate_http_url_non_https_scheme():
+    """Providers reject URLs with any non-HTTPS scheme (http, ftp, or arbitrary).
+
+    The validator enforces ``parsed.scheme == 'https'`` so any other scheme
+    fails, including plain HTTP.  A made-up scheme is used here to avoid
+    introducing a real-protocol security hotspot in the test file.
+    """
+    with pytest.raises(ValueError, match="must use https"):
+        WebhookProvider(url=_INVALID_SCHEME_URL)
 
 
 def test_validate_http_url_missing_hostname():
     """Providers reject URLs with no hostname."""
     with pytest.raises(ValueError, match="must include a hostname"):
-        WebhookProvider(url="http://")
+        WebhookProvider(url="https://")
 
 
 # ---------------------------------------------------------------------------
@@ -336,7 +351,7 @@ def test_ntfy_provider_rejects_non_positive_timeout():
 # ---------------------------------------------------------------------------
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_ntfy_provider_sends_with_auth_token(mock_post):
     """NtfyProvider adds Authorization header when token is provided."""
     mock_response = Mock()
@@ -359,7 +374,7 @@ def test_ntfy_provider_sends_with_auth_token(mock_post):
     assert call_args.kwargs["headers"]["Authorization"] == "Bearer mytoken123"
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_ntfy_provider_raises_on_request_error(mock_post):
     """NtfyProvider re-raises RequestException after logging."""
     import requests as req
@@ -380,7 +395,7 @@ def test_ntfy_provider_raises_on_request_error(mock_post):
 # ---------------------------------------------------------------------------
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_apprise_provider_stateless_mode_includes_urls(mock_post):
     """AppriseProvider includes 'urls' key in payload for stateless mode."""
     mock_response = Mock()
@@ -389,7 +404,7 @@ def test_apprise_provider_stateless_mode_includes_urls(mock_post):
     mock_post.return_value = mock_response
 
     provider = AppriseProvider(
-        url="http://apprise:8000",  # NOSONAR
+        url=_APPRISE_URL,
         urls=["ntfy://topic", "gotify://server/token"],
     )
     provider.send_alert(
@@ -403,7 +418,7 @@ def test_apprise_provider_stateless_mode_includes_urls(mock_post):
     assert "ntfy://topic" in payload["urls"]
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_apprise_provider_url_with_notify_uses_as_is(mock_post):
     """AppriseProvider uses URL as-is when it already contains /notify."""
     mock_response = Mock()
@@ -411,7 +426,7 @@ def test_apprise_provider_url_with_notify_uses_as_is(mock_post):
     mock_response.text = "ok"
     mock_post.return_value = mock_response
 
-    provider = AppriseProvider(url="http://apprise:8000/notify/myconfig")  # NOSONAR
+    provider = AppriseProvider(url=f"{_APPRISE_URL}/notify/myconfig")
     provider.send_alert(
         failure_count=1,
         last_error="error",
@@ -420,17 +435,17 @@ def test_apprise_provider_url_with_notify_uses_as_is(mock_post):
 
     called_url = mock_post.call_args.args[0]
     # URL should not have /notify appended again
-    assert called_url == "http://apprise:8000/notify/myconfig"  # NOSONAR
+    assert called_url == f"{_APPRISE_URL}/notify/myconfig"
 
 
-@patch("src.services.alert_providers.requests.post")
+@patch("requests.Session.post")
 def test_apprise_provider_reraises_request_exception_with_logging(mock_post):
     """AppriseProvider re-raises RequestException after logging."""
     import requests as req
 
     mock_post.side_effect = req.exceptions.RequestException("connection refused")
 
-    provider = AppriseProvider(url="http://apprise:8000")  # NOSONAR
+    provider = AppriseProvider(url=_APPRISE_URL)
     with pytest.raises(req.exceptions.RequestException):
         provider.send_alert(
             failure_count=2,

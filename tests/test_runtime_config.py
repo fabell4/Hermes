@@ -481,3 +481,85 @@ def test_load_returns_cached_result_when_file_unchanged(config_path):
 
     assert first == second
     assert first.get("interval_minutes") == 15
+
+
+# ---------------------------------------------------------------------------
+# get_test_window / set_test_window / _validate_test_window
+# ---------------------------------------------------------------------------
+
+
+def test_get_test_window_returns_defaults_when_missing(config_path):
+    """get_test_window() returns defaults when no test_window is persisted."""
+    assert not config_path.exists()
+    tw = runtime_config.get_test_window()
+    assert tw["enabled"] is False
+    assert isinstance(tw["start_hour"], int)
+    assert isinstance(tw["end_hour"], int)
+
+
+def test_set_test_window_persists_and_get_reads_back(config_path):
+    """set_test_window() saves the window so get_test_window returns it."""
+    runtime_config.set_test_window({"enabled": True, "start_hour": 8, "end_hour": 22})
+    tw = runtime_config.get_test_window()
+    assert tw["enabled"] is True
+    assert tw["start_hour"] == 8
+    assert tw["end_hour"] == 22
+
+
+def test_load_discards_test_window_not_dict(config_path, caplog):
+    """load() discards test_window when it is not a dict."""
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text('{"test_window": "08:00-22:00"}', encoding="utf-8")
+
+    with caplog.at_level("WARNING"):
+        result = runtime_config.load()
+
+    assert "test_window" not in result
+
+
+def test_load_discards_test_window_enabled_not_bool(config_path, caplog):
+    """load() discards test_window.enabled when it is not a bool."""
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text('{"test_window": {"enabled": 1}}', encoding="utf-8")
+
+    with caplog.at_level("WARNING"):
+        result = runtime_config.load()
+
+    tw = result.get("test_window", {})
+    assert "enabled" not in tw
+
+
+def test_load_discards_test_window_start_hour_out_of_range(config_path, caplog):
+    """load() discards test_window.start_hour when it is out of range [0, 23]."""
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text('{"test_window": {"start_hour": 25}}', encoding="utf-8")
+
+    with caplog.at_level("WARNING"):
+        result = runtime_config.load()
+
+    tw = result.get("test_window", {})
+    assert "start_hour" not in tw
+
+
+def test_load_discards_test_window_end_hour_out_of_range(config_path, caplog):
+    """load() discards test_window.end_hour when it is out of range [1, 24]."""
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text('{"test_window": {"end_hour": 0}}', encoding="utf-8")
+
+    with caplog.at_level("WARNING"):
+        result = runtime_config.load()
+
+    tw = result.get("test_window", {})
+    assert "end_hour" not in tw
+
+
+def test_load_discards_test_window_end_hour_non_integer(config_path, caplog):
+    """load() discards test_window.end_hour when it is not an integer."""
+    config_path.parent.mkdir(parents=True, exist_ok=True)
+    config_path.write_text('{"test_window": {"end_hour": "late"}}', encoding="utf-8")
+
+    with caplog.at_level("WARNING"):
+        result = runtime_config.load()
+
+    tw = result.get("test_window", {})
+    assert "end_hour" not in tw
