@@ -115,7 +115,9 @@ class SLAMonitor:
         download_ok = self._check_min(result.download_mbps, self.min_download_mbps)
         upload_ok = self._check_min(result.upload_mbps, self.min_upload_mbps)
         ping_ok = self._check_max(result.ping_ms, self.max_ping_ms)
-        packet_loss_ok = self._check_max(result.packet_loss_pct, self.max_packet_loss_pct)
+        packet_loss_ok = self._check_max(
+            result.packet_loss_pct, self.max_packet_loss_pct
+        )
 
         configured = [
             c

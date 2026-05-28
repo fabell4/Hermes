@@ -6,7 +6,7 @@ import threading
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Generator
+from typing import ClassVar, Generator
 
 from src.exporters.base_exporter import BaseExporter
 from src.models.outage_event import OutageEvent
@@ -95,6 +95,20 @@ class SQLiteExporter(BaseExporter):
       concurrent read access from the Streamlit UI process.
     """
 
+    # Serialises concurrent _init_db() calls to the same database path across
+    # different SQLiteExporter instances (e.g., multiple threads each creating
+    # their own instance against the same file).
+    _path_locks: ClassVar[dict[str, threading.Lock]] = {}
+    _path_locks_guard: ClassVar[threading.Lock] = threading.Lock()
+
+    @classmethod
+    def _get_path_lock(cls, path: Path) -> threading.Lock:
+        key = str(path.resolve())
+        with cls._path_locks_guard:
+            if key not in cls._path_locks:
+                cls._path_locks[key] = threading.Lock()
+            return cls._path_locks[key]
+
     def __init__(
         self,
         path: str | Path = "data/hermes.db",
@@ -117,7 +131,7 @@ class SQLiteExporter(BaseExporter):
     @contextmanager
     def _transaction(self) -> Generator[sqlite3.Connection, None, None]:
         """Open a connection, yield it, commit on success, rollback + close on error."""
-        conn = sqlite3.connect(self.path, check_same_thread=False)
+        conn = sqlite3.connect(str(self.path), timeout=30.0, check_same_thread=False)
         conn.execute("PRAGMA journal_mode=WAL")
         try:
             yield conn
@@ -151,36 +165,44 @@ class SQLiteExporter(BaseExporter):
         older versions of Hermes gain new columns and indexes automatically.
         """
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        with self._transaction() as conn:
-            conn.execute(_CREATE_TABLE)
-            conn.execute(_CREATE_INDEX)
+        path_lock = self._get_path_lock(self.path)
+        with path_lock:
+            with self._transaction() as conn:
+                conn.execute(_CREATE_TABLE)
+                conn.execute(_CREATE_INDEX)
 
-            # Check for missing columns
-            existing_columns = {
-                row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()
-            }
+                # Check for missing columns
+                existing_columns = {
+                    row[1]
+                    for row in conn.execute("PRAGMA table_info(results)").fetchall()
+                }
 
-            # Check for missing indexes
-            existing_indexes = {
-                row[1] for row in conn.execute("PRAGMA index_list(results)").fetchall()
-            }
+                # Check for missing indexes
+                existing_indexes = {
+                    row[1]
+                    for row in conn.execute("PRAGMA index_list(results)").fetchall()
+                }
 
-            for name, ddl in self._MIGRATIONS:
-                # Check if it's a column or index migration
-                if name.startswith("idx_"):
-                    # Index migration
-                    if name not in existing_indexes:
+                for name, ddl in self._MIGRATIONS:
+                    # Check if it's a column or index migration
+                    if name.startswith("idx_"):
+                        # Index migration
+                        if name not in existing_indexes:
+                            conn.execute(ddl)
+                            logger.info(
+                                "Migrated SQLite schema: added index '%s'", name
+                            )
+                    elif name.startswith("add_") and "table" in name:
+                        # CREATE TABLE migration — safe to run every time (IF NOT EXISTS)
                         conn.execute(ddl)
-                        logger.info("Migrated SQLite schema: added index '%s'", name)
-                elif name.startswith("add_") and "table" in name:
-                    # CREATE TABLE migration — safe to run every time (IF NOT EXISTS)
-                    conn.execute(ddl)
-                    logger.debug("Ensured table via migration '%s'", name)
-                else:
-                    # Column migration
-                    if name not in existing_columns:
-                        conn.execute(ddl)
-                        logger.info("Migrated SQLite schema: added column '%s'", name)
+                        logger.debug("Ensured table via migration '%s'", name)
+                    else:
+                        # Column migration
+                        if name not in existing_columns:
+                            conn.execute(ddl)
+                            logger.info(
+                                "Migrated SQLite schema: added column '%s'", name
+                            )
         logger.info("SQLite database ready at: %s", self.path)
 
     def export(self, result: SpeedResult) -> None:

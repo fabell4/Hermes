@@ -156,19 +156,30 @@ def get_results(
 ) -> ResultsPage:
     """Return paginated results, newest first. Supports optional filtering."""
     conditions, params = _build_filters(
-        date_from, date_to, min_download, max_download,
-        min_upload, max_upload, max_ping, server, isp,
+        date_from,
+        date_to,
+        min_download,
+        max_download,
+        min_upload,
+        max_upload,
+        max_ping,
+        server,
+        isp,
     )
 
     where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
     # nosec B608 — WHERE conditions are hardcoded string literals; only values are parameterised.
     count_sql = "SELECT COUNT(*) FROM results " + where  # NOSONAR
-    data_sql = "SELECT * FROM results " + where + " ORDER BY timestamp DESC LIMIT ? OFFSET ?"  # NOSONAR
+    data_sql = (
+        "SELECT * FROM results " + where + " ORDER BY timestamp DESC LIMIT ? OFFSET ?"
+    )  # NOSONAR
 
     with closing(_connect()) as conn:
         total: int = conn.execute(count_sql, params).fetchone()[0]  # NOSONAR
         offset = (page - 1) * page_size
-        rows = conn.execute(data_sql, [*params, page_size, offset]).fetchall()  # NOSONAR
+        rows = conn.execute(
+            data_sql, [*params, page_size, offset]
+        ).fetchall()  # NOSONAR
 
     return ResultsPage(
         results=[SpeedResultSchema(**dict(r)) for r in rows],

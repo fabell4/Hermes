@@ -157,7 +157,9 @@ class NDT7Provider(BaseTestProvider):
                 try:
                     last_measurement = json.loads(message)
                 except json.JSONDecodeError:
-                    _log.debug("NDT7: ignoring unparseable text frame: %r", message[:80])
+                    _log.debug(
+                        "NDT7: ignoring unparseable text frame: %r", message[:80]
+                    )
         return total_bytes, last_measurement
 
     def _run_download(self, url: str) -> tuple[float, float]:

@@ -238,9 +238,7 @@ class AlertManager:
                 )
                 logger.info("Alert sent successfully via %s", name)
             except Exception as e:  # pylint: disable=broad-exception-caught  # NOSONAR
-                logger.error(
-                    "Alert provider '%s' failed: %s", name, e, exc_info=True
-                )
+                logger.error("Alert provider '%s' failed: %s", name, e, exc_info=True)
 
     @property
     def consecutive_failures(self) -> int:

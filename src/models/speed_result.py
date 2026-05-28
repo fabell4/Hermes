@@ -17,9 +17,7 @@ def _check_optional_non_negative(value: float | None, name: str) -> None:
         raise ValueError(f"{name} cannot be negative: {value}")
 
 
-def _check_optional_range(
-    value: float | None, name: str, lo: float, hi: float
-) -> None:
+def _check_optional_range(value: float | None, name: str, lo: float, hi: float) -> None:
     if value is not None and not (lo <= value <= hi):
         raise ValueError(f"{name} must be {lo}–{hi}: {value}")
 

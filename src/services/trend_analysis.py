@@ -96,9 +96,7 @@ def _compute_regression(
     return dl_slope, ul_slope, pg_slope
 
 
-def _detect_degradation(
-    dl: float | None, ul: float | None, pg: float | None
-) -> bool:
+def _detect_degradation(dl: float | None, ul: float | None, pg: float | None) -> bool:
     """Return True when any slope indicates worsening performance."""
     return (
         (dl is not None and dl < 0)
