@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import sqlite3
 from contextlib import closing
-from datetime import datetime
 from pathlib import Path
 from typing import Annotated, Any
 
