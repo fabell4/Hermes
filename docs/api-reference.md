@@ -282,6 +282,239 @@ curl http://localhost:8080/api/alerts
 
 ---
 
+### Get Outage Events
+
+Retrieve paginated outage detection history. Requires SQLite to be enabled.
+
+**Request:**
+
+```http
+GET /api/outages?page=1&page_size=50
+```
+
+**Query Parameters:**
+
+- `page` (optional, default: `1`) — Page number (1-indexed)
+- `page_size` (optional, default: `50`) — Events per page (max: 500)
+
+**Response:**
+
+```json
+{
+  "events": [
+    {
+      "id": 1,
+      "event_type": "outage_start",
+      "timestamp": "2026-04-29T03:12:00Z",
+      "duration_seconds": 142.5,
+      "isp_name": "Comcast",
+      "asn": "AS7922",
+      "bgp_unstable": false,
+      "cloudflare_outage_desc": null,
+      "probe_results": "{\"1.1.1.1:53\": false, \"8.8.8.8:53\": false, \"9.9.9.9:53\": true}"
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "page_size": 50
+}
+```
+
+**Status Codes:**
+
+- `200 OK` — Events returned
+- `503 Service Unavailable` — Database not yet available
+
+**cURL Example:**
+
+```bash
+curl http://localhost:8080/api/outages
+```
+
+---
+
+### Get Current Outage Status
+
+Check whether an outage is currently in progress.
+
+**Request:**
+
+```http
+GET /api/outage-status
+```
+
+**Response:**
+
+```json
+{
+  "outage_in_progress": false,
+  "outage_start_time": null
+}
+```
+
+**Status Codes:**
+
+- `200 OK` — Status returned
+
+**cURL Example:**
+
+```bash
+curl http://localhost:8080/api/outage-status
+```
+
+---
+
+### Get Anomaly Detection Results
+
+Return recent speed test results annotated with z-score anomaly detection. Each result is compared
+against a rolling baseline window.
+
+**Request:**
+
+```http
+GET /api/analysis/anomalies?limit=50&window=20&threshold=2.5
+```
+
+**Query Parameters:**
+
+- `limit` (optional, default: `50`, max: `500`) — Number of results to annotate
+- `window` (optional, default: `20`, range: `3–200`) — Baseline window size for z-score computation
+- `threshold` (optional, default: `2.5`, range: `0.5–10.0`) — Z-score magnitude that triggers a flag
+
+**Response:**
+
+```json
+[
+  {
+    "id": 123,
+    "timestamp": "2026-04-29T12:00:00Z",
+    "download_mbps": 12.3,
+    "upload_mbps": 35.2,
+    "ping_ms": 15.3,
+    "jitter_ms": 2.1,
+    "isp_name": "Comcast",
+    "server_name": "Chicago, IL",
+    "server_location": "Chicago, IL",
+    "is_anomaly": true,
+    "anomaly_flags": [
+      {
+        "metric": "download_mbps",
+        "value": 12.3,
+        "baseline_mean": 248.5,
+        "baseline_stdev": 15.2,
+        "z_score": -15.5
+      }
+    ]
+  }
+]
+```
+
+**Status Codes:**
+
+- `200 OK` — Results returned
+- `503 Service Unavailable` — Database not yet available
+
+**cURL Example:**
+
+```bash
+curl "http://localhost:8080/api/analysis/anomalies?limit=100&threshold=3.0"
+```
+
+---
+
+### Get Time-of-Day Analysis
+
+Return average download, upload, and ping grouped by hour of day (UTC).
+
+**Request:**
+
+```http
+GET /api/analysis/time-of-day?days=30
+```
+
+**Query Parameters:**
+
+- `days` (optional, default: `30`, range: `0–3650`) — Lookback window in days. Use `0` for all time.
+
+**Response:**
+
+```json
+[
+  {
+    "hour": 2,
+    "sample_count": 28,
+    "avg_download_mbps": 310.5,
+    "avg_upload_mbps": 42.1,
+    "avg_ping_ms": 12.3,
+    "min_download_mbps": 290.0,
+    "max_download_mbps": 340.2
+  }
+]
+```
+
+**Status Codes:**
+
+- `200 OK` — Stats returned (empty array if no data in window)
+
+**cURL Example:**
+
+```bash
+curl "http://localhost:8080/api/analysis/time-of-day?days=90"
+```
+
+---
+
+### Get Trend Analysis
+
+Return month-over-month statistics and linear regression slopes to detect long-term degradation.
+
+**Request:**
+
+```http
+GET /api/analysis/trends?months=6
+```
+
+**Query Parameters:**
+
+- `months` (optional, default: `6`, range: `0–120`) — Lookback window in calendar months.
+  Use `0` for all time.
+
+**Response:**
+
+```json
+{
+  "monthly_stats": [
+    {
+      "month": "2026-04",
+      "sample_count": 720,
+      "avg_download_mbps": 248.5,
+      "avg_upload_mbps": 35.2,
+      "avg_ping_ms": 15.3
+    }
+  ],
+  "download_slope": -2.1,
+  "upload_slope": -0.5,
+  "ping_slope": 0.8,
+  "degradation_detected": true,
+  "months_available": 6
+}
+```
+
+Slopes are expressed as Mbps (or ms) per calendar month. Negative download/upload slope or positive
+ping slope indicates degradation.
+
+**Status Codes:**
+
+- `200 OK` — Report returned
+
+**cURL Example:**
+
+```bash
+curl "http://localhost:8080/api/analysis/trends?months=12"
+```
+
+---
+
 ### Check Trigger Status
 
 Check if a speed test is currently running.
@@ -404,7 +637,7 @@ Content-Type: application/json
 **Validation:**
 
 - `interval_minutes` must be between 5 and 1440 minutes (5 minutes to 24 hours)
-- `enabled_exporters` must be a list containing valid exporters: `csv`, `sqlite`, `prometheus`, `loki`
+- `enabled_exporters` must be a list containing valid exporters: `csv`, `sqlite`, `prometheus`, `loki`, `influxdb`
 - `scanning_enabled` controls whether automatic tests are running
 
 **Status Codes:**

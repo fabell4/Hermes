@@ -15,10 +15,13 @@ with your observability stack.
 ## ✨ Features
 
 - **Automated Speed Testing** — Scheduled tests at configurable intervals with manual triggers
-- **Multi-Destination Export** — CSV, SQLite, Prometheus, Loki
+- **Multi-Destination Export** — CSV, SQLite, Prometheus, Loki, InfluxDB
 - **Modern Web UI** — React + Vite frontend with real-time charts and statistics
 - **REST API** — Full-featured FastAPI backend for automation and integration
 - **Alert Notifications** — Webhook, Gotify, ntfy, Apprise (100+ services)
+- **Outage Detection** — TCP probe-based ISP outage detection with event history
+- **SLA Monitoring** — Configurable thresholds for download, upload, ping, and packet loss
+- **Analytics** — Anomaly detection, time-of-day analysis, and month-over-month trend reporting
 - **Production-Ready** — Docker deployment, health checks, data retention policies
 - **Security-First** — API key auth, rate limiting, SSRF protection, security headers
 
@@ -143,6 +146,7 @@ Results are exported to your choice of:
 - **SQLite** — Fast queries for UI and API (recommended)
 - **Prometheus** — Time-series metrics for Grafana
 - **Loki** — Structured logs for LogQL queries
+- **InfluxDB** — Time-series database (v2 API, enable with `influxdb` in `ENABLED_EXPORTERS`)
 
 ---
 
@@ -228,6 +232,13 @@ Key configuration options (see [Getting Started](https://fabell4.github.io/herme
 | `ALERT_FAILURE_THRESHOLD` | `0` | Consecutive failures before alerting (0 = disabled) |
 | `PROMETHEUS_PORT` | `8000` | Port for /metrics scrape endpoint |
 | `LOKI_URL` | *(unset)* | Loki push URL, e.g., `http://loki:3100` |
+| `INFLUXDB_URL` | *(unset)* | InfluxDB v2 base URL (enable with `influxdb` in `ENABLED_EXPORTERS`) |
+| `SLA_DOWNLOAD_MBPS` | *(unset)* | Minimum acceptable download speed; failures flagged when below this |
+| `SLA_UPLOAD_MBPS` | *(unset)* | Minimum acceptable upload speed |
+| `SLA_PING_MS_MAX` | *(unset)* | Maximum acceptable ping latency |
+| `SLA_PACKET_LOSS_MAX_PCT` | *(unset)* | Maximum acceptable packet loss percentage |
+| `OUTAGE_PROBE_HOSTS` | *(unset)* | Comma-separated `host:port` TCP probes, e.g. `1.1.1.1:53,8.8.8.8:53,9.9.9.9:53` |
+| `OUTAGE_PROBE_QUORUM` | `2` | Minimum probe failures (of total) to declare an outage |
 
 ---
 
@@ -268,8 +279,8 @@ Licensed under MIT. See [LICENSE](LICENSE) for details.
 
 ## ⭐ Project Status
 
-**Hermes v1.0 is in beta.** All four exporters (CSV, SQLite, Prometheus, Loki) are fully operational. Security audit
-complete and approved for release.
+**Hermes v0.5-beta is in active development.** All five exporters (CSV, SQLite, Prometheus, Loki, InfluxDB)
+are fully operational. Security audit complete and approved for release.
 
 **Coming in v2.0:**
 
