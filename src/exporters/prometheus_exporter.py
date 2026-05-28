@@ -94,26 +94,55 @@ class PrometheusExporter(BaseExporter):
                 "Prometheus label cardinality management enabled — "
                 "all label values collapsed to empty strings."
             )
+        self._start_server(port)
 
-        if not PrometheusExporter._server_started:
-            try:
-                start_http_server(port)
-                PrometheusExporter._server_started = True
-                logger.info("Prometheus metrics server started on port %d", port)
-            except OSError as e:
-                if "Address already in use" in str(e) or "Only one usage" in str(e):
-                    raise RuntimeError(
-                        f"Prometheus metrics port {port} is already in use. "
-                        f"Set PROMETHEUS_PORT to a different value or stop the conflicting service."
-                    ) from e
-                raise RuntimeError(
-                    f"Failed to start Prometheus server on port {port}: {e}"
-                ) from e
-        else:
+    # ------------------------------------------------------------------
+    # Private helpers
+    # ------------------------------------------------------------------
+
+    def _start_server(self, port: int) -> None:
+        """Start the Prometheus HTTP server on *port*, or log if already running."""
+        if PrometheusExporter._server_started:
             logger.debug(
                 "Prometheus metrics server already running; skipping start on port %d",
                 port,
             )
+            return
+        try:
+            start_http_server(port)
+            PrometheusExporter._server_started = True
+            logger.info("Prometheus metrics server started on port %d", port)
+        except OSError as e:
+            if "Address already in use" in str(e) or "Only one usage" in str(e):
+                raise RuntimeError(
+                    f"Prometheus metrics port {port} is already in use. "
+                    f"Set PROMETHEUS_PORT to a different value or stop the conflicting service."
+                ) from e
+            raise RuntimeError(
+                f"Failed to start Prometheus server on port {port}: {e}"
+            ) from e
+
+    def _build_labels(self, result: SpeedResult) -> dict[str, str]:
+        """Return the Prometheus label dict for *result*, respecting cardinality setting."""
+        if self._disable_labels:
+            return {"server_name": "", "server_location": "", "isp_name": ""}
+        return {
+            "server_name": result.server_name or "",
+            "server_location": result.server_location or "",
+            "isp_name": result.isp_name or "",
+        }
+
+    def _update_optional_gauges(self, result: SpeedResult, labels: dict[str, str]) -> None:
+        """Update gauges whose source field may be absent from a result."""
+        if result.jitter_ms is not None:
+            _JITTER.labels(**labels).set(result.jitter_ms)
+        if result.packet_loss_pct is not None:
+            _PACKET_LOSS.labels(**labels).set(result.packet_loss_pct)
+        if result.quality_score is not None:
+            _QUALITY_SCORE.labels(**labels).set(result.quality_score)
+        # SLA: 1=pass, 0=fail, -1=disabled (not configured)
+        sla_value = -1.0 if result.sla_ok is None else (1.0 if result.sla_ok else 0.0)
+        _SLA_OK.labels(**labels).set(sla_value)
 
     # ------------------------------------------------------------------
     # BaseExporter interface
@@ -126,29 +155,12 @@ class PrometheusExporter(BaseExporter):
         all label values are replaced with empty strings so that only a single
         time series exists per metric.
         """
-        if self._disable_labels:
-            labels = {"server_name": "", "server_location": "", "isp_name": ""}
-        else:
-            labels = {
-                "server_name": result.server_name or "",
-                "server_location": result.server_location or "",
-                "isp_name": result.isp_name or "",
-            }
+        labels = self._build_labels(result)
         try:
             _DOWNLOAD.labels(**labels).set(result.download_mbps)
             _UPLOAD.labels(**labels).set(result.upload_mbps)
             _PING.labels(**labels).set(result.ping_ms)
-            if result.jitter_ms is not None:
-                _JITTER.labels(**labels).set(result.jitter_ms)
-            if result.packet_loss_pct is not None:
-                _PACKET_LOSS.labels(**labels).set(result.packet_loss_pct)
-            if result.quality_score is not None:
-                _QUALITY_SCORE.labels(**labels).set(result.quality_score)
-            # SLA: 1=pass, 0=fail, -1=disabled (not configured)
-            if result.sla_ok is not None:
-                _SLA_OK.labels(**labels).set(1.0 if result.sla_ok else 0.0)
-            else:
-                _SLA_OK.labels(**labels).set(-1.0)
+            self._update_optional_gauges(result, labels)
             logger.debug(
                 "Prometheus gauges updated — down=%.2f up=%.2f ping=%.2f "
                 "jitter=%s loss=%s quality=%s sla_ok=%s",

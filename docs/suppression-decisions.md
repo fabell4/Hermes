@@ -17,7 +17,6 @@ and why it cannot simply be removed.
 | Line | Suppression | Reason |
 | ---- | ----------- | ------ |
 | `CORS_ORIGINS` default value | `# NOSONAR` (S5332) | The default value `http://localhost:5173,http://localhost:4173` is a **development-only** default for the local Vite/React dev server. It is never active in production — users set `CORS_ORIGINS` to their own HTTPS domain. The `http://` is localhost-only and poses no cross-site risk. |
-| `"OUTAGE_PROBE_HOSTS", ["1.1.1.1:53", ...]` | `# NOSONAR` (S1313) | The three IPs are well-known public DNS resolvers: Cloudflare (1.1.1.1), Google (8.8.8.8), and Quad9 (9.9.9.9). They are the **hardcoded default** probe endpoints for connectivity detection, not internal infrastructure addresses. Users can override them via `OUTAGE_PROBE_HOSTS`. |
 
 ### `tests/test_api_ssrf.py`
 
