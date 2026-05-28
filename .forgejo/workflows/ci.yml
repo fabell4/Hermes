@@ -915,16 +915,18 @@ jobs:
         if: ${{ !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
         run: |
           curl -s -X POST https://ntfy.greenflametech.net/pipeline-alerts \
-            -H "Title: Hermes Pipeline Passed Γ£à" \
+            -H "Title: Hermes Pipeline Passed ✅" \
             -H "Priority: default" \
             -H "Tags: white_check_mark" \
+            -H "X-Api-Key: ${{ secrets.NTFY_API_KEY }}" \
             -d "Pipeline passed for commit ${{ github.sha }} on branch ${{ github.ref_name }}"
 
       - name: Notify failure
         if: ${{ contains(needs.*.result, 'failure') }}
         run: |
           curl -s -X POST https://ntfy.greenflametech.net/pipeline-alerts \
-            -H "Title: Hermes Pipeline Failed Γ¥î" \
+            -H "Title: Hermes Pipeline Failed ❌" \
             -H "Priority: high" \
             -H "Tags: x" \
+            -H "X-Api-Key: ${{ secrets.NTFY_API_KEY }}" \
             -d "Pipeline failed for commit ${{ github.sha }} on branch ${{ github.ref_name }}. Check Forgejo Actions for details."
