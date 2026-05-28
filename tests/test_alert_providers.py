@@ -370,8 +370,8 @@ def test_ntfy_provider_sends_with_auth_token(mock_post):
     )
 
     call_args = mock_post.call_args
-    assert "Authorization" in call_args.kwargs["headers"]
-    assert call_args.kwargs["headers"]["Authorization"] == "Bearer mytoken123"
+    assert "X-Api-Key" in call_args.kwargs["headers"]
+    assert call_args.kwargs["headers"]["X-Api-Key"] == "mytoken123"
 
 
 @patch("requests.Session.post")

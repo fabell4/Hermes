@@ -268,7 +268,7 @@ class NtfyProvider(AlertProvider):
         }
 
         if self.token:
-            headers["Authorization"] = f"Bearer {self.token}"
+            headers["X-Api-Key"] = self.token
 
         try:
             response = self._session.post(
