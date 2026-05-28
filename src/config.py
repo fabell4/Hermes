@@ -234,7 +234,12 @@ INFLUXDB_TIMEOUT_MS: int = _get_int("INFLUXDB_TIMEOUT_MS", 10_000)
 # TCP probe endpoints (host:port). A majority-vote quorum of these must fail for
 # a round to count as a failure.
 OUTAGE_PROBE_HOSTS: list[str] = _get_csv_list(
-    "OUTAGE_PROBE_HOSTS", ["1.1.1.1:53", "8.8.8.8:53", "9.9.9.9:53"]  # NOSONAR - well-known public DNS resolvers (Cloudflare, Google, Quad9) used as connectivity probe targets
+    "OUTAGE_PROBE_HOSTS",
+    [
+        "1.1.1.1:53",
+        "8.8.8.8:53",
+        "9.9.9.9:53",
+    ],  # NOSONAR - well-known public DNS resolvers (Cloudflare, Google, Quad9) used as connectivity probe targets
 )
 # Seconds to wait for each TCP probe before counting it as failed.
 OUTAGE_PROBE_TIMEOUT: int = _get_int("OUTAGE_PROBE_TIMEOUT", 3)

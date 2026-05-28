@@ -85,7 +85,9 @@ class PrometheusExporter(BaseExporter):
         self._port = port
         # Resolve label behaviour: explicit arg takes precedence over env var.
         self._disable_labels: bool = (
-            disable_labels if disable_labels is not None else app_config.PROMETHEUS_DISABLE_LABELS
+            disable_labels
+            if disable_labels is not None
+            else app_config.PROMETHEUS_DISABLE_LABELS
         )
         if self._disable_labels:
             logger.info(
@@ -161,4 +163,3 @@ class PrometheusExporter(BaseExporter):
         except Exception as exc:  # pragma: no cover
             logger.error("Failed to update Prometheus gauges: %s", exc)
             raise
-

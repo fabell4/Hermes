@@ -29,6 +29,7 @@ DB_PATH = Path(_cfg.SQLITE_DB_PATH)
 # Shared helpers
 # ---------------------------------------------------------------------------
 
+
 def _require_db() -> None:
     if not DB_PATH.exists():
         raise HTTPException(status_code=503, detail="No database found yet.")
@@ -70,6 +71,7 @@ def _row_to_domain(row: sqlite3.Row) -> DomainResult:
 # ---------------------------------------------------------------------------
 # Anomaly detection
 # ---------------------------------------------------------------------------
+
 
 class AnomalyFlagSchema(BaseModel):
     """Details about one anomalous metric in a single result."""
@@ -171,6 +173,7 @@ def get_anomalies(
 # Time-of-day analysis
 # ---------------------------------------------------------------------------
 
+
 class HourlyStatsSchema(BaseModel):
     """Average speeds for one hour-of-day slot."""
 
@@ -199,6 +202,7 @@ def get_time_of_day(
 # ---------------------------------------------------------------------------
 # Trend analysis
 # ---------------------------------------------------------------------------
+
 
 class MonthlyStatsSchema(BaseModel):
     """Aggregate statistics for one calendar month."""

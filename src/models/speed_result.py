@@ -45,7 +45,9 @@ class SpeedResult:
             raise ValueError(f"server_id cannot be negative: {self.server_id}")
 
         # Validate packet loss (0–100 %)
-        if self.packet_loss_pct is not None and not (0.0 <= self.packet_loss_pct <= 100.0):
+        if self.packet_loss_pct is not None and not (
+            0.0 <= self.packet_loss_pct <= 100.0
+        ):
             raise ValueError(f"packet_loss_pct must be 0–100: {self.packet_loss_pct}")
 
         # Validate quality score (0–100)

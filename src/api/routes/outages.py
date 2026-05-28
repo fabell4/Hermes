@@ -98,9 +98,7 @@ def get_outages(
     """Return paginated outage events, newest first."""
     with closing(_connect()) as conn:
         _ensure_outage_table(conn)
-        total: int = conn.execute(
-            "SELECT COUNT(*) FROM outage_events"
-        ).fetchone()[0]
+        total: int = conn.execute("SELECT COUNT(*) FROM outage_events").fetchone()[0]
         offset = (page - 1) * page_size
         rows = conn.execute(
             "SELECT * FROM outage_events ORDER BY timestamp DESC LIMIT ? OFFSET ?",

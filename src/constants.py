@@ -46,6 +46,7 @@ PROVIDER_GOTIFY = AlertProviderType.GOTIFY
 PROVIDER_NTFY = AlertProviderType.NTFY
 PROVIDER_APPRISE = AlertProviderType.APPRISE
 
+
 class ProviderType(StrEnum):
     """Valid test provider type identifiers.
 

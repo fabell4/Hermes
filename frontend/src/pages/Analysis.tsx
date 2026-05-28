@@ -13,6 +13,7 @@ import {
   Legend,
 } from 'recharts'
 import { AlertTriangle, TrendingDown, TrendingUp, Clock, BarChart2, Minus } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { useTheme } from '@/hooks/useTheme'
 import { ChartExportButton } from '@/components/ChartExportButton'
 import type {
@@ -398,7 +399,7 @@ function TrendsTab({ data, loading, error }: TrendsTabProps) {
 // Analysis page
 // ---------------------------------------------------------------------------
 
-const TABS: { id: Tab; label: string; icon: React.ComponentType<{ size: number }> }[] = [
+const TABS: { id: Tab; label: string; icon: LucideIcon }[] = [
   { id: 'anomalies', label: 'Anomaly Detection', icon: AlertTriangle },
   { id: 'time-of-day', label: 'Time of Day', icon: Clock },
   { id: 'trends', label: 'Trend Analysis', icon: BarChart2 },

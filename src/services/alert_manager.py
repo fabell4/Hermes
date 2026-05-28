@@ -113,7 +113,8 @@ class AlertManager:
 
         if shared_state.get_outage_in_progress():
             logger.debug(
-                "record_failure() skipped — outage already in progress. Error: %s", error
+                "record_failure() skipped — outage already in progress. Error: %s",
+                error,
             )
             return
 
@@ -378,9 +379,7 @@ class AlertManager:
         shared_state.set_outage_start_time(None)
 
         minutes, secs = divmod(int(duration_s), 60)
-        duration_str = (
-            f"{minutes}m {secs}s" if minutes else f"{secs}s"
-        )
+        duration_str = f"{minutes}m {secs}s" if minutes else f"{secs}s"
         self._last_error = f"Connectivity restored after {duration_str}"
         self._last_failure_time = timestamp
 

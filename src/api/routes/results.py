@@ -53,7 +53,9 @@ class ResultsPage(BaseModel):
 
 def _connect() -> sqlite3.Connection:
     if not DB_PATH.exists():
-        raise HTTPException(status_code=503, detail="No database found yet.")  # NOSONAR — S8415 false positive: every route that calls _connect() already declares responses=_503
+        raise HTTPException(
+            status_code=503, detail="No database found yet."
+        )  # NOSONAR — S8415 false positive: every route that calls _connect() already declares responses=_503
     conn = sqlite3.connect(DB_PATH, check_same_thread=False)
     conn.execute("PRAGMA journal_mode=WAL")
     conn.row_factory = sqlite3.Row
@@ -78,13 +80,27 @@ class NoteRequest(BaseModel):
 def get_results(
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=500)] = 50,
-    date_from: Annotated[str | None, Query(description="Start date filter inclusive (YYYY-MM-DD)")] = None,
-    date_to: Annotated[str | None, Query(description="End date filter inclusive (YYYY-MM-DD)")] = None,
-    min_download: Annotated[float | None, Query(ge=0, description="Minimum download speed (Mbps)")] = None,
-    max_download: Annotated[float | None, Query(ge=0, description="Maximum download speed (Mbps)")] = None,
-    min_upload: Annotated[float | None, Query(ge=0, description="Minimum upload speed (Mbps)")] = None,
-    max_upload: Annotated[float | None, Query(ge=0, description="Maximum upload speed (Mbps)")] = None,
-    max_ping: Annotated[float | None, Query(ge=0, description="Maximum ping (ms)")] = None,
+    date_from: Annotated[
+        str | None, Query(description="Start date filter inclusive (YYYY-MM-DD)")
+    ] = None,
+    date_to: Annotated[
+        str | None, Query(description="End date filter inclusive (YYYY-MM-DD)")
+    ] = None,
+    min_download: Annotated[
+        float | None, Query(ge=0, description="Minimum download speed (Mbps)")
+    ] = None,
+    max_download: Annotated[
+        float | None, Query(ge=0, description="Maximum download speed (Mbps)")
+    ] = None,
+    min_upload: Annotated[
+        float | None, Query(ge=0, description="Minimum upload speed (Mbps)")
+    ] = None,
+    max_upload: Annotated[
+        float | None, Query(ge=0, description="Maximum upload speed (Mbps)")
+    ] = None,
+    max_ping: Annotated[
+        float | None, Query(ge=0, description="Maximum ping (ms)")
+    ] = None,
     server: Annotated[str | None, Query(description="Exact server name match")] = None,
     isp: Annotated[str | None, Query(description="Exact ISP name match")] = None,
 ) -> ResultsPage:

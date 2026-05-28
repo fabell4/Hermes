@@ -50,7 +50,9 @@ class SpeedtestRunner:
         """
         self._speedtest_path = speedtest_path
         # Explicit server_id overrides config; None defers to config.
-        self._server_id = server_id if server_id is not None else config.SPEEDTEST_SERVER_ID
+        self._server_id = (
+            server_id if server_id is not None else config.SPEEDTEST_SERVER_ID
+        )
         self._primary_retries = max(1, primary_retries)
         self._retry_backoff_seconds = max(0.0, retry_backoff_seconds)
         if providers is not None:

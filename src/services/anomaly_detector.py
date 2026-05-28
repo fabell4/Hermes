@@ -23,7 +23,7 @@ _MIN_WINDOW = 3
 class AnomalyFlag:
     """Details about a single anomalous metric."""
 
-    metric: str          # "download_mbps" | "upload_mbps" | "ping_ms"
+    metric: str  # "download_mbps" | "upload_mbps" | "ping_ms"
     value: float
     baseline_mean: float
     baseline_stdev: float

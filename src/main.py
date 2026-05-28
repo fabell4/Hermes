@@ -250,18 +250,20 @@ def _process_speedtest_result(
     sla_result = _sla_monitor.check(result)
     result.sla_ok = sla_result.overall_ok
 
-    shared_state.set_last_diagnostics({
-        "quality_score": result.quality_score,
-        "sla_ok": result.sla_ok,
-        "packet_loss_pct": result.packet_loss_pct,
-        "sla_detail": {
-            "download_ok": sla_result.download_ok,
-            "upload_ok": sla_result.upload_ok,
-            "ping_ok": sla_result.ping_ok,
-            "packet_loss_ok": sla_result.packet_loss_ok,
-            "overall_ok": sla_result.overall_ok,
-        },
-    })
+    shared_state.set_last_diagnostics(
+        {
+            "quality_score": result.quality_score,
+            "sla_ok": result.sla_ok,
+            "packet_loss_pct": result.packet_loss_pct,
+            "sla_detail": {
+                "download_ok": sla_result.download_ok,
+                "upload_ok": sla_result.upload_ok,
+                "ping_ok": sla_result.ping_ok,
+                "packet_loss_ok": sla_result.packet_loss_ok,
+                "overall_ok": sla_result.overall_ok,
+            },
+        }
+    )
 
     if alert_manager:
         alert_manager.record_success()
@@ -329,10 +331,14 @@ def run_once(
         if outage_detector is not None:
             status = outage_detector.check_connectivity()
             if status == ConnectivityStatus.DOWN:
-                _handle_connectivity_down(outage_detector, dispatcher, alert_manager, now)
+                _handle_connectivity_down(
+                    outage_detector, dispatcher, alert_manager, now
+                )
                 return
             if shared_state.get_outage_in_progress():
-                _handle_connectivity_restored(outage_detector, dispatcher, alert_manager, now)
+                _handle_connectivity_restored(
+                    outage_detector, dispatcher, alert_manager, now
+                )
 
         logger.info("Starting speedtest run...")
         try:
@@ -621,7 +627,9 @@ def main():
         run_once(service, dispatcher, alert_manager, sla_monitor, outage_detector)
 
     # Start the background scheduler
-    scheduler = build_scheduler(service, dispatcher, alert_manager, sla_monitor, outage_detector)
+    scheduler = build_scheduler(
+        service, dispatcher, alert_manager, sla_monitor, outage_detector
+    )
     scheduler.start()
 
     # Start the health endpoint

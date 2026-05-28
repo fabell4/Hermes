@@ -92,21 +92,22 @@ def _select_fields(conn: sqlite3.Connection) -> str:
     columns (e.g. ``note`` on instances that haven't restarted since upgrade).
     """
     existing = {row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()}
-    return ", ".join(
-        f if f in existing else f"NULL as {f}"
-        for f in _FIELDNAMES
-    )
+    return ", ".join(f if f in existing else f"NULL as {f}" for f in _FIELDNAMES)
 
 
 @router.get("/export/csv", responses=_503)
 def export_csv(
     start: Annotated[
         str | None,
-        Query(description="Start datetime filter, inclusive (ISO 8601, e.g. 2026-01-01T00:00:00)"),
+        Query(
+            description="Start datetime filter, inclusive (ISO 8601, e.g. 2026-01-01T00:00:00)"
+        ),
     ] = None,
     end: Annotated[
         str | None,
-        Query(description="End datetime filter, inclusive (ISO 8601, e.g. 2026-12-31T23:59:59)"),
+        Query(
+            description="End datetime filter, inclusive (ISO 8601, e.g. 2026-12-31T23:59:59)"
+        ),
     ] = None,
 ) -> StreamingResponse:
     """Download all results as a CSV file, optionally filtered by date range."""
@@ -117,7 +118,9 @@ def export_csv(
         end = _parse_iso(end, "end")
 
     sql, params = _build_query(start, end)
-    filename = f"hermes_export_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.csv"
+    filename = (
+        f"hermes_export_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.csv"
+    )
 
     def generate():
         # Yield header row
@@ -130,7 +133,9 @@ def export_csv(
             full_sql = sql.format(fields=f"SELECT {fields}")
             for row in conn.execute(full_sql, params):
                 buf = io.StringIO()
-                writer = csv.DictWriter(buf, fieldnames=_FIELDNAMES, lineterminator="\r\n")
+                writer = csv.DictWriter(
+                    buf, fieldnames=_FIELDNAMES, lineterminator="\r\n"
+                )
                 writer.writerow(dict(row))
                 yield buf.getvalue()
 
@@ -145,11 +150,15 @@ def export_csv(
 def export_json(
     start: Annotated[
         str | None,
-        Query(description="Start datetime filter, inclusive (ISO 8601, e.g. 2026-01-01T00:00:00)"),
+        Query(
+            description="Start datetime filter, inclusive (ISO 8601, e.g. 2026-01-01T00:00:00)"
+        ),
     ] = None,
     end: Annotated[
         str | None,
-        Query(description="End datetime filter, inclusive (ISO 8601, e.g. 2026-12-31T23:59:59)"),
+        Query(
+            description="End datetime filter, inclusive (ISO 8601, e.g. 2026-12-31T23:59:59)"
+        ),
     ] = None,
 ) -> StreamingResponse:
     """Download all results as a JSON file, optionally filtered by date range."""
@@ -160,7 +169,9 @@ def export_json(
         end = _parse_iso(end, "end")
 
     sql, params = _build_query(start, end)
-    filename = f"hermes_export_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.json"
+    filename = (
+        f"hermes_export_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.json"
+    )
     exported_at = datetime.now(timezone.utc).isoformat()
 
     def generate():

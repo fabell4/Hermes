@@ -26,9 +26,7 @@ logger = logging.getLogger(__name__)
 _CACHE_TTL = timedelta(minutes=15)
 
 # Cloudflare Radar API base URL (HTTPS only).
-_CF_RADAR_URL = (
-    "https://api.cloudflare.com/client/v4/radar/annotations/outages"
-)
+_CF_RADAR_URL = "https://api.cloudflare.com/client/v4/radar/annotations/outages"
 
 # RIPE Stat base URL (HTTPS only).
 _RIPE_BASE = "https://stat.ripe.net/data"
@@ -175,9 +173,7 @@ class OutageDetector:
             resp = self._session.get(url, timeout=5)
             resp.raise_for_status()
             data: dict[str, Any] = resp.json()
-            asns: list[str] = (
-                data.get("data", {}).get("asns", [])
-            )
+            asns: list[str] = data.get("data", {}).get("asns", [])
             self._asn = asns[0] if asns else None
             logger.debug("RIPE Stat ASN for %s: %s", ip, self._asn)
         except Exception as exc:  # pylint: disable=broad-except  # NOSONAR
@@ -234,10 +230,12 @@ class OutageDetector:
             )
             resp.raise_for_status()
             data = resp.json()
-            annotations: list[dict[str, Any]] = (
-                data.get("result", {}).get("annotations", [])
+            annotations: list[dict[str, Any]] = data.get("result", {}).get(
+                "annotations", []
             )
-            desc: str | None = annotations[0].get("description") if annotations else None
+            desc: str | None = (
+                annotations[0].get("description") if annotations else None
+            )
             self._cf_cache[asn] = (desc, now)
             logger.debug("Cloudflare Radar annotation for AS%s: %s", asn, desc)
             return desc
@@ -267,6 +265,7 @@ class OutageDetector:
 # ------------------------------------------------------------------
 # Module-level helpers (pure functions — easy to unit-test)
 # ------------------------------------------------------------------
+
 
 def _parse_probe_hosts(hosts: list[str]) -> list[tuple[str, int]]:
     """Parse ``["host:port", ...]`` strings into ``[(host, port), ...]`` tuples.

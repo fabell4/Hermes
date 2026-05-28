@@ -198,11 +198,7 @@ class SQLiteExporter(BaseExporter):
             "packet_loss_pct": result.packet_loss_pct,
             "quality_score": result.quality_score,
             # SQLite has no bool type; store as 1/0/NULL
-            "sla_ok": (
-                None
-                if result.sla_ok is None
-                else int(result.sla_ok)
-            ),
+            "sla_ok": (None if result.sla_ok is None else int(result.sla_ok)),
         }
 
         # Try to acquire lock with timeout to prevent deadlock
@@ -336,6 +332,4 @@ class SQLiteExporter(BaseExporter):
             finally:
                 conn.close()
         except sqlite3.Error as exc:
-            logger.warning(
-                "SQLite checkpoint/vacuum failed (non-fatal): %s", exc
-            )
+            logger.warning("SQLite checkpoint/vacuum failed (non-fatal): %s", exc)

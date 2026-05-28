@@ -145,6 +145,7 @@ class WebhookProvider(AlertProvider):
             logger.error("Failed to send webhook alert to %s: %s", self.url, e)
             raise
 
+
 class GotifyProvider(AlertProvider):
     """Sends alerts via Gotify push notification service."""
 

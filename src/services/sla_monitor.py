@@ -111,9 +111,7 @@ class SLAMonitor:
             else None
         )
         ping_ok: bool | None = (
-            result.ping_ms <= self.max_ping_ms
-            if self.max_ping_ms is not None
-            else None
+            result.ping_ms <= self.max_ping_ms if self.max_ping_ms is not None else None
         )
         packet_loss_ok: bool | None = None
         if self.max_packet_loss_pct is not None and result.packet_loss_pct is not None:

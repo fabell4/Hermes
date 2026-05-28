@@ -120,7 +120,9 @@ class OoklaProvider(BaseTestProvider):
 
             # Packet loss is reported as a top-level float (percentage, 0–100)
             raw_loss = data.get("packetLoss")
-            packet_loss_pct = round(float(raw_loss), 2) if raw_loss is not None else None
+            packet_loss_pct = (
+                round(float(raw_loss), 2) if raw_loss is not None else None
+            )
 
             # Parse server_id as int (Ookla returns int, but ensure type safety)
             server_id_raw = server.get("id")

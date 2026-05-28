@@ -18,7 +18,9 @@ class TestWindowSchema(BaseModel):
     """Configuration for restricting automated tests to specific hours (UTC)."""
 
     enabled: bool
-    start_hour: int = Field(ge=0, le=23, description="Inclusive start hour (UTC, 0–23).")
+    start_hour: int = Field(
+        ge=0, le=23, description="Inclusive start hour (UTC, 0–23)."
+    )
     end_hour: int = Field(ge=1, le=24, description="Exclusive end hour (UTC, 1–24).")
 
 

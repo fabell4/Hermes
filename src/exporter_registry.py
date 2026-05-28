@@ -29,9 +29,7 @@ logger = logging.getLogger(__name__)
 def _build_loki() -> LokiExporter | None:
     """Return a LokiExporter if ``LOKI_URL`` is configured, otherwise ``None``."""
     if not config.LOKI_URL:
-        logger.warning(
-            "Loki exporter is enabled but LOKI_URL is not set — skipping."
-        )
+        logger.warning("Loki exporter is enabled but LOKI_URL is not set — skipping.")
         return None
     return LokiExporter(url=config.LOKI_URL, job_label=config.LOKI_JOB_LABEL)
 

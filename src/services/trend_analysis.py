@@ -16,7 +16,7 @@ from pathlib import Path
 class MonthlyStats:
     """Aggregate statistics for a single calendar month."""
 
-    month: str            # "YYYY-MM"
+    month: str  # "YYYY-MM"
     sample_count: int
     avg_download_mbps: float
     avg_upload_mbps: float
