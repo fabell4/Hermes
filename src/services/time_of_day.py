@@ -13,6 +13,36 @@ from contextlib import closing
 from dataclasses import dataclass
 from pathlib import Path
 
+# Static SQL templates — no user input interpolated into these strings.
+_SQL_HOURLY_RECENT = """
+        SELECT
+            CAST(strftime('%H', timestamp) AS INTEGER) AS hour,
+            COUNT(*)                                   AS sample_count,
+            ROUND(AVG(download_mbps), 2)               AS avg_download_mbps,
+            ROUND(AVG(upload_mbps),   2)               AS avg_upload_mbps,
+            ROUND(AVG(ping_ms),       2)               AS avg_ping_ms,
+            ROUND(MIN(download_mbps), 2)               AS min_download_mbps,
+            ROUND(MAX(download_mbps), 2)               AS max_download_mbps
+        FROM results
+        WHERE timestamp >= datetime('now', ?)
+        GROUP BY hour
+        ORDER BY hour ASC
+    """
+
+_SQL_HOURLY_ALL = """
+        SELECT
+            CAST(strftime('%H', timestamp) AS INTEGER) AS hour,
+            COUNT(*)                                   AS sample_count,
+            ROUND(AVG(download_mbps), 2)               AS avg_download_mbps,
+            ROUND(AVG(upload_mbps),   2)               AS avg_upload_mbps,
+            ROUND(AVG(ping_ms),       2)               AS avg_ping_ms,
+            ROUND(MIN(download_mbps), 2)               AS min_download_mbps,
+            ROUND(MAX(download_mbps), 2)               AS max_download_mbps
+        FROM results
+        GROUP BY hour
+        ORDER BY hour ASC
+    """
+
 
 @dataclass(frozen=True)
 class HourlyStats:
@@ -44,26 +74,12 @@ def analyse(db_path: str | Path, days: int = 30) -> list[HourlyStats]:
     if not path.exists():
         return []
 
-    where = ""
-    params: list[object] = []
     if days > 0:
-        where = "WHERE timestamp >= datetime('now', ?)"
-        params.append(f"-{days} days")
-
-    sql = f"""
-        SELECT
-            CAST(strftime('%H', timestamp) AS INTEGER) AS hour,
-            COUNT(*)                                   AS sample_count,
-            ROUND(AVG(download_mbps), 2)               AS avg_download_mbps,
-            ROUND(AVG(upload_mbps),   2)               AS avg_upload_mbps,
-            ROUND(AVG(ping_ms),       2)               AS avg_ping_ms,
-            ROUND(MIN(download_mbps), 2)               AS min_download_mbps,
-            ROUND(MAX(download_mbps), 2)               AS max_download_mbps
-        FROM results
-        {where}
-        GROUP BY hour
-        ORDER BY hour ASC
-    """
+        sql: str = _SQL_HOURLY_RECENT
+        params: list[object] = [f"-{days} days"]
+    else:
+        sql = _SQL_HOURLY_ALL
+        params = []
 
     with closing(sqlite3.connect(str(path))) as conn:
         conn.row_factory = sqlite3.Row

@@ -365,8 +365,8 @@ def _is_within_test_window() -> bool:
     if not window.get("enabled", False):
         return True
 
-    start = window.get("start_hour", 0)
-    end = window.get("end_hour", 24)
+    start: int = int(window.get("start_hour", 0))
+    end: int = int(window.get("end_hour", 24))
     hour = datetime.now(timezone.utc).hour
 
     if start < end:

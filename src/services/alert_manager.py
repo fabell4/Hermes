@@ -222,21 +222,25 @@ class AlertManager:
         else:
             # Fallback to synchronous (should never happen, but defensive)
             logger.warning("Thread pool not initialized, sending alerts synchronously")
-            for name, provider in self._providers.items():
-                try:
-                    provider.send_alert(
-                        failure_count=self._consecutive_failures,
-                        last_error=self._last_error or "Unknown error",
-                        timestamp=timestamp,
-                    )
-                    logger.info("Alert sent successfully via %s", name)
-                except Exception as e:  # pylint: disable=broad-exception-caught  # NOSONAR
-                    logger.error(
-                        "Alert provider '%s' failed: %s", name, e, exc_info=True
-                    )
+            self._send_alerts_sync(timestamp)
 
         # Update last alert time immediately (don't wait for delivery)
         self._last_alert_time = timestamp
+
+    def _send_alerts_sync(self, timestamp: datetime) -> None:
+        """Send alerts to all providers synchronously (executor fallback)."""
+        for name, provider in self._providers.items():
+            try:
+                provider.send_alert(
+                    failure_count=self._consecutive_failures,
+                    last_error=self._last_error or "Unknown error",
+                    timestamp=timestamp,
+                )
+                logger.info("Alert sent successfully via %s", name)
+            except Exception as e:  # pylint: disable=broad-exception-caught  # NOSONAR
+                logger.error(
+                    "Alert provider '%s' failed: %s", name, e, exc_info=True
+                )
 
     @property
     def consecutive_failures(self) -> int:

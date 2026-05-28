@@ -76,35 +76,22 @@ class NoteRequest(BaseModel):
     note: str | None = Field(None, max_length=500)
 
 
-@router.get("/results", responses=_503)
-def get_results(
-    page: Annotated[int, Query(ge=1)] = 1,
-    page_size: Annotated[int, Query(ge=1, le=500)] = 50,
-    date_from: Annotated[
-        str | None, Query(description="Start date filter inclusive (YYYY-MM-DD)")
-    ] = None,
-    date_to: Annotated[
-        str | None, Query(description="End date filter inclusive (YYYY-MM-DD)")
-    ] = None,
-    min_download: Annotated[
-        float | None, Query(ge=0, description="Minimum download speed (Mbps)")
-    ] = None,
-    max_download: Annotated[
-        float | None, Query(ge=0, description="Maximum download speed (Mbps)")
-    ] = None,
-    min_upload: Annotated[
-        float | None, Query(ge=0, description="Minimum upload speed (Mbps)")
-    ] = None,
-    max_upload: Annotated[
-        float | None, Query(ge=0, description="Maximum upload speed (Mbps)")
-    ] = None,
-    max_ping: Annotated[
-        float | None, Query(ge=0, description="Maximum ping (ms)")
-    ] = None,
-    server: Annotated[str | None, Query(description="Exact server name match")] = None,
-    isp: Annotated[str | None, Query(description="Exact ISP name match")] = None,
-) -> ResultsPage:
-    """Return paginated results, newest first. Supports optional filtering."""
+def _build_filters(
+    date_from: str | None,
+    date_to: str | None,
+    min_download: float | None,
+    max_download: float | None,
+    min_upload: float | None,
+    max_upload: float | None,
+    max_ping: float | None,
+    server: str | None,
+    isp: str | None,
+) -> tuple[list[str], list[object]]:
+    """Build parameterised WHERE conditions from optional filter values.
+
+    All condition strings are hardcoded literals; only *values* come from user
+    input and are passed as bound parameters — not interpolated into SQL.
+    """
     conditions: list[str] = []
     params: list[object] = []
 
@@ -136,14 +123,52 @@ def get_results(
         conditions.append("isp_name = ?")
         params.append(isp)
 
-    where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
-    count_sql = f"SELECT COUNT(*) FROM results {where}"
-    data_sql = f"SELECT * FROM results {where} ORDER BY timestamp DESC LIMIT ? OFFSET ?"
+    return conditions, params
+
+
+@router.get("/results", responses=_503)
+def get_results(
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=500)] = 50,
+    date_from: Annotated[
+        str | None, Query(description="Start date filter inclusive (YYYY-MM-DD)")
+    ] = None,
+    date_to: Annotated[
+        str | None, Query(description="End date filter inclusive (YYYY-MM-DD)")
+    ] = None,
+    min_download: Annotated[
+        float | None, Query(ge=0, description="Minimum download speed (Mbps)")
+    ] = None,
+    max_download: Annotated[
+        float | None, Query(ge=0, description="Maximum download speed (Mbps)")
+    ] = None,
+    min_upload: Annotated[
+        float | None, Query(ge=0, description="Minimum upload speed (Mbps)")
+    ] = None,
+    max_upload: Annotated[
+        float | None, Query(ge=0, description="Maximum upload speed (Mbps)")
+    ] = None,
+    max_ping: Annotated[
+        float | None, Query(ge=0, description="Maximum ping (ms)")
+    ] = None,
+    server: Annotated[str | None, Query(description="Exact server name match")] = None,
+    isp: Annotated[str | None, Query(description="Exact ISP name match")] = None,
+) -> ResultsPage:
+    """Return paginated results, newest first. Supports optional filtering."""
+    conditions, params = _build_filters(
+        date_from, date_to, min_download, max_download,
+        min_upload, max_upload, max_ping, server, isp,
+    )
+
+    where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+    # nosec B608 — WHERE conditions are hardcoded string literals; only values are parameterised.
+    count_sql = "SELECT COUNT(*) FROM results " + where  # NOSONAR
+    data_sql = "SELECT * FROM results " + where + " ORDER BY timestamp DESC LIMIT ? OFFSET ?"  # NOSONAR
 
     with closing(_connect()) as conn:
-        total: int = conn.execute(count_sql, params).fetchone()[0]
+        total: int = conn.execute(count_sql, params).fetchone()[0]  # NOSONAR
         offset = (page - 1) * page_size
-        rows = conn.execute(data_sql, [*params, page_size, offset]).fetchall()
+        rows = conn.execute(data_sql, [*params, page_size, offset]).fetchall()  # NOSONAR
 
     return ResultsPage(
         results=[SpeedResultSchema(**dict(r)) for r in rows],

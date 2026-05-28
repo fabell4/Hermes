@@ -96,7 +96,7 @@ class AnomalyDetector:
                 stdev = statistics.stdev(values)
             except statistics.StatisticsError:
                 continue
-            if stdev == 0.0:
+            if not stdev:
                 continue
             z = abs(value - mean) / stdev
             if z > self.threshold:

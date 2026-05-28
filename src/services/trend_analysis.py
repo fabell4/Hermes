@@ -11,6 +11,32 @@ from contextlib import closing
 from dataclasses import dataclass
 from pathlib import Path
 
+# Static SQL templates — no user input interpolated into these strings.
+_SQL_MONTHLY_RECENT = """
+    SELECT
+        strftime('%Y-%m', timestamp)   AS month,
+        COUNT(*)                       AS sample_count,
+        ROUND(AVG(download_mbps), 2)   AS avg_download_mbps,
+        ROUND(AVG(upload_mbps),   2)   AS avg_upload_mbps,
+        ROUND(AVG(ping_ms),       2)   AS avg_ping_ms
+    FROM results
+    WHERE timestamp >= datetime('now', ?)
+    GROUP BY month
+    ORDER BY month ASC
+"""
+
+_SQL_MONTHLY_ALL = """
+    SELECT
+        strftime('%Y-%m', timestamp)   AS month,
+        COUNT(*)                       AS sample_count,
+        ROUND(AVG(download_mbps), 2)   AS avg_download_mbps,
+        ROUND(AVG(upload_mbps),   2)   AS avg_upload_mbps,
+        ROUND(AVG(ping_ms),       2)   AS avg_ping_ms
+    FROM results
+    GROUP BY month
+    ORDER BY month ASC
+"""
+
 
 @dataclass(frozen=True)
 class MonthlyStats:
@@ -54,9 +80,31 @@ def _linear_slope(xs: list[float], ys: list[float]) -> float | None:
     sxy = sum(x * y for x, y in zip(xs, ys))
     sxx = sum(x * x for x in xs)
     denom = n * sxx - sx * sx
-    if denom == 0.0:
+    if not denom:
         return None
     return (n * sxy - sx * sy) / denom
+
+
+def _compute_regression(
+    monthly: list[MonthlyStats],
+) -> tuple[float | None, float | None, float | None]:
+    """Compute OLS slopes for download, upload, and ping over monthly data."""
+    xs: list[float] = [float(i) for i in range(len(monthly))]
+    dl_slope = _linear_slope(xs, [m.avg_download_mbps for m in monthly])
+    ul_slope = _linear_slope(xs, [m.avg_upload_mbps for m in monthly])
+    pg_slope = _linear_slope(xs, [m.avg_ping_ms for m in monthly])
+    return dl_slope, ul_slope, pg_slope
+
+
+def _detect_degradation(
+    dl: float | None, ul: float | None, pg: float | None
+) -> bool:
+    """Return True when any slope indicates worsening performance."""
+    return (
+        (dl is not None and dl < 0)
+        or (ul is not None and ul < 0)
+        or (pg is not None and pg > 0)
+    )
 
 
 def analyse(db_path: str | Path, months: int = 6) -> TrendReport:
@@ -80,24 +128,12 @@ def analyse(db_path: str | Path, months: int = 6) -> TrendReport:
             months_available=0,
         )
 
-    where = ""
-    params: list[object] = []
     if months > 0:
-        where = "WHERE timestamp >= datetime('now', ?)"
-        params.append(f"-{months} months")
-
-    sql = f"""
-        SELECT
-            strftime('%Y-%m', timestamp)   AS month,
-            COUNT(*)                       AS sample_count,
-            ROUND(AVG(download_mbps), 2)   AS avg_download_mbps,
-            ROUND(AVG(upload_mbps),   2)   AS avg_upload_mbps,
-            ROUND(AVG(ping_ms),       2)   AS avg_ping_ms
-        FROM results
-        {where}
-        GROUP BY month
-        ORDER BY month ASC
-    """
+        sql: str = _SQL_MONTHLY_RECENT
+        params: list[object] = [f"-{months} months"]
+    else:
+        sql = _SQL_MONTHLY_ALL
+        params = []
 
     with closing(sqlite3.connect(str(path))) as conn:
         conn.row_factory = sqlite3.Row
@@ -115,16 +151,8 @@ def analyse(db_path: str | Path, months: int = 6) -> TrendReport:
             months_available=len(monthly),
         )
 
-    xs = list(range(len(monthly)))
-    dl_slope = _linear_slope(xs, [m.avg_download_mbps for m in monthly])
-    ul_slope = _linear_slope(xs, [m.avg_upload_mbps for m in monthly])
-    pg_slope = _linear_slope(xs, [m.avg_ping_ms for m in monthly])
-
-    degradation = (
-        (dl_slope is not None and dl_slope < 0)
-        or (ul_slope is not None and ul_slope < 0)
-        or (pg_slope is not None and pg_slope > 0)
-    )
+    dl_slope, ul_slope, pg_slope = _compute_regression(monthly)
+    degradation = _detect_degradation(dl_slope, ul_slope, pg_slope)
 
     return TrendReport(
         monthly_stats=monthly,

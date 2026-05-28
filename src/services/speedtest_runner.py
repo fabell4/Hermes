@@ -109,7 +109,8 @@ class SpeedtestRunner:
                     )
                     if self._retry_backoff_seconds > 0:
                         time.sleep(self._retry_backoff_seconds)
-        assert last_exc is not None  # always set: loop runs ≥ 1 times
+        if last_exc is None:  # pragma: no cover
+            raise RuntimeError("Provider loop completed without capturing an exception")
         raise last_exc
 
     def run(self) -> SpeedResult:

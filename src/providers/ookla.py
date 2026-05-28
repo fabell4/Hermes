@@ -72,6 +72,34 @@ class OoklaProvider(BaseTestProvider):
             raise RuntimeError("Speedtest path not resolved.")
         return self._speedtest_path
 
+    def _parse_result(self, data: dict[str, Any], tz: ZoneInfo) -> SpeedResult:
+        """Parse Ookla CLI JSON output into a SpeedResult."""
+        server = data.get("server", {})
+        download_bps = data.get("download", {}).get("bandwidth", 0) * 8
+        upload_bps = data.get("upload", {}).get("bandwidth", 0) * 8
+        ping_data = data.get("ping", {})
+        ping_ms = ping_data.get("latency", 0)
+        jitter_ms = ping_data.get("jitter")
+
+        raw_loss = data.get("packetLoss")
+        packet_loss_pct = round(float(raw_loss), 2) if raw_loss is not None else None
+
+        server_id_raw = server.get("id")
+        server_id = int(server_id_raw) if server_id_raw is not None else None
+
+        return SpeedResult(
+            timestamp=datetime.now(tz),
+            download_mbps=round(download_bps / 1_000_000, 2),
+            upload_mbps=round(upload_bps / 1_000_000, 2),
+            ping_ms=round(ping_ms, 2),
+            server_name=server.get("name", "Unknown"),
+            server_location=f"{server.get('location', '')}, {server.get('country', '')}",
+            server_id=server_id,
+            jitter_ms=round(jitter_ms, 2) if jitter_ms is not None else None,
+            isp_name=data.get("isp"),
+            packet_loss_pct=packet_loss_pct,
+        )
+
     def run(self) -> SpeedResult:
         """Execute a single speed test using the Ookla CLI.
 
@@ -102,44 +130,13 @@ class OoklaProvider(BaseTestProvider):
 
             data: dict[str, Any] = json.loads(result.stdout)
 
-            # Parse timezone
             _tz_name = config.TIMEZONE
             try:
                 _tz = ZoneInfo(_tz_name)
             except ZoneInfoNotFoundError:
                 _tz = ZoneInfo("UTC")
 
-            # Extract values from Ookla JSON format.
-            # Bandwidth is reported in bytes/s; multiply by 8 for bits/s.
-            server = data.get("server", {})
-            download_bps = data.get("download", {}).get("bandwidth", 0) * 8
-            upload_bps = data.get("upload", {}).get("bandwidth", 0) * 8
-            ping_data = data.get("ping", {})
-            ping_ms = ping_data.get("latency", 0)
-            jitter_ms = ping_data.get("jitter")
-
-            # Packet loss is reported as a top-level float (percentage, 0–100)
-            raw_loss = data.get("packetLoss")
-            packet_loss_pct = (
-                round(float(raw_loss), 2) if raw_loss is not None else None
-            )
-
-            # Parse server_id as int (Ookla returns int, but ensure type safety)
-            server_id_raw = server.get("id")
-            server_id = int(server_id_raw) if server_id_raw is not None else None
-
-            return SpeedResult(
-                timestamp=datetime.now(_tz),
-                download_mbps=round(download_bps / 1_000_000, 2),
-                upload_mbps=round(upload_bps / 1_000_000, 2),
-                ping_ms=round(ping_ms, 2),
-                server_name=server.get("name", "Unknown"),
-                server_location=f"{server.get('location', '')}, {server.get('country', '')}",
-                server_id=server_id,
-                jitter_ms=round(jitter_ms, 2) if jitter_ms is not None else None,
-                isp_name=data.get("isp"),
-                packet_loss_pct=packet_loss_pct,
-            )
+            return self._parse_result(data, _tz)
 
         except subprocess.TimeoutExpired as exc:
             raise RuntimeError("Speedtest timed out after 120 seconds.") from exc

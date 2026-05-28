@@ -107,8 +107,8 @@ class NDT7Provider(BaseTestProvider):
         urls: dict[str, str] = first.get("urls", {})
 
         # Locate v2 uses triple-slash keys: "wss:///ndt/v7/download"
-        dl_url = urls.get("wss:///ndt/v7/download") or urls.get("ws:///ndt/v7/download")
-        ul_url = urls.get("wss:///ndt/v7/upload") or urls.get("ws:///ndt/v7/upload")
+        dl_url = urls.get("wss:///ndt/v7/download")
+        ul_url = urls.get("wss:///ndt/v7/upload")
 
         if not dl_url or not ul_url:
             raise RuntimeError(
@@ -157,7 +157,7 @@ class NDT7Provider(BaseTestProvider):
                 try:
                     last_measurement = json.loads(message)
                 except json.JSONDecodeError:
-                    pass
+                    _log.debug("NDT7: ignoring unparseable text frame: %r", message[:80])
         return total_bytes, last_measurement
 
     def _run_download(self, url: str) -> tuple[float, float]:
@@ -214,14 +214,14 @@ class NDT7Provider(BaseTestProvider):
             while not stop_event.is_set() and time.monotonic() < deadline:
                 ws.send(chunk)
                 sender_bytes[0] += len(chunk)
-        except Exception:  # pylint: disable=broad-exception-caught  # NOSONAR
-            pass
+        except Exception:  # pylint: disable=broad-exception-caught  # NOSONAR  # nosec
+            _log.debug("NDT7 upload sender: send interrupted.")
         finally:
             stop_event.set()
             try:
                 ws.close()
-            except Exception:  # pylint: disable=broad-exception-caught  # NOSONAR
-                pass
+            except Exception:  # pylint: disable=broad-exception-caught  # NOSONAR  # nosec
+                _log.debug("NDT7 upload sender: error closing WebSocket.")
 
     @staticmethod
     def _upload_receiver(
@@ -247,8 +247,8 @@ class NDT7Provider(BaseTestProvider):
                             server_num_bytes.append(int(nb))
                     except ValueError:
                         pass
-        except Exception:  # pylint: disable=broad-exception-caught  # NOSONAR
-            pass
+        except Exception:  # pylint: disable=broad-exception-caught  # NOSONAR  # nosec
+            _log.debug("NDT7 upload receiver: connection error during receive.")
         finally:
             stop_event.set()
 

@@ -88,6 +88,18 @@ class SLAMonitor:
             )
         )
 
+    @staticmethod
+    def _check_min(value: float, threshold: float | None) -> bool | None:
+        """Return True if value meets minimum threshold, None if unconfigured."""
+        return (value >= threshold) if threshold is not None else None
+
+    @staticmethod
+    def _check_max(value: float | None, threshold: float | None) -> bool | None:
+        """Return True if value meets maximum threshold, None if unconfigured or missing."""
+        if threshold is None or value is None:
+            return None
+        return value <= threshold
+
     def check(self, result: SpeedResult) -> SLAResult:
         """Evaluate *result* against all configured thresholds.
 
@@ -100,22 +112,10 @@ class SLAMonitor:
         if not self.enabled:
             return SLAResult.disabled()
 
-        download_ok: bool | None = (
-            result.download_mbps >= self.min_download_mbps
-            if self.min_download_mbps is not None
-            else None
-        )
-        upload_ok: bool | None = (
-            result.upload_mbps >= self.min_upload_mbps
-            if self.min_upload_mbps is not None
-            else None
-        )
-        ping_ok: bool | None = (
-            result.ping_ms <= self.max_ping_ms if self.max_ping_ms is not None else None
-        )
-        packet_loss_ok: bool | None = None
-        if self.max_packet_loss_pct is not None and result.packet_loss_pct is not None:
-            packet_loss_ok = result.packet_loss_pct <= self.max_packet_loss_pct
+        download_ok = self._check_min(result.download_mbps, self.min_download_mbps)
+        upload_ok = self._check_min(result.upload_mbps, self.min_upload_mbps)
+        ping_ok = self._check_max(result.ping_ms, self.max_ping_ms)
+        packet_loss_ok = self._check_max(result.packet_loss_pct, self.max_packet_loss_pct)
 
         configured = [
             c

@@ -46,6 +46,33 @@ class InfluxDBExporter(BaseExporter):
     ``SpeedResult.timestamp`` with **nanosecond** precision.
     """
 
+    @staticmethod
+    def _validate_config(
+        url: str,
+        parsed: Any,
+        token: str,
+        org: str,
+        bucket: str,
+        timeout_ms: int,
+    ) -> None:
+        """Validate constructor arguments, raising ValueError on invalid input."""
+        if not url or not url.strip():
+            raise ValueError("InfluxDB URL is required")
+        if parsed.scheme not in ("http", "https"):
+            raise ValueError(
+                f"InfluxDB URL must use http or https, got: '{parsed.scheme}'"
+            )
+        if not parsed.hostname:
+            raise ValueError("InfluxDB URL must include a hostname")
+        if not token or not token.strip():
+            raise ValueError("InfluxDB token is required")
+        if not org or not org.strip():
+            raise ValueError("InfluxDB org is required")
+        if not bucket or not bucket.strip():
+            raise ValueError("InfluxDB bucket is required")
+        if timeout_ms <= 0:
+            raise ValueError("timeout_ms must be positive")
+
     def __init__(
         self,
         url: str,
@@ -62,31 +89,9 @@ class InfluxDBExporter(BaseExporter):
             bucket: Destination bucket name.
             timeout_ms: HTTP request timeout in milliseconds (default 10 000).
         """
-        if not url or not url.strip():
-            raise ValueError("InfluxDB URL is required")
-
-        stripped = url.strip()
+        stripped = url.strip() if url else ""
         parsed = urlparse(stripped)
-
-        if parsed.scheme not in ("http", "https"):
-            raise ValueError(
-                f"InfluxDB URL must use http or https, got: '{parsed.scheme}'"
-            )
-
-        if not parsed.hostname:
-            raise ValueError("InfluxDB URL must include a hostname")
-
-        if not token or not token.strip():
-            raise ValueError("InfluxDB token is required")
-
-        if not org or not org.strip():
-            raise ValueError("InfluxDB org is required")
-
-        if not bucket or not bucket.strip():
-            raise ValueError("InfluxDB bucket is required")
-
-        if timeout_ms <= 0:
-            raise ValueError("timeout_ms must be positive")
+        self._validate_config(stripped, parsed, token, org, bucket, timeout_ms)
 
         self._url = stripped
         self._org = org.strip()
