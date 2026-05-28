@@ -42,6 +42,13 @@ _FIELDNAMES = [
     "note",
 ]
 
+# Hardcoded, parameterised SQL variants — no user input is ever interpolated into
+# the query string.  The four variants cover all combinations of optional filters.
+_SQL_NO_FILTER = "SELECT * FROM results ORDER BY timestamp ASC"
+_SQL_START_ONLY = "SELECT * FROM results WHERE timestamp >= ? ORDER BY timestamp ASC"
+_SQL_END_ONLY = "SELECT * FROM results WHERE timestamp <= ? ORDER BY timestamp ASC"
+_SQL_BOTH = "SELECT * FROM results WHERE timestamp >= ? AND timestamp <= ? ORDER BY timestamp ASC"
+
 
 def _require_db() -> None:
     """Raise 503 if the database file does not exist yet."""
@@ -71,31 +78,29 @@ def _parse_iso(value: str, param_name: str) -> str:
 
 
 def _build_query(start: str | None, end: str | None) -> tuple[str, list[str]]:
-    """Build a WHERE clause with optional inclusive timestamp filters.
+    """Return a (sql, params) pair for the optional inclusive timestamp filters.
 
-    Returns (where_clause, params).  The caller is responsible for prepending
-    ``SELECT <fields> FROM results`` and any ORDER BY clause.
+    The SQL string is always one of the four module-level constants; no user
+    input is ever concatenated into it.
     """
-    conditions: list[str] = []
-    params: list[str] = []
+    if start is not None and end is not None:
+        return _SQL_BOTH, [start, end]
     if start is not None:
-        conditions.append("timestamp >= ?")
-        params.append(start)
+        return _SQL_START_ONLY, [start]
     if end is not None:
-        conditions.append("timestamp <= ?")
-        params.append(end)
-    where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
-    return where, params
+        return _SQL_END_ONLY, [end]
+    return _SQL_NO_FILTER, []
 
 
-def _select_fields(conn: sqlite3.Connection) -> str:
-    """Return the SELECT field list, substituting NULL AS for any missing columns.
+def _normalise_row(row: sqlite3.Row) -> dict[str, Any]:
+    """Map a sqlite3.Row to a dict keyed by _FIELDNAMES.
 
-    This makes the export resilient to pre-migration databases that lack newer
-    columns (e.g. ``note`` on instances that haven't restarted since upgrade).
+    Missing columns (e.g. ``note`` on pre-migration databases) are filled with
+    None instead of raising a KeyError, preserving backward compatibility
+    without touching the SQL query.
     """
-    existing = {row[1] for row in conn.execute("PRAGMA table_info(results)").fetchall()}
-    return ", ".join(f if f in existing else f"NULL as {f}" for f in _FIELDNAMES)
+    raw = dict(row)
+    return {f: raw.get(f) for f in _FIELDNAMES}
 
 
 @router.get("/export/csv", responses=_503)
@@ -120,7 +125,7 @@ def export_csv(
     if end is not None:
         end = _parse_iso(end, "end")
 
-    where, params = _build_query(start, end)
+    full_sql, params = _build_query(start, end)
     filename = (
         f"hermes_export_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.csv"
     )
@@ -132,16 +137,12 @@ def export_csv(
         yield buf.getvalue()
 
         with closing(_open_db()) as conn:
-            fields = _select_fields(conn)
-            # Column names cannot be SQL parameters; fields derives exclusively from
-            # _FIELDNAMES (a hardcoded module constant) — no user input is interpolated.
-            full_sql = f"SELECT {fields} FROM results {where} ORDER BY timestamp ASC"  # nosec B608  # NOSONAR
             for row in conn.execute(full_sql, params):
                 buf = io.StringIO()
                 writer = csv.DictWriter(
                     buf, fieldnames=_FIELDNAMES, lineterminator="\r\n"
                 )
-                writer.writerow(dict(row))
+                writer.writerow(_normalise_row(row))
                 yield buf.getvalue()
 
     return StreamingResponse(
@@ -173,7 +174,7 @@ def export_json(
     if end is not None:
         end = _parse_iso(end, "end")
 
-    where, params = _build_query(start, end)
+    full_sql, params = _build_query(start, end)
     filename = (
         f"hermes_export_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.json"
     )
@@ -183,12 +184,8 @@ def export_json(
         yield f'{{"exported_at": "{exported_at}", "results": ['
         first = True
         with closing(_open_db()) as conn:
-            fields = _select_fields(conn)
-            # Column names cannot be SQL parameters; fields derives exclusively from
-            # _FIELDNAMES (a hardcoded module constant) — no user input is interpolated.
-            full_sql = f"SELECT {fields} FROM results {where} ORDER BY timestamp ASC"  # nosec B608  # NOSONAR
             for row in conn.execute(full_sql, params):
-                row_dict = dict(row)
+                row_dict = _normalise_row(row)
                 # Convert SQLite INTEGER (0/1/NULL) to JSON bool/null
                 if row_dict.get("sla_ok") is not None:
                     row_dict["sla_ok"] = bool(row_dict["sla_ok"])
