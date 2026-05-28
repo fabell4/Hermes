@@ -7,7 +7,12 @@ from pathlib import Path
 
 import pytest
 
-from src.services.trend_analysis import MonthlyStats, TrendReport, _linear_slope, analyse
+from src.services.trend_analysis import (
+    MonthlyStats,
+    TrendReport,
+    _linear_slope,
+    analyse,
+)
 
 _CREATE = """
 CREATE TABLE IF NOT EXISTS results (
@@ -78,9 +83,17 @@ class TestAnalyseEmpty:
 class TestAnalyseSingleMonth:
     def test_one_month_no_slopes(self, tmp_path: Path) -> None:
         db = tmp_path / "hermes.db"
-        _seed_db(db, [
-            {"timestamp": "2026-03-01T10:00:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 20.0},
-        ])
+        _seed_db(
+            db,
+            [
+                {
+                    "timestamp": "2026-03-01T10:00:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 20.0,
+                },
+            ],
+        )
         report = analyse(db, months=0)
         assert report.months_available == 1
         assert report.download_slope is None
@@ -92,10 +105,23 @@ class TestAnalyseSingleMonth:
 class TestAnalyseMultipleMonths:
     def test_two_months_slopes_computed(self, tmp_path: Path) -> None:
         db = tmp_path / "hermes.db"
-        _seed_db(db, [
-            {"timestamp": "2026-01-15T10:00:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 20.0},
-            {"timestamp": "2026-02-15T10:00:00", "download_mbps": 90.0, "upload_mbps": 45.0, "ping_ms": 25.0},
-        ])
+        _seed_db(
+            db,
+            [
+                {
+                    "timestamp": "2026-01-15T10:00:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 20.0,
+                },
+                {
+                    "timestamp": "2026-02-15T10:00:00",
+                    "download_mbps": 90.0,
+                    "upload_mbps": 45.0,
+                    "ping_ms": 25.0,
+                },
+            ],
+        )
         report = analyse(db, months=0)
         assert report.months_available == 2
         assert report.download_slope is not None
@@ -104,11 +130,29 @@ class TestAnalyseMultipleMonths:
 
     def test_declining_download_detected(self, tmp_path: Path) -> None:
         db = tmp_path / "hermes.db"
-        _seed_db(db, [
-            {"timestamp": "2026-01-15T10:00:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 20.0},
-            {"timestamp": "2026-02-15T10:00:00", "download_mbps": 80.0, "upload_mbps": 48.0, "ping_ms": 22.0},
-            {"timestamp": "2026-03-15T10:00:00", "download_mbps": 60.0, "upload_mbps": 46.0, "ping_ms": 24.0},
-        ])
+        _seed_db(
+            db,
+            [
+                {
+                    "timestamp": "2026-01-15T10:00:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 20.0,
+                },
+                {
+                    "timestamp": "2026-02-15T10:00:00",
+                    "download_mbps": 80.0,
+                    "upload_mbps": 48.0,
+                    "ping_ms": 22.0,
+                },
+                {
+                    "timestamp": "2026-03-15T10:00:00",
+                    "download_mbps": 60.0,
+                    "upload_mbps": 46.0,
+                    "ping_ms": 24.0,
+                },
+            ],
+        )
         report = analyse(db, months=0)
         assert report.degradation_detected
         assert report.download_slope is not None
@@ -116,11 +160,29 @@ class TestAnalyseMultipleMonths:
 
     def test_increasing_ping_detected(self, tmp_path: Path) -> None:
         db = tmp_path / "hermes.db"
-        _seed_db(db, [
-            {"timestamp": "2026-01-15T10:00:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 15.0},
-            {"timestamp": "2026-02-15T10:00:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 30.0},
-            {"timestamp": "2026-03-15T10:00:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 50.0},
-        ])
+        _seed_db(
+            db,
+            [
+                {
+                    "timestamp": "2026-01-15T10:00:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 15.0,
+                },
+                {
+                    "timestamp": "2026-02-15T10:00:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 30.0,
+                },
+                {
+                    "timestamp": "2026-03-15T10:00:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 50.0,
+                },
+            ],
+        )
         report = analyse(db, months=0)
         assert report.degradation_detected
         assert report.ping_slope is not None
@@ -128,11 +190,29 @@ class TestAnalyseMultipleMonths:
 
     def test_improving_trend_no_degradation(self, tmp_path: Path) -> None:
         db = tmp_path / "hermes.db"
-        _seed_db(db, [
-            {"timestamp": "2026-01-15T10:00:00", "download_mbps": 60.0, "upload_mbps": 30.0, "ping_ms": 50.0},
-            {"timestamp": "2026-02-15T10:00:00", "download_mbps": 80.0, "upload_mbps": 40.0, "ping_ms": 30.0},
-            {"timestamp": "2026-03-15T10:00:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 15.0},
-        ])
+        _seed_db(
+            db,
+            [
+                {
+                    "timestamp": "2026-01-15T10:00:00",
+                    "download_mbps": 60.0,
+                    "upload_mbps": 30.0,
+                    "ping_ms": 50.0,
+                },
+                {
+                    "timestamp": "2026-02-15T10:00:00",
+                    "download_mbps": 80.0,
+                    "upload_mbps": 40.0,
+                    "ping_ms": 30.0,
+                },
+                {
+                    "timestamp": "2026-03-15T10:00:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 15.0,
+                },
+            ],
+        )
         report = analyse(db, months=0)
         assert not report.degradation_detected
         assert report.download_slope is not None
@@ -142,19 +222,45 @@ class TestAnalyseMultipleMonths:
 
     def test_monthly_stats_ordered_oldest_first(self, tmp_path: Path) -> None:
         db = tmp_path / "hermes.db"
-        _seed_db(db, [
-            {"timestamp": "2026-03-15T10:00:00", "download_mbps": 80.0, "upload_mbps": 40.0, "ping_ms": 30.0},
-            {"timestamp": "2026-01-15T10:00:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 20.0},
-        ])
+        _seed_db(
+            db,
+            [
+                {
+                    "timestamp": "2026-03-15T10:00:00",
+                    "download_mbps": 80.0,
+                    "upload_mbps": 40.0,
+                    "ping_ms": 30.0,
+                },
+                {
+                    "timestamp": "2026-01-15T10:00:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 20.0,
+                },
+            ],
+        )
         report = analyse(db, months=0)
         assert report.monthly_stats[0].month < report.monthly_stats[-1].month
 
     def test_monthly_averages_correct(self, tmp_path: Path) -> None:
         db = tmp_path / "hermes.db"
-        _seed_db(db, [
-            {"timestamp": "2026-01-10T10:00:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 20.0},
-            {"timestamp": "2026-01-20T10:00:00", "download_mbps": 80.0, "upload_mbps": 40.0, "ping_ms": 30.0},
-        ])
+        _seed_db(
+            db,
+            [
+                {
+                    "timestamp": "2026-01-10T10:00:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 20.0,
+                },
+                {
+                    "timestamp": "2026-01-20T10:00:00",
+                    "download_mbps": 80.0,
+                    "upload_mbps": 40.0,
+                    "ping_ms": 30.0,
+                },
+            ],
+        )
         report = analyse(db, months=0)
         m = report.monthly_stats[0]
         assert m.month == "2026-01"
@@ -165,10 +271,23 @@ class TestAnalyseMultipleMonths:
 
     def test_slopes_rounded_to_four_places(self, tmp_path: Path) -> None:
         db = tmp_path / "hermes.db"
-        _seed_db(db, [
-            {"timestamp": "2026-01-15T10:00:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 20.0},
-            {"timestamp": "2026-02-15T10:00:00", "download_mbps": 90.0, "upload_mbps": 45.0, "ping_ms": 25.0},
-        ])
+        _seed_db(
+            db,
+            [
+                {
+                    "timestamp": "2026-01-15T10:00:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 20.0,
+                },
+                {
+                    "timestamp": "2026-02-15T10:00:00",
+                    "download_mbps": 90.0,
+                    "upload_mbps": 45.0,
+                    "ping_ms": 25.0,
+                },
+            ],
+        )
         report = analyse(db, months=0)
         for slope in (report.download_slope, report.upload_slope, report.ping_slope):
             if slope is not None:
@@ -176,7 +295,15 @@ class TestAnalyseMultipleMonths:
 
     def test_returns_trend_report_instance(self, tmp_path: Path) -> None:
         db = tmp_path / "hermes.db"
-        _seed_db(db, [
-            {"timestamp": "2026-01-15T10:00:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 20.0},
-        ])
+        _seed_db(
+            db,
+            [
+                {
+                    "timestamp": "2026-01-15T10:00:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 20.0,
+                },
+            ],
+        )
         assert isinstance(analyse(db, months=0), TrendReport)

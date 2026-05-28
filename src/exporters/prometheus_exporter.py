@@ -132,7 +132,9 @@ class PrometheusExporter(BaseExporter):
             "isp_name": result.isp_name or "",
         }
 
-    def _update_optional_gauges(self, result: SpeedResult, labels: dict[str, str]) -> None:
+    def _update_optional_gauges(
+        self, result: SpeedResult, labels: dict[str, str]
+    ) -> None:
         """Update gauges whose source field may be absent from a result."""
         if result.jitter_ms is not None:
             _JITTER.labels(**labels).set(result.jitter_ms)

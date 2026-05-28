@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import sqlite3
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -61,19 +60,23 @@ def populated_db(tmp_path):
     conn.execute(_CREATE)
     rows = []
     for i in range(10):
-        rows.append({
-            "timestamp": f"2026-04-{i+1:02d}T10:00:00",
-            "download_mbps": 100.0 + i,
-            "upload_mbps": 50.0 + i * 0.5,
-            "ping_ms": 20.0 + i * 0.2,
-        })
+        rows.append(
+            {
+                "timestamp": f"2026-04-{i + 1:02d}T10:00:00",
+                "download_mbps": 100.0 + i,
+                "upload_mbps": 50.0 + i * 0.5,
+                "ping_ms": 20.0 + i * 0.2,
+            }
+        )
     for i in range(10):
-        rows.append({
-            "timestamp": f"2026-05-{i+1:02d}T14:00:00",
-            "download_mbps": 90.0 + i,
-            "upload_mbps": 45.0 + i * 0.5,
-            "ping_ms": 25.0 + i * 0.2,
-        })
+        rows.append(
+            {
+                "timestamp": f"2026-05-{i + 1:02d}T14:00:00",
+                "download_mbps": 90.0 + i,
+                "upload_mbps": 45.0 + i * 0.5,
+                "ping_ms": 25.0 + i * 0.2,
+            }
+        )
     _seed(conn, rows)
     conn.close()
     with patch("src.api.routes.analysis.DB_PATH", db):
@@ -83,6 +86,7 @@ def populated_db(tmp_path):
 # ---------------------------------------------------------------------------
 # Anomaly endpoint
 # ---------------------------------------------------------------------------
+
 
 class TestAnomaliesNoDb:
     def test_missing_db_returns_503(self, tmp_path):
@@ -153,19 +157,23 @@ class TestAnomaliesResponse:
         rows = []
         # 20 baseline results with small natural variation (stdev ~1 on download)
         for i in range(20):
-            rows.append({
-                "timestamp": f"2026-04-{i+1:02d}T10:00:00",
-                "download_mbps": 100.0 + (i % 5) * 0.5,   # 100–102, stdev ~0.8
-                "upload_mbps": 50.0,
-                "ping_ms": 20.0 + (i % 3) * 0.1,
-            })
+            rows.append(
+                {
+                    "timestamp": f"2026-04-{i + 1:02d}T10:00:00",
+                    "download_mbps": 100.0 + (i % 5) * 0.5,  # 100–102, stdev ~0.8
+                    "upload_mbps": 50.0,
+                    "ping_ms": 20.0 + (i % 3) * 0.1,
+                }
+            )
         # 1 extreme outlier (download far from baseline mean)
-        rows.append({
-            "timestamp": "2026-04-22T12:00:00",
-            "download_mbps": 1.0,   # z-score >> 2.5
-            "upload_mbps": 50.0,
-            "ping_ms": 20.0,
-        })
+        rows.append(
+            {
+                "timestamp": "2026-04-22T12:00:00",
+                "download_mbps": 1.0,  # z-score >> 2.5
+                "upload_mbps": 50.0,
+                "ping_ms": 20.0,
+            }
+        )
         _seed(conn, rows)
         conn.close()
         with patch("src.api.routes.analysis.DB_PATH", db):
@@ -180,6 +188,7 @@ class TestAnomaliesResponse:
 # ---------------------------------------------------------------------------
 # Time-of-day endpoint
 # ---------------------------------------------------------------------------
+
 
 class TestTimeOfDayNoDb:
     def test_missing_db_returns_empty(self, tmp_path):
@@ -238,6 +247,7 @@ class TestTimeOfDayResponse:
 # Trends endpoint
 # ---------------------------------------------------------------------------
 
+
 class TestTrendsNoDb:
     def test_missing_db_returns_empty_report(self, tmp_path):
         with patch("src.api.routes.analysis.DB_PATH", tmp_path / "noexist.db"):
@@ -293,11 +303,29 @@ class TestTrendsResponse:
         db = tmp_path / "hermes.db"
         conn = sqlite3.connect(str(db))
         conn.execute(_CREATE)
-        _seed(conn, [
-            {"timestamp": "2026-01-15T10:00:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 20.0},
-            {"timestamp": "2026-02-15T10:00:00", "download_mbps": 80.0, "upload_mbps": 40.0, "ping_ms": 25.0},
-            {"timestamp": "2026-03-15T10:00:00", "download_mbps": 60.0, "upload_mbps": 30.0, "ping_ms": 30.0},
-        ])
+        _seed(
+            conn,
+            [
+                {
+                    "timestamp": "2026-01-15T10:00:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 20.0,
+                },
+                {
+                    "timestamp": "2026-02-15T10:00:00",
+                    "download_mbps": 80.0,
+                    "upload_mbps": 40.0,
+                    "ping_ms": 25.0,
+                },
+                {
+                    "timestamp": "2026-03-15T10:00:00",
+                    "download_mbps": 60.0,
+                    "upload_mbps": 30.0,
+                    "ping_ms": 30.0,
+                },
+            ],
+        )
         conn.close()
         with patch("src.api.routes.analysis.DB_PATH", db):
             resp = client.get("/api/analysis/trends?months=0")
@@ -308,10 +336,23 @@ class TestTrendsResponse:
         db = tmp_path / "hermes.db"
         conn = sqlite3.connect(str(db))
         conn.execute(_CREATE)
-        _seed(conn, [
-            {"timestamp": "2026-01-15T10:00:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 20.0},
-            {"timestamp": "2026-02-15T10:00:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 20.0},
-        ])
+        _seed(
+            conn,
+            [
+                {
+                    "timestamp": "2026-01-15T10:00:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 20.0,
+                },
+                {
+                    "timestamp": "2026-02-15T10:00:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 20.0,
+                },
+            ],
+        )
         conn.close()
         with patch("src.api.routes.analysis.DB_PATH", db):
             resp = client.get("/api/analysis/trends?months=0")

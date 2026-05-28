@@ -207,7 +207,9 @@ def test_ftp_scheme_rejected(auth_enabled):
         headers={"X-Api-Key": "test-key-32-characters-long-abc"},
     )
     assert response.status_code == 422
-    assert "ftp://" in response.json()["detail"].lower()  # NOSONAR - assertion against test vector
+    assert (
+        "ftp://" in response.json()["detail"].lower()
+    )  # NOSONAR - assertion against test vector
 
 
 def test_data_scheme_rejected(auth_enabled):
@@ -341,7 +343,10 @@ def test_private_ip_10_rejected(auth_enabled):
             "failure_threshold": 3,
             "cooldown_minutes": 60,
             "providers": {
-                "webhook": {"enabled": True, "url": "https://10.0.0.1:8080/webhook"},  # NOSONAR - intentional RFC1918 test vector
+                "webhook": {
+                    "enabled": True,
+                    "url": "https://10.0.0.1:8080/webhook",
+                },  # NOSONAR - intentional RFC1918 test vector
                 "gotify": {"enabled": False, "url": "", "token": "", "priority": 5},
                 "ntfy": {
                     "enabled": False,

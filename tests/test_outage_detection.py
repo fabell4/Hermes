@@ -122,16 +122,19 @@ class TestOutageEvent:
 class TestSharedStateOutage:
     def setup_method(self):
         from src import shared_state
+
         shared_state.set_outage_in_progress(False)
         shared_state.set_outage_start_time(None)
 
     def test_defaults(self):
         from src import shared_state
+
         assert shared_state.get_outage_in_progress() is False
         assert shared_state.get_outage_start_time() is None
 
     def test_set_outage_in_progress_roundtrip(self):
         from src import shared_state
+
         shared_state.set_outage_in_progress(True)
         assert shared_state.get_outage_in_progress() is True
         shared_state.set_outage_in_progress(False)
@@ -139,6 +142,7 @@ class TestSharedStateOutage:
 
     def test_set_outage_start_time_roundtrip(self):
         from src import shared_state
+
         ts = datetime(2026, 5, 1, 0, 0, 0, tzinfo=timezone.utc)
         shared_state.set_outage_start_time(ts)
         assert shared_state.get_outage_start_time() == ts
@@ -147,6 +151,7 @@ class TestSharedStateOutage:
 
     def test_thread_safety(self):
         from src import shared_state
+
         errors: list[Exception] = []
 
         def toggle():
@@ -271,16 +276,18 @@ class TestOutageDetectorEnrichment:
     def test_get_isp_asn_cached_after_first_call(self):
         d = self._make_detector()
         # Mock public IP and RIPE Stat responses
-        d._session.get = MagicMock(side_effect=[
-            Mock(
-                json=lambda: {"ip": "1.2.3.4"},
-                raise_for_status=Mock(),
-            ),
-            Mock(
-                json=lambda: {"data": {"asns": ["12345"]}},
-                raise_for_status=Mock(),
-            ),
-        ])
+        d._session.get = MagicMock(
+            side_effect=[
+                Mock(
+                    json=lambda: {"ip": "1.2.3.4"},
+                    raise_for_status=Mock(),
+                ),
+                Mock(
+                    json=lambda: {"data": {"asns": ["12345"]}},
+                    raise_for_status=Mock(),
+                ),
+            ]
+        )
         asn1 = d.get_isp_asn()
         # Second call should not make HTTP request (already fetched)
         asn2 = d.get_isp_asn()
@@ -290,7 +297,7 @@ class TestOutageDetectorEnrichment:
         assert d._session.get.call_count == 2
 
     def test_bgp_cache_ttl(self):
-        from datetime import timedelta
+
         d = self._make_detector()
         now = datetime.now(timezone.utc)
         # Pre-populate with fresh cache entry
@@ -326,25 +333,29 @@ class MockProvider(AlertProvider):
     def __init__(self):
         self.calls: list[tuple[int, str, datetime]] = []
 
-    def send_alert(self, failure_count: int, last_error: str, timestamp: datetime) -> None:
+    def send_alert(
+        self, failure_count: int, last_error: str, timestamp: datetime
+    ) -> None:
         self.calls.append((failure_count, last_error, timestamp))
 
 
 class TestAlertManagerOutage:
     def setup_method(self):
         from src import shared_state
+
         shared_state.set_outage_in_progress(False)
         shared_state.set_outage_start_time(None)
 
     def _make_manager(self):
         from src.services.alert_manager import AlertManager
+
         m = AlertManager(failure_threshold=3, cooldown_minutes=0)
         m.reset()
         return m
 
     def test_record_failure_noop_during_outage(self):
         from src import shared_state
-        from src.services.alert_manager import AlertManager
+
         manager = self._make_manager()
         shared_state.set_outage_in_progress(True)
         try:
@@ -360,6 +371,7 @@ class TestAlertManagerOutage:
 
     def test_record_outage_start_sets_shared_state(self):
         from src import shared_state
+
         manager = self._make_manager()
         manager.record_outage_start()
         assert shared_state.get_outage_in_progress() is True
@@ -373,6 +385,7 @@ class TestAlertManagerOutage:
 
     def test_record_outage_start_sends_alert(self):
         from src.services.alert_manager import AlertManager
+
         manager = AlertManager(failure_threshold=1, cooldown_minutes=0)
         provider = MockProvider()
         manager.add_provider("mock", provider)
@@ -384,6 +397,7 @@ class TestAlertManagerOutage:
 
     def test_record_outage_start_bgp_context_in_message(self):
         from src.services.alert_manager import AlertManager
+
         manager = AlertManager(failure_threshold=1, cooldown_minutes=0)
         provider = MockProvider()
         manager.add_provider("mock", provider)
@@ -394,6 +408,7 @@ class TestAlertManagerOutage:
 
     def test_record_outage_recovered_clears_shared_state(self):
         from src import shared_state
+
         manager = self._make_manager()
         shared_state.set_outage_in_progress(True)
         shared_state.set_outage_start_time(datetime.now(timezone.utc))
@@ -403,6 +418,7 @@ class TestAlertManagerOutage:
 
     def test_record_outage_recovered_sends_alert_with_duration(self):
         from src.services.alert_manager import AlertManager
+
         manager = AlertManager(failure_threshold=1, cooldown_minutes=0)
         provider = MockProvider()
         manager.add_provider("mock", provider)
@@ -415,6 +431,7 @@ class TestAlertManagerOutage:
 
     def test_record_outage_recovered_bypasses_cooldown(self):
         from src.services.alert_manager import AlertManager
+
         manager = AlertManager(failure_threshold=1, cooldown_minutes=60)
         provider = MockProvider()
         manager.add_provider("mock", provider)
@@ -433,10 +450,12 @@ class TestAlertManagerOutage:
 class TestSQLiteOutageExport:
     def test_outage_table_created_on_init(self, tmp_path):
         from src.exporters.sqlite_exporter import SQLiteExporter
+
         SQLiteExporter(path=tmp_path / "test.db")
         with closing(sqlite3.connect(str(tmp_path / "test.db"))) as conn:
             tables = {
-                r[0] for r in conn.execute(
+                r[0]
+                for r in conn.execute(
                     "SELECT name FROM sqlite_master WHERE type='table'"
                 ).fetchall()
             }
@@ -444,12 +463,14 @@ class TestSQLiteOutageExport:
 
     def test_init_is_idempotent(self, tmp_path):
         from src.exporters.sqlite_exporter import SQLiteExporter
+
         db = tmp_path / "test.db"
         SQLiteExporter(path=db)
         SQLiteExporter(path=db)  # should not raise
 
     def test_export_outage_event_inserts_row(self, tmp_path):
         from src.exporters.sqlite_exporter import SQLiteExporter
+
         exporter = SQLiteExporter(path=tmp_path / "test.db")
         event = OutageEvent(
             event_type=OutageEventType.CONNECTIVITY_LOST,
@@ -470,6 +491,7 @@ class TestSQLiteOutageExport:
 
     def test_export_outage_event_null_duration(self, tmp_path):
         from src.exporters.sqlite_exporter import SQLiteExporter
+
         exporter = SQLiteExporter(path=tmp_path / "test.db")
         event = OutageEvent(
             event_type=OutageEventType.CONNECTIVITY_LOST,
@@ -484,6 +506,7 @@ class TestSQLiteOutageExport:
 
     def test_bgp_unstable_stored_as_integer(self, tmp_path):
         from src.exporters.sqlite_exporter import SQLiteExporter
+
         exporter = SQLiteExporter(path=tmp_path / "test.db")
         event = OutageEvent(
             event_type=OutageEventType.CONNECTIVITY_LOST,
@@ -506,6 +529,7 @@ class TestSQLiteOutageExport:
 class TestCSVOutageExport:
     def test_outage_csv_created_when_not_exists(self, tmp_path):
         from src.exporters.csv_exporter import CSVExporter
+
         exporter = CSVExporter(path=tmp_path / "results.csv")
         event = OutageEvent(
             event_type=OutageEventType.CONNECTIVITY_LOST,
@@ -516,6 +540,7 @@ class TestCSVOutageExport:
 
     def test_outage_csv_appends_row(self, tmp_path):
         from src.exporters.csv_exporter import CSVExporter
+
         exporter = CSVExporter(path=tmp_path / "results.csv")
         event = OutageEvent(
             event_type=OutageEventType.CONNECTIVITY_LOST,
@@ -531,6 +556,7 @@ class TestCSVOutageExport:
 
     def test_outage_csv_correct_fieldnames(self, tmp_path):
         from src.exporters.csv_exporter import CSVExporter, OUTAGE_FIELDNAMES
+
         exporter = CSVExporter(path=tmp_path / "results.csv")
         event = OutageEvent(
             event_type=OutageEventType.CONNECTIVITY_LOST,
@@ -592,6 +618,7 @@ class TestOutageAPI:
     def test_get_outages_pagination(self, api_client, tmp_path, monkeypatch):
         """Insert 5 events; page_size=2 returns 2 with correct total."""
         import src.api.routes.outages as outages_module
+
         db_path = outages_module.DB_PATH
         ts = "2026-05-01T12:00:00+00:00"
         with closing(sqlite3.connect(str(db_path))) as conn:
@@ -614,6 +641,7 @@ class TestOutageAPI:
 
     def test_get_outage_status_default(self, api_client):
         from src import shared_state
+
         shared_state.set_outage_in_progress(False)
         shared_state.set_outage_start_time(None)
         resp = api_client.get("/api/outage-status")
@@ -624,6 +652,7 @@ class TestOutageAPI:
 
     def test_get_outage_status_during_outage(self, api_client):
         from src import shared_state
+
         ts = datetime(2026, 5, 1, 0, 0, 0, tzinfo=timezone.utc)
         shared_state.set_outage_in_progress(True)
         shared_state.set_outage_start_time(ts)
@@ -640,6 +669,7 @@ class TestOutageAPI:
     def test_get_outages_503_when_no_db(self, monkeypatch):
         import src.api.routes.outages as outages_module
         from src.api.main import app
+
         monkeypatch.setattr(outages_module, "DB_PATH", Path("/nonexistent/db.db"))
         monkeypatch.setattr("src.config.API_KEY", None)
         client = TestClient(app)

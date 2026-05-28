@@ -188,9 +188,20 @@ def test_csv_export_fieldnames(populated_db):
     reader = csv.DictReader(io.StringIO(resp.text))
     assert reader.fieldnames is not None
     expected = [
-        "id", "timestamp", "download_mbps", "upload_mbps", "ping_ms",
-        "jitter_ms", "isp_name", "server_name", "server_location",
-        "server_id", "packet_loss_pct", "quality_score", "sla_ok", "note",
+        "id",
+        "timestamp",
+        "download_mbps",
+        "upload_mbps",
+        "ping_ms",
+        "jitter_ms",
+        "isp_name",
+        "server_name",
+        "server_location",
+        "server_id",
+        "packet_loss_pct",
+        "quality_score",
+        "sla_ok",
+        "note",
     ]
     assert reader.fieldnames == expected
 
@@ -235,7 +246,9 @@ def test_json_export_sla_ok_true_is_bool(populated_db):
     """sla_ok stored as INTEGER 1 in SQLite should be exported as JSON true."""
     resp = client.get("/api/export/json")
     data = json.loads(resp.content)
-    row_with_sla_true = next(r for r in data["results"] if r["timestamp"] == "2026-04-01T10:00:00")
+    row_with_sla_true = next(
+        r for r in data["results"] if r["timestamp"] == "2026-04-01T10:00:00"
+    )
     assert row_with_sla_true["sla_ok"] is True
 
 
@@ -243,7 +256,9 @@ def test_json_export_sla_ok_false_is_bool(populated_db):
     """sla_ok stored as INTEGER 0 in SQLite should be exported as JSON false."""
     resp = client.get("/api/export/json")
     data = json.loads(resp.content)
-    row_with_sla_false = next(r for r in data["results"] if r["timestamp"] == "2026-04-02T12:00:00")
+    row_with_sla_false = next(
+        r for r in data["results"] if r["timestamp"] == "2026-04-02T12:00:00"
+    )
     assert row_with_sla_false["sla_ok"] is False
 
 
@@ -251,7 +266,9 @@ def test_json_export_sla_ok_null_is_none(populated_db):
     """sla_ok stored as NULL in SQLite should be exported as JSON null."""
     resp = client.get("/api/export/json")
     data = json.loads(resp.content)
-    row_null_sla = next(r for r in data["results"] if r["timestamp"] == "2026-05-01T08:00:00")
+    row_null_sla = next(
+        r for r in data["results"] if r["timestamp"] == "2026-05-01T08:00:00"
+    )
     assert row_null_sla["sla_ok"] is None
 
 
@@ -297,7 +314,9 @@ def test_csv_export_end_filter(populated_db):
 
 
 def test_csv_export_start_and_end_filter(populated_db):
-    resp = client.get("/api/export/csv?start=2026-04-01T00:00:00&end=2026-04-30T23:59:59")
+    resp = client.get(
+        "/api/export/csv?start=2026-04-01T00:00:00&end=2026-04-30T23:59:59"
+    )
     reader = csv.DictReader(io.StringIO(resp.text))
     rows = list(reader)
     assert len(rows) == 2
@@ -329,7 +348,9 @@ def test_json_export_end_filter(populated_db):
 
 
 def test_json_export_start_and_end_filter(populated_db):
-    resp = client.get("/api/export/json?start=2026-04-01T00:00:00&end=2026-04-30T23:59:59")
+    resp = client.get(
+        "/api/export/json?start=2026-04-01T00:00:00&end=2026-04-30T23:59:59"
+    )
     data = json.loads(resp.content)
     assert len(data["results"]) == 2
 

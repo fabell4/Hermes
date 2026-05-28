@@ -22,6 +22,7 @@ class _ExporterFixture(NamedTuple):
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _sample_result(**kwargs) -> SpeedResult:
     defaults = {
         "timestamp": datetime(2026, 5, 19, 10, 0, 0, tzinfo=timezone.utc),
@@ -41,7 +42,9 @@ def _sample_result(**kwargs) -> SpeedResult:
     return SpeedResult(**defaults)
 
 
-def _make_exporter(url: str = "https://influxdb.example.com:8086", **kwargs) -> _ExporterFixture:
+def _make_exporter(
+    url: str = "https://influxdb.example.com:8086", **kwargs
+) -> _ExporterFixture:
     """Return an InfluxDBExporter with the client patched out."""
     with patch("src.exporters.influxdb_exporter.InfluxDBClient") as mock_cls:
         mock_client: MagicMock = MagicMock()
@@ -62,6 +65,7 @@ def _make_exporter(url: str = "https://influxdb.example.com:8086", **kwargs) -> 
 # ---------------------------------------------------------------------------
 # Constructor validation
 # ---------------------------------------------------------------------------
+
 
 class TestInfluxDBExporterInit:
     def test_valid_https_url(self):
@@ -90,30 +94,46 @@ class TestInfluxDBExporterInit:
 
     def test_empty_token_raises(self):
         with pytest.raises(ValueError, match="token is required"):
-            InfluxDBExporter(url="https://localhost:8086", token="", org="o", bucket="b")
+            InfluxDBExporter(
+                url="https://localhost:8086", token="", org="o", bucket="b"
+            )
 
     def test_blank_token_raises(self):
         with pytest.raises(ValueError, match="token is required"):
-            InfluxDBExporter(url="https://localhost:8086", token="  ", org="o", bucket="b")
+            InfluxDBExporter(
+                url="https://localhost:8086", token="  ", org="o", bucket="b"
+            )
 
     def test_empty_org_raises(self):
         with pytest.raises(ValueError, match="org is required"):
-            InfluxDBExporter(url="https://localhost:8086", token="t", org="", bucket="b")
+            InfluxDBExporter(
+                url="https://localhost:8086", token="t", org="", bucket="b"
+            )
 
     def test_empty_bucket_raises(self):
         with pytest.raises(ValueError, match="bucket is required"):
-            InfluxDBExporter(url="https://localhost:8086", token="t", org="o", bucket="")
+            InfluxDBExporter(
+                url="https://localhost:8086", token="t", org="o", bucket=""
+            )
 
     def test_zero_timeout_raises(self):
         with pytest.raises(ValueError, match="timeout_ms must be positive"):
             InfluxDBExporter(
-                url="https://localhost:8086", token="t", org="o", bucket="b", timeout_ms=0
+                url="https://localhost:8086",
+                token="t",
+                org="o",
+                bucket="b",
+                timeout_ms=0,
             )
 
     def test_negative_timeout_raises(self):
         with pytest.raises(ValueError, match="timeout_ms must be positive"):
             InfluxDBExporter(
-                url="https://localhost:8086", token="t", org="o", bucket="b", timeout_ms=-1
+                url="https://localhost:8086",
+                token="t",
+                org="o",
+                bucket="b",
+                timeout_ms=-1,
             )
 
     def test_strips_whitespace_from_org_and_bucket(self):
@@ -143,6 +163,7 @@ class TestInfluxDBExporterInit:
 # _build_point
 # ---------------------------------------------------------------------------
 
+
 class TestBuildPoint:
     def test_measurement_name(self):
         result = _sample_result()
@@ -166,7 +187,13 @@ class TestBuildPoint:
         assert point._tags["isp_name"] == "unknown"
 
     def test_required_fields(self):
-        result = _sample_result(jitter_ms=None, packet_loss_pct=None, quality_score=None, sla_ok=None, server_id=None)
+        result = _sample_result(
+            jitter_ms=None,
+            packet_loss_pct=None,
+            quality_score=None,
+            sla_ok=None,
+            server_id=None,
+        )
         point = InfluxDBExporter._build_point(result)
         fields = point._fields
         assert fields["download_mbps"] == pytest.approx(200.5)
@@ -184,7 +211,13 @@ class TestBuildPoint:
         assert fields["server_id"] == 101
 
     def test_optional_fields_omitted_when_none(self):
-        result = _sample_result(jitter_ms=None, packet_loss_pct=None, quality_score=None, sla_ok=None, server_id=None)
+        result = _sample_result(
+            jitter_ms=None,
+            packet_loss_pct=None,
+            quality_score=None,
+            sla_ok=None,
+            server_id=None,
+        )
         point = InfluxDBExporter._build_point(result)
         fields = point._fields
         assert "jitter_ms" not in fields
@@ -215,6 +248,7 @@ class TestBuildPoint:
 # ---------------------------------------------------------------------------
 # export()
 # ---------------------------------------------------------------------------
+
 
 class TestExport:
     def test_export_calls_write_api(self):
@@ -260,6 +294,7 @@ class TestExport:
 # ---------------------------------------------------------------------------
 # close()
 # ---------------------------------------------------------------------------
+
 
 class TestClose:
     def test_close_calls_write_api_and_client(self):

@@ -182,7 +182,7 @@ def test_put_note_overwrites_existing_note(db_with_note_col):
 
 
 def test_put_note_with_special_characters(db_with_note_col):
-    note = "Storm ⛈️ — ISP said: \"works as expected\""
+    note = 'Storm ⛈️ — ISP said: "works as expected"'
     resp = client.put("/api/results/1/note", json={"note": note})
     assert resp.status_code == 200
     assert resp.json()["note"] == note

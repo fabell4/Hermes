@@ -50,11 +50,29 @@ class TestAnalyseEmpty:
 class TestAnalyseHourGrouping:
     def test_groups_by_hour(self, tmp_path: Path) -> None:
         db = tmp_path / "hermes.db"
-        _seed_db(db, [
-            {"timestamp": "2026-01-01T10:00:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 20.0},
-            {"timestamp": "2026-01-01T10:30:00", "download_mbps": 80.0, "upload_mbps": 40.0, "ping_ms": 30.0},
-            {"timestamp": "2026-01-01T14:00:00", "download_mbps": 60.0, "upload_mbps": 30.0, "ping_ms": 50.0},
-        ])
+        _seed_db(
+            db,
+            [
+                {
+                    "timestamp": "2026-01-01T10:00:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 20.0,
+                },
+                {
+                    "timestamp": "2026-01-01T10:30:00",
+                    "download_mbps": 80.0,
+                    "upload_mbps": 40.0,
+                    "ping_ms": 30.0,
+                },
+                {
+                    "timestamp": "2026-01-01T14:00:00",
+                    "download_mbps": 60.0,
+                    "upload_mbps": 30.0,
+                    "ping_ms": 50.0,
+                },
+            ],
+        )
         result = analyse(db, days=0)
         assert len(result) == 2
         hours = [r.hour for r in result]
@@ -63,10 +81,23 @@ class TestAnalyseHourGrouping:
 
     def test_averages_computed_correctly(self, tmp_path: Path) -> None:
         db = tmp_path / "hermes.db"
-        _seed_db(db, [
-            {"timestamp": "2026-01-01T10:00:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 20.0},
-            {"timestamp": "2026-01-01T10:30:00", "download_mbps": 80.0, "upload_mbps": 40.0, "ping_ms": 30.0},
-        ])
+        _seed_db(
+            db,
+            [
+                {
+                    "timestamp": "2026-01-01T10:00:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 20.0,
+                },
+                {
+                    "timestamp": "2026-01-01T10:30:00",
+                    "download_mbps": 80.0,
+                    "upload_mbps": 40.0,
+                    "ping_ms": 30.0,
+                },
+            ],
+        )
         result = analyse(db, days=0)
         assert len(result) == 1
         h = result[0]
@@ -78,11 +109,29 @@ class TestAnalyseHourGrouping:
 
     def test_min_max_download(self, tmp_path: Path) -> None:
         db = tmp_path / "hermes.db"
-        _seed_db(db, [
-            {"timestamp": "2026-01-01T10:00:00", "download_mbps": 120.0, "upload_mbps": 50.0, "ping_ms": 20.0},
-            {"timestamp": "2026-01-01T10:15:00", "download_mbps": 80.0, "upload_mbps": 50.0, "ping_ms": 20.0},
-            {"timestamp": "2026-01-01T10:45:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 20.0},
-        ])
+        _seed_db(
+            db,
+            [
+                {
+                    "timestamp": "2026-01-01T10:00:00",
+                    "download_mbps": 120.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 20.0,
+                },
+                {
+                    "timestamp": "2026-01-01T10:15:00",
+                    "download_mbps": 80.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 20.0,
+                },
+                {
+                    "timestamp": "2026-01-01T10:45:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 20.0,
+                },
+            ],
+        )
         result = analyse(db, days=0)
         h = result[0]
         assert h.min_download_mbps == pytest.approx(80.0, abs=0.01)
@@ -90,20 +139,46 @@ class TestAnalyseHourGrouping:
 
     def test_ordered_by_hour(self, tmp_path: Path) -> None:
         db = tmp_path / "hermes.db"
-        _seed_db(db, [
-            {"timestamp": "2026-01-01T22:00:00", "download_mbps": 60.0, "upload_mbps": 30.0, "ping_ms": 50.0},
-            {"timestamp": "2026-01-01T03:00:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 20.0},
-            {"timestamp": "2026-01-01T12:00:00", "download_mbps": 80.0, "upload_mbps": 40.0, "ping_ms": 30.0},
-        ])
+        _seed_db(
+            db,
+            [
+                {
+                    "timestamp": "2026-01-01T22:00:00",
+                    "download_mbps": 60.0,
+                    "upload_mbps": 30.0,
+                    "ping_ms": 50.0,
+                },
+                {
+                    "timestamp": "2026-01-01T03:00:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 20.0,
+                },
+                {
+                    "timestamp": "2026-01-01T12:00:00",
+                    "download_mbps": 80.0,
+                    "upload_mbps": 40.0,
+                    "ping_ms": 30.0,
+                },
+            ],
+        )
         result = analyse(db, days=0)
         hours = [r.hour for r in result]
         assert hours == sorted(hours)
 
     def test_returns_hourly_stats_instances(self, tmp_path: Path) -> None:
         db = tmp_path / "hermes.db"
-        _seed_db(db, [
-            {"timestamp": "2026-01-01T08:00:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 20.0},
-        ])
+        _seed_db(
+            db,
+            [
+                {
+                    "timestamp": "2026-01-01T08:00:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 20.0,
+                },
+            ],
+        )
         result = analyse(db, days=0)
         assert all(isinstance(r, HourlyStats) for r in result)
 
@@ -111,10 +186,23 @@ class TestAnalyseHourGrouping:
 class TestAnalyseDaysFilter:
     def test_days_filter_excludes_old_rows(self, tmp_path: Path) -> None:
         db = tmp_path / "hermes.db"
-        _seed_db(db, [
-            {"timestamp": "2020-01-01T10:00:00", "download_mbps": 10.0, "upload_mbps": 5.0, "ping_ms": 200.0},
-            {"timestamp": "2026-05-20T10:00:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 20.0},
-        ])
+        _seed_db(
+            db,
+            [
+                {
+                    "timestamp": "2020-01-01T10:00:00",
+                    "download_mbps": 10.0,
+                    "upload_mbps": 5.0,
+                    "ping_ms": 200.0,
+                },
+                {
+                    "timestamp": "2026-05-20T10:00:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 20.0,
+                },
+            ],
+        )
         # Use days=1 — only the very recent row should match in a real environment.
         # Since we seed a far-future row, use days=0 (all time) to test inclusion.
         result_all = analyse(db, days=0)
@@ -123,9 +211,22 @@ class TestAnalyseDaysFilter:
 
     def test_days_zero_returns_all(self, tmp_path: Path) -> None:
         db = tmp_path / "hermes.db"
-        _seed_db(db, [
-            {"timestamp": "2020-06-15T08:00:00", "download_mbps": 50.0, "upload_mbps": 25.0, "ping_ms": 30.0},
-            {"timestamp": "2026-01-10T14:00:00", "download_mbps": 100.0, "upload_mbps": 50.0, "ping_ms": 20.0},
-        ])
+        _seed_db(
+            db,
+            [
+                {
+                    "timestamp": "2020-06-15T08:00:00",
+                    "download_mbps": 50.0,
+                    "upload_mbps": 25.0,
+                    "ping_ms": 30.0,
+                },
+                {
+                    "timestamp": "2026-01-10T14:00:00",
+                    "download_mbps": 100.0,
+                    "upload_mbps": 50.0,
+                    "ping_ms": 20.0,
+                },
+            ],
+        )
         result = analyse(db, days=0)
         assert len(result) == 2  # hour 8 and hour 14

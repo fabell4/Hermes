@@ -28,7 +28,9 @@ def _make(
     )
 
 
-def _baseline(n: int = 20, download: float = 100.0, upload: float = 50.0, ping: float = 20.0) -> list[SpeedResult]:
+def _baseline(
+    n: int = 20, download: float = 100.0, upload: float = 50.0, ping: float = 20.0
+) -> list[SpeedResult]:
     """Return *n* identical baseline results."""
     return [_make(download=download, upload=upload, ping=ping) for _ in range(n)]
 

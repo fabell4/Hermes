@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import datetime
 
-import pytest
 
 from src.models.speed_result import SpeedResult
 from src.services.sla_monitor import SLAMonitor, SLAResult

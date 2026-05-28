@@ -100,9 +100,7 @@ def test_isp_name_absent_key_becomes_none(mock_run):
 def test_jitter_ms_valid_float_rounded_correctly(mock_run):
     """1. Valid: jitter is rounded to 2 decimal places."""
     mock_run.return_value = Mock(stdout=_make_mock_json(jitter=3.456), returncode=0)
-    assert OoklaProvider("/usr/bin/speedtest").run().jitter_ms == pytest.approx(
-        3.46
-    )
+    assert OoklaProvider("/usr/bin/speedtest").run().jitter_ms == pytest.approx(3.46)
 
 
 @patch("src.providers.ookla.subprocess.run")
@@ -116,9 +114,7 @@ def test_jitter_ms_absent_becomes_none(mock_run):
 def test_jitter_ms_zero_value_accepted(mock_run):
     """1. Valid: jitter=0.0 is a valid measurement."""
     mock_run.return_value = Mock(stdout=_make_mock_json(jitter=0.0), returncode=0)
-    assert OoklaProvider("/usr/bin/speedtest").run().jitter_ms == pytest.approx(
-        0.0
-    )
+    assert OoklaProvider("/usr/bin/speedtest").run().jitter_ms == pytest.approx(0.0)
 
 
 # ---------------------------------------------------------------------------
@@ -133,7 +129,9 @@ def test_download_bandwidth_converts_correctly(mock_run):
     mock_run.return_value = Mock(
         stdout=_make_mock_json(download_bandwidth=12500000), returncode=0
     )
-    assert OoklaProvider("/usr/bin/speedtest").run().download_mbps == pytest.approx(100.0)
+    assert OoklaProvider("/usr/bin/speedtest").run().download_mbps == pytest.approx(
+        100.0
+    )
 
 
 @patch("src.providers.ookla.subprocess.run")
@@ -211,6 +209,4 @@ def test_missing_server_location_produces_safe_string(mock_run):
 def test_zero_ping_is_valid(mock_run):
     """Boundary: zero ping is stored as 0.0."""
     mock_run.return_value = Mock(stdout=_make_mock_json(latency=0.0), returncode=0)
-    assert OoklaProvider("/usr/bin/speedtest").run().ping_ms == pytest.approx(
-        0.0
-    )
+    assert OoklaProvider("/usr/bin/speedtest").run().ping_ms == pytest.approx(0.0)
