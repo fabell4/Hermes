@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { ThemeContext } from '@/context/themeContextDef'
 import type { Theme } from '@/context/themeContextDef'
@@ -25,8 +25,10 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
   const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))
 
+  const contextValue = useMemo(() => ({ theme, toggleTheme }), [theme])
+
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   )

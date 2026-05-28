@@ -248,7 +248,9 @@ class NDT7Provider(BaseTestProvider):
                         if nb is not None:
                             server_num_bytes.append(int(nb))
                     except ValueError:
-                        pass
+                        _log.debug(
+                            "NDT7 upload receiver: ignoring unparseable measurement frame."
+                        )
         except Exception:  # pylint: disable=broad-exception-caught  # NOSONAR  # nosec
             _log.debug("NDT7 upload receiver: connection error during receive.")
         finally:

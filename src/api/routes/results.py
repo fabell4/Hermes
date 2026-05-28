@@ -76,54 +76,34 @@ class NoteRequest(BaseModel):
     note: str | None = Field(None, max_length=500)
 
 
-def _build_filters(
-    date_from: str | None,
-    date_to: str | None,
-    min_download: float | None,
-    max_download: float | None,
-    min_upload: float | None,
-    max_upload: float | None,
-    max_ping: float | None,
-    server: str | None,
-    isp: str | None,
-) -> tuple[list[str], list[object]]:
-    """Build parameterised WHERE conditions from optional filter values.
+# Fixed parameterised queries: every optional filter uses (? IS NULL OR condition)
+# so the SQL is a compile-time constant — no string concatenation, no injection risk.
+_FILTER_COUNT_SQL = """
+SELECT COUNT(*) FROM results
+WHERE (? IS NULL OR DATE(timestamp) >= ?)
+  AND (? IS NULL OR DATE(timestamp) <= ?)
+  AND (? IS NULL OR download_mbps >= ?)
+  AND (? IS NULL OR download_mbps <= ?)
+  AND (? IS NULL OR upload_mbps >= ?)
+  AND (? IS NULL OR upload_mbps <= ?)
+  AND (? IS NULL OR ping_ms <= ?)
+  AND (? IS NULL OR server_name = ?)
+  AND (? IS NULL OR isp_name = ?)
+"""
 
-    All condition strings are hardcoded literals; only *values* come from user
-    input and are passed as bound parameters — not interpolated into SQL.
-    """
-    conditions: list[str] = []
-    params: list[object] = []
-
-    if date_from is not None:
-        conditions.append("DATE(timestamp) >= ?")
-        params.append(date_from)
-    if date_to is not None:
-        conditions.append("DATE(timestamp) <= ?")
-        params.append(date_to)
-    if min_download is not None:
-        conditions.append("download_mbps >= ?")
-        params.append(min_download)
-    if max_download is not None:
-        conditions.append("download_mbps <= ?")
-        params.append(max_download)
-    if min_upload is not None:
-        conditions.append("upload_mbps >= ?")
-        params.append(min_upload)
-    if max_upload is not None:
-        conditions.append("upload_mbps <= ?")
-        params.append(max_upload)
-    if max_ping is not None:
-        conditions.append("ping_ms <= ?")
-        params.append(max_ping)
-    if server is not None:
-        conditions.append("server_name = ?")
-        params.append(server)
-    if isp is not None:
-        conditions.append("isp_name = ?")
-        params.append(isp)
-
-    return conditions, params
+_FILTER_DATA_SQL = """
+SELECT * FROM results
+WHERE (? IS NULL OR DATE(timestamp) >= ?)
+  AND (? IS NULL OR DATE(timestamp) <= ?)
+  AND (? IS NULL OR download_mbps >= ?)
+  AND (? IS NULL OR download_mbps <= ?)
+  AND (? IS NULL OR upload_mbps >= ?)
+  AND (? IS NULL OR upload_mbps <= ?)
+  AND (? IS NULL OR ping_ms <= ?)
+  AND (? IS NULL OR server_name = ?)
+  AND (? IS NULL OR isp_name = ?)
+ORDER BY timestamp DESC LIMIT ? OFFSET ?
+"""
 
 
 @router.get("/results", responses=_503)
@@ -155,31 +135,36 @@ def get_results(
     isp: Annotated[str | None, Query(description="Exact ISP name match")] = None,
 ) -> ResultsPage:
     """Return paginated results, newest first. Supports optional filtering."""
-    conditions, params = _build_filters(
+    # Each optional filter is passed twice: once for the IS NULL bypass, once
+    # for the actual comparison. Python None becomes SQL NULL, so when no filter
+    # is supplied the (NULL IS NULL) condition is TRUE and the row is included.
+    filter_params: list[object] = [
+        date_from,
         date_from,
         date_to,
+        date_to,
+        min_download,
         min_download,
         max_download,
+        max_download,
+        min_upload,
         min_upload,
         max_upload,
+        max_upload,
+        max_ping,
         max_ping,
         server,
+        server,
         isp,
-    )
-
-    where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
-    # nosec B608 — WHERE conditions are hardcoded string literals; only values are parameterised.
-    count_sql = "SELECT COUNT(*) FROM results " + where  # NOSONAR
-    data_sql = (
-        "SELECT * FROM results " + where + " ORDER BY timestamp DESC LIMIT ? OFFSET ?"
-    )  # NOSONAR
+        isp,
+    ]
 
     with closing(_connect()) as conn:
-        total: int = conn.execute(count_sql, params).fetchone()[0]  # NOSONAR
+        total: int = conn.execute(_FILTER_COUNT_SQL, filter_params).fetchone()[0]
         offset = (page - 1) * page_size
         rows = conn.execute(
-            data_sql, [*params, page_size, offset]
-        ).fetchall()  # NOSONAR
+            _FILTER_DATA_SQL, [*filter_params, page_size, offset]
+        ).fetchall()
 
     return ResultsPage(
         results=[SpeedResultSchema(**dict(r)) for r in rows],

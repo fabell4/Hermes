@@ -71,7 +71,11 @@ def _parse_iso(value: str, param_name: str) -> str:
 
 
 def _build_query(start: str | None, end: str | None) -> tuple[str, list[str]]:
-    """Build a SELECT query with optional inclusive timestamp filters."""
+    """Build a WHERE clause with optional inclusive timestamp filters.
+
+    Returns (where_clause, params).  The caller is responsible for prepending
+    ``SELECT <fields> FROM results`` and any ORDER BY clause.
+    """
     conditions: list[str] = []
     params: list[str] = []
     if start is not None:
@@ -81,8 +85,7 @@ def _build_query(start: str | None, end: str | None) -> tuple[str, list[str]]:
         conditions.append("timestamp <= ?")
         params.append(end)
     where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
-    sql = f"{{fields}} FROM results {where} ORDER BY timestamp ASC"
-    return sql, params
+    return where, params
 
 
 def _select_fields(conn: sqlite3.Connection) -> str:
@@ -117,7 +120,7 @@ def export_csv(
     if end is not None:
         end = _parse_iso(end, "end")
 
-    sql, params = _build_query(start, end)
+    where, params = _build_query(start, end)
     filename = (
         f"hermes_export_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.csv"
     )
@@ -130,7 +133,9 @@ def export_csv(
 
         with closing(_open_db()) as conn:
             fields = _select_fields(conn)
-            full_sql = sql.format(fields=f"SELECT {fields}")
+            # Column names cannot be SQL parameters; fields derives exclusively from
+            # _FIELDNAMES (a hardcoded module constant) — no user input is interpolated.
+            full_sql = f"SELECT {fields} FROM results {where} ORDER BY timestamp ASC"  # nosec B608  # NOSONAR
             for row in conn.execute(full_sql, params):
                 buf = io.StringIO()
                 writer = csv.DictWriter(
@@ -168,7 +173,7 @@ def export_json(
     if end is not None:
         end = _parse_iso(end, "end")
 
-    sql, params = _build_query(start, end)
+    where, params = _build_query(start, end)
     filename = (
         f"hermes_export_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.json"
     )
@@ -179,7 +184,9 @@ def export_json(
         first = True
         with closing(_open_db()) as conn:
             fields = _select_fields(conn)
-            full_sql = sql.format(fields=f"SELECT {fields}")
+            # Column names cannot be SQL parameters; fields derives exclusively from
+            # _FIELDNAMES (a hardcoded module constant) — no user input is interpolated.
+            full_sql = f"SELECT {fields} FROM results {where} ORDER BY timestamp ASC"  # nosec B608  # NOSONAR
             for row in conn.execute(full_sql, params):
                 row_dict = dict(row)
                 # Convert SQLite INTEGER (0/1/NULL) to JSON bool/null

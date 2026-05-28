@@ -47,6 +47,28 @@ class InfluxDBExporter(BaseExporter):
     """
 
     @staticmethod
+    def _validate_url(url: str, parsed: Any) -> None:
+        """Validate the InfluxDB URL argument."""
+        if not url or not url.strip():
+            raise ValueError("InfluxDB URL is required")
+        if parsed.scheme not in ("http", "https"):
+            raise ValueError(
+                f"InfluxDB URL must use http or https, got: '{parsed.scheme}'"
+            )
+        if not parsed.hostname:
+            raise ValueError("InfluxDB URL must include a hostname")
+
+    @staticmethod
+    def _validate_credentials(token: str, org: str, bucket: str) -> None:
+        """Validate the InfluxDB authentication and destination arguments."""
+        if not token or not token.strip():
+            raise ValueError("InfluxDB token is required")
+        if not org or not org.strip():
+            raise ValueError("InfluxDB org is required")
+        if not bucket or not bucket.strip():
+            raise ValueError("InfluxDB bucket is required")
+
+    @staticmethod
     def _validate_config(
         url: str,
         parsed: Any,
@@ -56,20 +78,8 @@ class InfluxDBExporter(BaseExporter):
         timeout_ms: int,
     ) -> None:
         """Validate constructor arguments, raising ValueError on invalid input."""
-        if not url or not url.strip():
-            raise ValueError("InfluxDB URL is required")
-        if parsed.scheme not in ("http", "https"):
-            raise ValueError(
-                f"InfluxDB URL must use http or https, got: '{parsed.scheme}'"
-            )
-        if not parsed.hostname:
-            raise ValueError("InfluxDB URL must include a hostname")
-        if not token or not token.strip():
-            raise ValueError("InfluxDB token is required")
-        if not org or not org.strip():
-            raise ValueError("InfluxDB org is required")
-        if not bucket or not bucket.strip():
-            raise ValueError("InfluxDB bucket is required")
+        InfluxDBExporter._validate_url(url, parsed)
+        InfluxDBExporter._validate_credentials(token, org, bucket)
         if timeout_ms <= 0:
             raise ValueError("timeout_ms must be positive")
 

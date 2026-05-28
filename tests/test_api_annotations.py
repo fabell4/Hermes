@@ -37,8 +37,14 @@ CREATE TABLE IF NOT EXISTS results (
     download_mbps   REAL    NOT NULL,
     upload_mbps     REAL    NOT NULL,
     ping_ms         REAL    NOT NULL,
+    jitter_ms       REAL,
+    isp_name        TEXT,
     server_name     TEXT    NOT NULL,
-    server_location TEXT    NOT NULL
+    server_location TEXT    NOT NULL,
+    server_id       INTEGER,
+    packet_loss_pct REAL,
+    quality_score   REAL,
+    sla_ok          INTEGER
 )"""
 
 _SAMPLE_ROW = {
