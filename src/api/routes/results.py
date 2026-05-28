@@ -78,15 +78,56 @@ class NoteRequest(BaseModel):
 def get_results(
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=500)] = 50,
+    date_from: Annotated[str | None, Query(description="Start date filter inclusive (YYYY-MM-DD)")] = None,
+    date_to: Annotated[str | None, Query(description="End date filter inclusive (YYYY-MM-DD)")] = None,
+    min_download: Annotated[float | None, Query(ge=0, description="Minimum download speed (Mbps)")] = None,
+    max_download: Annotated[float | None, Query(ge=0, description="Maximum download speed (Mbps)")] = None,
+    min_upload: Annotated[float | None, Query(ge=0, description="Minimum upload speed (Mbps)")] = None,
+    max_upload: Annotated[float | None, Query(ge=0, description="Maximum upload speed (Mbps)")] = None,
+    max_ping: Annotated[float | None, Query(ge=0, description="Maximum ping (ms)")] = None,
+    server: Annotated[str | None, Query(description="Exact server name match")] = None,
+    isp: Annotated[str | None, Query(description="Exact ISP name match")] = None,
 ) -> ResultsPage:
-    """Return paginated results, newest first."""
+    """Return paginated results, newest first. Supports optional filtering."""
+    conditions: list[str] = []
+    params: list[object] = []
+
+    if date_from is not None:
+        conditions.append("DATE(timestamp) >= ?")
+        params.append(date_from)
+    if date_to is not None:
+        conditions.append("DATE(timestamp) <= ?")
+        params.append(date_to)
+    if min_download is not None:
+        conditions.append("download_mbps >= ?")
+        params.append(min_download)
+    if max_download is not None:
+        conditions.append("download_mbps <= ?")
+        params.append(max_download)
+    if min_upload is not None:
+        conditions.append("upload_mbps >= ?")
+        params.append(min_upload)
+    if max_upload is not None:
+        conditions.append("upload_mbps <= ?")
+        params.append(max_upload)
+    if max_ping is not None:
+        conditions.append("ping_ms <= ?")
+        params.append(max_ping)
+    if server is not None:
+        conditions.append("server_name = ?")
+        params.append(server)
+    if isp is not None:
+        conditions.append("isp_name = ?")
+        params.append(isp)
+
+    where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+    count_sql = f"SELECT COUNT(*) FROM results {where}"
+    data_sql = f"SELECT * FROM results {where} ORDER BY timestamp DESC LIMIT ? OFFSET ?"
+
     with closing(_connect()) as conn:
-        total: int = conn.execute("SELECT COUNT(*) FROM results").fetchone()[0]
+        total: int = conn.execute(count_sql, params).fetchone()[0]
         offset = (page - 1) * page_size
-        rows = conn.execute(
-            "SELECT * FROM results ORDER BY timestamp DESC LIMIT ? OFFSET ?",
-            (page_size, offset),
-        ).fetchall()
+        rows = conn.execute(data_sql, [*params, page_size, offset]).fetchall()
 
     return ResultsPage(
         results=[SpeedResultSchema(**dict(r)) for r in rows],

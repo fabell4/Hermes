@@ -40,10 +40,57 @@ async function request<T>(
   return res.json() as Promise<T>
 }
 
+export interface ResultsFilter {
+  page?: number
+  pageSize?: number
+  dateFrom?: string
+  dateTo?: string
+  minDownload?: number
+  maxDownload?: number
+  minUpload?: number
+  maxUpload?: number
+  maxPing?: number
+  server?: string
+  isp?: string
+}
+
 export const api = {
   /** Paginated history — newest first. */
   getResults(page = 1, pageSize = 50): Promise<ResultsPage> {
     return request(`/results?page=${page}&page_size=${pageSize}`)
+  },
+
+  /** Paginated history with optional filters. */
+  getResultsFiltered(filter: ResultsFilter = {}): Promise<ResultsPage> {
+    const params = new URLSearchParams()
+    params.set('page', String(filter.page ?? 1))
+    params.set('page_size', String(filter.pageSize ?? 50))
+    if (filter.dateFrom) params.set('date_from', filter.dateFrom)
+    if (filter.dateTo) params.set('date_to', filter.dateTo)
+    if (filter.minDownload !== undefined) params.set('min_download', String(filter.minDownload))
+    if (filter.maxDownload !== undefined) params.set('max_download', String(filter.maxDownload))
+    if (filter.minUpload !== undefined) params.set('min_upload', String(filter.minUpload))
+    if (filter.maxUpload !== undefined) params.set('max_upload', String(filter.maxUpload))
+    if (filter.maxPing !== undefined) params.set('max_ping', String(filter.maxPing))
+    if (filter.server) params.set('server', filter.server)
+    if (filter.isp) params.set('isp', filter.isp)
+    return request(`/results?${params}`)
+  },
+
+  /** Fetch all distinct server names for filter dropdowns. */
+  getServers(): Promise<string[]> {
+    return api.getResultsFiltered({ pageSize: 500 }).then((p) =>
+      [...new Set(p.results.map((r) => r.server_name))].sort((a, b) => a.localeCompare(b))
+    )
+  },
+
+  /** Fetch all distinct ISP names for filter dropdowns. */
+  getIsps(): Promise<string[]> {
+    return api.getResultsFiltered({ pageSize: 500 }).then((p) =>
+      [...new Set(p.results.map((r) => r.isp_name ?? '').filter(Boolean))].sort((a, b) =>
+        a.localeCompare(b)
+      )
+    )
   },
 
   /** Single most-recent result, or null if none yet. */
