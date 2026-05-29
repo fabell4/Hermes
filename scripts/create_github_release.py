@@ -65,25 +65,33 @@ r = subprocess.run(
 code = r.stdout.strip()
 
 if code == "422":
+    # Release already exists — fetch its ID then PATCH it
     r2 = subprocess.run(
-        ["curl", "-fsSL", *headers, f"{base_url}/tags/{tag}"],
+        ["curl", "-s", "-o", response_file, "-w", "%{http_code}", *headers, f"{base_url}/tags/{tag}"],
         capture_output=True,
         text=True,
     )
-    release_id = json.loads(r2.stdout)["id"]
-    subprocess.run(
+    get_code = r2.stdout.strip()
+    if get_code != "200":
+        print(f"Could not fetch existing release for tag {tag!r} (HTTP {get_code})", file=sys.stderr)
+        sys.exit(1)
+    with open(response_file) as fh:
+        release_id = json.load(fh)["id"]
+    r3 = subprocess.run(
         [
-            "curl",
-            "-fsSL",
-            "-X",
-            "PATCH",
+            "curl", "-s", "-o", response_file, "-w", "%{http_code}",
+            "-X", "PATCH",
             *headers,
             f"{base_url}/{release_id}",
-            "-d",
-            f"@{payload_file}",
+            "-d", f"@{payload_file}",
         ],
-        check=True,
+        capture_output=True,
+        text=True,
     )
+    patch_code = r3.stdout.strip()
+    if patch_code not in ("200", "201"):
+        print(f"GitHub release PATCH returned HTTP {patch_code}", file=sys.stderr)
+        sys.exit(1)
 elif code not in ("200", "201"):
     print(f"GitHub release API returned HTTP {code}", file=sys.stderr)
     sys.exit(1)

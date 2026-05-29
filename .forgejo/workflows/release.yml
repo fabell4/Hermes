@@ -86,7 +86,7 @@ jobs:
       - name: pytest — unit tests
         run: |
           pip install pytest pytest-cov pytest-asyncio httpx anyio
-          pytest --cov=src --cov-fail-under=80 -q
+          pytest --cov=src --cov-fail-under=85 -q
 
       - name: Validate Jekyll docs build
         run: |
@@ -160,20 +160,30 @@ jobs:
             --label org.opencontainers.image.revision="${{ github.sha }}" \
             --label org.opencontainers.image.created="${CREATED}" \
             --tag registry.greenflametech.net/hermes:${{ needs.validate.outputs.version }} \
-            --tag registry.greenflametech.net/hermes:latest \
             --tag ghcr.io/${{ secrets.GH_USERNAME }}/hermes:${{ needs.validate.outputs.version }} \
-            --tag ghcr.io/${{ secrets.GH_USERNAME }}/hermes:latest \
             .
 
       - name: Push to private registry
         run: |
+          TAG="${{ needs.validate.outputs.tag }}"
           docker push registry.greenflametech.net/hermes:${{ needs.validate.outputs.version }}
-          docker push registry.greenflametech.net/hermes:latest
+          if [[ ! "${TAG}" =~ alpha|beta|rc ]]; then
+            docker tag registry.greenflametech.net/hermes:${{ needs.validate.outputs.version }} registry.greenflametech.net/hermes:latest
+            docker push registry.greenflametech.net/hermes:latest
+          else
+            echo "Pre-release tag (${TAG}) — skipping :latest push to private registry"
+          fi
 
       - name: Push to GHCR
         run: |
+          TAG="${{ needs.validate.outputs.tag }}"
           docker push ghcr.io/${{ secrets.GH_USERNAME }}/hermes:${{ needs.validate.outputs.version }}
-          docker push ghcr.io/${{ secrets.GH_USERNAME }}/hermes:latest
+          if [[ ! "${TAG}" =~ alpha|beta|rc ]]; then
+            docker tag ghcr.io/${{ secrets.GH_USERNAME }}/hermes:${{ needs.validate.outputs.version }} ghcr.io/${{ secrets.GH_USERNAME }}/hermes:latest
+            docker push ghcr.io/${{ secrets.GH_USERNAME }}/hermes:latest
+          else
+            echo "Pre-release tag (${TAG}) — skipping :latest push to GHCR"
+          fi
 
       - name: Make GHCR package public
         env:
@@ -274,15 +284,24 @@ jobs:
 
           # Restore public Docker Hub base image
           sed -i 's|FROM registry\.greenflametech\.net/python:3\.13-slim|FROM python:3.13-slim|g' Dockerfile
+          if grep -q "registry\.greenflametech\.net/python" Dockerfile; then
+            echo "ERROR: Dockerfile sed replacement failed — internal registry reference still present"
+            exit 1
+          fi
 
           # Strip internal sonar.host.url
           sed -i '/^sonar\.host\.url=/d' sonar-project.properties
+          if grep -q "^sonar\.host\.url=" sonar-project.properties; then
+            echo "ERROR: sonar.host.url removal failed — internal sonar config still present"
+            exit 1
+          fi
 
           git add -A
           git commit -m "chore: prepare public release ${TAG} (strip internal infra config)"
 
-          GITHUB_REPO_URL="https://${GH_USERNAME}:${GH_PAT}@github.com/${GH_USERNAME}/Hermes.git"
-          git remote add github "${GITHUB_REPO_URL}"
+          git remote add github "https://github.com/${GH_USERNAME}/Hermes.git"
+          git config http.https://github.com/.extraheader \
+            "Authorization: Basic $(printf '%s:%s' "${GH_USERNAME}" "${GH_PAT}" | base64 -w0)"
 
           # Push sanitized code to main (public repo is a CI-managed mirror)
           git push github public-release:refs/heads/main --force
@@ -294,6 +313,7 @@ jobs:
             "https://api.github.com/repos/${GH_USERNAME}/Hermes/git/refs/tags/${TAG}" || true
           git push github "${TAG}"
 
+          git config --unset http.https://github.com/.extraheader || true
           git remote remove github || true
           git branch -D public-release || true
 
