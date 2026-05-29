@@ -5,7 +5,8 @@ title: "Alert Configuration"
 
 # Alert Configuration
 
-Hermes can send notifications when speed tests fail consecutively. Alerts are configurable via the UI Settings page or environment variables.
+Hermes can send notifications when speed tests fail consecutively. Alerts are configurable via the
+dedicated **Alert Settings** page in the web UI or environment variables.
 
 ---
 
@@ -22,13 +23,13 @@ Hermes can send notifications when speed tests fail consecutively. Alerts are co
 
 ## Alert Configuration Methods
 
-### Method 1: UI Settings (Recommended)
+### Method 1: Alert Settings UI (Recommended)
 
-1. Navigate to **Settings → Alerts** in the web UI
+1. Navigate to **Alert Settings** in the sidebar
 2. Toggle alerts **ON** and set failure threshold and cooldown
 3. Enable desired providers and fill in their settings
 4. Use **"Send Test Notification"** to verify configuration
-5. Click **"Save Settings"** to persist to `runtime_config.json`
+5. Click **"Save Changes"** to persist to `runtime_config.json`
 
 **Advantages:**
 
@@ -95,7 +96,7 @@ ALERT_APPRISE_URL=https://apprise.example.com/notify/myconfig
 ALERT_APPRISE_URL=https://apprise.example.com
 ```
 
-**2. Add service URLs in Hermes UI:** Settings → Alerts → Apprise → Service URLs:
+**2. Add service URLs in Hermes UI:** Alert Settings → Apprise → Service URLs:
 
 ```text
 ntfys://ntfy.example.com/topic?token=tk_xxx
@@ -252,11 +253,11 @@ Before deploying, verify your alert configuration:
 
 ### Via UI
 
-1. Navigate to **Settings → Alerts**
+1. Navigate to **Alert Settings** in the sidebar
 2. Configure your provider settings
 3. Click **"Send Test Notification"**
 4. Check that you receive the test message
-5. Click **"Save Settings"** to persist
+5. Click **"Save Changes"** to persist
 
 ### Via API
 
@@ -287,7 +288,7 @@ Response:
 ### No Alerts Received
 
 1. **Check threshold:** Ensure `ALERT_FAILURE_THRESHOLD > 0`
-2. **Verify provider enabled:** Check Settings → Alerts or environment variables
+2. **Verify provider enabled:** Check Alert Settings in the sidebar or environment variables
 3. **Check cooldown:** Wait `ALERT_COOLDOWN_MINUTES` after last alert
 4. **Test notification:** Use "Send Test Notification" button in UI
 5. **Check logs:** Look for alert-related errors in container logs:

@@ -7,6 +7,10 @@ title: "Hermes Documentation"
 
 ![Hermes Dashboard](assets/Hermes-Screenshot.png)
 
+| Analysis | Reports | Alert Settings |
+|---|---|---|
+| ![Analysis screen](assets/Hermes-analysis.png) | ![Reports screen](assets/Hermes-reports.png) | ![Alert Settings screen](assets/Hermes-alerts.png) |
+
 **Hermes** is a self-hosted internet speed test monitoring solution that periodically tests your
 connection and exports results to multiple destinations. It features a modern React frontend,
 comprehensive API, and integrates seamlessly with your observability stack.
@@ -21,11 +25,16 @@ comprehensive API, and integrates seamlessly with your observability stack.
 
 - **Multi-Destination Export** — CSV, SQLite, Prometheus, Loki
 
-- **Modern Web UI** — React + Vite frontend with real-time charts and statistics
+- **Modern Web UI** — Five dedicated screens: Dashboard, Analysis, Reports, Alert Settings, Settings
 
 - **REST API** — Full-featured FastAPI backend for automation and integration
 
-- **Alert Notifications** — Webhook, Gotify, ntfy, Apprise (100+ services)
+- **Alert Notifications** — Webhook, Gotify, ntfy, Apprise (100+ services) via dedicated Alert
+  Settings screen
+
+- **Analytics** — Anomaly detection, time-of-day speed patterns, and month-over-month trends
+
+- **Filterable Reports** — Date/speed/ISP filters, column visibility toggles, and CSV export
 
 - **Production-Ready** — Docker deployment, health checks, data retention policies
 

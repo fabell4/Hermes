@@ -346,7 +346,6 @@ npm run lint
 Use pre-configured tasks (Terminal → Run Task):
 
 - **Run Hermes** — Start Python scheduler
-- **Run Hermes UI** — Start Streamlit UI (legacy)
 - **Run Hermes API** — Start FastAPI server
 - **Run Hermes Frontend (dev)** — Start React dev server
 
@@ -377,11 +376,27 @@ Navigate to **Settings** to adjust:
 
 - **Test interval** — How often to run automatic tests
 - **Enabled exporters** — Which destinations to write results to
-- **Alert settings** — Configure failure notifications (see [Alerts](alerts))
+- **Test window** — Restrict automated tests to specific hours
 
 Changes are saved to `data/runtime_config.json` and apply immediately (no restart required).
 
-### 5. Integrate with Observability Stack
+### 5. Configure Alert Notifications
+
+Navigate to **Alert Settings** (sidebar) to configure failure notifications:
+
+- Enable alerts and set the consecutive failure threshold
+- Add one or more providers (Webhook, Gotify, ntfy, Apprise)
+- Use **"Send Test Notification"** to verify before saving
+
+See [Alert Configuration](alerts) for provider-specific setup guides.
+
+### 6. Explore Analysis and Reports
+
+- **Analysis** — Anomaly detection, time-of-day speed patterns, and month-over-month trend charts
+- **Reports** — Filter your full test history by date, speed range, ISP, or server; toggle column
+  visibility; and export a custom CSV
+
+### 7. Integrate with Observability Stack
 
 **Prometheus:**
 

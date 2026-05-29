@@ -4,6 +4,10 @@
 
 ![Hermes Dashboard](docs/assets/Hermes-Screenshot.png)
 
+| Analysis | Reports | Alert Settings |
+|---|---|---|
+| ![Analysis screen](docs/assets/Hermes-analysis.png) | ![Reports screen](docs/assets/Hermes-reports.png) | ![Alert Settings screen](docs/assets/Hermes-alerts.png) |
+
 **Hermes** is a self-hosted internet speed test monitoring solution that periodically tests your connection and exports
 results to multiple destinations. It features a modern React frontend, comprehensive REST API, and integrates seamlessly
 with your observability stack.
@@ -16,12 +20,13 @@ with your observability stack.
 
 - **Automated Speed Testing** — Scheduled tests at configurable intervals with manual triggers
 - **Multi-Destination Export** — CSV, SQLite, Prometheus, Loki, InfluxDB
-- **Modern Web UI** — React + Vite frontend with real-time charts and statistics
+- **Modern Web UI** — Five dedicated screens: Dashboard, Analysis, Reports, Alert Settings, and Settings
 - **REST API** — Full-featured FastAPI backend for automation and integration
-- **Alert Notifications** — Webhook, Gotify, ntfy, Apprise (100+ services)
+- **Alert Notifications** — Webhook, Gotify, ntfy, Apprise (100+ services) with a dedicated Alert Settings screen
 - **Outage Detection** — TCP probe-based ISP outage detection with event history
 - **SLA Monitoring** — Configurable thresholds for download, upload, ping, and packet loss
-- **Analytics** — Anomaly detection, time-of-day analysis, and month-over-month trend reporting
+- **Analytics** — Dedicated Analysis screen with anomaly detection, time-of-day patterns, and month-over-month trend reports
+- **Filterable Reports** — Dedicated Reports screen with date/speed/ISP filters, column visibility toggles, and CSV export
 - **Production-Ready** — Docker deployment, health checks, data retention policies
 - **Security-First** — API key auth, rate limiting, SSRF protection, security headers
 
@@ -244,8 +249,8 @@ Key configuration options (see [Getting Started](https://fabell4.github.io/herme
 
 ## 🧪 Test Coverage
 
-- **426 tests passing** including 130+ API security tests
-- **92% code coverage** (1,529 statements, 133 missed)
+- **497 Python tests + 44 frontend tests passing** including 130+ API security tests
+- **96% code coverage**
 - **All ruff checks passing** (format + lint)
 - **All mypy type checks passing** (27 source files)
 - **Comprehensive security validation:**
