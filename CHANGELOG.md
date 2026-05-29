@@ -12,6 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.6.0-beta] - 2026-05-29
+
+### Changed
+
+- **Version milestone** — Bumped to v0.6.0-beta. Consolidates all post-0.5-beta work
+  including InfluxDB exporter, Grafana integration, outage detection, enhanced diagnostics
+  (packet loss, quality score, SLA monitoring, server pinning), UI enhancements, ntfy
+  authentication fix (X-Api-Key header), and release pipeline updates.
+
+---
+
 ## [0.5-beta] - 2026-05-04
 
 ### Changed
