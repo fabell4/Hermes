@@ -131,7 +131,8 @@ Single API key means no per-user access control or audit trails.
 Cannot distinguish between legitimate users or revoke access selectively.
 
 **Recommendation:**  
-For v1.1+: Consider user database with hashed keys if multi-user access is required. Not needed for current use case (single-user self-hosted).
+For v1.1+: Consider user database with hashed keys if multi-user access
+is required. Not needed for current use case (single-user self-hosted).
 
 **Status:** 🟢 Defer to post-v1.0
 
@@ -139,12 +140,13 @@ For v1.1+: Consider user database with hashed keys if multi-user access is requi
 
 ## 2. Rate Limiting
 
-### Implementation Overview
+### 2.1 Implementation Overview
 
 **Location:** [`src/api/auth.py:37-50`](../src/api/auth.py)
 
 **Algorithm:** Sliding window (60-second) per API key  
-**Default Limit:** 60 requests/minute (configurable via `RATE_LIMIT_PER_MINUTE`)  
+**Default Limit:** 60 requests/minute (configurable via
+`RATE_LIMIT_PER_MINUTE`)  
 **Storage:** In-process dictionary (`_request_timestamps`)
 
 When rate limit is exceeded:
@@ -153,7 +155,7 @@ When rate limit is exceeded:
 - Logs warning with redacted key prefix
 - Request is rejected (no retry-after header)
 
-### Security Strengths ✅
+### 2.2 Security Strengths ✅
 
 1. **Per-key tracking** prevents one user exhausting quota for others (if multiple keys were supported)
 
@@ -165,7 +167,7 @@ When rate limit is exceeded:
 
 5. **Automatic cleanup** — old timestamps are pruned on each request (no memory leak)
 
-### Issues & Recommendations
+### 2.3 Issues & Recommendations
 
 #### 🟡 MEDIUM: In-Process State Not Suitable for Multi-Instance Deployment
 
@@ -179,7 +181,8 @@ Rate limit state is stored in memory and not shared between processes or instanc
 - Restart resets all counters
 
 **Recommendation:**  
-For v1.1+: If horizontal scaling is needed, migrate to Redis or distributed rate limiter. Not critical for v1.0 (single-instance Docker deployment).
+For v1.1+: If horizontal scaling is needed, migrate to Redis or distributed rate limiter.
+Not critical for v1.0 (single-instance Docker deployment).
 
 **Status:** 🟢 Acceptable for v1.0 (single-instance model)
 
@@ -234,7 +237,9 @@ Application-layer rate limiting cannot prevent network-layer DDoS attacks.
 Malicious actors could overwhelm the server before requests reach FastAPI.
 
 **Recommendation:**  
-Deploy behind reverse proxy (nginx/Caddy/Traefik) with connection limits, or use cloud provider DDoS protection. This is infrastructure-level, not application-level.
+Deploy behind reverse proxy (nginx/Caddy/Traefik) with connection
+limits, or use cloud provider DDoS protection. This is infrastructure-level,
+not application-level.
 
 **Status:** 🔵 Out of scope (deployment concern)
 
@@ -242,7 +247,7 @@ Deploy behind reverse proxy (nginx/Caddy/Traefik) with connection limits, or use
 
 ## 3. Input Validation
 
-### Implementation Overview
+### 3.1 Implementation Overview
 
 **Validation Strategy:**
 
@@ -250,9 +255,9 @@ Deploy behind reverse proxy (nginx/Caddy/Traefik) with connection limits, or use
 2. **FastAPI `Query` annotations** for query parameters (type/range validation)
 3. **Parameterized SQL queries** for database operations (SQL injection prevention)
 
-### Security Strengths ✅
+### 3.2 Security Strengths ✅
 
-#### 3.1 Request Body Validation (Pydantic)
+#### 3.2.1 Request Body Validation (Pydantic)
 
 All `PUT`/`POST` endpoints use typed Pydantic models:
 
@@ -271,7 +276,8 @@ class RuntimeConfigSchema(BaseModel):
 - ✅ Range constraints (`ge=5, le=1440`)
 - ✅ Required field enforcement
 - ✅ Rejects unknown fields by default
-- ✅ Returns `422 Unprocessable Entity` with detailed error messages
+- ✅ Returns `422 Unprocessable Entity` with detailed
+  error messages
 
 **Additional validation:** Unknown exporter names are rejected with explicit check:
 
@@ -297,7 +303,8 @@ def get_results(
 **Protection:**
 
 - ✅ Type validation (`?page=abc` → `422` error)
-- ✅ Range constraints (`page_size ≤ 500` prevents excessive memory usage)
+- ✅ Range constraints (`page_size ≤ 500` prevents
+  excessive memory usage)
 - ✅ Minimum values (`page ≥ 1` prevents negative indexing)
 
 ---
@@ -323,10 +330,13 @@ conn.execute(_INSERT, row)  # Parameters passed separately
 
 **Protection:**
 
-- ✅ No string interpolation (`f"SELECT * FROM results WHERE id={user_input}"` ❌)
+- ✅ No string interpolation
+  (`f"SELECT * FROM results WHERE id={user_input}"` ❌)
 - ✅ No manual escaping (SQLite driver handles it)
-- ✅ Named parameters (`:timestamp`) prevent positional injection
-- ✅ All user-controlled data in `results.py` uses `?` placeholders:
+- ✅ Named parameters (`:timestamp`) prevent
+  positional injection
+- ✅ All user-controlled data in `results.py` uses
+  `?` placeholders:
 
   ```python
   conn.execute(
@@ -378,7 +388,8 @@ conn.execute(_INSERT, row)  # Parameters passed separately
 - URLs are stored and **invoked by the backend** (not client-side)
 - Could be used for **Server-Side Request Forgery (SSRF)** if not validated
 
-**Current Implementation:** [`src/services/alert_providers.py`](../src/services/alert_providers.py)
+**Current Implementation:**
+[`src/services/alert_providers.py`](../src/services/alert_providers.py)
 
 ```python
 # WebhookProvider
@@ -396,14 +407,16 @@ response = requests.post(endpoint, headers=headers, data=message, timeout=10)
 **Protection:**
 
 - ✅ Timeouts prevent indefinite hangs (10 seconds)
-- ⚠️ No URL scheme validation (could POST to `file://`, `ftp://`, etc.)
-- ⚠️ No private IP range filtering (could target internal services like `http://localhost:6379`)
+- ⚠️ No URL scheme validation (could POST to
+  `file://`, `ftp://`, etc.)
+- ⚠️ No private IP range filtering (could target
+  internal services like `http://localhost:6379`)
 
 **SSRF Risk:** 🟡 **MEDIUM**
 
 ---
 
-### Issues & Recommendations
+### 3.2 Validation Issues & Recommendations
 
 #### 🟡 MEDIUM: Server-Side Request Forgery (SSRF) via Alert URLs
 
@@ -416,10 +429,12 @@ Alert provider URLs are not validated. Malicious users could configure alerts to
 - File system (`file:///etc/passwd`)
 
 **Risk:**  
-Attacker with API access can probe internal network or exfiltrate data via alert payloads.
+Attacker with API access can probe internal network
+or exfiltrate data via alert payloads.
 
 **Recommendation:**  
-Add URL validation in [`src/api/routes/alerts.py`](../src/api/routes/alerts.py):
+Add URL validation in
+[`src/api/routes/alerts.py`](../src/api/routes/alerts.py):
 
 ```python
 from urllib.parse import urlparse
@@ -497,7 +512,10 @@ class WebhookProviderConfig(BaseModel):
 
 **Status:** 🟡 **Critical for v1.0** if untrusted users have API access
 
-**Mitigation:** If deployment is single-user self-hosted (user targets their own services), SSRF risk is mitigated. However, validation should still be added as defense-in-depth.
+**Mitigation:** If deployment is single-user self-hosted
+(user targets their own services), SSRF risk is mitigated.
+However, validation should still be added as
+defense-in-depth.
 
 ---
 
@@ -529,17 +547,22 @@ class RequestSizeLimitMiddleware(BaseHTTPMiddleware):
 app.add_middleware(RequestSizeLimitMiddleware)
 ```
 
-**Status:** 🟢 Nice-to-have for v1.0 (Pydantic models are small, unlikely to be exploited)
+**Status:** 🟢 Nice-to-have for v1.0 (Pydantic models
+are small, unlikely to be exploited)
 
 ---
 
 #### 🟢 LOW: Alert Test Endpoint Lacks Throttling
 
 **Issue:**  
-`POST /api/alerts/test` sends real HTTP requests to external services. No rate limiting beyond global API limit.
+`POST /api/alerts/test` sends real HTTP requests to
+external services. No rate limiting beyond global
+API limit.
 
 **Risk:**  
-Authenticated user could abuse endpoint to flood external services (e.g., 60 requests/min to victim's webhook).
+Authenticated user could abuse endpoint to flood
+external services (e.g., 60 requests/min to
+victim's webhook).
 
 **Recommendation:**  
 Add separate rate limit for test endpoint:
@@ -588,7 +611,8 @@ logger.warning("auth: rate limit exceeded for key prefix=%.4s", x_api_key)
 If `x_api_key` contains `\n`, could split log entry.
 
 **Recommendation:**  
-Python's `logging` module already handles newlines safely (escapes them). No action needed unless custom log parsing is added.
+Python's `logging` module already handles newlines safely (escapes
+them). No action needed unless custom log parsing is added.
 
 **Status:** 🟢 No issue (Python logging handles this)
 
@@ -611,8 +635,10 @@ class _SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 **Headers Present:**
 
-- ✅ `X-Content-Type-Options: nosniff` — prevents MIME sniffing
-- ✅ `Cross-Origin-Resource-Policy: same-origin` — restricts resource embedding
+- ✅ `X-Content-Type-Options: nosniff` — prevents
+  MIME sniffing
+- ✅ `Cross-Origin-Resource-Policy: same-origin` —
+  restricts resource embedding
 
 **Missing Headers (consider adding):**
 
@@ -823,7 +849,8 @@ The Hermes API demonstrates solid security fundamentals:
 
 **Recommendation:** Implement the two high-priority fixes (~35 minutes total) before v1.0 release. All other issues are low-risk and can be deferred.
 
-**Audit Conclusion:** ✅ **APPROVED FOR v1.0 RELEASE** after implementing SSRF protection and API key length validation.
+**Audit Conclusion:** ✅ **APPROVED FOR v1.0 RELEASE** after implementing
+SSRF protection and API key length validation.
 
 ---
 
