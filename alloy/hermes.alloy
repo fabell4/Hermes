@@ -1,0 +1,227 @@
+// alloy/hermes.alloy
+// ─────────────────────────────────────────────────────────────────────────────
+// Hermes Alloy module
+//
+// Import this file into your existing Alloy configuration to add Hermes metrics
+// scraping and log collection alongside your other pipelines.  It does NOT
+// define a logging block, remote_write endpoint, or loki.write endpoint — those
+// are owned by your existing config.  The module arguments accept whatever
+// receivers you already have.
+//
+// Two modules are provided so you can opt in to only what you need:
+//
+//   hermes.metrics  — scrapes the Hermes /metrics endpoint
+//   hermes.logs     — tails the Hermes log file and/or the systemd journal
+//
+// ─────────────────────────────────────────────────────────────────────────────
+// Usage
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// 1. Copy (or symlink) this file to wherever your Alloy config lives, then add
+//    the following to your existing config.alloy:
+//
+//      import.file "hermes" {
+//        filename = "/etc/alloy/hermes.alloy"   // adjust path as needed
+//      }
+//
+// 2. Instantiate whichever modules you need, wiring them into your existing
+//    remote_write / loki.write receivers:
+//
+//      // Metrics only
+//      hermes.metrics "default" {
+//        forward_to = [prometheus.remote_write.default.receiver]
+//      }
+//
+//      // Logs only (file tail)
+//      hermes.logs "default" {
+//        log_path   = "/opt/hermes/logs/hermes.log"
+//        forward_to = [loki.write.default.receiver]
+//      }
+//
+//      // Logs with intermediate processing already in your pipeline
+//      hermes.logs "default" {
+//        log_path   = "/opt/hermes/logs/hermes.log"
+//        forward_to = [loki.process.my_existing_pipeline.receiver]
+//      }
+//
+// 3. Reload Alloy:
+//      systemctl reload alloy          # system agent
+//      docker compose restart alloy    # container
+//
+// ─────────────────────────────────────────────────────────────────────────────
+// Module: hermes.metrics
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Scrapes the Hermes Prometheus /metrics endpoint and forwards time-series to
+// one or more prometheus.remote_write receivers.
+//
+// Arguments:
+//
+//   forward_to       (required) List of prometheus.remote_write receivers.
+//
+//   address          (optional, default: "localhost:8000")
+//     host:port of the Hermes /metrics endpoint.  Override when PROMETHEUS_PORT
+//     is set to a non-default value in Hermes, or when Hermes runs on a remote
+//     host.
+//
+//   scrape_interval  (optional, default: "15s")
+//     How often to scrape /metrics.  Align with your retention / step settings.
+//
+// ─────────────────────────────────────────────────────────────────────────────
+
+declare "metrics" {
+
+  argument "forward_to" {
+    comment = "List of prometheus.remote_write receivers to send scraped metrics to."
+  }
+
+  argument "address" {
+    optional = true
+    default  = "localhost:8000"
+    comment  = "host:port of the Hermes Prometheus /metrics endpoint."
+  }
+
+  argument "scrape_interval" {
+    optional = true
+    default  = "15s"
+    comment  = "Scrape interval for the /metrics endpoint."
+  }
+
+  prometheus.scrape "hermes" {
+    targets = [
+      {
+        __address__ = argument.address.value,
+        job         = "hermes",
+      },
+    ]
+
+    scrape_interval = argument.scrape_interval.value
+    metrics_path    = "/metrics"
+
+    forward_to = argument.forward_to.value
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Module: hermes.logs
+// ─────────────────────────────────────────────────────────────────────────────
+//
+// Tails the Hermes application log file on disk, parses structured log fields,
+// and forwards log lines to one or more loki.write (or loki.process) receivers.
+//
+// Optionally also reads from the systemd journal when Hermes is managed by a
+// systemd unit (set systemd_unit to enable).
+//
+// The parse pipeline handles both log formats emitted by Hermes:
+//
+//   LOG_FORMAT=json  — extracts level, logger, message via stage.json
+//   LOG_FORMAT=text  — extracts level via regex on the bracket prefix
+//
+// The "level" field is promoted to a Loki stream label in both cases so that
+// LogQL label filters ({job="hermes", level="ERROR"}) work regardless of format.
+//
+// Arguments:
+//
+//   forward_to      (required) List of loki.write or loki.process receivers.
+//
+//   log_path        (required)
+//     Absolute path to the Hermes log file on disk, e.g.:
+//       /opt/hermes/logs/hermes.log
+//       /home/hermes/logs/hermes.log
+//       /var/log/hermes/hermes.log
+//
+//   job_label       (optional, default: "hermes")
+//     Value of the Loki "job" stream label attached to every log line.
+//
+//   systemd_unit    (optional, default: "")
+//     Systemd unit name whose journal entries are also collected, e.g. "hermes".
+//     Leave empty (the default) to skip journal collection entirely.  Only
+//     useful when Hermes is managed by systemd on the same host.
+//
+// ─────────────────────────────────────────────────────────────────────────────
+
+declare "logs" {
+
+  argument "forward_to" {
+    comment = "List of loki.write or loki.process receivers to send log lines to."
+  }
+
+  argument "log_path" {
+    comment = "Absolute path to the Hermes log file on disk."
+  }
+
+  argument "job_label" {
+    optional = true
+    default  = "hermes"
+    comment  = "Value of the Loki 'job' stream label."
+  }
+
+  argument "systemd_unit" {
+    optional = true
+    default  = ""
+    comment  = "Systemd unit name to collect from the journal. Empty string disables journal collection."
+  }
+
+  // ── Log file tailing ───────────────────────────────────────────────────────
+
+  local.file_match "hermes" {
+    path_targets = [
+      {
+        __path__ = argument.log_path.value,
+        job      = argument.job_label.value,
+      },
+    ]
+  }
+
+  loki.source.file "hermes" {
+    targets    = local.file_match.hermes.targets
+    forward_to = [loki.process.hermes_parse.receiver]
+  }
+
+  // ── Systemd journal (optional) ─────────────────────────────────────────────
+  // Active only when systemd_unit is non-empty.  If the unit name is empty the
+  // match expression matches nothing and the source produces no log lines.
+
+  loki.source.journal "hermes" {
+    matches    = string.format("_SYSTEMD_UNIT=%s.service", argument.systemd_unit.value)
+    forward_to = [loki.process.hermes_parse.receiver]
+
+    labels = {
+      job = argument.job_label.value,
+    }
+  }
+
+  // ── Shared parse pipeline ──────────────────────────────────────────────────
+
+  loki.process "hermes_parse" {
+
+    // JSON structured logs (LOG_FORMAT=json) — extracts level, logger, message.
+    stage.json {
+      expressions = {
+        level   = "level",
+        logger  = "logger",
+        message = "message",
+      }
+    }
+
+    stage.labels {
+      values = {
+        level = "level",
+      }
+    }
+
+    // Plain-text log fallback (LOG_FORMAT=text).
+    // Format: "2026-01-01 12:00:00 [INFO] src.main: message"
+    stage.regex {
+      expression = `^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \[(?P<level>[A-Z]+)\]`
+    }
+
+    stage.labels {
+      values = {
+        level = "level",
+      }
+    }
+
+    forward_to = argument.forward_to.value
+  }
+}
