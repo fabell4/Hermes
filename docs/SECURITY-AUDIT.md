@@ -860,6 +860,5 @@ python -c 'import secrets; print(secrets.token_urlsafe(32))'
 
 ---
 
-**Auditor:** GitHub Copilot (Claude Sonnet 4.5)  
 **Review Date:** April 29, 2026  
 **Next Review:** Before v2.0 release or 6 months
