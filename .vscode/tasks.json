@@ -70,9 +70,9 @@
 		{
 			"label": "Serve Docs (Jekyll)",
 			"type": "shell",
-			"command": "bundle exec jekyll serve --port 4001 --livereload",
+			"command": "Set-Location 'C:\\Users\\psywa\\source\\repos\\projects\\Hermes\\docs'; bundle exec jekyll serve --port 4001 --livereload",
 			"options": {
-				"cwd": "${workspaceFolder}/docs"
+				"cwd": "C:\\Users\\psywa\\source\\repos\\projects\\Hermes\\docs"
 			},
 			"isBackground": true,
 			"group": "build",
@@ -97,9 +97,9 @@
 		{
 			"label": "Build Docs (Jekyll)",
 			"type": "shell",
-			"command": "bundle exec jekyll build",
+			"command": "Set-Location 'C:\\Users\\psywa\\source\\repos\\projects\\Hermes\\docs'; bundle exec jekyll build",
 			"options": {
-				"cwd": "${workspaceFolder}/docs"
+				"cwd": "C:\\Users\\psywa\\source\\repos\\projects\\Hermes\\docs"
 			},
 			"group": "build",
 			"presentation": {
