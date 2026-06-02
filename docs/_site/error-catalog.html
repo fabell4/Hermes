@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Error Catalog — Hermes Documentation</title>
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Error Catalog | Hermes Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Error Catalog" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<link rel="canonical" href="http://localhost:4001/error-catalog.html" />
+<meta property="og:url" content="http://localhost:4001/error-catalog.html" />
+<meta property="og:site_name" content="Hermes Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Error Catalog" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted internet speed test monitoring with modern observability stack integration","headline":"Error Catalog","url":"http://localhost:4001/error-catalog.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration">
+
+<title>
+  
+    Error Catalog — Hermes Documentation
+  
+</title>
+
+
+<link rel="icon" type="image/png" href="/assets/Hermes.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="/" class="nav-brand">
+    <span class="brand-name">
+      Hermes
+      <span>Docs</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/alloy"
+                 >
+                Grafana Alloy
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-ENHANCEMENTS"
+                 >
+                Security Enhancements
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Error Handling</h3>
+        <ul>
+          
+            <li>
+              <a href="/error-catalog"
+                 >
+                Error Catalog
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-handling-conventions"
+                 >
+                Handling Conventions
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-messages"
+                 >
+                Error Messages
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/RELEASE-PROCESS"
+                 >
+                Release Process
+              </a>
+            </li>
+          
+            <li>
+              <a href="/styleguide"
+                 >
+                Frontend Style Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/suppression-decisions"
+                 >
+                Suppression Decisions
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Code Reviews</h3>
+        <ul>
+          
+            <li>
+              <a href="/BEST-PRACTICES-REVIEW"
+                 >
+                Best Practices
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DEFENSIVE-CODING-REVIEW"
+                 >
+                Defensive Coding
+              </a>
+            </li>
+          
+            <li>
+              <a href="/ERROR-HANDLING-REVIEW"
+                 >
+                Error Handling Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/PERFORMANCE-OPTIMIZATION-REVIEW"
+                 >
+                Performance Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/TEST-COVERAGE-REVIEW"
+                 >
+                Test Coverage
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DOCUMENTATION-ACCURACY-REVIEW"
+                 >
+                Documentation Review
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Error Catalog</h1>
+
+            
+          </header>
+        
+
+        <p><strong>Project:</strong> Hermes Speed Monitor<br />
+<strong>Last Updated:</strong> 2026-05-01<br />
+<strong>Purpose:</strong> Comprehensive list of all possible errors by module with causes and remediation</p>
+
+<hr />
+
+<h2 id="table-of-contents">Table of Contents</h2>
+
+<ul>
+  <li><a href="#api-module">API Module</a></li>
+  <li><a href="#configuration-module">Configuration Module</a></li>
+  <li><a href="#dispatcher-module">Dispatcher Module</a></li>
+  <li><a href="#exporters">Exporters</a></li>
+  <li><a href="#services">Services</a></li>
+  <li><a href="#error-matrix">Error Matrix</a></li>
+</ul>
+
+<hr />
+
+<h2 id="api-module">API Module</h2>
+
+<h3 id="authentication--authorization-srcapiauthpy">Authentication &amp; Authorization (<code class="language-plaintext highlighter-rouge">src/api/auth.py</code>)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Error</th>
+      <th>Type</th>
+      <th>Severity</th>
+      <th>Cause</th>
+      <th>Remediation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Missing X-Api-Key header</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(401)</code></td>
+      <td>High</td>
+      <td>Client didn’t send required header</td>
+      <td>Add <code class="language-plaintext highlighter-rouge">X-Api-Key</code> header to all requests</td>
+    </tr>
+    <tr>
+      <td>Invalid API key</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(403)</code></td>
+      <td>High</td>
+      <td>API key doesn’t match configured value</td>
+      <td>Verify API key matches <code class="language-plaintext highlighter-rouge">.env</code> configuration</td>
+    </tr>
+    <tr>
+      <td>Rate limit exceeded</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(429)</code></td>
+      <td>Medium</td>
+      <td>Too many requests from client</td>
+      <td>Implement backoff, reduce request frequency</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Prevention:</strong></p>
+
+<ul>
+  <li>Always send <code class="language-plaintext highlighter-rouge">X-Api-Key</code> header</li>
+  <li>Store API key securely (environment variable, secrets vault)</li>
+  <li>Implement client-side rate limiting</li>
+</ul>
+
+<hr />
+
+<h3 id="configuration-routes-srcapiroutesconfigpy">Configuration Routes (<code class="language-plaintext highlighter-rouge">src/api/routes/config.py</code>)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Error</th>
+      <th>Type</th>
+      <th>Severity</th>
+      <th>Cause</th>
+      <th>Remediation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Invalid configuration payload</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(400)</code></td>
+      <td>Medium</td>
+      <td>Validation failed on config update</td>
+      <td>Check interval (5-1440), valid exporter names</td>
+    </tr>
+    <tr>
+      <td>Runtime config save failed</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(500)</code></td>
+      <td>High</td>
+      <td>Filesystem error saving config</td>
+      <td>Check permissions, disk space</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Prevention:</strong></p>
+
+<ul>
+  <li>Validate payload before sending (client-side validation)</li>
+  <li>Ensure data directory is writable</li>
+  <li>Use atomic writes (handled by backend)</li>
+</ul>
+
+<hr />
+
+<h3 id="results-routes-srcapiroutesresultspy">Results Routes (<code class="language-plaintext highlighter-rouge">src/api/routes/results.py</code>)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Error</th>
+      <th>Type</th>
+      <th>Severity</th>
+      <th>Cause</th>
+      <th>Remediation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>No database found yet</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(503)</code></td>
+      <td>Low</td>
+      <td>No speedtests have run</td>
+      <td>Wait for first test or trigger manually</td>
+    </tr>
+    <tr>
+      <td>Invalid pagination parameters</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(400)</code></td>
+      <td>Low</td>
+      <td>page/page_size out of range</td>
+      <td>Use page ≥ 1, page_size 1-500</td>
+    </tr>
+    <tr>
+      <td>Database query failed</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(500)</code></td>
+      <td>High</td>
+      <td>SQLite error during query</td>
+      <td>Check database integrity, reduce page_size</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Prevention:</strong></p>
+
+<ul>
+  <li>Enable SQLite exporter</li>
+  <li>Trigger first speedtest after deployment</li>
+  <li>Use reasonable page sizes (≤100)</li>
+</ul>
+
+<hr />
+
+<h3 id="trigger-routes-srcapiroutestriggerpy">Trigger Routes (<code class="language-plaintext highlighter-rouge">src/api/routes/trigger.py</code>)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Error</th>
+      <th>Type</th>
+      <th>Severity</th>
+      <th>Cause</th>
+      <th>Remediation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Failed to start manual test thread</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(500)</code></td>
+      <td>High</td>
+      <td>Thread creation failed</td>
+      <td>Check system resources, restart container</td>
+    </tr>
+    <tr>
+      <td>Trigger file write failed</td>
+      <td>Internal</td>
+      <td>Medium</td>
+      <td>Filesystem error</td>
+      <td>Check permissions on data directory</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Prevention:</strong></p>
+
+<ul>
+  <li>Monitor system resources (threads, memory)</li>
+  <li>Ensure data directory is writable</li>
+  <li>Don’t trigger tests too frequently (respect rate limits)</li>
+</ul>
+
+<hr />
+
+<h3 id="alert-routes-srcapiroutesalertspy">Alert Routes (<code class="language-plaintext highlighter-rouge">src/api/routes/alerts.py</code>)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Error</th>
+      <th>Type</th>
+      <th>Severity</th>
+      <th>Cause</th>
+      <th>Remediation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Threshold must be positive integer</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(400)</code></td>
+      <td>Low</td>
+      <td>Invalid alert threshold</td>
+      <td>Use threshold ≥ 1</td>
+    </tr>
+    <tr>
+      <td>Cooldown must be positive integer</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(400)</code></td>
+      <td>Low</td>
+      <td>Invalid cooldown</td>
+      <td>Use cooldown ≥ 1 (minutes)</td>
+    </tr>
+    <tr>
+      <td>Webhook URL invalid scheme</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(400)</code></td>
+      <td>Medium</td>
+      <td>URL doesn’t start with http/https</td>
+      <td>Use http:// or https://</td>
+    </tr>
+    <tr>
+      <td>Gotify/ntfy URL required</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(400)</code></td>
+      <td>Medium</td>
+      <td>Provider enabled but URL missing</td>
+      <td>Provide valid URL for enabled provider</td>
+    </tr>
+    <tr>
+      <td>Gotify token required</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(400)</code></td>
+      <td>Medium</td>
+      <td>Token missing for Gotify</td>
+      <td>Provide app token from Gotify</td>
+    </tr>
+    <tr>
+      <td>ntfy topic required</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(400)</code></td>
+      <td>Medium</td>
+      <td>Topic missing for ntfy</td>
+      <td>Provide topic name for ntfy</td>
+    </tr>
+    <tr>
+      <td>SSRF protection triggered</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(400)</code></td>
+      <td>High</td>
+      <td>URL points to private IP</td>
+      <td>Use public URLs only (not 127.0.0.1, 10.x, etc.)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Prevention:</strong></p>
+
+<ul>
+  <li>Validate alert configuration before submitting</li>
+  <li>Use only public URLs for webhooks (no localhost, private IPs)</li>
+  <li>Keep threshold reasonable (2-5 failures)</li>
+  <li>Set cooldown to avoid alert storms (60+ minutes recommended)</li>
+</ul>
+
+<hr />
+
+<h2 id="configuration-module">Configuration Module</h2>
+
+<h3 id="environment-configuration-srcconfigpy">Environment Configuration (<code class="language-plaintext highlighter-rouge">src/config.py</code>)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Error</th>
+      <th>Type</th>
+      <th>Severity</th>
+      <th>Cause</th>
+      <th>Remediation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>API_KEY not set</td>
+      <td><code class="language-plaintext highlighter-rouge">SystemExit(1)</code></td>
+      <td>Critical</td>
+      <td>Missing required env var</td>
+      <td>Set <code class="language-plaintext highlighter-rouge">API_KEY</code> in <code class="language-plaintext highlighter-rouge">.env</code> file</td>
+    </tr>
+    <tr>
+      <td>API_KEY validation failed</td>
+      <td><code class="language-plaintext highlighter-rouge">SystemExit(1)</code></td>
+      <td>Critical</td>
+      <td>API key too short (&lt;32 chars)</td>
+      <td>Generate secure key: <code class="language-plaintext highlighter-rouge">openssl rand -hex 32</code></td>
+    </tr>
+    <tr>
+      <td>Invalid PROMETHEUS_PORT</td>
+      <td><code class="language-plaintext highlighter-rouge">ValueError</code></td>
+      <td>High</td>
+      <td>Port not integer or out of range</td>
+      <td>Use port 1-65535</td>
+    </tr>
+    <tr>
+      <td>Invalid RATE_LIMIT</td>
+      <td><code class="language-plaintext highlighter-rouge">ValueError</code></td>
+      <td>Medium</td>
+      <td>Rate limit not positive integer</td>
+      <td>Use positive integer (recommended: 60)</td>
+    </tr>
+    <tr>
+      <td>Invalid LOKI_TIMEOUT</td>
+      <td><code class="language-plaintext highlighter-rouge">ValueError</code></td>
+      <td>Medium</td>
+      <td>Timeout not positive</td>
+      <td>Use positive integer (seconds)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Prevention:</strong></p>
+
+<ul>
+  <li>Use <code class="language-plaintext highlighter-rouge">.env.example</code> as template</li>
+  <li>Generate secure random API key</li>
+  <li>Validate environment variables before deployment</li>
+  <li>Use default ports when possible (Prometheus: 9090)</li>
+</ul>
+
+<hr />
+
+<h3 id="runtime-configuration-srcruntime_configpy">Runtime Configuration (<code class="language-plaintext highlighter-rouge">src/runtime_config.py</code>)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Error</th>
+      <th>Type</th>
+      <th>Severity</th>
+      <th>Cause</th>
+      <th>Remediation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Runtime config file corrupted</td>
+      <td>Warning</td>
+      <td>Medium</td>
+      <td>Malformed JSON</td>
+      <td>Delete file, allow regeneration</td>
+    </tr>
+    <tr>
+      <td>interval_minutes out of range</td>
+      <td>Warning</td>
+      <td>Low</td>
+      <td>Value not 5-1440</td>
+      <td>Fallback to default (60)</td>
+    </tr>
+    <tr>
+      <td>enabled_exporters not a list</td>
+      <td>Warning</td>
+      <td>Low</td>
+      <td>Wrong type</td>
+      <td>Fallback to default (all enabled)</td>
+    </tr>
+    <tr>
+      <td>Unknown exporter in list</td>
+      <td>Warning</td>
+      <td>Low</td>
+      <td>Invalid exporter name</td>
+      <td>Filtered out, valid ones kept</td>
+    </tr>
+    <tr>
+      <td>Alert threshold out of range</td>
+      <td>Warning</td>
+      <td>Low</td>
+      <td>Not 1-100</td>
+      <td>Fallback to default (3)</td>
+    </tr>
+    <tr>
+      <td>Alert cooldown out of range</td>
+      <td>Warning</td>
+      <td>Low</td>
+      <td>Not 1-10080</td>
+      <td>Fallback to default (60)</td>
+    </tr>
+    <tr>
+      <td>Could not save runtime config</td>
+      <td><code class="language-plaintext highlighter-rouge">RuntimeError</code></td>
+      <td>High</td>
+      <td>Filesystem error</td>
+      <td>Check permissions, disk space</td>
+    </tr>
+    <tr>
+      <td>Temp file cleanup failed</td>
+      <td>Warning</td>
+      <td>Low</td>
+      <td>Orphaned temp file</td>
+      <td>Non-fatal, temp file remains</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Prevention:</strong></p>
+
+<ul>
+  <li>Don’t manually edit runtime_config.json (use API)</li>
+  <li>Ensure data directory is writable</li>
+  <li>Monitor disk space</li>
+  <li>Regular backups of config file</li>
+</ul>
+
+<hr />
+
+<h2 id="dispatcher-module">Dispatcher Module</h2>
+
+<h3 id="result-dispatcher-srcresult_dispatcherpy">Result Dispatcher (<code class="language-plaintext highlighter-rouge">src/result_dispatcher.py</code>)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Error</th>
+      <th>Type</th>
+      <th>Severity</th>
+      <th>Cause</th>
+      <th>Remediation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Invalid result type</td>
+      <td><code class="language-plaintext highlighter-rouge">TypeError</code></td>
+      <td>Critical</td>
+      <td>Non-exporter passed to register()</td>
+      <td>Programming error - fix code</td>
+    </tr>
+    <tr>
+      <td>Exporter registration duplicate</td>
+      <td>Warning</td>
+      <td>Low</td>
+      <td>Same exporter registered twice</td>
+      <td>Ignored, last registration wins</td>
+    </tr>
+    <tr>
+      <td>No exporters registered</td>
+      <td>Warning</td>
+      <td>Medium</td>
+      <td>dispatch() called with no exporters</td>
+      <td>Enable at least one exporter</td>
+    </tr>
+    <tr>
+      <td>One or more exporters failed</td>
+      <td><code class="language-plaintext highlighter-rouge">DispatchError</code></td>
+      <td>Medium</td>
+      <td>Exporter threw exception</td>
+      <td>Check exporter-specific logs</td>
+    </tr>
+    <tr>
+      <td>All exporters failed</td>
+      <td><code class="language-plaintext highlighter-rouge">DispatchError</code></td>
+      <td>High</td>
+      <td>Every exporter failed</td>
+      <td>Check system health, connectivity</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Prevention:</strong></p>
+
+<ul>
+  <li>Always register at least one exporter</li>
+  <li>Monitor exporter health (Prometheus, Loki, SQLite)</li>
+  <li>Test exporters individually before enabling</li>
+  <li>Check network connectivity for remote exporters</li>
+</ul>
+
+<hr />
+
+<h2 id="exporters">Exporters</h2>
+
+<h3 id="csv-exporter-srcexporterscsv_exporterpy">CSV Exporter (<code class="language-plaintext highlighter-rouge">src/exporters/csv_exporter.py</code>)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Error</th>
+      <th>Type</th>
+      <th>Severity</th>
+      <th>Cause</th>
+      <th>Remediation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>CSV file write failed</td>
+      <td><code class="language-plaintext highlighter-rouge">OSError</code></td>
+      <td>High</td>
+      <td>Filesystem error</td>
+      <td>Check permissions, disk space</td>
+    </tr>
+    <tr>
+      <td>CSV directory creation failed</td>
+      <td><code class="language-plaintext highlighter-rouge">OSError</code></td>
+      <td>High</td>
+      <td>Parent directory not writable</td>
+      <td>Verify logs/ directory permissions</td>
+    </tr>
+    <tr>
+      <td>CSV pruning failed</td>
+      <td>Warning</td>
+      <td>Low</td>
+      <td>Error reading/writing for prune</td>
+      <td>Non-fatal, file continues to grow</td>
+    </tr>
+    <tr>
+      <td>CSV file corrupted</td>
+      <td><code class="language-plaintext highlighter-rouge">ValueError</code></td>
+      <td>Medium</td>
+      <td>Invalid CSV format</td>
+      <td>Backup and recreate file</td>
+    </tr>
+    <tr>
+      <td>Max rows exceeded (prune disabled)</td>
+      <td>Warning</td>
+      <td>Low</td>
+      <td>File growing unbounded</td>
+      <td>Enable pruning or manual cleanup</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Prevention:</strong></p>
+
+<ul>
+  <li>Ensure logs/ directory exists and is writable</li>
+  <li>Enable pruning (max_rows or retention_days)</li>
+  <li>Monitor file size: <code class="language-plaintext highlighter-rouge">du -h logs/results.csv</code></li>
+  <li>Regular backups of CSV file</li>
+</ul>
+
+<hr />
+
+<h3 id="prometheus-exporter-srcexportersprometheus_exporterpy">Prometheus Exporter (<code class="language-plaintext highlighter-rouge">src/exporters/prometheus_exporter.py</code>)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Error</th>
+      <th>Type</th>
+      <th>Severity</th>
+      <th>Cause</th>
+      <th>Remediation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Invalid port number</td>
+      <td><code class="language-plaintext highlighter-rouge">ValueError</code></td>
+      <td>Critical</td>
+      <td>Port not 1-65535</td>
+      <td>Use valid port number</td>
+    </tr>
+    <tr>
+      <td>Port already in use</td>
+      <td><code class="language-plaintext highlighter-rouge">RuntimeError</code></td>
+      <td>Critical</td>
+      <td>Another process bound to port</td>
+      <td>Use different port or kill process</td>
+    </tr>
+    <tr>
+      <td>Failed to start HTTP server</td>
+      <td><code class="language-plaintext highlighter-rouge">RuntimeError</code></td>
+      <td>Critical</td>
+      <td>Server startup failed</td>
+      <td>Check network config, firewall</td>
+    </tr>
+    <tr>
+      <td>Failed to update gauges</td>
+      <td>Warning</td>
+      <td>Medium</td>
+      <td>Metric update error</td>
+      <td>Check result data validity</td>
+    </tr>
+    <tr>
+      <td>Label cardinality too high</td>
+      <td>Warning</td>
+      <td>Low</td>
+      <td>Too many unique label combinations</td>
+      <td>Disable dynamic labels if needed</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Prevention:</strong></p>
+
+<ul>
+  <li>Use dedicated port for Prometheus (9090-9100)</li>
+  <li>Check port availability before starting: <code class="language-plaintext highlighter-rouge">netstat -an | grep :9090</code></li>
+  <li>Monitor metric cardinality (avoid unbounded ISP labels)</li>
+  <li>Use <code class="language-plaintext highlighter-rouge">make labels optional</code> feature if cardinality is issue</li>
+</ul>
+
+<hr />
+
+<h3 id="loki-exporter-srcexportersloki_exporterpy">Loki Exporter (<code class="language-plaintext highlighter-rouge">src/exporters/loki_exporter.py</code>)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Error</th>
+      <th>Type</th>
+      <th>Severity</th>
+      <th>Cause</th>
+      <th>Remediation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Loki URL is required</td>
+      <td><code class="language-plaintext highlighter-rouge">ValueError</code></td>
+      <td>Critical</td>
+      <td>URL not configured</td>
+      <td>Set <code class="language-plaintext highlighter-rouge">LOKI_URL</code> environment variable</td>
+    </tr>
+    <tr>
+      <td>Loki URL invalid scheme</td>
+      <td><code class="language-plaintext highlighter-rouge">ValueError</code></td>
+      <td>Critical</td>
+      <td>URL not http/https</td>
+      <td>Use http:// or https://</td>
+    </tr>
+    <tr>
+      <td>Loki URL missing hostname</td>
+      <td><code class="language-plaintext highlighter-rouge">ValueError</code></td>
+      <td>Critical</td>
+      <td>URL has no host</td>
+      <td>Provide full URL with hostname</td>
+    </tr>
+    <tr>
+      <td>Loki URL includes credentials</td>
+      <td>Warning</td>
+      <td>Medium</td>
+      <td>URL has username/password</td>
+      <td>Remove credentials, use auth headers</td>
+    </tr>
+    <tr>
+      <td>Timeout must be positive</td>
+      <td><code class="language-plaintext highlighter-rouge">ValueError</code></td>
+      <td>Medium</td>
+      <td>Invalid timeout value</td>
+      <td>Use positive integer (seconds)</td>
+    </tr>
+    <tr>
+      <td>Loki job label empty</td>
+      <td><code class="language-plaintext highlighter-rouge">ValueError</code></td>
+      <td>Medium</td>
+      <td>Job name is blank</td>
+      <td>Provide non-empty job name</td>
+    </tr>
+    <tr>
+      <td>Loki push connection error</td>
+      <td><code class="language-plaintext highlighter-rouge">RuntimeError</code></td>
+      <td>High</td>
+      <td>Network/DNS failure</td>
+      <td>Check connectivity, DNS, firewall</td>
+    </tr>
+    <tr>
+      <td>Loki push timed out</td>
+      <td><code class="language-plaintext highlighter-rouge">RuntimeError</code></td>
+      <td>High</td>
+      <td>Loki didn’t respond in time</td>
+      <td>Increase timeout, check Loki health</td>
+    </tr>
+    <tr>
+      <td>Loki push rejected (HTTP error)</td>
+      <td><code class="language-plaintext highlighter-rouge">RuntimeError</code></td>
+      <td>High</td>
+      <td>Loki returned 4xx/5xx</td>
+      <td>Check Loki logs, verify auth/tenant</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Prevention:</strong></p>
+
+<ul>
+  <li>Test Loki connectivity before enabling: <code class="language-plaintext highlighter-rouge">curl http://loki:3100/ready</code></li>
+  <li>Use reasonable timeout (5-10 seconds)</li>
+  <li>Monitor Loki health and resource usage</li>
+  <li>Verify Loki authentication/tenant configuration</li>
+  <li>Check network latency to Loki</li>
+</ul>
+
+<hr />
+
+<h3 id="sqlite-exporter-srcexporterssqlite_exporterpy">SQLite Exporter (<code class="language-plaintext highlighter-rouge">src/exporters/sqlite_exporter.py</code>)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Error</th>
+      <th>Type</th>
+      <th>Severity</th>
+      <th>Cause</th>
+      <th>Remediation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>SQLite write failed</td>
+      <td><code class="language-plaintext highlighter-rouge">RuntimeError</code></td>
+      <td>High</td>
+      <td>INSERT failed</td>
+      <td>Check disk space, permissions, schema</td>
+    </tr>
+    <tr>
+      <td>Database locked (timeout)</td>
+      <td><code class="language-plaintext highlighter-rouge">SQLiteLockTimeout</code></td>
+      <td>High</td>
+      <td>Lock held for &gt;30s</td>
+      <td>Reduce page_size, check for long queries</td>
+    </tr>
+    <tr>
+      <td>Database initialization failed</td>
+      <td><code class="language-plaintext highlighter-rouge">RuntimeError</code></td>
+      <td>Critical</td>
+      <td>Schema creation failed</td>
+      <td>Check permissions, disk space</td>
+    </tr>
+    <tr>
+      <td>Database migration failed</td>
+      <td><code class="language-plaintext highlighter-rouge">RuntimeError</code></td>
+      <td>Critical</td>
+      <td>ALTER TABLE failed</td>
+      <td>Backup DB, review migration code</td>
+    </tr>
+    <tr>
+      <td>Database corrupted</td>
+      <td><code class="language-plaintext highlighter-rouge">sqlite3.DatabaseError</code></td>
+      <td>Critical</td>
+      <td>Integrity check failed</td>
+      <td>Restore from backup or recreate</td>
+    </tr>
+    <tr>
+      <td>Disk full during write</td>
+      <td><code class="language-plaintext highlighter-rouge">OSError</code></td>
+      <td>Critical</td>
+      <td>No space for database growth</td>
+      <td>Free disk space or increase volume size</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Prevention:</strong></p>
+
+<ul>
+  <li>Use WAL mode (enabled by default) for better concurrency</li>
+  <li>Monitor database size: <code class="language-plaintext highlighter-rouge">du -h data/results.db</code></li>
+  <li>Regular integrity checks: <code class="language-plaintext highlighter-rouge">sqlite3 data/results.db "PRAGMA integrity_check;"</code></li>
+  <li>Keep page_size reasonable (≤100) for queries</li>
+  <li>Monitor disk space usage</li>
+  <li>Regular backups of database file</li>
+</ul>
+
+<hr />
+
+<h2 id="services">Services</h2>
+
+<h3 id="speedtest-runner-srcservicesspeedtest_runnerpy--srcproviders">Speedtest Runner (<code class="language-plaintext highlighter-rouge">src/services/speedtest_runner.py</code> + <code class="language-plaintext highlighter-rouge">src/providers/</code>)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Error</th>
+      <th>Provider</th>
+      <th>Severity</th>
+      <th>Cause</th>
+      <th>Remediation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Ookla CLI not found</td>
+      <td><code class="language-plaintext highlighter-rouge">ookla</code></td>
+      <td>Critical</td>
+      <td>Binary not installed or not in PATH</td>
+      <td>Install from <a href="https://www.speedtest.net/apps/cli">https://www.speedtest.net/apps/cli</a></td>
+    </tr>
+    <tr>
+      <td>Speedtest execution failed</td>
+      <td><code class="language-plaintext highlighter-rouge">ookla</code></td>
+      <td>High</td>
+      <td>CLI returned non-zero exit code</td>
+      <td>Check internet connectivity; run <code class="language-plaintext highlighter-rouge">speedtest</code> manually</td>
+    </tr>
+    <tr>
+      <td>Speedtest timed out (&gt;120s)</td>
+      <td><code class="language-plaintext highlighter-rouge">ookla</code></td>
+      <td>High</td>
+      <td>Test did not complete in time</td>
+      <td>Check network speed or ISP issues</td>
+    </tr>
+    <tr>
+      <td>JSON parse failed</td>
+      <td><code class="language-plaintext highlighter-rouge">ookla</code></td>
+      <td>High</td>
+      <td>Invalid output from Ookla CLI</td>
+      <td>Update Ookla CLI; inspect stderr in logs</td>
+    </tr>
+    <tr>
+      <td>NDT7 locate request failed</td>
+      <td><code class="language-plaintext highlighter-rouge">ndt7</code></td>
+      <td>High</td>
+      <td>Cannot reach M-Lab Locate API</td>
+      <td>Check outbound HTTPS; M-Lab may be at capacity</td>
+    </tr>
+    <tr>
+      <td>NDT7 WebSocket error</td>
+      <td><code class="language-plaintext highlighter-rouge">ndt7</code></td>
+      <td>High</td>
+      <td>WebSocket connection dropped</td>
+      <td>Check firewall; verify WSS (port 443) is allowed</td>
+    </tr>
+    <tr>
+      <td>Custom HTTP download failed</td>
+      <td><code class="language-plaintext highlighter-rouge">custom</code></td>
+      <td>High</td>
+      <td>Request to download URL failed</td>
+      <td>Verify <code class="language-plaintext highlighter-rouge">SPEEDTEST_CUSTOM_URL_DOWNLOAD</code> is reachable</td>
+    </tr>
+    <tr>
+      <td>Custom HTTP upload failed</td>
+      <td><code class="language-plaintext highlighter-rouge">custom</code></td>
+      <td>Medium</td>
+      <td>POST to upload URL failed</td>
+      <td>Verify <code class="language-plaintext highlighter-rouge">SPEEDTEST_CUSTOM_URL_UPLOAD</code> accepts POST</td>
+    </tr>
+    <tr>
+      <td>Custom URL scheme invalid</td>
+      <td><code class="language-plaintext highlighter-rouge">custom</code></td>
+      <td>Critical</td>
+      <td>Non-HTTP/S scheme in URL</td>
+      <td>Only <code class="language-plaintext highlighter-rouge">http://</code> and <code class="language-plaintext highlighter-rouge">https://</code> URLs are accepted</td>
+    </tr>
+    <tr>
+      <td>All providers exhausted</td>
+      <td>all</td>
+      <td>High</td>
+      <td>Every provider in the chain failed</td>
+      <td>Check connectivity; review per-provider errors above</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Prevention:</strong></p>
+
+<ul>
+  <li>Verify Ookla CLI (if used): <code class="language-plaintext highlighter-rouge">speedtest --version</code></li>
+  <li>Test Ookla manually: <code class="language-plaintext highlighter-rouge">speedtest --format=json</code></li>
+  <li>For <code class="language-plaintext highlighter-rouge">ndt7</code>: ensure outbound WSS traffic is allowed on port 443</li>
+  <li>For <code class="language-plaintext highlighter-rouge">custom</code>: confirm download/upload URLs respond before deploying</li>
+  <li>Monitor consecutive failure count for alerts</li>
+  <li>Configure a fallback chain, e.g., <code class="language-plaintext highlighter-rouge">SPEEDTEST_PROVIDERS=ookla,ndt7</code></li>
+</ul>
+
+<hr />
+
+<h3 id="alert-manager-srcservicesalert_managerpy">Alert Manager (<code class="language-plaintext highlighter-rouge">src/services/alert_manager.py</code>)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Error</th>
+      <th>Type</th>
+      <th>Severity</th>
+      <th>Cause</th>
+      <th>Remediation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Alert provider send failed</td>
+      <td>Warning</td>
+      <td>Medium</td>
+      <td>Provider threw exception</td>
+      <td>Check provider-specific logs</td>
+    </tr>
+    <tr>
+      <td>All alert providers failed</td>
+      <td>Warning</td>
+      <td>High</td>
+      <td>Every enabled provider failed</td>
+      <td>Check connectivity, provider health</td>
+    </tr>
+    <tr>
+      <td>Thread pool exhausted</td>
+      <td>Warning</td>
+      <td>High</td>
+      <td>Too many pending alerts</td>
+      <td>Increase thread pool size</td>
+    </tr>
+    <tr>
+      <td>Alert send timed out</td>
+      <td>Warning</td>
+      <td>Medium</td>
+      <td>Provider didn’t respond</td>
+      <td>Check provider health, network</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Prevention:</strong></p>
+
+<ul>
+  <li>Test alert providers before enabling</li>
+  <li>Monitor alert provider health</li>
+  <li>Don’t set threshold too low (avoid alert storms)</li>
+  <li>Use cooldown to rate-limit alerts (60+ minutes)</li>
+  <li>Verify network connectivity to alert services</li>
+</ul>
+
+<hr />
+
+<h3 id="alert-providers-srcservicesalert_providerspy">Alert Providers (<code class="language-plaintext highlighter-rouge">src/services/alert_providers.py</code>)</h3>
+
+<h4 id="webhook-provider">Webhook Provider</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Error</th>
+      <th>Type</th>
+      <th>Severity</th>
+      <th>Cause</th>
+      <th>Remediation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Webhook connection error</td>
+      <td>Warning</td>
+      <td>Medium</td>
+      <td>Network/DNS failure</td>
+      <td>Check URL, DNS, firewall</td>
+    </tr>
+    <tr>
+      <td>Webhook timeout</td>
+      <td>Warning</td>
+      <td>Medium</td>
+      <td>Endpoint too slow</td>
+      <td>Increase timeout, optimize endpoint</td>
+    </tr>
+    <tr>
+      <td>Webhook HTTP error (4xx/5xx)</td>
+      <td>Warning</td>
+      <td>Medium</td>
+      <td>Endpoint rejected request</td>
+      <td>Check endpoint logs, auth</td>
+    </tr>
+    <tr>
+      <td>SSRF protection blocked URL</td>
+      <td><code class="language-plaintext highlighter-rouge">ValueError</code></td>
+      <td>High</td>
+      <td>URL targets private IP</td>
+      <td>Use public URLs only</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h4 id="gotify-provider">Gotify Provider</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Error</th>
+      <th>Type</th>
+      <th>Severity</th>
+      <th>Cause</th>
+      <th>Remediation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Gotify connection error</td>
+      <td>Warning</td>
+      <td>Medium</td>
+      <td>Service unreachable</td>
+      <td>Check Gotify service, network</td>
+    </tr>
+    <tr>
+      <td>Gotify timeout</td>
+      <td>Warning</td>
+      <td>Medium</td>
+      <td>No response in time</td>
+      <td>Check Gotify health, load</td>
+    </tr>
+    <tr>
+      <td>Gotify authentication failed</td>
+      <td>Warning</td>
+      <td>High</td>
+      <td>Invalid app token</td>
+      <td>Verify token from Gotify admin</td>
+    </tr>
+    <tr>
+      <td>Gotify HTTP error</td>
+      <td>Warning</td>
+      <td>Medium</td>
+      <td>Service returned error</td>
+      <td>Check Gotify logs</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h4 id="ntfy-provider">ntfy Provider</h4>
+
+<table>
+  <thead>
+    <tr>
+      <th>Error</th>
+      <th>Type</th>
+      <th>Severity</th>
+      <th>Cause</th>
+      <th>Remediation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ntfy connection error</td>
+      <td>Warning</td>
+      <td>Medium</td>
+      <td>Service unreachable</td>
+      <td>Check ntfy service, network</td>
+    </tr>
+    <tr>
+      <td>ntfy timeout</td>
+      <td>Warning</td>
+      <td>Medium</td>
+      <td>No response in time</td>
+      <td>Check ntfy health, load</td>
+    </tr>
+    <tr>
+      <td>ntfy HTTP error</td>
+      <td>Warning</td>
+      <td>Medium</td>
+      <td>Service returned error</td>
+      <td>Check ntfy logs, topic name</td>
+    </tr>
+    <tr>
+      <td>ntfy topic invalid</td>
+      <td><code class="language-plaintext highlighter-rouge">ValueError</code></td>
+      <td>Medium</td>
+      <td>Topic contains invalid chars</td>
+      <td>Use alphanumeric + dash/underscore</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="error-matrix">Error Matrix</h2>
+
+<h3 id="severity-levels">Severity Levels</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Severity</th>
+      <th>Impact</th>
+      <th>Example</th>
+      <th>Response Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Critical</strong></td>
+      <td>Service cannot start or is completely broken</td>
+      <td>Missing API key, port conflict</td>
+      <td>Immediate (blocks deployment)</td>
+    </tr>
+    <tr>
+      <td><strong>High</strong></td>
+      <td>Core functionality fails but service continues</td>
+      <td>Exporter failure, database locked</td>
+      <td>Within hours (same day)</td>
+    </tr>
+    <tr>
+      <td><strong>Medium</strong></td>
+      <td>Degraded functionality or performance impact</td>
+      <td>Alert send failure, config validation</td>
+      <td>Within days (this week)</td>
+    </tr>
+    <tr>
+      <td><strong>Low</strong></td>
+      <td>Minor issues, warnings, edge cases</td>
+      <td>Pruning failed, label cardinality</td>
+      <td>When convenient (backlog)</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h3 id="error-categories">Error Categories</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>Examples</th>
+      <th>Typical Cause</th>
+      <th>Prevention</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Configuration</strong></td>
+      <td>Missing env var, invalid values</td>
+      <td>Deployment error, typo</td>
+      <td>Validate config before deployment</td>
+    </tr>
+    <tr>
+      <td><strong>Network</strong></td>
+      <td>Connection error, timeout, DNS</td>
+      <td>Infrastructure issue</td>
+      <td>Health checks, retry logic</td>
+    </tr>
+    <tr>
+      <td><strong>Filesystem</strong></td>
+      <td>Permission denied, disk full</td>
+      <td>Resource exhaustion</td>
+      <td>Monitor disk space, permissions</td>
+    </tr>
+    <tr>
+      <td><strong>Database</strong></td>
+      <td>Lock timeout, corruption, full</td>
+      <td>Concurrent access, disk issue</td>
+      <td>WAL mode, backups, monitoring</td>
+    </tr>
+    <tr>
+      <td><strong>Validation</strong></td>
+      <td>Out of range, wrong type</td>
+      <td>User input error</td>
+      <td>Client-side validation, schema</td>
+    </tr>
+    <tr>
+      <td><strong>Programming</strong></td>
+      <td>Type error, logic error</td>
+      <td>Bug in code</td>
+      <td>Unit tests, static analysis</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h3 id="recovery-strategies-by-error-type">Recovery Strategies by Error Type</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Error Type</th>
+      <th>Strategy</th>
+      <th>Implementation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Transient Network</strong></td>
+      <td>Retry with backoff</td>
+      <td><code class="language-plaintext highlighter-rouge">speedtest_runner.py</code> (1 retry)</td>
+    </tr>
+    <tr>
+      <td><strong>Configuration Invalid</strong></td>
+      <td>Fallback to default</td>
+      <td><code class="language-plaintext highlighter-rouge">runtime_config.py</code> validation</td>
+    </tr>
+    <tr>
+      <td><strong>Partial Failure</strong></td>
+      <td>Continue with successful</td>
+      <td><code class="language-plaintext highlighter-rouge">result_dispatcher.py</code></td>
+    </tr>
+    <tr>
+      <td><strong>Filesystem Error</strong></td>
+      <td>Graceful degradation</td>
+      <td>CSV prune failure non-fatal</td>
+    </tr>
+    <tr>
+      <td><strong>Resource Exhaustion</strong></td>
+      <td>Rate limiting, cleanup</td>
+      <td>Alert cooldown, pruning</td>
+    </tr>
+    <tr>
+      <td><strong>Corruption</strong></td>
+      <td>Atomic operations</td>
+      <td>Runtime config atomic write</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="monitoring--alerts">Monitoring &amp; Alerts</h2>
+
+<h3 id="key-metrics-to-monitor">Key Metrics to Monitor</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Threshold</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Consecutive speedtest failures</strong></td>
+      <td>≥3</td>
+      <td>Alert configured via API</td>
+    </tr>
+    <tr>
+      <td><strong>Exporter failure rate</strong></td>
+      <td>&gt;10%</td>
+      <td>Check exporter health</td>
+    </tr>
+    <tr>
+      <td><strong>Database size</strong></td>
+      <td>&gt;1GB</td>
+      <td>Enable pruning or manual cleanup</td>
+    </tr>
+    <tr>
+      <td><strong>CSV file size</strong></td>
+      <td>&gt;100MB</td>
+      <td>Enable pruning or rotation</td>
+    </tr>
+    <tr>
+      <td><strong>Alert send failure rate</strong></td>
+      <td>&gt;50%</td>
+      <td>Check provider connectivity</td>
+    </tr>
+    <tr>
+      <td><strong>API error rate (5xx)</strong></td>
+      <td>&gt;1%</td>
+      <td>Review logs, check resources</td>
+    </tr>
+    <tr>
+      <td><strong>Disk usage</strong></td>
+      <td>&gt;80%</td>
+      <td>Free space or expand volume</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h3 id="log-analysis-commands">Log Analysis Commands</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Find all errors in last hour</span>
+docker-compose logs <span class="nt">--since</span><span class="o">=</span>1h | <span class="nb">grep </span>ERROR
+
+<span class="c"># Count errors by type</span>
+docker-compose logs | <span class="nb">grep </span>ERROR | <span class="nb">cut</span> <span class="nt">-d</span><span class="s1">' '</span> <span class="nt">-f5-</span> | <span class="nb">sort</span> | <span class="nb">uniq</span> <span class="nt">-c</span> | <span class="nb">sort</span> <span class="nt">-nr</span>
+
+<span class="c"># Find database lock errors</span>
+docker-compose logs | <span class="nb">grep</span> <span class="s2">"Database locked"</span>
+
+<span class="c"># Find authentication failures</span>
+docker-compose logs | <span class="nb">grep</span> <span class="s2">"Invalid API key"</span>
+
+<span class="c"># Find alert failures</span>
+docker-compose logs | <span class="nb">grep</span> <span class="s2">"Alert.*failed"</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="troubleshooting-flowcharts">Troubleshooting Flowcharts</h2>
+
+<h3 id="speedtest-failures">Speedtest Failures</h3>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Speedtest fails
+├─ Error: "command not found"
+│  └─ Fix: Install speedtest-cli
+├─ Error: "timed out"
+│  └─ Check: Internet connectivity, ISP throttling
+├─ Error: "JSON parse failed"
+│  └─ Fix: Update speedtest-cli
+└─ Multiple consecutive failures
+   └─ Action: Investigate ISP outage, check alerts
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="exporter-failures">Exporter Failures</h3>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Exporter fails
+├─ CSV Exporter
+│  ├─ Error: "Permission denied"
+│  │  └─ Fix: Check logs/ directory permissions
+│  └─ Error: "Disk full"
+│     └─ Fix: Free space or enable pruning
+├─ Prometheus Exporter
+│  ├─ Error: "Port in use"
+│  │  └─ Fix: Use different port or kill process
+│  └─ Error: "Update gauges failed"
+│     └─ Check: Result data validity
+├─ Loki Exporter
+│  ├─ Error: "Connection error"
+│  │  └─ Check: Loki service, network, DNS
+│  └─ Error: "Push rejected"
+│     └─ Check: Loki logs, auth, tenant
+└─ SQLite Exporter
+   ├─ Error: "Database locked"
+   │  └─ Fix: Reduce page_size, check long queries
+   └─ Error: "Write failed"
+      └─ Check: Disk space, permissions, integrity
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="api-authentication-failures">API Authentication Failures</h3>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>API request fails
+├─ Status: 401 (Unauthorized)
+│  └─ Fix: Add X-Api-Key header
+├─ Status: 403 (Forbidden)
+│  └─ Fix: Verify API key matches .env
+└─ Status: 429 (Rate Limited)
+   └─ Fix: Reduce request frequency, implement backoff
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="related-documentation">Related Documentation</h2>
+
+<ul>
+  <li><a href="/error-messages.html">Error Message Reference</a> — Detailed error descriptions with examples</li>
+  <li><a href="/error-handling-conventions.html">Error Handling Conventions</a> — Patterns and best practices</li>
+  <li><a href="/architecture.html">Architecture</a> — System design and error boundaries</li>
+  <li><a href="/api-reference.html">API Reference</a> — API endpoints and error responses</li>
+  <li><a href="/getting-started.html">Getting Started</a> — Configuration and setup</li>
+</ul>
+
+<hr />
+
+<h2 id="document-history">Document History</h2>
+
+<ul>
+  <li><strong>2026-05-01:</strong> Initial documentation (M4 from ERROR-HANDLING-REVIEW.md)</li>
+</ul>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/Hermes" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Error Catalog
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

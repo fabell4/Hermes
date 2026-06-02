@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Grafana Alloy Integration — Hermes Documentation</title>
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Grafana Alloy Integration | Hermes Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Grafana Alloy Integration" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<link rel="canonical" href="http://localhost:4001/alloy.html" />
+<meta property="og:url" content="http://localhost:4001/alloy.html" />
+<meta property="og:site_name" content="Hermes Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Grafana Alloy Integration" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted internet speed test monitoring with modern observability stack integration","headline":"Grafana Alloy Integration","url":"http://localhost:4001/alloy.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration">
+
+<title>
+  
+    Grafana Alloy Integration — Hermes Documentation
+  
+</title>
+
+
+<link rel="icon" type="image/png" href="/assets/Hermes.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="/" class="nav-brand">
+    <span class="brand-name">
+      Hermes
+      <span>Docs</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/alloy"
+                 >
+                Grafana Alloy
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-ENHANCEMENTS"
+                 >
+                Security Enhancements
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Error Handling</h3>
+        <ul>
+          
+            <li>
+              <a href="/error-catalog"
+                 >
+                Error Catalog
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-handling-conventions"
+                 >
+                Handling Conventions
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-messages"
+                 >
+                Error Messages
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/RELEASE-PROCESS"
+                 >
+                Release Process
+              </a>
+            </li>
+          
+            <li>
+              <a href="/styleguide"
+                 >
+                Frontend Style Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/suppression-decisions"
+                 >
+                Suppression Decisions
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Code Reviews</h3>
+        <ul>
+          
+            <li>
+              <a href="/BEST-PRACTICES-REVIEW"
+                 >
+                Best Practices
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DEFENSIVE-CODING-REVIEW"
+                 >
+                Defensive Coding
+              </a>
+            </li>
+          
+            <li>
+              <a href="/ERROR-HANDLING-REVIEW"
+                 >
+                Error Handling Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/PERFORMANCE-OPTIMIZATION-REVIEW"
+                 >
+                Performance Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/TEST-COVERAGE-REVIEW"
+                 >
+                Test Coverage
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DOCUMENTATION-ACCURACY-REVIEW"
+                 >
+                Documentation Review
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Grafana Alloy Integration</h1>
+
+            
+          </header>
+        
+
+        <p><code class="language-plaintext highlighter-rouge">alloy/hermes.alloy</code> is an importable <a href="https://grafana.com/docs/alloy/latest/">Grafana Alloy</a>
+module that adds Hermes telemetry to your <strong>existing</strong> Alloy deployment.  It does not define its
+own remote_write or loki.write endpoints — it wires into the receivers your config already has.</p>
+
+<p>Two independent modules are provided:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Module</th>
+      <th>What it does</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">hermes.metrics</code></td>
+      <td>Scrapes the Hermes <code class="language-plaintext highlighter-rouge">/metrics</code> endpoint and forwards to your <code class="language-plaintext highlighter-rouge">prometheus.remote_write</code> receiver</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">hermes.logs</code></td>
+      <td>Tails the Hermes log file (and optionally the systemd journal) and forwards to your <code class="language-plaintext highlighter-rouge">loki.write</code> receiver</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p><strong>Note:</strong> The Loki exporter built into Hermes pushes structured speedtest <em>results</em> directly to
+Loki as JSON log lines. Alloy’s log pipeline collects the <em>application log output</em> (startup
+messages, warnings, error tracebacks, etc.) — the two streams are complementary and can run
+simultaneously.</p>
+</blockquote>
+
+<hr />
+
+<h2 id="prerequisites">Prerequisites</h2>
+
+<ul>
+  <li>Grafana Alloy already installed and running (system package, container, or other deployment)</li>
+  <li>A <code class="language-plaintext highlighter-rouge">prometheus.remote_write</code> component already defined in your Alloy config (for metrics)</li>
+  <li>A <code class="language-plaintext highlighter-rouge">loki.write</code> component already defined in your Alloy config (for logs)</li>
+</ul>
+
+<hr />
+
+<h2 id="setup">Setup</h2>
+
+<h3 id="1-copy-the-module-file">1. Copy the module file</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cp </span>alloy/hermes.alloy /etc/alloy/hermes.alloy
+</code></pre></div></div>
+
+<p>Adjust the destination to match wherever your Alloy config directory is (e.g.
+<code class="language-plaintext highlighter-rouge">/opt/alloy/</code>, <code class="language-plaintext highlighter-rouge">~/.config/alloy/</code>).</p>
+
+<h3 id="2-import-and-instantiate-in-your-existing-config">2. Import and instantiate in your existing config</h3>
+
+<p>Add the following to your Alloy config file (typically <code class="language-plaintext highlighter-rouge">config.alloy</code>):</p>
+
+<pre><code class="language-alloy">import.file "hermes" {
+  filename = "/etc/alloy/hermes.alloy"
+}
+
+// Metrics — scrapes localhost:8000/metrics every 15 s
+hermes.metrics "default" {
+  forward_to = [prometheus.remote_write.default.receiver]
+}
+
+// Logs — tails the Hermes log file
+hermes.logs "default" {
+  log_path   = "/opt/hermes/logs/hermes.log"   // adjust to your install path
+  forward_to = [loki.write.default.receiver]
+}
+</code></pre>
+
+<p>Both modules are independent — include only what you need.</p>
+
+<h3 id="3-reload-alloy">3. Reload Alloy</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>systemctl reload alloy          <span class="c"># system agent (Linux)</span>
+docker compose restart alloy         <span class="c"># if running Alloy in a container</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="hermes-configuration">Hermes Configuration</h2>
+
+<p>With <code class="language-plaintext highlighter-rouge">hermes.alloy</code> handling log shipping you can remove <code class="language-plaintext highlighter-rouge">loki</code> from <code class="language-plaintext highlighter-rouge">ENABLED_EXPORTERS</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># .env</span>
+<span class="nv">ENABLED_EXPORTERS</span><span class="o">=</span>csv,prometheus   <span class="c"># Alloy tails logs; no direct Loki push from Hermes</span>
+<span class="nv">LOG_FORMAT</span><span class="o">=</span>json                    <span class="c"># recommended — enables structured field extraction in Alloy</span>
+</code></pre></div></div>
+
+<p>Setting <code class="language-plaintext highlighter-rouge">LOG_FORMAT=json</code> is optional but improves log queryability. The parse pipeline in
+<code class="language-plaintext highlighter-rouge">hermes.logs</code> handles both <code class="language-plaintext highlighter-rouge">json</code> and <code class="language-plaintext highlighter-rouge">text</code> formats automatically.</p>
+
+<hr />
+
+<h2 id="module-reference">Module Reference</h2>
+
+<h3 id="hermesmetrics"><code class="language-plaintext highlighter-rouge">hermes.metrics</code></h3>
+
+<p>Scrapes the Hermes Prometheus <code class="language-plaintext highlighter-rouge">/metrics</code> endpoint and forwards time-series to one or more
+<code class="language-plaintext highlighter-rouge">prometheus.remote_write</code> receivers.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Argument</th>
+      <th>Required</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">forward_to</code></td>
+      <td>yes</td>
+      <td>—</td>
+      <td>List of <code class="language-plaintext highlighter-rouge">prometheus.remote_write</code> receivers</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">address</code></td>
+      <td>no</td>
+      <td><code class="language-plaintext highlighter-rouge">localhost:8000</code></td>
+      <td><code class="language-plaintext highlighter-rouge">host:port</code> of the Hermes <code class="language-plaintext highlighter-rouge">/metrics</code> endpoint. Override when <code class="language-plaintext highlighter-rouge">PROMETHEUS_PORT</code> is non-default or Hermes runs on a remote host</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">scrape_interval</code></td>
+      <td>no</td>
+      <td><code class="language-plaintext highlighter-rouge">15s</code></td>
+      <td>How often to scrape. Align with your Prometheus/Mimir retention settings</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="hermeslogs"><code class="language-plaintext highlighter-rouge">hermes.logs</code></h3>
+
+<p>Tails the Hermes log file on disk, parses structured fields, and forwards to one or more
+<code class="language-plaintext highlighter-rouge">loki.write</code> (or <code class="language-plaintext highlighter-rouge">loki.process</code>) receivers. Optionally also reads from the systemd journal.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Argument</th>
+      <th>Required</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">forward_to</code></td>
+      <td>yes</td>
+      <td>—</td>
+      <td>List of <code class="language-plaintext highlighter-rouge">loki.write</code> or <code class="language-plaintext highlighter-rouge">loki.process</code> receivers</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">log_path</code></td>
+      <td>yes</td>
+      <td>—</td>
+      <td>Absolute path to <code class="language-plaintext highlighter-rouge">hermes.log</code> on disk</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">job_label</code></td>
+      <td>no</td>
+      <td><code class="language-plaintext highlighter-rouge">hermes</code></td>
+      <td>Value of the Loki <code class="language-plaintext highlighter-rouge">job</code> stream label</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">systemd_unit</code></td>
+      <td>no</td>
+      <td><code class="language-plaintext highlighter-rouge">""</code></td>
+      <td>Systemd unit name for journal collection. Empty string disables journal collection</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="examples">Examples</h2>
+
+<h3 id="metrics-only">Metrics only</h3>
+
+<pre><code class="language-alloy">import.file "hermes" {
+  filename = "/etc/alloy/hermes.alloy"
+}
+
+hermes.metrics "default" {
+  forward_to = [prometheus.remote_write.default.receiver]
+}
+</code></pre>
+
+<h3 id="custom-port-and-scrape-interval">Custom port and scrape interval</h3>
+
+<pre><code class="language-alloy">hermes.metrics "default" {
+  address         = "localhost:9100"
+  scrape_interval = "30s"
+  forward_to      = [prometheus.remote_write.default.receiver]
+}
+</code></pre>
+
+<h3 id="logs-with-systemd-journal">Logs with systemd journal</h3>
+
+<pre><code class="language-alloy">hermes.logs "default" {
+  log_path     = "/var/log/hermes/hermes.log"
+  systemd_unit = "hermes"
+  forward_to   = [loki.write.default.receiver]
+}
+</code></pre>
+
+<h3 id="feed-logs-into-an-existing-processing-stage">Feed logs into an existing processing stage</h3>
+
+<pre><code class="language-alloy">hermes.logs "default" {
+  log_path   = "/opt/hermes/logs/hermes.log"
+  forward_to = [loki.process.my_pipeline.receiver]
+}
+</code></pre>
+
+<h3 id="both-modules-together">Both modules together</h3>
+
+<pre><code class="language-alloy">import.file "hermes" {
+  filename = "/etc/alloy/hermes.alloy"
+}
+
+hermes.metrics "default" {
+  forward_to = [prometheus.remote_write.default.receiver]
+}
+
+hermes.logs "default" {
+  log_path     = "/opt/hermes/logs/hermes.log"
+  systemd_unit = "hermes"
+  forward_to   = [loki.write.default.receiver]
+}
+</code></pre>
+
+<h3 id="grafana-cloud--passing-credentials-from-your-existing-config">Grafana Cloud — passing credentials from your existing config</h3>
+
+<p><code class="language-plaintext highlighter-rouge">hermes.alloy</code> forwards to receivers you already defined, so Grafana Cloud credentials stay in
+your existing <code class="language-plaintext highlighter-rouge">prometheus.remote_write</code> and <code class="language-plaintext highlighter-rouge">loki.write</code> blocks — no changes to <code class="language-plaintext highlighter-rouge">hermes.alloy</code>
+are needed:</p>
+
+<pre><code class="language-alloy">// Already in your config:
+prometheus.remote_write "default" {
+  endpoint {
+    url = env("PROMETHEUS_REMOTE_WRITE_URL")
+    basic_auth {
+      username = env("GRAFANA_CLOUD_METRICS_USER")
+      password = env("GRAFANA_CLOUD_API_KEY")
+    }
+  }
+}
+
+loki.write "default" {
+  endpoint {
+    url = env("LOKI_PUSH_URL")
+    basic_auth {
+      username = env("GRAFANA_CLOUD_LOGS_USER")
+      password = env("GRAFANA_CLOUD_API_KEY")
+    }
+  }
+}
+
+// Just import and wire:
+import.file "hermes" { filename = "/etc/alloy/hermes.alloy" }
+
+hermes.metrics "default" { forward_to = [prometheus.remote_write.default.receiver] }
+hermes.logs "default" {
+  log_path   = "/opt/hermes/logs/hermes.log"
+  forward_to = [loki.write.default.receiver]
+}
+</code></pre>
+
+<hr />
+
+<h2 id="metrics-collected">Metrics Collected</h2>
+
+<p>All Prometheus gauges exposed by Hermes at <code class="language-plaintext highlighter-rouge">/metrics</code>:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">hermes_download_mbps</code></td>
+      <td>Last measured download speed (Mbit/s)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">hermes_upload_mbps</code></td>
+      <td>Last measured upload speed (Mbit/s)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">hermes_ping_ms</code></td>
+      <td>Last measured latency (ms)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">hermes_jitter_ms</code></td>
+      <td>Last measured jitter (ms)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">hermes_packet_loss_pct</code></td>
+      <td>Last measured packet loss (%)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">hermes_quality_score</code></td>
+      <td>Composite connection quality score (0–100)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">hermes_sla_ok</code></td>
+      <td>SLA status: <code class="language-plaintext highlighter-rouge">1</code> pass / <code class="language-plaintext highlighter-rouge">0</code> breached / <code class="language-plaintext highlighter-rouge">-1</code> disabled</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>All gauges carry labels <code class="language-plaintext highlighter-rouge">server_name</code>, <code class="language-plaintext highlighter-rouge">server_location</code>, and <code class="language-plaintext highlighter-rouge">isp_name</code> unless
+<code class="language-plaintext highlighter-rouge">PROMETHEUS_DISABLE_LABELS=true</code> is set in Hermes.</p>
+
+<hr />
+
+<h2 id="log-labels-and-queries">Log Labels and Queries</h2>
+
+<p>Every log line forwarded by <code class="language-plaintext highlighter-rouge">hermes.logs</code> arrives in Loki with these stream labels:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Label</th>
+      <th>Example value</th>
+      <th>Source</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">job</code></td>
+      <td><code class="language-plaintext highlighter-rouge">hermes</code></td>
+      <td><code class="language-plaintext highlighter-rouge">job_label</code> argument (default <code class="language-plaintext highlighter-rouge">hermes</code>)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">level</code></td>
+      <td><code class="language-plaintext highlighter-rouge">INFO</code></td>
+      <td>Extracted from log line by the parse pipeline</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Example LogQL queries:</strong></p>
+
+<pre><code class="language-logql"># All Hermes application logs
+{job="hermes"}
+
+# Errors only
+{job="hermes", level="ERROR"}
+
+# Speedtest completions (requires LOG_FORMAT=json)
+{job="hermes"} | json | message =~ "Test complete.*"
+
+# Structured speedtest results (from LokiExporter, not Alloy)
+{job="hermes_speedtest"} | json | download_mbps &gt; 0
+</code></pre>
+
+<hr />
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+
+<h3 id="no-metrics-arriving">No metrics arriving</h3>
+
+<ol>
+  <li>Open the Alloy UI (<code class="language-plaintext highlighter-rouge">http://&lt;alloy-host&gt;:12345</code>) and inspect the <code class="language-plaintext highlighter-rouge">prometheus.scrape.hermes</code>
+component for errors.</li>
+  <li>
+    <p>Confirm Hermes is running and <code class="language-plaintext highlighter-rouge">/metrics</code> is reachable from the Alloy host:</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://localhost:8000/metrics | <span class="nb">grep </span>hermes_
+</code></pre></div>    </div>
+  </li>
+  <li>Check the <code class="language-plaintext highlighter-rouge">address</code> argument matches <code class="language-plaintext highlighter-rouge">PROMETHEUS_PORT</code> in your Hermes config (default <code class="language-plaintext highlighter-rouge">8000</code>).</li>
+</ol>
+
+<h3 id="no-logs-arriving">No logs arriving</h3>
+
+<ol>
+  <li>In the Alloy UI, inspect <code class="language-plaintext highlighter-rouge">loki.source.file.hermes</code> for errors.</li>
+  <li>Confirm <code class="language-plaintext highlighter-rouge">log_path</code> points to the correct absolute path and the file exists.</li>
+  <li>The Alloy process user must have read access to the log file.</li>
+  <li>If using <code class="language-plaintext highlighter-rouge">systemd_unit</code> and seeing journal errors, confirm the unit name is correct and that
+the Alloy user can read the journal (<code class="language-plaintext highlighter-rouge">journalctl -u hermes</code> should work).  Remove the
+<code class="language-plaintext highlighter-rouge">systemd_unit</code> argument to disable journal collection if not needed.</li>
+</ol>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/Hermes" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Grafana Alloy Integration
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

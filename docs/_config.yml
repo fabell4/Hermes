@@ -1,44 +1,32 @@
-# Jekyll configuration for GitHub Pages
+# Jekyll configuration for Hermes Docs
 
 title: Hermes Documentation
 description: Self-hosted internet speed test monitoring with modern observability stack integration
 url: https://hermes-docs.greenflametech.com
 baseurl: ""
 
-remote_theme: fabell4/green-flame-jekyll
+favicon: /assets/Hermes.png
 
-# Navigation
-navigation:
+# Top navbar links
+nav_links:
   - title: Home
     url: /
   - title: Getting Started
     url: /getting-started
-  - title: Architecture
-    url: /architecture
   - title: API Reference
     url: /api-reference
-  - title: Alerts
-    url: /alerts
-  - title: Security Guide
+  - title: Security
     url: /security
-  - title: Security Audit
-    url: /SECURITY-AUDIT
-  - title: Security Enhancements
-    url: /SECURITY-ENHANCEMENTS
-  - title: Error Catalog
-    url: /error-catalog
-  - title: Error Handling Conventions
-    url: /error-handling-conventions
-  - title: Error Messages
-    url: /error-messages
-  - title: Release Process
-    url: /RELEASE-PROCESS
+
+# Footer links
+footer:
+  github: https://github.com/fabell4/Hermes
+  linkedin: https://www.linkedin.com/in/alex-bell-iv
+  main_site: https://www.greenflametech.com
 
 # GitHub metadata
 repository: fabell4/Hermes
-github:
-  repository_url: https://github.com/fabell4/hermes
-  
+
 # Build settings
 markdown: kramdown
 kramdown:
@@ -47,9 +35,9 @@ kramdown:
 
 # Plugins
 plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
   - jekyll-github-metadata
-  - jekyll-relative-links
-  - jekyll-remote-theme
   - jekyll-relative-links
 
 # Include files
@@ -57,6 +45,14 @@ include:
   - SECURITY-AUDIT.md
   - SECURITY-ENHANCEMENTS.md
   - RELEASE-PROCESS.md
+
+# Exclude from build
+exclude:
+  - zeniscal.yml
+  - Gemfile
+  - Gemfile.lock
+  - grafana-dashboard.json
+  - "*.json"
 
 # Exclude from build
 exclude:

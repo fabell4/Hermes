@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>API Reference — Hermes Documentation</title>
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>API Reference | Hermes Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="API Reference" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<link rel="canonical" href="http://localhost:4001/api-reference.html" />
+<meta property="og:url" content="http://localhost:4001/api-reference.html" />
+<meta property="og:site_name" content="Hermes Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="API Reference" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted internet speed test monitoring with modern observability stack integration","headline":"API Reference","url":"http://localhost:4001/api-reference.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration">
+
+<title>
+  
+    API Reference — Hermes Documentation
+  
+</title>
+
+
+<link rel="icon" type="image/png" href="/assets/Hermes.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="/" class="nav-brand">
+    <span class="brand-name">
+      Hermes
+      <span>Docs</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/alloy"
+                 >
+                Grafana Alloy
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-ENHANCEMENTS"
+                 >
+                Security Enhancements
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Error Handling</h3>
+        <ul>
+          
+            <li>
+              <a href="/error-catalog"
+                 >
+                Error Catalog
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-handling-conventions"
+                 >
+                Handling Conventions
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-messages"
+                 >
+                Error Messages
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/RELEASE-PROCESS"
+                 >
+                Release Process
+              </a>
+            </li>
+          
+            <li>
+              <a href="/styleguide"
+                 >
+                Frontend Style Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/suppression-decisions"
+                 >
+                Suppression Decisions
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Code Reviews</h3>
+        <ul>
+          
+            <li>
+              <a href="/BEST-PRACTICES-REVIEW"
+                 >
+                Best Practices
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DEFENSIVE-CODING-REVIEW"
+                 >
+                Defensive Coding
+              </a>
+            </li>
+          
+            <li>
+              <a href="/ERROR-HANDLING-REVIEW"
+                 >
+                Error Handling Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/PERFORMANCE-OPTIMIZATION-REVIEW"
+                 >
+                Performance Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/TEST-COVERAGE-REVIEW"
+                 >
+                Test Coverage
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DOCUMENTATION-ACCURACY-REVIEW"
+                 >
+                Documentation Review
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>API Reference</h1>
+
+            
+          </header>
+        
+
+        <p>Complete REST API documentation for the Hermes FastAPI backend.</p>
+
+<hr />
+
+<h2 id="base-url">Base URL</h2>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>http://localhost:8080/api
+</code></pre></div></div>
+
+<p>Replace <code class="language-plaintext highlighter-rouge">localhost:8080</code> with your server address.</p>
+
+<hr />
+
+<h2 id="authentication">Authentication</h2>
+
+<h3 id="api-key-authentication">API Key Authentication</h3>
+
+<p>When <code class="language-plaintext highlighter-rouge">API_KEY</code> is set in environment variables, <strong>protected endpoints</strong> require an <code class="language-plaintext highlighter-rouge">X-Api-Key</code> header:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-X</span> POST http://localhost:8080/api/trigger <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"X-Api-Key: your-api-key-here"</span>
+</code></pre></div></div>
+
+<p><strong>Public endpoints</strong> (GET requests) do not require authentication.</p>
+
+<h3 id="generate-secure-api-key">Generate Secure API Key</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Option 1: Python secrets module (recommended)</span>
+python <span class="nt">-c</span> <span class="s1">'import secrets; print(secrets.token_urlsafe(32))'</span>
+
+<span class="c"># Option 2: OpenSSL</span>
+openssl rand <span class="nt">-hex</span> 32
+</code></pre></div></div>
+
+<p><strong>Requirements:</strong></p>
+
+<ul>
+  <li>Minimum 32 characters (enforced at startup)</li>
+  <li>Application exits with error if <code class="language-plaintext highlighter-rouge">API_KEY</code> is set but too short</li>
+</ul>
+
+<h3 id="disabling-authentication">Disabling Authentication</h3>
+
+<p>Leave <code class="language-plaintext highlighter-rouge">API_KEY</code> unset in <code class="language-plaintext highlighter-rouge">.env</code> to disable authentication entirely. <strong>Not recommended for production.</strong></p>
+
+<hr />
+
+<h2 id="rate-limiting">Rate Limiting</h2>
+
+<p>Protected endpoints are rate-limited per API key:</p>
+
+<ul>
+  <li><strong>Default:</strong> 60 requests per 60-second sliding window</li>
+  <li><strong>Configurable:</strong> Set <code class="language-plaintext highlighter-rouge">RATE_LIMIT_PER_MINUTE</code> in <code class="language-plaintext highlighter-rouge">.env</code></li>
+  <li><strong>Response on limit:</strong> <code class="language-plaintext highlighter-rouge">429 Too Many Requests</code> with <code class="language-plaintext highlighter-rouge">Retry-After</code> header</li>
+</ul>
+
+<p><strong>Example rate limit response:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>HTTP/1.1 429 Too Many Requests
+Retry-After: 60
+Content-Type: application/json
+
+<span class="o">{</span>
+  <span class="s2">"detail"</span>: <span class="s2">"Rate limit exceeded. Try again in 60 seconds."</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="public-endpoints">Public Endpoints</h2>
+
+<h3 id="health-check">Health Check</h3>
+
+<p>Get API health and scheduler status.</p>
+
+<p><strong>Request:</strong></p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/health
+</span></code></pre></div></div>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"healthy"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"scheduler_running"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"uptime_seconds"</span><span class="p">:</span><span class="w"> </span><span class="mi">3600</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"last_test_timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-04-29T12:00:00Z"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Status Codes:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">200 OK</code> — API healthy</li>
+</ul>
+
+<hr />
+
+<h3 id="get-results-paginated">Get Results (Paginated)</h3>
+
+<p>Retrieve speed test results with pagination. Reads from SQLite if available, falls back to CSV.</p>
+
+<p><strong>Request:</strong></p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/results?page=1&amp;page_size=50
+</span></code></pre></div></div>
+
+<p><strong>Query Parameters:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">page</code> (optional, default: <code class="language-plaintext highlighter-rouge">1</code>) — Page number (1-indexed)</li>
+  <li><code class="language-plaintext highlighter-rouge">page_size</code> (optional, default: <code class="language-plaintext highlighter-rouge">50</code>) — Results per page (max: 500)</li>
+</ul>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">123</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-04-29T12:00:00Z"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"download_mbps"</span><span class="p">:</span><span class="w"> </span><span class="mf">250.5</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"upload_mbps"</span><span class="p">:</span><span class="w"> </span><span class="mf">35.2</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"ping_ms"</span><span class="p">:</span><span class="w"> </span><span class="mf">15.3</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"jitter_ms"</span><span class="p">:</span><span class="w"> </span><span class="mf">2.1</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"isp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Comcast"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"pagination"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"page"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"page_size"</span><span class="p">:</span><span class="w"> </span><span class="mi">50</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">500</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"total_pages"</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="nl">"source"</span><span class="p">:</span><span class="w"> </span><span class="s2">"sqlite"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Status Codes:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">200 OK</code> — Results returned</li>
+  <li><code class="language-plaintext highlighter-rouge">404 Not Found</code> — Page out of range or no results available</li>
+</ul>
+
+<p><strong>cURL Example:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://localhost:8080/api/results?page<span class="o">=</span>1&amp;page_size<span class="o">=</span>100
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="get-latest-result">Get Latest Result</h3>
+
+<p>Retrieve the most recent speed test result.</p>
+
+<p><strong>Request:</strong></p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/results/latest
+</span></code></pre></div></div>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">123</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-04-29T12:00:00Z"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"download_mbps"</span><span class="p">:</span><span class="w"> </span><span class="mf">250.5</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"upload_mbps"</span><span class="p">:</span><span class="w"> </span><span class="mf">35.2</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"ping_ms"</span><span class="p">:</span><span class="w"> </span><span class="mf">15.3</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"jitter_ms"</span><span class="p">:</span><span class="w"> </span><span class="mf">2.1</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"isp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Comcast"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Status Codes:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">200 OK</code> — Result returned</li>
+  <li><code class="language-plaintext highlighter-rouge">404 Not Found</code> — No results available</li>
+</ul>
+
+<p><strong>cURL Example:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://localhost:8080/api/results/latest
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="get-configuration">Get Configuration</h3>
+
+<p>Retrieve current runtime configuration (interval, enabled exporters).</p>
+
+<p><strong>Request:</strong></p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/config
+</span></code></pre></div></div>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"speedtest_interval_minutes"</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"enabled_exporters"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"csv"</span><span class="p">,</span><span class="w"> </span><span class="s2">"sqlite"</span><span class="p">,</span><span class="w"> </span><span class="s2">"prometheus"</span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Status Codes:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">200 OK</code> — Configuration returned</li>
+</ul>
+
+<p><strong>cURL Example:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://localhost:8080/api/config
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="get-alert-configuration">Get Alert Configuration</h3>
+
+<p>Retrieve current alert settings and provider configuration.</p>
+
+<p><strong>Request:</strong></p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/alerts
+</span></code></pre></div></div>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"failure_threshold"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"cooldown_minutes"</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"providers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"webhook"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"gotify"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"token"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"priority"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"ntfy"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://ntfy.sh"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"topic"</span><span class="p">:</span><span class="w"> </span><span class="s2">"hermes_alerts"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"token"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"priority"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"tags"</span><span class="p">:</span><span class="w"> </span><span class="s2">"warning,rotating_light"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"apprise"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"urls"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Status Codes:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">200 OK</code> — Configuration returned</li>
+</ul>
+
+<p><strong>cURL Example:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://localhost:8080/api/alerts
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="get-outage-events">Get Outage Events</h3>
+
+<p>Retrieve paginated outage detection history. Requires SQLite to be enabled.</p>
+
+<p><strong>Request:</strong></p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/outages?page=1&amp;page_size=50
+</span></code></pre></div></div>
+
+<p><strong>Query Parameters:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">page</code> (optional, default: <code class="language-plaintext highlighter-rouge">1</code>) — Page number (1-indexed)</li>
+  <li><code class="language-plaintext highlighter-rouge">page_size</code> (optional, default: <code class="language-plaintext highlighter-rouge">50</code>) — Events per page (max: 500)</li>
+</ul>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"events"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"event_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"outage_start"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-04-29T03:12:00Z"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"duration_seconds"</span><span class="p">:</span><span class="w"> </span><span class="mf">142.5</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"isp_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Comcast"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"asn"</span><span class="p">:</span><span class="w"> </span><span class="s2">"AS7922"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"bgp_unstable"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"cloudflare_outage_desc"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"probe_results"</span><span class="p">:</span><span class="w"> </span><span class="s2">"{</span><span class="se">\"</span><span class="s2">1.1.1.1:53</span><span class="se">\"</span><span class="s2">: false, </span><span class="se">\"</span><span class="s2">8.8.8.8:53</span><span class="se">\"</span><span class="s2">: false, </span><span class="se">\"</span><span class="s2">9.9.9.9:53</span><span class="se">\"</span><span class="s2">: true}"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"page"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"page_size"</span><span class="p">:</span><span class="w"> </span><span class="mi">50</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Status Codes:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">200 OK</code> — Events returned</li>
+  <li><code class="language-plaintext highlighter-rouge">503 Service Unavailable</code> — Database not yet available</li>
+</ul>
+
+<p><strong>cURL Example:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://localhost:8080/api/outages
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="get-current-outage-status">Get Current Outage Status</h3>
+
+<p>Check whether an outage is currently in progress.</p>
+
+<p><strong>Request:</strong></p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/outage-status
+</span></code></pre></div></div>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"outage_in_progress"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"outage_start_time"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Status Codes:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">200 OK</code> — Status returned</li>
+</ul>
+
+<p><strong>cURL Example:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://localhost:8080/api/outage-status
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="get-anomaly-detection-results">Get Anomaly Detection Results</h3>
+
+<p>Return recent speed test results annotated with z-score anomaly detection. Each result is compared
+against a rolling baseline window.</p>
+
+<p><strong>Request:</strong></p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/analysis/anomalies?limit=50&amp;window=20&amp;threshold=2.5
+</span></code></pre></div></div>
+
+<p><strong>Query Parameters:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">limit</code> (optional, default: <code class="language-plaintext highlighter-rouge">50</code>, max: <code class="language-plaintext highlighter-rouge">500</code>) — Number of results to annotate</li>
+  <li><code class="language-plaintext highlighter-rouge">window</code> (optional, default: <code class="language-plaintext highlighter-rouge">20</code>, range: <code class="language-plaintext highlighter-rouge">3–200</code>) — Baseline window size for z-score computation</li>
+  <li><code class="language-plaintext highlighter-rouge">threshold</code> (optional, default: <code class="language-plaintext highlighter-rouge">2.5</code>, range: <code class="language-plaintext highlighter-rouge">0.5–10.0</code>) — Z-score magnitude that triggers a flag</li>
+</ul>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">123</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-04-29T12:00:00Z"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"download_mbps"</span><span class="p">:</span><span class="w"> </span><span class="mf">12.3</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"upload_mbps"</span><span class="p">:</span><span class="w"> </span><span class="mf">35.2</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"ping_ms"</span><span class="p">:</span><span class="w"> </span><span class="mf">15.3</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"jitter_ms"</span><span class="p">:</span><span class="w"> </span><span class="mf">2.1</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"isp_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Comcast"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"server_name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Chicago, IL"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"server_location"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Chicago, IL"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"is_anomaly"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"anomaly_flags"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"metric"</span><span class="p">:</span><span class="w"> </span><span class="s2">"download_mbps"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"value"</span><span class="p">:</span><span class="w"> </span><span class="mf">12.3</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"baseline_mean"</span><span class="p">:</span><span class="w"> </span><span class="mf">248.5</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"baseline_stdev"</span><span class="p">:</span><span class="w"> </span><span class="mf">15.2</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"z_score"</span><span class="p">:</span><span class="w"> </span><span class="mf">-15.5</span><span class="w">
+      </span><span class="p">}</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Status Codes:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">200 OK</code> — Results returned</li>
+  <li><code class="language-plaintext highlighter-rouge">503 Service Unavailable</code> — Database not yet available</li>
+</ul>
+
+<p><strong>cURL Example:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="s2">"http://localhost:8080/api/analysis/anomalies?limit=100&amp;threshold=3.0"</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="get-time-of-day-analysis">Get Time-of-Day Analysis</h3>
+
+<p>Return average download, upload, and ping grouped by hour of day (UTC).</p>
+
+<p><strong>Request:</strong></p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/analysis/time-of-day?days=30
+</span></code></pre></div></div>
+
+<p><strong>Query Parameters:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">days</code> (optional, default: <code class="language-plaintext highlighter-rouge">30</code>, range: <code class="language-plaintext highlighter-rouge">0–3650</code>) — Lookback window in days. Use <code class="language-plaintext highlighter-rouge">0</code> for all time.</li>
+</ul>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"hour"</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"sample_count"</span><span class="p">:</span><span class="w"> </span><span class="mi">28</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"avg_download_mbps"</span><span class="p">:</span><span class="w"> </span><span class="mf">310.5</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"avg_upload_mbps"</span><span class="p">:</span><span class="w"> </span><span class="mf">42.1</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"avg_ping_ms"</span><span class="p">:</span><span class="w"> </span><span class="mf">12.3</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"min_download_mbps"</span><span class="p">:</span><span class="w"> </span><span class="mf">290.0</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"max_download_mbps"</span><span class="p">:</span><span class="w"> </span><span class="mf">340.2</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Status Codes:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">200 OK</code> — Stats returned (empty array if no data in window)</li>
+</ul>
+
+<p><strong>cURL Example:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="s2">"http://localhost:8080/api/analysis/time-of-day?days=90"</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="get-trend-analysis">Get Trend Analysis</h3>
+
+<p>Return month-over-month statistics and linear regression slopes to detect long-term degradation.</p>
+
+<p><strong>Request:</strong></p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/analysis/trends?months=6
+</span></code></pre></div></div>
+
+<p><strong>Query Parameters:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">months</code> (optional, default: <code class="language-plaintext highlighter-rouge">6</code>, range: <code class="language-plaintext highlighter-rouge">0–120</code>) — Lookback window in calendar months.
+Use <code class="language-plaintext highlighter-rouge">0</code> for all time.</li>
+</ul>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"monthly_stats"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"month"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-04"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"sample_count"</span><span class="p">:</span><span class="w"> </span><span class="mi">720</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"avg_download_mbps"</span><span class="p">:</span><span class="w"> </span><span class="mf">248.5</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"avg_upload_mbps"</span><span class="p">:</span><span class="w"> </span><span class="mf">35.2</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"avg_ping_ms"</span><span class="p">:</span><span class="w"> </span><span class="mf">15.3</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">],</span><span class="w">
+  </span><span class="nl">"download_slope"</span><span class="p">:</span><span class="w"> </span><span class="mf">-2.1</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"upload_slope"</span><span class="p">:</span><span class="w"> </span><span class="mf">-0.5</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"ping_slope"</span><span class="p">:</span><span class="w"> </span><span class="mf">0.8</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"degradation_detected"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"months_available"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Slopes are expressed as Mbps (or ms) per calendar month. Negative download/upload slope or positive
+ping slope indicates degradation.</p>
+
+<p><strong>Status Codes:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">200 OK</code> — Report returned</li>
+</ul>
+
+<p><strong>cURL Example:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="s2">"http://localhost:8080/api/analysis/trends?months=12"</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="check-trigger-status">Check Trigger Status</h3>
+
+<p>Check if a speed test is currently running.</p>
+
+<p><strong>Request:</strong></p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/trigger/status
+</span></code></pre></div></div>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"is_running"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Status Codes:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">200 OK</code> — Status returned</li>
+</ul>
+
+<p><strong>cURL Example:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://localhost:8080/api/trigger/status
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="protected-endpoints">Protected Endpoints</h2>
+
+<p>Require <code class="language-plaintext highlighter-rouge">X-Api-Key</code> header when <code class="language-plaintext highlighter-rouge">API_KEY</code> environment variable is set.</p>
+
+<h3 id="trigger-speed-test">Trigger Speed Test</h3>
+
+<p>Manually trigger a speed test to run immediately.</p>
+
+<p><strong>Request:</strong></p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST /api/trigger
+</span></code></pre></div></div>
+
+<p><strong>Headers:</strong></p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>X-Api-Key: your-api-key-here
+</code></pre></div></div>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"started"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>OR if a test is already running:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"already_running"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Status Codes:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">200 OK</code> — Test triggered successfully or already running</li>
+  <li><code class="language-plaintext highlighter-rouge">401 Unauthorized</code> — Missing or invalid API key</li>
+  <li><code class="language-plaintext highlighter-rouge">429 Too Many Requests</code> — Rate limit exceeded</li>
+</ul>
+
+<p><strong>cURL Example:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-X</span> POST http://localhost:8080/api/trigger <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"X-Api-Key: your-api-key-here"</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="update-configuration">Update Configuration</h3>
+
+<p>Update runtime configuration (interval, enabled exporters).</p>
+
+<p><strong>Request:</strong></p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">PUT /api/config
+Content-Type: application/json
+</span></code></pre></div></div>
+
+<p><strong>Headers:</strong></p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>X-Api-Key: your-api-key-here
+Content-Type: application/json
+</code></pre></div></div>
+
+<p><strong>Body:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"interval_minutes"</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"enabled_exporters"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"csv"</span><span class="p">,</span><span class="w"> </span><span class="s2">"sqlite"</span><span class="p">,</span><span class="w"> </span><span class="s2">"prometheus"</span><span class="p">,</span><span class="w"> </span><span class="s2">"loki"</span><span class="p">],</span><span class="w">
+  </span><span class="nl">"scanning_enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"interval_minutes"</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"enabled_exporters"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"csv"</span><span class="p">,</span><span class="w"> </span><span class="s2">"sqlite"</span><span class="p">],</span><span class="w">
+  </span><span class="nl">"scanning_enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Validation:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">interval_minutes</code> must be between 5 and 1440 minutes (5 minutes to 24 hours)</li>
+  <li><code class="language-plaintext highlighter-rouge">enabled_exporters</code> must be a list containing valid exporters: <code class="language-plaintext highlighter-rouge">csv</code>, <code class="language-plaintext highlighter-rouge">sqlite</code>, <code class="language-plaintext highlighter-rouge">prometheus</code>, <code class="language-plaintext highlighter-rouge">loki</code>, <code class="language-plaintext highlighter-rouge">influxdb</code></li>
+  <li><code class="language-plaintext highlighter-rouge">scanning_enabled</code> controls whether automatic tests are running</li>
+</ul>
+
+<p><strong>Status Codes:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">200 OK</code> — Configuration updated</li>
+  <li><code class="language-plaintext highlighter-rouge">400 Bad Request</code> — Invalid input</li>
+  <li><code class="language-plaintext highlighter-rouge">401 Unauthorized</code> — Missing or invalid API key</li>
+  <li><code class="language-plaintext highlighter-rouge">429 Too Many Requests</code> — Rate limit exceeded</li>
+</ul>
+
+<p><strong>cURL Example:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-X</span> PUT http://localhost:8080/api/config <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"X-Api-Key: your-api-key-here"</span> <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"Content-Type: application/json"</span> <span class="se">\</span>
+  <span class="nt">-d</span> <span class="s1">'{
+    "interval_minutes": 30,
+    "enabled_exporters": ["csv", "sqlite"],
+    "scanning_enabled": true
+  }'</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="update-alert-configuration">Update Alert Configuration</h3>
+
+<p>Update alert settings and provider configuration.</p>
+
+<p><strong>Request:</strong></p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">PUT /api/alerts
+Content-Type: application/json
+</span></code></pre></div></div>
+
+<p><strong>Headers:</strong></p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>X-Api-Key: your-api-key-here
+Content-Type: application/json
+</code></pre></div></div>
+
+<p><strong>Body:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"failure_threshold"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"cooldown_minutes"</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"providers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"webhook"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"ntfy"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://ntfy.sh"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"topic"</span><span class="p">:</span><span class="w"> </span><span class="s2">"hermes_alerts"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"token"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"priority"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"tags"</span><span class="p">:</span><span class="w"> </span><span class="s2">"warning,rotating_light"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"success"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Alert configuration updated successfully"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Validation:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">failure_threshold</code> must be &gt;= 0 (0 = disabled)</li>
+  <li><code class="language-plaintext highlighter-rouge">cooldown_minutes</code> must be &gt;= 1</li>
+  <li>Alert URLs validated for SSRF protection (see <a href="security">Security</a>)</li>
+  <li>Provider-specific validation (priority ranges, required fields)</li>
+</ul>
+
+<p><strong>Status Codes:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">200 OK</code> — Configuration updated</li>
+  <li><code class="language-plaintext highlighter-rouge">400 Bad Request</code> — Invalid input or SSRF risk detected</li>
+  <li><code class="language-plaintext highlighter-rouge">401 Unauthorized</code> — Missing or invalid API key</li>
+  <li><code class="language-plaintext highlighter-rouge">429 Too Many Requests</code> — Rate limit exceeded</li>
+</ul>
+
+<p><strong>cURL Example:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-X</span> PUT http://localhost:8080/api/alerts <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"X-Api-Key: your-api-key-here"</span> <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"Content-Type: application/json"</span> <span class="se">\</span>
+  <span class="nt">-d</span> <span class="s1">'{
+    "enabled": true,
+    "failure_threshold": 3,
+    "cooldown_minutes": 60,
+    "providers": {
+      "ntfy": {
+        "enabled": true,
+        "url": "https://ntfy.sh",
+        "topic": "hermes_alerts",
+        "priority": 3
+      }
+    }
+  }'</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="test-alert-notification">Test Alert Notification</h3>
+
+<p>Send a test notification to all enabled alert providers.</p>
+
+<p><strong>Request:</strong></p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST /api/alerts/test
+</span></code></pre></div></div>
+
+<p><strong>Headers:</strong></p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>X-Api-Key: your-api-key-here
+</code></pre></div></div>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"success"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Test alert sent successfully to 2 provider(s)"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"webhook"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"ntfy"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"gotify"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"apprise"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Rate Limiting:</strong></p>
+
+<ul>
+  <li>Test alerts are rate-limited globally (10-second cooldown)</li>
+  <li>Separate from per-API-key rate limits</li>
+  <li>Prevents notification spam</li>
+</ul>
+
+<p><strong>Status Codes:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">200 OK</code> — Test sent (check <code class="language-plaintext highlighter-rouge">results</code> for per-provider status)</li>
+  <li><code class="language-plaintext highlighter-rouge">401 Unauthorized</code> — Missing or invalid API key</li>
+  <li><code class="language-plaintext highlighter-rouge">429 Too Many Requests</code> — Test alert cooldown active (wait 10 seconds)</li>
+</ul>
+
+<p><strong>cURL Example:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-X</span> POST http://localhost:8080/api/alerts/test <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"X-Api-Key: your-api-key-here"</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="error-responses">Error Responses</h2>
+
+<p>All errors return JSON with <code class="language-plaintext highlighter-rouge">detail</code> field:</p>
+
+<h3 id="400-bad-request">400 Bad Request</h3>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"speedtest_interval_minutes must be between 1 and 1440"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="401-unauthorized">401 Unauthorized</h3>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Invalid API key"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="404-not-found">404 Not Found</h3>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"No results found"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="413-payload-too-large">413 Payload Too Large</h3>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Request body exceeds maximum size of 1048576 bytes"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="429-too-many-requests">429 Too Many Requests</h3>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Rate limit exceeded. Try again in 60 seconds."</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Response includes <code class="language-plaintext highlighter-rouge">Retry-After</code> header with seconds to wait.</p>
+
+<h3 id="503-service-unavailable">503 Service Unavailable</h3>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Speed test already running"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<hr />
+
+<h2 id="security-features">Security Features</h2>
+
+<h3 id="ssrf-protection">SSRF Protection</h3>
+
+<p>Alert URLs are validated to prevent Server-Side Request Forgery attacks:</p>
+
+<p><strong>Blocked:</strong></p>
+
+<ul>
+  <li>Non-HTTP schemes: <code class="language-plaintext highlighter-rouge">file://</code>, <code class="language-plaintext highlighter-rouge">ftp://</code>, <code class="language-plaintext highlighter-rouge">data://</code></li>
+  <li>Localhost: <code class="language-plaintext highlighter-rouge">localhost</code>, <code class="language-plaintext highlighter-rouge">127.0.0.1</code>, <code class="language-plaintext highlighter-rouge">::1</code></li>
+  <li>Private IP ranges: <code class="language-plaintext highlighter-rouge">10.x</code>, <code class="language-plaintext highlighter-rouge">192.168.x</code>, <code class="language-plaintext highlighter-rouge">172.16-31.x</code></li>
+  <li>Link-local: <code class="language-plaintext highlighter-rouge">169.254.x</code>, <code class="language-plaintext highlighter-rouge">fe80::/10</code></li>
+  <li>Cloud metadata endpoints: <code class="language-plaintext highlighter-rouge">169.254.169.254</code></li>
+</ul>
+
+<p><strong>Allowed:</strong></p>
+
+<ul>
+  <li>Public HTTPS/HTTP URLs only</li>
+</ul>
+
+<p>See <a href="security">Security Guide</a> for details.</p>
+
+<h3 id="security-headers">Security Headers</h3>
+
+<p>All responses include security headers:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">X-Frame-Options: DENY</code></li>
+  <li><code class="language-plaintext highlighter-rouge">X-Content-Type-Options: nosniff</code></li>
+  <li><code class="language-plaintext highlighter-rouge">Cross-Origin-Resource-Policy: same-origin</code></li>
+  <li><code class="language-plaintext highlighter-rouge">Referrer-Policy: strict-origin-when-cross-origin</code></li>
+</ul>
+
+<h3 id="cors-configuration">CORS Configuration</h3>
+
+<p>CORS is configured via <code class="language-plaintext highlighter-rouge">CORS_ORIGINS</code> environment variable:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">CORS_ORIGINS</span><span class="o">=</span>https://your-frontend-domain.com
+</code></pre></div></div>
+
+<p><strong>Allowed methods:</strong> GET, POST, PUT<br />
+<strong>Allowed headers:</strong> Content-Type, X-Api-Key</p>
+
+<hr />
+
+<h2 id="api-client-examples">API Client Examples</h2>
+
+<h3 id="python-requests">Python (requests)</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">requests</span>
+
+<span class="n">BASE_URL</span> <span class="o">=</span> <span class="sh">"</span><span class="s">http://localhost:8080/api</span><span class="sh">"</span>
+<span class="n">API_KEY</span> <span class="o">=</span> <span class="sh">"</span><span class="s">your-api-key-here</span><span class="sh">"</span>
+
+<span class="c1"># Get latest result
+</span><span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s">/results/latest</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="p">.</span><span class="nf">json</span><span class="p">()</span>
+<span class="nf">print</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Download: </span><span class="si">{</span><span class="n">result</span><span class="p">[</span><span class="sh">'</span><span class="s">download_mbps</span><span class="sh">'</span><span class="p">]</span><span class="si">}</span><span class="s"> Mbps</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Trigger test
+</span><span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span>
+    <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s">/trigger</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">X-Api-Key</span><span class="sh">"</span><span class="p">:</span> <span class="n">API_KEY</span><span class="p">}</span>
+<span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="nf">json</span><span class="p">())</span>
+
+<span class="c1"># Update config
+</span><span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">put</span><span class="p">(</span>
+    <span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s">/config</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">headers</span><span class="o">=</span><span class="p">{</span>
+        <span class="sh">"</span><span class="s">X-Api-Key</span><span class="sh">"</span><span class="p">:</span> <span class="n">API_KEY</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">Content-Type</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">application/json</span><span class="sh">"</span>
+    <span class="p">},</span>
+    <span class="n">json</span><span class="o">=</span><span class="p">{</span>
+        <span class="sh">"</span><span class="s">speedtest_interval_minutes</span><span class="sh">"</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+        <span class="sh">"</span><span class="s">enabled_exporters</span><span class="sh">"</span><span class="p">:</span> <span class="p">[</span><span class="sh">"</span><span class="s">csv</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">sqlite</span><span class="sh">"</span><span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">response</span><span class="p">.</span><span class="nf">json</span><span class="p">())</span>
+</code></pre></div></div>
+
+<h3 id="javascript-fetch">JavaScript (fetch)</h3>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">const</span> <span class="nx">BASE_URL</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">http://localhost:8080/api</span><span class="dl">"</span><span class="p">;</span>
+<span class="kd">const</span> <span class="nx">API_KEY</span> <span class="o">=</span> <span class="dl">"</span><span class="s2">your-api-key-here</span><span class="dl">"</span><span class="p">;</span>
+
+<span class="c1">// Get latest result</span>
+<span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="s2">`</span><span class="p">${</span><span class="nx">BASE_URL</span><span class="p">}</span><span class="s2">/results/latest`</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">response</span><span class="p">.</span><span class="nf">json</span><span class="p">();</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="s2">`Download: </span><span class="p">${</span><span class="nx">result</span><span class="p">.</span><span class="nx">download_mbps</span><span class="p">}</span><span class="s2"> Mbps`</span><span class="p">);</span>
+
+<span class="c1">// Trigger test</span>
+<span class="kd">const</span> <span class="nx">triggerResponse</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="s2">`</span><span class="p">${</span><span class="nx">BASE_URL</span><span class="p">}</span><span class="s2">/trigger`</span><span class="p">,</span> <span class="p">{</span>
+  <span class="na">method</span><span class="p">:</span> <span class="dl">"</span><span class="s2">POST</span><span class="dl">"</span><span class="p">,</span>
+  <span class="na">headers</span><span class="p">:</span> <span class="p">{</span>
+    <span class="dl">"</span><span class="s2">X-Api-Key</span><span class="dl">"</span><span class="p">:</span> <span class="nx">API_KEY</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="k">await</span> <span class="nx">triggerResponse</span><span class="p">.</span><span class="nf">json</span><span class="p">());</span>
+
+<span class="c1">// Update config</span>
+<span class="kd">const</span> <span class="nx">configResponse</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="s2">`</span><span class="p">${</span><span class="nx">BASE_URL</span><span class="p">}</span><span class="s2">/config`</span><span class="p">,</span> <span class="p">{</span>
+  <span class="na">method</span><span class="p">:</span> <span class="dl">"</span><span class="s2">PUT</span><span class="dl">"</span><span class="p">,</span>
+  <span class="na">headers</span><span class="p">:</span> <span class="p">{</span>
+    <span class="dl">"</span><span class="s2">X-Api-Key</span><span class="dl">"</span><span class="p">:</span> <span class="nx">API_KEY</span><span class="p">,</span>
+    <span class="dl">"</span><span class="s2">Content-Type</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">application/json</span><span class="dl">"</span>
+  <span class="p">},</span>
+  <span class="na">body</span><span class="p">:</span> <span class="nx">JSON</span><span class="p">.</span><span class="nf">stringify</span><span class="p">({</span>
+    <span class="na">speedtest_interval_minutes</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+    <span class="na">enabled_exporters</span><span class="p">:</span> <span class="p">[</span><span class="dl">"</span><span class="s2">csv</span><span class="dl">"</span><span class="p">,</span> <span class="dl">"</span><span class="s2">sqlite</span><span class="dl">"</span><span class="p">]</span>
+  <span class="p">})</span>
+<span class="p">});</span>
+<span class="nx">console</span><span class="p">.</span><span class="nf">log</span><span class="p">(</span><span class="k">await</span> <span class="nx">configResponse</span><span class="p">.</span><span class="nf">json</span><span class="p">());</span>
+</code></pre></div></div>
+
+<h3 id="bash-curl">Bash (curl)</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/bash</span>
+
+<span class="nv">BASE_URL</span><span class="o">=</span><span class="s2">"http://localhost:8080/api"</span>
+<span class="nv">API_KEY</span><span class="o">=</span><span class="s2">"your-api-key-here"</span>
+
+<span class="c"># Get latest result</span>
+curl <span class="nt">-s</span> <span class="s2">"</span><span class="nv">$BASE_URL</span><span class="s2">/results/latest"</span> | jq <span class="nb">.</span>
+
+<span class="c"># Trigger test</span>
+curl <span class="nt">-X</span> POST <span class="s2">"</span><span class="nv">$BASE_URL</span><span class="s2">/trigger"</span> <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"X-Api-Key: </span><span class="nv">$API_KEY</span><span class="s2">"</span>
+
+<span class="c"># Update config</span>
+curl <span class="nt">-X</span> PUT <span class="s2">"</span><span class="nv">$BASE_URL</span><span class="s2">/config"</span> <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"X-Api-Key: </span><span class="nv">$API_KEY</span><span class="s2">"</span> <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"Content-Type: application/json"</span> <span class="se">\</span>
+  <span class="nt">-d</span> <span class="s1">'{
+    "speedtest_interval_minutes": 30,
+    "enabled_exporters": ["csv", "sqlite"]
+  }'</span>
+
+<span class="c"># Get paginated results</span>
+curl <span class="nt">-s</span> <span class="s2">"</span><span class="nv">$BASE_URL</span><span class="s2">/results?page=1&amp;page_size=100"</span> | jq <span class="nb">.</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="websocket-support">WebSocket Support</h2>
+
+<p>Hermes does not currently support WebSocket connections. For real-time updates:</p>
+
+<p><strong>Option 1:</strong> Poll <code class="language-plaintext highlighter-rouge">/api/results/latest</code> periodically</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nf">setInterval</span><span class="p">(</span><span class="k">async </span><span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="dl">"</span><span class="s2">/api/results/latest</span><span class="dl">"</span><span class="p">);</span>
+  <span class="kd">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">response</span><span class="p">.</span><span class="nf">json</span><span class="p">();</span>
+  <span class="nf">updateUI</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+<span class="p">},</span> <span class="mi">30000</span><span class="p">);</span> <span class="c1">// Poll every 30 seconds</span>
+</code></pre></div></div>
+
+<p><strong>Option 2:</strong> Poll <code class="language-plaintext highlighter-rouge">/api/trigger/status</code> to detect test completion</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">async</span> <span class="kd">function</span> <span class="nf">waitForTestCompletion</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">while </span><span class="p">(</span><span class="kc">true</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">const</span> <span class="nx">response</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="dl">"</span><span class="s2">/api/trigger/status</span><span class="dl">"</span><span class="p">);</span>
+    <span class="kd">const</span> <span class="nx">status</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">response</span><span class="p">.</span><span class="nf">json</span><span class="p">();</span>
+    <span class="k">if </span><span class="p">(</span><span class="o">!</span><span class="nx">status</span><span class="p">.</span><span class="nx">running</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>
+    <span class="k">await</span> <span class="k">new</span> <span class="nc">Promise</span><span class="p">(</span><span class="nx">resolve</span> <span class="o">=&gt;</span> <span class="nf">setTimeout</span><span class="p">(</span><span class="nx">resolve</span><span class="p">,</span> <span class="mi">5000</span><span class="p">));</span>
+  <span class="p">}</span>
+  <span class="c1">// Fetch new result</span>
+  <span class="kd">const</span> <span class="nx">result</span> <span class="o">=</span> <span class="k">await</span> <span class="nf">fetch</span><span class="p">(</span><span class="dl">"</span><span class="s2">/api/results/latest</span><span class="dl">"</span><span class="p">);</span>
+  <span class="k">return</span> <span class="nx">result</span><span class="p">.</span><span class="nf">json</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="see-also">See Also</h2>
+
+<ul>
+  <li><a href="getting-started">Getting Started</a> — Deployment and authentication setup</li>
+  <li><a href="security">Security Guide</a> — API key best practices, SSRF protection</li>
+  <li><a href="alerts">Alert Configuration</a> — Webhook and notification provider setup</li>
+  <li><a href="architecture">Architecture</a> — API container design and data flow</li>
+</ul>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/Hermes" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; API Reference
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

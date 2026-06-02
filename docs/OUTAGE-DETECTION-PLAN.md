@@ -2,9 +2,6 @@
 layout: default
 title: "Outage Detection Implementation Plan"
 ---
-
-# Outage Detection Implementation Plan
-
 **Status:** Not started  
 **Target:** v1.4  
 **Estimated Total Effort:** 10–14 hours  

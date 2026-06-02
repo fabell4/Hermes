@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Hermes Documentation</title>
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Hermes Documentation | Self-hosted internet speed test monitoring with modern observability stack integration</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Hermes Documentation" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<link rel="canonical" href="http://localhost:4001/" />
+<meta property="og:url" content="http://localhost:4001/" />
+<meta property="og:site_name" content="Hermes Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Hermes Documentation" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","description":"Self-hosted internet speed test monitoring with modern observability stack integration","headline":"Hermes Documentation","name":"Hermes Documentation","url":"http://localhost:4001/"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration">
+
+<title>
+  
+    Hermes Documentation
+  
+</title>
+
+
+<link rel="icon" type="image/png" href="/assets/Hermes.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="/" class="nav-brand">
+    <span class="brand-name">
+      Hermes
+      <span>Docs</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           class="active" aria-current="page">
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <!-- Hero section for doc home page -->
+  <section class="doc-hero">
+    <div class="doc-hero__inner">
+      <div class="doc-hero__eyebrow">Documentation</div>
+      <h1 class="doc-hero__title">Hermes Docs</h1>
+      <p class="doc-hero__subtitle">Self-hosted internet speed test monitoring with automated scheduling, multi-destination export, and full observability stack integration.</p>
+
+      
+        <div class="doc-hero__ctas">
+          
+            <a href="/getting-started"
+               class="btn btn--primary">
+              Get Started
+            </a>
+          
+            <a href="https://github.com/fabell4/hermes"
+               class="btn btn--outline">
+              View on GitHub
+            </a>
+          
+        </div>
+      
+    </div>
+  </section>
+
+  
+    <section class="quick-links">
+      <div class="quick-links__inner">
+        
+          <a href="/getting-started" class="quick-card">
+            <div class="quick-card__icon">🚀</div>
+            <div class="quick-card__title">Getting Started</div>
+            <div class="quick-card__desc">Deploy with Docker, configure exporters, and run your first speed test.</div>
+          </a>
+        
+          <a href="/architecture" class="quick-card">
+            <div class="quick-card__icon">🏗️</div>
+            <div class="quick-card__title">Architecture</div>
+            <div class="quick-card__desc">System design, data flow, and two-container deployment topology.</div>
+          </a>
+        
+          <a href="/api-reference" class="quick-card">
+            <div class="quick-card__icon">🔌</div>
+            <div class="quick-card__title">API Reference</div>
+            <div class="quick-card__desc">REST endpoints, authentication, and request/response examples.</div>
+          </a>
+        
+          <a href="/alerts" class="quick-card">
+            <div class="quick-card__icon">🔔</div>
+            <div class="quick-card__title">Alert Configuration</div>
+            <div class="quick-card__desc">Webhook, Gotify, ntfy, and Apprise notification setup.</div>
+          </a>
+        
+          <a href="/security" class="quick-card">
+            <div class="quick-card__icon">🔐</div>
+            <div class="quick-card__title">Security Guide</div>
+            <div class="quick-card__desc">API key auth, rate limiting, SSRF protection, and best practices.</div>
+          </a>
+        
+          <a href="/runbook" class="quick-card">
+            <div class="quick-card__icon">📖</div>
+            <div class="quick-card__title">Runbook</div>
+            <div class="quick-card__desc">Operational guide for diagnosing and resolving production issues.</div>
+          </a>
+        
+      </div>
+    </section>
+  
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 class="active" aria-current="page">
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/alloy"
+                 >
+                Grafana Alloy
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-ENHANCEMENTS"
+                 >
+                Security Enhancements
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Error Handling</h3>
+        <ul>
+          
+            <li>
+              <a href="/error-catalog"
+                 >
+                Error Catalog
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-handling-conventions"
+                 >
+                Handling Conventions
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-messages"
+                 >
+                Error Messages
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/RELEASE-PROCESS"
+                 >
+                Release Process
+              </a>
+            </li>
+          
+            <li>
+              <a href="/styleguide"
+                 >
+                Frontend Style Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/suppression-decisions"
+                 >
+                Suppression Decisions
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Code Reviews</h3>
+        <ul>
+          
+            <li>
+              <a href="/BEST-PRACTICES-REVIEW"
+                 >
+                Best Practices
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DEFENSIVE-CODING-REVIEW"
+                 >
+                Defensive Coding
+              </a>
+            </li>
+          
+            <li>
+              <a href="/ERROR-HANDLING-REVIEW"
+                 >
+                Error Handling Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/PERFORMANCE-OPTIMIZATION-REVIEW"
+                 >
+                Performance Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/TEST-COVERAGE-REVIEW"
+                 >
+                Test Coverage
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DOCUMENTATION-ACCURACY-REVIEW"
+                 >
+                Documentation Review
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+        <h2 id="quick-start">Quick Start</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Pull and configure</span>
+curl <span class="nt">-o</span> docker-compose.yml https://raw.githubusercontent.com/fabell4/hermes/main/docker-compose.yml
+curl <span class="nt">-o</span> .env https://raw.githubusercontent.com/fabell4/hermes/main/.env.example
+
+<span class="c"># Start containers</span>
+docker compose up <span class="nt">-d</span>
+
+<span class="c"># Access the UI</span>
+open http://localhost:8080
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="key-configuration">Key Configuration</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SPEEDTEST_INTERVAL_MINUTES</code></td>
+      <td><code class="language-plaintext highlighter-rouge">60</code></td>
+      <td>How often to run speed tests</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ENABLED_EXPORTERS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">csv</code></td>
+      <td>Comma-separated: <code class="language-plaintext highlighter-rouge">csv</code>, <code class="language-plaintext highlighter-rouge">sqlite</code>, <code class="language-plaintext highlighter-rouge">prometheus</code>, <code class="language-plaintext highlighter-rouge">loki</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">API_KEY</code></td>
+      <td><em>(unset)</em></td>
+      <td>Enables authentication when set</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_FAILURE_THRESHOLD</code></td>
+      <td><code class="language-plaintext highlighter-rouge">0</code></td>
+      <td>Consecutive failures before alerting (0 = disabled)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">PROMETHEUS_PORT</code></td>
+      <td><code class="language-plaintext highlighter-rouge">8000</code></td>
+      <td>Port for <code class="language-plaintext highlighter-rouge">/metrics</code> scrape endpoint</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">LOKI_URL</code></td>
+      <td><em>(unset)</em></td>
+      <td>Loki push URL, e.g., <code class="language-plaintext highlighter-rouge">http://loki:3100</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>See <a href="/getting-started">Getting Started</a> for the full environment variable reference.</p>
+
+<hr />
+
+<h2 id="architecture-at-a-glance">Architecture at a Glance</h2>
+
+<p>Hermes runs as two containers:</p>
+
+<ul>
+  <li><strong>hermes-scheduler</strong> — Background worker running speed tests on schedule, exposing Prometheus metrics on port <code class="language-plaintext highlighter-rouge">8000</code></li>
+  <li><strong>hermes-api</strong> — FastAPI backend + React frontend on port <code class="language-plaintext highlighter-rouge">8080</code></li>
+</ul>
+
+<p>Data flows from the scheduler through exporters (CSV, SQLite, Prometheus, Loki) and is consumed by the frontend via the REST API.</p>
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/Hermes" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Hermes Documentation
+    </p>
+  </div>
+</footer>
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

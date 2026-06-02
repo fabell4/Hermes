@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Security Guide — Hermes Documentation</title>
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Security Guide | Hermes Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Security Guide" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<link rel="canonical" href="http://localhost:4001/security.html" />
+<meta property="og:url" content="http://localhost:4001/security.html" />
+<meta property="og:site_name" content="Hermes Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Security Guide" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted internet speed test monitoring with modern observability stack integration","headline":"Security Guide","url":"http://localhost:4001/security.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration">
+
+<title>
+  
+    Security Guide — Hermes Documentation
+  
+</title>
+
+
+<link rel="icon" type="image/png" href="/assets/Hermes.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="/" class="nav-brand">
+    <span class="brand-name">
+      Hermes
+      <span>Docs</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/alloy"
+                 >
+                Grafana Alloy
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-ENHANCEMENTS"
+                 >
+                Security Enhancements
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Error Handling</h3>
+        <ul>
+          
+            <li>
+              <a href="/error-catalog"
+                 >
+                Error Catalog
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-handling-conventions"
+                 >
+                Handling Conventions
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-messages"
+                 >
+                Error Messages
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/RELEASE-PROCESS"
+                 >
+                Release Process
+              </a>
+            </li>
+          
+            <li>
+              <a href="/styleguide"
+                 >
+                Frontend Style Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/suppression-decisions"
+                 >
+                Suppression Decisions
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Code Reviews</h3>
+        <ul>
+          
+            <li>
+              <a href="/BEST-PRACTICES-REVIEW"
+                 >
+                Best Practices
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DEFENSIVE-CODING-REVIEW"
+                 >
+                Defensive Coding
+              </a>
+            </li>
+          
+            <li>
+              <a href="/ERROR-HANDLING-REVIEW"
+                 >
+                Error Handling Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/PERFORMANCE-OPTIMIZATION-REVIEW"
+                 >
+                Performance Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/TEST-COVERAGE-REVIEW"
+                 >
+                Test Coverage
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DOCUMENTATION-ACCURACY-REVIEW"
+                 >
+                Documentation Review
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Security Guide</h1>
+
+            
+          </header>
+        
+
+        <p>Hermes implements multiple layers of security for production deployments. This guide covers security features, best practices, and audit reports.</p>
+
+<hr />
+
+<h2 id="security-features">Security Features</h2>
+
+<h3 id="api-key-authentication">API Key Authentication</h3>
+
+<p><strong>Purpose:</strong> Protect write endpoints from unauthorized access.</p>
+
+<p><strong>Implementation:</strong></p>
+
+<ul>
+  <li>Optional <code class="language-plaintext highlighter-rouge">API_KEY</code> environment variable</li>
+  <li><strong>32-character minimum</strong> enforced at startup (application exits if too short)</li>
+  <li>Timing-safe comparison using <code class="language-plaintext highlighter-rouge">secrets.compare_digest()</code> to prevent timing attacks</li>
+  <li><code class="language-plaintext highlighter-rouge">X-Api-Key</code> header required on all protected endpoints</li>
+</ul>
+
+<p><strong>Protected Endpoints:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">POST /api/trigger</code> — Manual speed test trigger</li>
+  <li><code class="language-plaintext highlighter-rouge">PUT /api/config</code> — Configuration updates</li>
+  <li><code class="language-plaintext highlighter-rouge">PUT /api/alerts</code> — Alert configuration updates</li>
+  <li><code class="language-plaintext highlighter-rouge">POST /api/alerts/test</code> — Test alert notifications</li>
+</ul>
+
+<p><strong>Public Endpoints:</strong> (no authentication required)</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">GET /api/health</code> — Health check</li>
+  <li><code class="language-plaintext highlighter-rouge">GET /api/results</code> — Speed test results</li>
+  <li><code class="language-plaintext highlighter-rouge">GET /api/results/latest</code> — Latest result</li>
+  <li><code class="language-plaintext highlighter-rouge">GET /api/config</code> — Current configuration</li>
+  <li><code class="language-plaintext highlighter-rouge">GET /api/alerts</code> — Alert configuration</li>
+  <li><code class="language-plaintext highlighter-rouge">GET /api/trigger/status</code> — Test status</li>
+</ul>
+
+<p><strong>Generate Secure Key:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Recommended: Python secrets module</span>
+python <span class="nt">-c</span> <span class="s1">'import secrets; print(secrets.token_urlsafe(32))'</span>
+
+<span class="c"># Alternative: OpenSSL</span>
+openssl rand <span class="nt">-hex</span> 32
+</code></pre></div></div>
+
+<p><strong>Startup Validation:</strong></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ERROR: API_KEY must be at least 32 characters long
+Suggestion: Generate a secure key with:
+  python -c 'import secrets; print(secrets.token_urlsafe(32))'
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="rate-limiting">Rate Limiting</h3>
+
+<p><strong>Purpose:</strong> Prevent abuse and DoS attacks via request flooding.</p>
+
+<p><strong>Implementation:</strong></p>
+
+<ul>
+  <li>Per-API-key sliding window rate limiting</li>
+  <li><strong>Default:</strong> 60 requests per 60-second window (configurable via <code class="language-plaintext highlighter-rouge">RATE_LIMIT_PER_MINUTE</code>)</li>
+  <li>Applies to protected endpoints only</li>
+  <li>Returns <code class="language-plaintext highlighter-rouge">429 Too Many Requests</code> with <code class="language-plaintext highlighter-rouge">Retry-After</code> header</li>
+</ul>
+
+<p><strong>Example Response:</strong></p>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">429</span> <span class="ne">Too Many Requests</span>
+<span class="na">Retry-After</span><span class="p">:</span> <span class="s">60</span>
+<span class="na">Content-Type</span><span class="p">:</span> <span class="s">application/json</span>
+
+<span class="p">{</span><span class="w">
+  </span><span class="nl">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Rate limit exceeded. Try again in 60 seconds."</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Configuration:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">RATE_LIMIT_PER_MINUTE</span><span class="o">=</span>120  <span class="c"># Allow 120 requests per 60 seconds</span>
+</code></pre></div></div>
+
+<p><strong>Test Alert Rate Limiting:</strong></p>
+
+<ul>
+  <li>Test alerts (<code class="language-plaintext highlighter-rouge">POST /api/alerts/test</code>) have <strong>10-second global cooldown</strong></li>
+  <li>Separate from per-API-key limits</li>
+  <li>Prevents notification spam during configuration testing</li>
+</ul>
+
+<hr />
+
+<h3 id="ssrf-protection">SSRF Protection</h3>
+
+<p><strong>Purpose:</strong> Prevent Server-Side Request Forgery attacks via alert URLs.</p>
+
+<p><strong>Implementation:</strong></p>
+
+<ul>
+  <li><strong>URL validation</strong> on all alert webhook/Gotify/ntfy/Apprise URLs</li>
+  <li>Blocks internal network access, cloud metadata endpoints, and non-HTTP schemes</li>
+</ul>
+
+<p><strong>Blocked Targets:</strong></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Category</th>
+      <th>Examples</th>
+      <th>Reason</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Non-HTTP schemes</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">file://</code>, <code class="language-plaintext highlighter-rouge">ftp://</code>, <code class="language-plaintext highlighter-rouge">data://</code>, <code class="language-plaintext highlighter-rouge">javascript:</code></td>
+      <td>Prevent local file/protocol abuse</td>
+    </tr>
+    <tr>
+      <td><strong>Localhost</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">localhost</code>, <code class="language-plaintext highlighter-rouge">127.0.0.1</code>, <code class="language-plaintext highlighter-rouge">::1</code></td>
+      <td>Block loopback access</td>
+    </tr>
+    <tr>
+      <td><strong>Private IPs</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">10.x</code>, <code class="language-plaintext highlighter-rouge">192.168.x</code>, <code class="language-plaintext highlighter-rouge">172.16-31.x</code></td>
+      <td>Block internal network</td>
+    </tr>
+    <tr>
+      <td><strong>Link-local</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">169.254.x</code>, <code class="language-plaintext highlighter-rouge">fe80::/10</code></td>
+      <td>Block metadata endpoints</td>
+    </tr>
+    <tr>
+      <td><strong>Cloud metadata</strong></td>
+      <td><code class="language-plaintext highlighter-rouge">169.254.169.254</code></td>
+      <td>Prevent AWS/GCP/Azure credential theft</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Allowed Targets:</strong></p>
+
+<ul>
+  <li>Public HTTPS/HTTP URLs only (resolved IPs must be public)</li>
+</ul>
+
+<p><strong>Validation Error:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Invalid alert URL: private IP addresses and localhost are not allowed"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Testing:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Blocked - private IP</span>
+curl <span class="nt">-X</span> PUT http://localhost:8080/api/alerts <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"X-Api-Key: key"</span> <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"Content-Type: application/json"</span> <span class="se">\</span>
+  <span class="nt">-d</span> <span class="s1">'{"providers": {"webhook": {"enabled": true, "url": "http://192.168.1.1/webhook"}}}'</span>
+
+<span class="c"># Allowed - public URL</span>
+curl <span class="nt">-X</span> PUT http://localhost:8080/api/alerts <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"X-Api-Key: key"</span> <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"Content-Type: application/json"</span> <span class="se">\</span>
+  <span class="nt">-d</span> <span class="s1">'{"providers": {"webhook": {"enabled": true, "url": "https://webhook.site/unique-id"}}}'</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="request-size-limits">Request Size Limits</h3>
+
+<p><strong>Purpose:</strong> Prevent DoS attacks via large request bodies.</p>
+
+<p><strong>Implementation:</strong></p>
+
+<ul>
+  <li><strong>1 MB default limit</strong> (configurable via <code class="language-plaintext highlighter-rouge">MAX_REQUEST_BODY_SIZE</code>)</li>
+  <li>Middleware checks <code class="language-plaintext highlighter-rouge">Content-Length</code> header before reading body</li>
+  <li>Returns <code class="language-plaintext highlighter-rouge">413 Payload Too Large</code> if exceeded</li>
+</ul>
+
+<p><strong>Configuration:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">MAX_REQUEST_BODY_SIZE</span><span class="o">=</span>524288  <span class="c"># 512 KB limit</span>
+</code></pre></div></div>
+
+<p><strong>Error Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Request body exceeds maximum size of 1048576 bytes"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<hr />
+
+<h3 id="security-headers">Security Headers</h3>
+
+<p><strong>Purpose:</strong> Protect against common web vulnerabilities (clickjacking, MIME sniffing, etc.).</p>
+
+<p><strong>Middleware:</strong> <code class="language-plaintext highlighter-rouge">SecurityHeadersMiddleware</code> adds headers to all responses.</p>
+
+<p><strong>Headers:</strong></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Header</th>
+      <th>Value</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">X-Frame-Options</code></td>
+      <td><code class="language-plaintext highlighter-rouge">DENY</code></td>
+      <td>Prevent clickjacking</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">X-Content-Type-Options</code></td>
+      <td><code class="language-plaintext highlighter-rouge">nosniff</code></td>
+      <td>Prevent MIME sniffing</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Cross-Origin-Resource-Policy</code></td>
+      <td><code class="language-plaintext highlighter-rouge">same-origin</code></td>
+      <td>Restrict resource loading</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Referrer-Policy</code></td>
+      <td><code class="language-plaintext highlighter-rouge">strict-origin-when-cross-origin</code></td>
+      <td>Control referrer information</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Verification:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-I</span> http://localhost:8080/api/health
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="cors-configuration">CORS Configuration</h3>
+
+<p><strong>Purpose:</strong> Restrict which frontend origins can access the API.</p>
+
+<p><strong>Implementation:</strong></p>
+
+<ul>
+  <li>Configurable via <code class="language-plaintext highlighter-rouge">CORS_ORIGINS</code> environment variable (comma-separated)</li>
+  <li><strong>Default:</strong> <code class="language-plaintext highlighter-rouge">http://localhost:5173,http://localhost:4173</code> (Vite dev servers)</li>
+  <li>Restricted methods: <code class="language-plaintext highlighter-rouge">GET</code>, <code class="language-plaintext highlighter-rouge">POST</code>, <code class="language-plaintext highlighter-rouge">PUT</code></li>
+  <li>Restricted headers: <code class="language-plaintext highlighter-rouge">Content-Type</code>, <code class="language-plaintext highlighter-rouge">X-Api-Key</code></li>
+</ul>
+
+<p><strong>Configuration:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Production: restrict to your domain only</span>
+<span class="nv">CORS_ORIGINS</span><span class="o">=</span>https://your-frontend-domain.com
+
+<span class="c"># Development: allow multiple origins</span>
+<span class="nv">CORS_ORIGINS</span><span class="o">=</span>http://localhost:5173,http://localhost:4173,https://staging.example.com
+</code></pre></div></div>
+
+<p><strong>Preflight Request:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-X</span> OPTIONS http://localhost:8080/api/config <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"Origin: https://your-frontend-domain.com"</span> <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"Access-Control-Request-Method: PUT"</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="input-validation">Input Validation</h3>
+
+<p><strong>Purpose:</strong> Prevent injection attacks and ensure data integrity.</p>
+
+<p><strong>Implementation:</strong></p>
+
+<ul>
+  <li><strong>Pydantic models</strong> enforce strict type checking on all API inputs</li>
+  <li>Range validation (e.g., <code class="language-plaintext highlighter-rouge">speedtest_interval_minutes</code> between 1 and 1440)</li>
+  <li>Required field validation</li>
+  <li>Type coercion with validation errors</li>
+</ul>
+
+<p><strong>Examples:</strong></p>
+
+<p><strong>Valid Configuration Update:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"speedtest_interval_minutes"</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"enabled_exporters"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"csv"</span><span class="p">,</span><span class="w"> </span><span class="s2">"sqlite"</span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Invalid Configuration Update:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"speedtest_interval_minutes"</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w">  </span><span class="err">//</span><span class="w"> </span><span class="err">Too</span><span class="w"> </span><span class="err">low</span><span class="w">
+  </span><span class="nl">"enabled_exporters"</span><span class="p">:</span><span class="w"> </span><span class="s2">"csv"</span><span class="w">  </span><span class="err">//</span><span class="w"> </span><span class="err">Wrong</span><span class="w"> </span><span class="err">type</span><span class="w"> </span><span class="err">(should</span><span class="w"> </span><span class="err">be</span><span class="w"> </span><span class="err">list)</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Error Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"detail"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"loc"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"body"</span><span class="p">,</span><span class="w"> </span><span class="s2">"speedtest_interval_minutes"</span><span class="p">],</span><span class="w">
+      </span><span class="nl">"msg"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ensure this value is greater than or equal to 1"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"value_error.number.not_ge"</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<hr />
+
+<h2 id="security-best-practices">Security Best Practices</h2>
+
+<h3 id="for-production-deployments">For Production Deployments</h3>
+
+<h4 id="1-always-set-api_key">1. Always Set API_KEY</h4>
+
+<p>Generate a strong, unique API key:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python <span class="nt">-c</span> <span class="s1">'import secrets; print(secrets.token_urlsafe(32))'</span>
+</code></pre></div></div>
+
+<p>Add to <code class="language-plaintext highlighter-rouge">.env</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">API_KEY</span><span class="o">=</span>your-generated-key-here
+</code></pre></div></div>
+
+<p><strong>Never commit API keys to version control.</strong></p>
+
+<h4 id="2-use-https">2. Use HTTPS</h4>
+
+<p>Deploy behind a reverse proxy (nginx, Caddy, Traefik) with TLS certificates:</p>
+
+<p><strong>nginx example:</strong></p>
+
+<div class="language-nginx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">server</span> <span class="p">{</span>
+    <span class="kn">listen</span> <span class="mi">443</span> <span class="s">ssl</span> <span class="s">http2</span><span class="p">;</span>
+    <span class="kn">server_name</span> <span class="s">hermes.yourdomain.com</span><span class="p">;</span>
+
+    <span class="kn">ssl_certificate</span> <span class="n">/etc/letsencrypt/live/hermes.yourdomain.com/fullchain.pem</span><span class="p">;</span>
+    <span class="kn">ssl_certificate_key</span> <span class="n">/etc/letsencrypt/live/hermes.yourdomain.com/privkey.pem</span><span class="p">;</span>
+
+    <span class="kn">location</span> <span class="n">/</span> <span class="p">{</span>
+        <span class="kn">proxy_pass</span> <span class="s">http://localhost:8080</span><span class="p">;</span>
+        <span class="kn">proxy_set_header</span> <span class="s">Host</span> <span class="nv">$host</span><span class="p">;</span>
+        <span class="kn">proxy_set_header</span> <span class="s">X-Real-IP</span> <span class="nv">$remote_addr</span><span class="p">;</span>
+        <span class="kn">proxy_set_header</span> <span class="s">X-Forwarded-For</span> <span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+        <span class="kn">proxy_set_header</span> <span class="s">X-Forwarded-Proto</span> <span class="nv">$scheme</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><strong>Caddy example:</strong></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hermes.yourdomain.com {
+    reverse_proxy localhost:8080
+}
+</code></pre></div></div>
+
+<h4 id="3-restrict-cors-origins">3. Restrict CORS Origins</h4>
+
+<p>Set <code class="language-plaintext highlighter-rouge">CORS_ORIGINS</code> to your frontend domain only:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">CORS_ORIGINS</span><span class="o">=</span>https://your-frontend-domain.com
+</code></pre></div></div>
+
+<p><strong>Never use <code class="language-plaintext highlighter-rouge">*</code> in production.</strong></p>
+
+<h4 id="4-configure-rate-limits">4. Configure Rate Limits</h4>
+
+<p>Adjust <code class="language-plaintext highlighter-rouge">RATE_LIMIT_PER_MINUTE</code> based on your usage patterns:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Low traffic: tighten limits</span>
+<span class="nv">RATE_LIMIT_PER_MINUTE</span><span class="o">=</span>30
+
+<span class="c"># High traffic: increase limits</span>
+<span class="nv">RATE_LIMIT_PER_MINUTE</span><span class="o">=</span>120
+</code></pre></div></div>
+
+<h4 id="5-validate-alert-urls">5. Validate Alert URLs</h4>
+
+<p>Only use trusted, public HTTPS endpoints for alert webhooks:</p>
+
+<p><strong>Good:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ALERT_WEBHOOK_URL</span><span class="o">=</span>https://webhook.site/unique-id
+<span class="nv">ALERT_GOTIFY_URL</span><span class="o">=</span>https://gotify.yourdomain.com
+</code></pre></div></div>
+
+<p><strong>Bad (blocked by SSRF protection):</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ALERT_WEBHOOK_URL</span><span class="o">=</span>http://localhost:8080/admin
+<span class="nv">ALERT_WEBHOOK_URL</span><span class="o">=</span>http://192.168.1.100/internal
+</code></pre></div></div>
+
+<h4 id="6-network-isolation">6. Network Isolation</h4>
+
+<p>Deploy in a private network segment if possible:</p>
+
+<p><strong>docker-compose.yml:</strong></p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">services</span><span class="pi">:</span>
+  <span class="na">hermes-scheduler</span><span class="pi">:</span>
+    <span class="na">networks</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">hermes_internal</span>
+  <span class="na">hermes-api</span><span class="pi">:</span>
+    <span class="na">networks</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">hermes_internal</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">127.0.0.1:8080:8080"</span>  <span class="c1"># Bind to localhost only</span>
+
+<span class="na">networks</span><span class="pi">:</span>
+  <span class="na">hermes_internal</span><span class="pi">:</span>
+    <span class="na">driver</span><span class="pi">:</span> <span class="s">bridge</span>
+    <span class="na">internal</span><span class="pi">:</span> <span class="kc">true</span>  <span class="c1"># No external access</span>
+</code></pre></div></div>
+
+<p>Then expose via reverse proxy on host network.</p>
+
+<h4 id="7-monitor-logs">7. Monitor Logs</h4>
+
+<p>Review authentication failures and rate limit violations regularly:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Check for auth failures</span>
+docker logs hermes-api | <span class="nb">grep</span> <span class="nt">-i</span> <span class="s2">"unauthorized</span><span class="se">\|</span><span class="s2">invalid api key"</span>
+
+<span class="c"># Check for rate limit hits</span>
+docker logs hermes-api | <span class="nb">grep</span> <span class="nt">-i</span> <span class="s2">"rate limit"</span>
+
+<span class="c"># Check for SSRF attempts</span>
+docker logs hermes-api | <span class="nb">grep</span> <span class="nt">-i</span> <span class="s2">"ssrf</span><span class="se">\|</span><span class="s2">invalid alert url"</span>
+</code></pre></div></div>
+
+<h4 id="8-keep-docker-images-updated">8. Keep Docker Images Updated</h4>
+
+<p>Regularly pull latest images to get security patches:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker compose pull
+docker compose up <span class="nt">-d</span>
+</code></pre></div></div>
+
+<p>Subscribe to GitHub releases for notifications:
+<a href="https://github.com/fabell4/hermes/releases">https://github.com/fabell4/hermes/releases</a></p>
+
+<h4 id="9-use-read-only-volumes-optional">9. Use Read-Only Volumes (Optional)</h4>
+
+<p>For extra security, mount sensitive files as read-only:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">volumes</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">./config.json:/app/data/config.json:ro</span>
+</code></pre></div></div>
+
+<h4 id="10-run-as-non-root-user">10. Run as Non-Root User</h4>
+
+<p>Dockerfile already uses non-root user (<code class="language-plaintext highlighter-rouge">appuser</code>), but verify:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker <span class="nb">exec </span>hermes-api <span class="nb">whoami</span>
+<span class="c"># Output: appuser</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="security-documentation">Security Documentation</h2>
+
+<h3 id="security-audit-report">Security Audit Report</h3>
+
+<p><strong><a href="SECURITY-AUDIT">Security Audit Report</a></strong> — Comprehensive 50-page security analysis covering:</p>
+
+<ul>
+  <li><strong>Authentication Review</strong> — API key validation, timing attacks, credential storage</li>
+  <li><strong>Rate Limiting Analysis</strong> — Sliding window implementation, DoS protection, Retry-After headers</li>
+  <li><strong>Input Validation</strong> — Pydantic schemas, boundary conditions, type safety</li>
+  <li><strong>SSRF Assessment</strong> — URL validation, private IP blocking, cloud metadata protection</li>
+  <li><strong>Threat Modeling</strong> — Attack scenarios, mitigation strategies, risk ratings</li>
+  <li><strong>Recommendations Summary</strong> — Prioritized security enhancements</li>
+</ul>
+
+<p><strong>Conclusion:</strong> <em>“APPROVED FOR v1.0 RELEASE after implementing SSRF protection and API key length validation”</em> (both complete).</p>
+
+<h3 id="security-enhancements-summary">Security Enhancements Summary</h3>
+
+<p><strong><a href="SECURITY-ENHANCEMENTS">Security Enhancements</a></strong> — Implementation details of v1.0 security fixes:</p>
+
+<ol>
+  <li><strong>API Key Validation</strong> — 32-character minimum enforced at startup</li>
+  <li><strong>SSRF Protection</strong> — Alert URL validation blocking dangerous targets</li>
+  <li><strong>Rate Limiting Improvements</strong> — Retry-After headers, test alert cooldown</li>
+  <li><strong>Security Headers</strong> — X-Frame-Options, Referrer-Policy added</li>
+</ol>
+
+<p><strong>Test Coverage:</strong> 130+ API security tests validating all features.</p>
+
+<hr />
+
+<h2 id="test-coverage">Test Coverage</h2>
+
+<h3 id="security-focused-tests">Security-Focused Tests</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Test Suite</th>
+      <th>Count</th>
+      <th>Coverage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>SSRF Protection</strong></td>
+      <td>15</td>
+      <td>Valid URLs, dangerous schemes, localhost, private IPs, link-local, multiple providers</td>
+    </tr>
+    <tr>
+      <td><strong>Request Size Limits</strong></td>
+      <td>6</td>
+      <td>Under/at/over limit, missing Content-Length, error messages</td>
+    </tr>
+    <tr>
+      <td><strong>Test Alert Rate Limiting</strong></td>
+      <td>7</td>
+      <td>First allowed, second rejected, cooldown behavior, Retry-After header</td>
+    </tr>
+    <tr>
+      <td><strong>Authentication</strong></td>
+      <td>25+</td>
+      <td>Missing key, invalid key, valid key, timing-safe comparison</td>
+    </tr>
+    <tr>
+      <td><strong>Rate Limiting</strong></td>
+      <td>18+</td>
+      <td>Per-key limits, sliding window, Retry-After header, burst behavior</td>
+    </tr>
+    <tr>
+      <td><strong>Input Validation</strong></td>
+      <td>30+</td>
+      <td>Type checking, range validation, required fields, boundary conditions</td>
+    </tr>
+    <tr>
+      <td><strong>API Boundaries</strong></td>
+      <td>25+</td>
+      <td>Paginations, invalid pages, empty results, malformed queries</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Total API Tests:</strong> 344 passing<br />
+<strong>Code Coverage:</strong> 92% (1,395 statements, 114 missed)<br />
+<strong>Linting:</strong> All ruff checks passing</p>
+
+<p><strong>Run Tests:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pytest <span class="nt">--cov</span><span class="o">=</span>src tests/
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="vulnerability-disclosure">Vulnerability Disclosure</h2>
+
+<h3 id="reporting-security-issues">Reporting Security Issues</h3>
+
+<p><strong>DO NOT</strong> open public GitHub issues for security vulnerabilities.</p>
+
+<p><strong>Instead:</strong></p>
+
+<ol>
+  <li>Email security report to: [maintainer-email]</li>
+  <li>Include:
+    <ul>
+      <li>Description of vulnerability</li>
+      <li>Steps to reproduce</li>
+      <li>Affected versions</li>
+      <li>Suggested fix (if known)</li>
+    </ul>
+  </li>
+</ol>
+
+<p>Response SLA: 48 hours for acknowledgment, 7 days for fix timeline.</p>
+
+<h3 id="security-updates">Security Updates</h3>
+
+<p>Security patches are released as:</p>
+
+<ul>
+  <li><strong>Patch releases</strong> for critical vulnerabilities (e.g., v1.0.1)</li>
+  <li><strong>Changelog entries</strong> with <code class="language-plaintext highlighter-rouge">[SECURITY]</code> prefix</li>
+  <li><strong>GitHub Security Advisories</strong> for CVE-level issues</li>
+</ul>
+
+<p>Subscribe to releases for notifications:
+<a href="https://github.com/fabell4/hermes/releases">https://github.com/fabell4/hermes/releases</a></p>
+
+<hr />
+
+<h2 id="security-checklist">Security Checklist</h2>
+
+<p>Use this checklist before deploying to production:</p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">API_KEY</code> set to 32+ character strong key</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Running behind HTTPS reverse proxy with valid TLS certificate</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">CORS_ORIGINS</code> restricted to frontend domain only</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">RATE_LIMIT_PER_MINUTE</code> configured for expected traffic</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Alert URLs validated and HTTPS-only</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Docker images updated to latest version</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Logs monitored for auth failures and rate limit violations</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Network isolation applied (private network segment)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Volumes mounted with appropriate permissions</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Health check endpoints verified</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Backup strategy in place for <code class="language-plaintext highlighter-rouge">hermes.db</code> and <code class="language-plaintext highlighter-rouge">runtime_config.json</code></li>
+</ul>
+
+<hr />
+
+<h2 id="common-security-questions">Common Security Questions</h2>
+
+<h3 id="q-is-it-safe-to-disable-authentication">Q: Is it safe to disable authentication?</h3>
+
+<p><strong>A:</strong> Only in completely isolated environments (e.g., home network with no external access). <strong>Never disable authentication for internet-facing deployments.</strong> Anyone can trigger speed tests and modify configuration without authentication.</p>
+
+<h3 id="q-can-i-use-the-same-api-key-across-multiple-deployments">Q: Can I use the same API key across multiple deployments?</h3>
+
+<p><strong>A:</strong> Not recommended. Each deployment should have a unique API key to prevent credential reuse and enable independent key rotation.</p>
+
+<h3 id="q-how-do-i-rotate-api-keys">Q: How do I rotate API keys?</h3>
+
+<p><strong>A:</strong> Currently, key rotation requires:</p>
+
+<ol>
+  <li>Generate new key</li>
+  <li>Update <code class="language-plaintext highlighter-rouge">.env</code> with new key</li>
+  <li>Restart containers</li>
+  <li>Update API clients with new key</li>
+</ol>
+
+<p><strong>Planned for v2.0:</strong> Multi-key support and zero-downtime rotation.</p>
+
+<h3 id="q-are-api-keys-logged">Q: Are API keys logged?</h3>
+
+<p><strong>A:</strong> No. API keys are never logged or written to disk (except <code class="language-plaintext highlighter-rouge">.env</code> file). Failed authentication attempts log the error but not the attempted key.</p>
+
+<h3 id="q-can-i-use-mutual-tls-mtls">Q: Can I use mutual TLS (mTLS)?</h3>
+
+<p><strong>A:</strong> Hermes doesn’t natively support mTLS, but you can configure it at the reverse proxy level (nginx, Caddy, Traefik). Clients must present valid certificates to access the API.</p>
+
+<h3 id="q-does-hermes-support-oauth2oidc">Q: Does Hermes support OAuth2/OIDC?</h3>
+
+<p><strong>A:</strong> Not currently. Planned for post-v1.0 enhancements. See <a href="https://github.com/fabell4/hermes/blob/main/TODO.md">TODO.md</a> for roadmap.</p>
+
+<h3 id="q-how-are-secrets-stored">Q: How are secrets stored?</h3>
+
+<p><strong>A:</strong> All secrets (API keys, alert tokens) are stored in:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">.env</code> file (plaintext, should be protected via file permissions)</li>
+  <li><code class="language-plaintext highlighter-rouge">runtime_config.json</code> (plaintext, alert provider tokens)</li>
+</ul>
+
+<p><strong>Planned for v2.0:</strong> Integration with secrets vaults (HashiCorp Vault, AWS Secrets Manager).</p>
+
+<h3 id="q-is-sqlite-database-encrypted">Q: Is SQLite database encrypted?</h3>
+
+<p><strong>A:</strong> No. The <code class="language-plaintext highlighter-rouge">hermes.db</code> file stores speed test results in plaintext. If you need encryption, use:</p>
+
+<ul>
+  <li><strong>Filesystem-level encryption</strong> (LUKS, FileVault, BitLocker)</li>
+  <li><strong>Volume encryption</strong> via Docker secrets or encrypted volumes</li>
+</ul>
+
+<h3 id="q-can-i-run-hermes-behind-cloudflare">Q: Can I run Hermes behind Cloudflare?</h3>
+
+<p><strong>A:</strong> Yes. Enable Cloudflare’s “Bot Fight Mode” and “Rate Limiting” for additional protection. API key authentication still applies.</p>
+
+<hr />
+
+<h2 id="see-also">See Also</h2>
+
+<ul>
+  <li><a href="SECURITY-AUDIT">Security Audit Report</a> — Comprehensive security analysis</li>
+  <li><a href="SECURITY-ENHANCEMENTS">Security Enhancements</a> — v1.0 security fixes</li>
+  <li><a href="api-reference">API Reference</a> — Authentication and rate limiting details</li>
+  <li><a href="getting-started">Getting Started</a> — API key generation and configuration</li>
+  <li><a href="alerts">Alerts Configuration</a> — SSRF protection on alert URLs</li>
+</ul>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/Hermes" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Security Guide
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

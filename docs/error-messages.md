@@ -2,9 +2,6 @@
 layout: default
 title: "Error Message Reference"
 ---
-
-# Error Message Reference
-
 **Project:** Hermes Speed Monitor  
 **Last Updated:** 2026-05-01  
 **Purpose:** Centralized error message reference with troubleshooting steps

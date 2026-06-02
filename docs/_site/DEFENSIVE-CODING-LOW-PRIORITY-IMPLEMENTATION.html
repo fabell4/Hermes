@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Defensive Coding Low-Priority Implementation — Hermes Documentation</title>
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Defensive Coding Low-Priority Implementation | Hermes Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Defensive Coding Low-Priority Implementation" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<link rel="canonical" href="http://localhost:4001/DEFENSIVE-CODING-LOW-PRIORITY-IMPLEMENTATION.html" />
+<meta property="og:url" content="http://localhost:4001/DEFENSIVE-CODING-LOW-PRIORITY-IMPLEMENTATION.html" />
+<meta property="og:site_name" content="Hermes Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Defensive Coding Low-Priority Implementation" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted internet speed test monitoring with modern observability stack integration","headline":"Defensive Coding Low-Priority Implementation","url":"http://localhost:4001/DEFENSIVE-CODING-LOW-PRIORITY-IMPLEMENTATION.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration">
+
+<title>
+  
+    Defensive Coding Low-Priority Implementation — Hermes Documentation
+  
+</title>
+
+
+<link rel="icon" type="image/png" href="/assets/Hermes.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="/" class="nav-brand">
+    <span class="brand-name">
+      Hermes
+      <span>Docs</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/alloy"
+                 >
+                Grafana Alloy
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-ENHANCEMENTS"
+                 >
+                Security Enhancements
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Error Handling</h3>
+        <ul>
+          
+            <li>
+              <a href="/error-catalog"
+                 >
+                Error Catalog
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-handling-conventions"
+                 >
+                Handling Conventions
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-messages"
+                 >
+                Error Messages
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/RELEASE-PROCESS"
+                 >
+                Release Process
+              </a>
+            </li>
+          
+            <li>
+              <a href="/styleguide"
+                 >
+                Frontend Style Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/suppression-decisions"
+                 >
+                Suppression Decisions
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Code Reviews</h3>
+        <ul>
+          
+            <li>
+              <a href="/BEST-PRACTICES-REVIEW"
+                 >
+                Best Practices
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DEFENSIVE-CODING-REVIEW"
+                 >
+                Defensive Coding
+              </a>
+            </li>
+          
+            <li>
+              <a href="/ERROR-HANDLING-REVIEW"
+                 >
+                Error Handling Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/PERFORMANCE-OPTIMIZATION-REVIEW"
+                 >
+                Performance Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/TEST-COVERAGE-REVIEW"
+                 >
+                Test Coverage
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DOCUMENTATION-ACCURACY-REVIEW"
+                 >
+                Documentation Review
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Defensive Coding Low-Priority Implementation</h1>
+
+            
+          </header>
+        
+
+        <p><strong>Implementation Date:</strong> May 1, 2026<br />
+<strong>Status:</strong> ✅ COMPLETE</p>
+
+<h2 id="summary">Summary</h2>
+
+<p>Implemented 4 low-priority defensive coding improvements from <a href="/DEFENSIVE-CODING-REVIEW.html">DEFENSIVE-CODING-REVIEW.md</a>.
+These improvements add additional validation edge cases to further harden the codebase against invalid configurations.</p>
+
+<hr />
+
+<h2 id="changes-implemented">Changes Implemented</h2>
+
+<h3 id="issue-12-loki-exporter-url-validation-">Issue #12: Loki Exporter URL Validation ✅</h3>
+
+<p><strong>File:</strong> <code class="language-plaintext highlighter-rouge">src/exporters/loki_exporter.py</code></p>
+
+<p><strong>Improvements:</strong></p>
+<ul>
+  <li>✅ Added hostname existence validation</li>
+  <li>✅ Added timeout validation (must be positive)</li>
+  <li>✅ Added job label validation (cannot be empty/whitespace)</li>
+  <li>✅ Added warning for embedded credentials in URL</li>
+  <li>✅ Job label whitespace is now automatically stripped</li>
+</ul>
+
+<p><strong>Impact:</strong> Prevents invalid URLs from causing runtime crashes; clearer error messages on misconfiguration.</p>
+
+<hr />
+
+<h3 id="issue-13-alert-manager-upper-bounds-">Issue #13: Alert Manager Upper Bounds ✅</h3>
+
+<p><strong>File:</strong> <code class="language-plaintext highlighter-rouge">src/services/alert_manager.py</code></p>
+
+<p><strong>Improvements:</strong></p>
+<ul>
+  <li>✅ Added upper bound for <code class="language-plaintext highlighter-rouge">failure_threshold</code> (max 100)</li>
+  <li>✅ Added upper bound for <code class="language-plaintext highlighter-rouge">cooldown_minutes</code> (max 10080 minutes = 1 week)</li>
+</ul>
+
+<p><strong>Impact:</strong> Prevents unrealistic configuration values that could delay alerts indefinitely.</p>
+
+<hr />
+
+<h3 id="issue-14-config-rate-limit-validation-">Issue #14: Config Rate Limit Validation ✅</h3>
+
+<p><strong>File:</strong> <code class="language-plaintext highlighter-rouge">src/config.py</code></p>
+
+<p><strong>Improvements:</strong></p>
+<ul>
+  <li>✅ Added negative value clamping for <code class="language-plaintext highlighter-rouge">RATE_LIMIT_PER_MINUTE</code></li>
+  <li>✅ Negative values are clamped to 0 with warning log</li>
+</ul>
+
+<p><strong>Impact:</strong> Prevents unexpected auth middleware behavior with negative rate limits.</p>
+
+<hr />
+
+<h3 id="issue-15-runtime-config-interval-bounds-">Issue #15: Runtime Config Interval Bounds ✅</h3>
+
+<p><strong>File:</strong> <code class="language-plaintext highlighter-rouge">src/runtime_config.py</code></p>
+
+<p><strong>Status:</strong> Already implemented in previous defensive coding pass<br />
+<strong>Details:</strong> Bounds checking exists in <code class="language-plaintext highlighter-rouge">get_interval_minutes()</code> function validating 1-10080 minute range.</p>
+
+<hr />
+
+<h2 id="test-coverage">Test Coverage</h2>
+
+<h3 id="new-tests-added">New Tests Added</h3>
+
+<p><strong>AlertManager Tests (4 tests):</strong></p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">test_alert_manager_raises_on_threshold_too_high</code> - Validates max threshold of 100</li>
+  <li><code class="language-plaintext highlighter-rouge">test_alert_manager_raises_on_cooldown_too_high</code> - Validates max cooldown of 10080</li>
+  <li><code class="language-plaintext highlighter-rouge">test_alert_manager_accepts_maximum_valid_threshold</code> - Boundary test</li>
+  <li><code class="language-plaintext highlighter-rouge">test_alert_manager_accepts_maximum_valid_cooldown</code> - Boundary test</li>
+</ul>
+
+<p><strong>Loki Exporter Tests (7 tests):</strong></p>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">test_init_rejects_url_without_hostname</code> - Validates hostname presence</li>
+  <li><code class="language-plaintext highlighter-rouge">test_init_rejects_negative_timeout</code> - Validates positive timeout</li>
+  <li><code class="language-plaintext highlighter-rouge">test_init_rejects_zero_timeout</code> - Validates positive timeout</li>
+  <li><code class="language-plaintext highlighter-rouge">test_init_rejects_empty_job_label</code> - Validates non-empty job label</li>
+  <li><code class="language-plaintext highlighter-rouge">test_init_rejects_whitespace_only_job_label</code> - Validates non-whitespace job label</li>
+  <li><code class="language-plaintext highlighter-rouge">test_init_strips_job_label_whitespace</code> - Validates whitespace stripping</li>
+  <li><code class="language-plaintext highlighter-rouge">test_init_warns_on_credentials_in_url</code> - Validates credential warning</li>
+</ul>
+
+<p><strong>Total:</strong> 11 new tests added (392 → 403 tests)</p>
+
+<hr />
+
+<h2 id="verification-results">Verification Results</h2>
+
+<h3 id="test-suite">Test Suite</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>✅ 403 tests passing
+✅ No failures
+✅ Test runtime: ~19 seconds
+</code></pre></div></div>
+
+<h3 id="static-analysis">Static Analysis</h3>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>✅ mypy: Success - no issues found in 26 source files
+✅ ruff: All checks passed
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="impact-assessment">Impact Assessment</h2>
+
+<p><strong>Risk Level:</strong> Very Low<br />
+<strong>Breaking Changes:</strong> None<br />
+<strong>Backward Compatibility:</strong> ✅ Fully maintained</p>
+
+<p><strong>Benefits:</strong></p>
+<ul>
+  <li>More robust input validation across all components</li>
+  <li>Clearer error messages for invalid configurations</li>
+  <li>Better logging for troubleshooting configuration issues</li>
+  <li>Prevents edge case configuration errors</li>
+</ul>
+
+<hr />
+
+<h2 id="related-documentation">Related Documentation</h2>
+
+<ul>
+  <li><a href="/DEFENSIVE-CODING-REVIEW.html">docs/DEFENSIVE-CODING-REVIEW.md</a> - Full defensive coding review</li>
+  <li><a href="../TODO.md">TODO.md</a> - Project roadmap and completed tasks</li>
+</ul>
+
+<hr />
+
+<h2 id="remaining-optional-improvements">Remaining Optional Improvements</h2>
+
+<p>The following items remain for post-v1.0 consideration:</p>
+
+<ul>
+  <li><strong>Issue #1:</strong> Config range validation helper functions</li>
+  <li><strong>Issue #6:</strong> Configurable retry logic with exponential backoff</li>
+  <li><strong>Issue #8:</strong> File locking for triggers (requires Windows/Unix compatibility)</li>
+</ul>
+
+<p>These are documented in TODO.md under “v1.1 — Code Quality &amp; Testing (Deferred Items from Reviews)”.</p>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/Hermes" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Defensive Coding Low-Priority Implementation
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

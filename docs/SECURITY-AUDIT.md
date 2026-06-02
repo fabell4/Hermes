@@ -2,9 +2,6 @@
 layout: default
 title: "Security Audit Report"
 ---
-
-# Security Audit Report — Hermes v1.0
-
 **Date:** 2026-04-29  
 **Scope:** Authentication, Rate Limiting, Input Validation  
 **Status:** Pre-v1.0 Release Audit

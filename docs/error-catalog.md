@@ -2,9 +2,6 @@
 layout: default
 title: "Error Catalog"
 ---
-
-# Error Catalog
-
 **Project:** Hermes Speed Monitor  
 **Last Updated:** 2026-05-01  
 **Purpose:** Comprehensive list of all possible errors by module with causes and remediation

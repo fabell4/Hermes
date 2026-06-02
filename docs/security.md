@@ -2,9 +2,6 @@
 layout: default
 title: "Security Guide"
 ---
-
-# Security Guide
-
 Hermes implements multiple layers of security for production deployments. This guide covers security features, best practices, and audit reports.
 
 ---

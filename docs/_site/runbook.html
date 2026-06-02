@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Runbook — Hermes Documentation</title>
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Runbook | Hermes Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Runbook" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Operational guide for diagnosing and resolving production issues using logs and metrics." />
+<meta name="twitter:description" property="og:description" content="Operational guide for diagnosing and resolving production issues using logs and metrics." />
+<link rel="canonical" href="http://localhost:4001/runbook.html" />
+<meta property="og:url" content="http://localhost:4001/runbook.html" />
+<meta property="og:site_name" content="Hermes Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Runbook" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Operational guide for diagnosing and resolving production issues using logs and metrics.","headline":"Runbook","url":"http://localhost:4001/runbook.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Operational guide for diagnosing and resolving production issues using logs and metrics.">
+
+<title>
+  
+    Runbook — Hermes Documentation
+  
+</title>
+
+
+<link rel="icon" type="image/png" href="/assets/Hermes.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="/" class="nav-brand">
+    <span class="brand-name">
+      Hermes
+      <span>Docs</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/alloy"
+                 >
+                Grafana Alloy
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-ENHANCEMENTS"
+                 >
+                Security Enhancements
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Error Handling</h3>
+        <ul>
+          
+            <li>
+              <a href="/error-catalog"
+                 >
+                Error Catalog
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-handling-conventions"
+                 >
+                Handling Conventions
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-messages"
+                 >
+                Error Messages
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/RELEASE-PROCESS"
+                 >
+                Release Process
+              </a>
+            </li>
+          
+            <li>
+              <a href="/styleguide"
+                 >
+                Frontend Style Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/suppression-decisions"
+                 >
+                Suppression Decisions
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Code Reviews</h3>
+        <ul>
+          
+            <li>
+              <a href="/BEST-PRACTICES-REVIEW"
+                 >
+                Best Practices
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DEFENSIVE-CODING-REVIEW"
+                 >
+                Defensive Coding
+              </a>
+            </li>
+          
+            <li>
+              <a href="/ERROR-HANDLING-REVIEW"
+                 >
+                Error Handling Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/PERFORMANCE-OPTIMIZATION-REVIEW"
+                 >
+                Performance Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/TEST-COVERAGE-REVIEW"
+                 >
+                Test Coverage
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DOCUMENTATION-ACCURACY-REVIEW"
+                 >
+                Documentation Review
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Runbook</h1>
+
+            
+              <p class="page-lead">Operational guide for diagnosing and resolving production issues using logs and metrics.</p>
+            
+          </header>
+        
+
+        <p>Operational guide for diagnosing and resolving production issues using logs and metrics.</p>
+
+<h2 id="table-of-contents">Table of Contents</h2>
+
+<ul>
+  <li><a href="#log-interpretation">Log Interpretation</a></li>
+  <li><a href="#metric-thresholds">Metric Thresholds</a></li>
+  <li><a href="#alert-investigation">Alert Investigation</a></li>
+  <li><a href="#sqlite-health">SQLite Health</a></li>
+  <li><a href="#common-failure-scenarios">Common Failure Scenarios</a></li>
+  <li><a href="#escalation">Escalation</a></li>
+</ul>
+
+<hr />
+
+<h2 id="log-interpretation">Log Interpretation</h2>
+
+<p>Hermes uses structured log lines at <code class="language-plaintext highlighter-rouge">INFO</code>, <code class="language-plaintext highlighter-rouge">WARNING</code>, and <code class="language-plaintext highlighter-rouge">ERROR</code> levels.</p>
+
+<h3 id="key-log-patterns">Key Log Patterns</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Pattern</th>
+      <th>Level</th>
+      <th>Meaning</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Speedtest complete: X.X / X.X Mbps, X.X ms</code></td>
+      <td>INFO</td>
+      <td>Normal run completed</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Speedtest failed</code></td>
+      <td>ERROR</td>
+      <td>Runner could not complete test</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Exporter 'X' could not be initialized</code></td>
+      <td>WARNING</td>
+      <td>Exporter skipped this cycle</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Alert sent successfully via X</code></td>
+      <td>INFO</td>
+      <td>Alert provider delivered</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Alert provider 'X' failed</code></td>
+      <td>ERROR</td>
+      <td>Provider could not send alert</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Runtime config saved</code></td>
+      <td>INFO</td>
+      <td>UI-driven config change persisted</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">PRAGMA wal_checkpoint</code></td>
+      <td>DEBUG</td>
+      <td>SQLite WAL checkpoint triggered</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Running VACUUM</code></td>
+      <td>INFO</td>
+      <td>SQLite fragmentation above 20 %</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">pool_pending_approx=N</code></td>
+      <td>INFO</td>
+      <td>Approximate in-flight alert tasks</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="log-levels-summary">Log Levels Summary</h3>
+
+<ul>
+  <li><strong>INFO</strong>: Normal operational events; no action required.</li>
+  <li><strong>WARNING</strong>: Degraded operation (e.g., exporter skipped, retry attempted). Monitor for recurrence.</li>
+  <li><strong>ERROR</strong>: Failed operation; investigate root cause. App continues running.</li>
+  <li><strong>CRITICAL</strong>: Startup failures (e.g., missing required config). App may not function.</li>
+</ul>
+
+<hr />
+
+<h2 id="metric-thresholds">Metric Thresholds</h2>
+
+<p>Prometheus metrics are exposed on <code class="language-plaintext highlighter-rouge">PROMETHEUS_PORT</code> (default <code class="language-plaintext highlighter-rouge">8000</code>). Suggested alert thresholds:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Label</th>
+      <th>Warning</th>
+      <th>Critical</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">hermes_download_mbps</code></td>
+      <td><code class="language-plaintext highlighter-rouge">server</code></td>
+      <td>&lt; 50 % of baseline</td>
+      <td>&lt; 20 % of baseline</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">hermes_upload_mbps</code></td>
+      <td><code class="language-plaintext highlighter-rouge">server</code></td>
+      <td>&lt; 50 % of baseline</td>
+      <td>&lt; 20 % of baseline</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">hermes_ping_ms</code></td>
+      <td><code class="language-plaintext highlighter-rouge">server</code></td>
+      <td>&gt; 2× baseline</td>
+      <td>&gt; 5× baseline</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">hermes_consecutive_failures_total</code></td>
+      <td>—</td>
+      <td>≥ 3</td>
+      <td>≥ failure_threshold</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p><strong>Tip:</strong> Set <code class="language-plaintext highlighter-rouge">PROMETHEUS_DISABLE_LABELS=true</code> to reduce label cardinality if using a high-cardinality server pool.</p>
+</blockquote>
+
+<hr />
+
+<h2 id="alert-investigation">Alert Investigation</h2>
+
+<p>When an alert fires (<code class="language-plaintext highlighter-rouge">consecutive_failures &gt;= failure_threshold</code>):</p>
+
+<ol>
+  <li>
+    <p><strong>Check recent logs</strong> for <code class="language-plaintext highlighter-rouge">Speedtest failed</code> entries:</p>
+
+    <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>grep -i "speedtest failed" /var/log/hermes/app.log | tail -20
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Verify network connectivity</strong> from the host running Hermes.</p>
+  </li>
+  <li>
+    <p><strong>Check speedtest-cli</strong> is accessible and not rate-limited:</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>speedtest-cli <span class="nt">--simple</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Confirm alert provider config</strong> via <code class="language-plaintext highlighter-rouge">GET /api/alerts/config</code> — ensure <code class="language-plaintext highlighter-rouge">enabled: true</code>
+and all provider URLs/tokens are set.</p>
+  </li>
+  <li>
+    <p><strong>Trigger a manual test</strong> to rule out transient failure:</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-X</span> POST http://localhost:8080/api/trigger <span class="nt">-H</span> <span class="s2">"X-Api-Key: &lt;key&gt;"</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Check health endpoint</strong>:</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://localhost:8080/healthz
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<hr />
+
+<h2 id="sqlite-health">SQLite Health</h2>
+
+<p>The SQLite database at <code class="language-plaintext highlighter-rouge">data/hermes.db</code> uses WAL mode. The exporter automatically:</p>
+
+<ul>
+  <li>Runs <code class="language-plaintext highlighter-rouge">PRAGMA wal_checkpoint(TRUNCATE)</code> after any pruning cycle.</li>
+  <li>Runs <code class="language-plaintext highlighter-rouge">VACUUM</code> when fragmentation exceeds 20 % (<code class="language-plaintext highlighter-rouge">freelist_count / page_count &gt; 0.20</code>).</li>
+</ul>
+
+<h3 id="manual-health-check">Manual Health Check</h3>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">sqlite3</span> <span class="k">data</span><span class="o">/</span><span class="n">hermes</span><span class="p">.</span><span class="n">db</span> <span class="nv">"PRAGMA integrity_check;"</span>
+<span class="n">sqlite3</span> <span class="k">data</span><span class="o">/</span><span class="n">hermes</span><span class="p">.</span><span class="n">db</span> <span class="nv">"PRAGMA page_count; PRAGMA freelist_count;"</span>
+</code></pre></div></div>
+
+<h3 id="signs-of-problems">Signs of Problems</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Symptom</th>
+      <th>Likely Cause</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">database disk image is malformed</code></td>
+      <td>Corruption</td>
+      <td>Restore from backup; re-initialise</td>
+    </tr>
+    <tr>
+      <td>WAL file growing indefinitely</td>
+      <td>Checkpoint blocked by long reader</td>
+      <td>Restart Hermes</td>
+    </tr>
+    <tr>
+      <td>Very slow queries</td>
+      <td>High fragmentation</td>
+      <td>Run <code class="language-plaintext highlighter-rouge">VACUUM</code> manually</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="common-failure-scenarios">Common Failure Scenarios</h2>
+
+<h3 id="hermes-fails-to-start">Hermes fails to start</h3>
+
+<ul>
+  <li>Check <code class="language-plaintext highlighter-rouge">SPEEDTEST_INTERVAL_MINUTES</code> is a valid integer (≥ 1).</li>
+  <li>Verify <code class="language-plaintext highlighter-rouge">PROMETHEUS_PORT</code> is not already in use.</li>
+  <li>Confirm <code class="language-plaintext highlighter-rouge">.env</code> or environment variables are loaded.</li>
+</ul>
+
+<h3 id="no-results-being-written">No results being written</h3>
+
+<ul>
+  <li>Ensure at least one exporter is listed in <code class="language-plaintext highlighter-rouge">ENABLED_EXPORTERS</code>.</li>
+  <li>Confirm <code class="language-plaintext highlighter-rouge">data/</code> directory exists and is writable.</li>
+  <li>Check for <code class="language-plaintext highlighter-rouge">Exporter 'X' could not be initialized</code> warnings in logs.</li>
+</ul>
+
+<h3 id="alerts-not-firing">Alerts not firing</h3>
+
+<ul>
+  <li>Confirm <code class="language-plaintext highlighter-rouge">ALERT_ENABLED=true</code>.</li>
+  <li>Verify <code class="language-plaintext highlighter-rouge">ALERT_FAILURE_THRESHOLD</code> is set to expected value (default 3).</li>
+  <li>Test delivery: <code class="language-plaintext highlighter-rouge">POST /api/alerts/test</code>.</li>
+  <li>Check <code class="language-plaintext highlighter-rouge">pool_pending_approx</code> in logs — if always 0, thread pool may be exhausted.</li>
+</ul>
+
+<h3 id="high-prometheus-label-cardinality">High Prometheus label cardinality</h3>
+
+<ul>
+  <li>Set <code class="language-plaintext highlighter-rouge">PROMETHEUS_DISABLE_LABELS=true</code> to collapse all label values to empty strings.</li>
+  <li>This reduces each metric to a single time series regardless of server.</li>
+</ul>
+
+<h3 id="loki-exporter-silently-skipped">Loki exporter silently skipped</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">LOKI_URL</code> must be set when <code class="language-plaintext highlighter-rouge">loki</code> is in <code class="language-plaintext highlighter-rouge">ENABLED_EXPORTERS</code>.</li>
+  <li>Without it, the Loki factory returns <code class="language-plaintext highlighter-rouge">None</code> and the exporter is skipped with a WARNING.</li>
+</ul>
+
+<hr />
+
+<h2 id="escalation">Escalation</h2>
+
+<p>If an issue cannot be resolved via the steps above:</p>
+
+<ol>
+  <li>Collect logs from the past 24 hours.</li>
+  <li>Export current Prometheus metrics snapshot.</li>
+  <li>Note the current runtime config (<code class="language-plaintext highlighter-rouge">GET /api/config</code>).</li>
+  <li>File an issue in the project repository with the above artefacts.</li>
+</ol>
+
+<table>
+  <tbody>
+    <tr>
+      <td>See also: <a href="/error-catalog.html">Error Catalog</a></td>
+      <td><a href="/SECURITY-AUDIT.html">Security Audit</a></td>
+    </tr>
+  </tbody>
+</table>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/Hermes" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Runbook
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

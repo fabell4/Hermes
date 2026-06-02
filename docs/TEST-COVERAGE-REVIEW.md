@@ -2,9 +2,6 @@
 layout: default
 title: "Test Coverage Review"
 ---
-
-# Hermes — Test Coverage Gaps Review
-
 **Review Date:** 2026-04-30  
 **Current Coverage:** 91.36% (Python backend), unknown (TypeScript frontend)  
 **Test Count:** 355 tests (Python), 12 tests (TypeScript)  

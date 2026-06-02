@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Test Coverage Review — Hermes Documentation</title>
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Test Coverage Review | Hermes Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Test Coverage Review" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<link rel="canonical" href="http://localhost:4001/TEST-COVERAGE-REVIEW.html" />
+<meta property="og:url" content="http://localhost:4001/TEST-COVERAGE-REVIEW.html" />
+<meta property="og:site_name" content="Hermes Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Test Coverage Review" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted internet speed test monitoring with modern observability stack integration","headline":"Test Coverage Review","url":"http://localhost:4001/TEST-COVERAGE-REVIEW.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration">
+
+<title>
+  
+    Test Coverage Review — Hermes Documentation
+  
+</title>
+
+
+<link rel="icon" type="image/png" href="/assets/Hermes.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="/" class="nav-brand">
+    <span class="brand-name">
+      Hermes
+      <span>Docs</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/alloy"
+                 >
+                Grafana Alloy
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-ENHANCEMENTS"
+                 >
+                Security Enhancements
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Error Handling</h3>
+        <ul>
+          
+            <li>
+              <a href="/error-catalog"
+                 >
+                Error Catalog
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-handling-conventions"
+                 >
+                Handling Conventions
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-messages"
+                 >
+                Error Messages
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/RELEASE-PROCESS"
+                 >
+                Release Process
+              </a>
+            </li>
+          
+            <li>
+              <a href="/styleguide"
+                 >
+                Frontend Style Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/suppression-decisions"
+                 >
+                Suppression Decisions
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Code Reviews</h3>
+        <ul>
+          
+            <li>
+              <a href="/BEST-PRACTICES-REVIEW"
+                 >
+                Best Practices
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DEFENSIVE-CODING-REVIEW"
+                 >
+                Defensive Coding
+              </a>
+            </li>
+          
+            <li>
+              <a href="/ERROR-HANDLING-REVIEW"
+                 >
+                Error Handling Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/PERFORMANCE-OPTIMIZATION-REVIEW"
+                 >
+                Performance Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/TEST-COVERAGE-REVIEW"
+                 >
+                Test Coverage
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DOCUMENTATION-ACCURACY-REVIEW"
+                 >
+                Documentation Review
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Test Coverage Review</h1>
+
+            
+          </header>
+        
+
+        <p><strong>Review Date:</strong> 2026-04-30<br />
+<strong>Current Coverage:</strong> 91.36% (Python backend), unknown (TypeScript frontend)<br />
+<strong>Test Count:</strong> 355 tests (Python), 12 tests (TypeScript)<br />
+<strong>Goal:</strong> Identify and document test coverage gaps before v1.0 release</p>
+
+<hr />
+
+<h2 id="executive-summary">Executive Summary</h2>
+
+<p>The Hermes project has a <strong>strong test foundation</strong> with 355 Python tests achieving 91.36%
+backend coverage. However, several <strong>critical gaps</strong> exist that should be addressed before v1.0:</p>
+
+<h3 id="high-priority-issues">High Priority Issues</h3>
+
+<ol>
+  <li><strong>Alert Provider Factory</strong> — 66% coverage (lowest module)</li>
+  <li><strong>ResourceWarnings</strong> — 16 unclosed database warnings in test suite</li>
+  <li><strong>Frontend Coverage</strong> — Only 3 test files, 12 tests total; major components untested</li>
+  <li><strong>Error Path Coverage</strong> — Missing tests for several exception handlers</li>
+  <li><strong>Integration Tests</strong> — No integration or end-to-end tests</li>
+</ol>
+
+<h3 id="coverage-by-module-python-backend">Coverage by Module (Python Backend)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Module</th>
+      <th>Coverage</th>
+      <th>Missing Lines</th>
+      <th>Priority</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">alert_provider_factory.py</code></td>
+      <td><strong>66%</strong></td>
+      <td>66, 70-71, 95-110, 131-152, 174-186</td>
+      <td><strong>HIGH</strong></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">main.py</code></td>
+      <td><strong>83%</strong></td>
+      <td>125-149, 159, 161, 167-172, 337, 349-356, 368-392, 403-409, 472-473</td>
+      <td><strong>HIGH</strong></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">runtime_config.py</code></td>
+      <td><strong>86%</strong></td>
+      <td>39, 63, 79, 93, 105-106, 119, 153-154, 208-217, 233-246, 264-265</td>
+      <td><strong>MEDIUM</strong></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">alert_providers.py</code></td>
+      <td><strong>86%</strong></td>
+      <td>41, 45-49, 85, 142, 181-183, 213, 240, 256-260, 306, 321</td>
+      <td><strong>MEDIUM</strong></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">config.py</code></td>
+      <td><strong>89%</strong></td>
+      <td>33-37, 44, 55, 73-77</td>
+      <td><strong>LOW</strong></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">prometheus_exporter.py</code></td>
+      <td><strong>86%</strong></td>
+      <td>52, 60-66</td>
+      <td><strong>LOW</strong></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">csv_exporter.py</code></td>
+      <td><strong>92%</strong></td>
+      <td>97-98, 133-136, 149</td>
+      <td><strong>LOW</strong></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">api/main.py</code></td>
+      <td><strong>91%</strong></td>
+      <td>76-80, 181-182</td>
+      <td><strong>LOW</strong></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">api/routes/alerts.py</code></td>
+      <td><strong>94%</strong></td>
+      <td>74, 79, 89, 147, 422-427</td>
+      <td><strong>LOW</strong></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">api/routes/trigger.py</code></td>
+      <td><strong>91%</strong></td>
+      <td>86, 122-126</td>
+      <td><strong>LOW</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="frontend-coverage-gaps">Frontend Coverage Gaps</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Tested?</th>
+      <th>Priority</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SpeedGauge.tsx</code></td>
+      <td>✅ Yes</td>
+      <td>N/A</td>
+      <td>4 test cases</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">CountdownTimer.tsx</code></td>
+      <td>✅ Yes</td>
+      <td>N/A</td>
+      <td>4 test cases</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">api.ts</code></td>
+      <td>✅ Yes</td>
+      <td>N/A</td>
+      <td>4 test cases</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Layout.tsx</code></td>
+      <td>❌ No</td>
+      <td><strong>HIGH</strong></td>
+      <td>Version check, navigation, update banner</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Dashboard.tsx</code></td>
+      <td>❌ No</td>
+      <td><strong>HIGH</strong></td>
+      <td>Main page integration</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Settings.tsx</code></td>
+      <td>❌ No</td>
+      <td><strong>HIGH</strong></td>
+      <td>Config updates, alert setup</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SpeedChart.tsx</code></td>
+      <td>❌ No</td>
+      <td><strong>MEDIUM</strong></td>
+      <td>Chart rendering, data handling</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ResultsTable.tsx</code></td>
+      <td>❌ No</td>
+      <td><strong>MEDIUM</strong></td>
+      <td>Pagination, sorting</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">HermesContext.tsx</code></td>
+      <td>❌ No</td>
+      <td><strong>MEDIUM</strong></td>
+      <td>State management</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">App.tsx</code></td>
+      <td>❌ No</td>
+      <td><strong>LOW</strong></td>
+      <td>Routing setup</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Coverage Estimate:</strong> ~25% of frontend components have tests.</p>
+
+<hr />
+
+<h2 id="detailed-gap-analysis">Detailed Gap Analysis</h2>
+
+<h3 id="h1-alert-provider-factory-66-coverage--high-priority">H1: Alert Provider Factory (66% Coverage) — <strong>HIGH PRIORITY</strong></h3>
+
+<p><strong>Location:</strong> <code class="language-plaintext highlighter-rouge">src/services/alert_provider_factory.py</code><br />
+<strong>Missing Lines:</strong> 66, 70-71, 95-110, 131-152, 174-186<br />
+<strong>Impact:</strong> Critical alerting infrastructure</p>
+
+<h4 id="missing-test-scenarios">Missing Test Scenarios</h4>
+
+<ol>
+  <li>
+    <p><strong>Provider Initialization Failures</strong> (Lines 66-186)</p>
+
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Untested error paths in register_*_provider functions
+</span><span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">warning</span><span class="p">(</span><span class="sh">"</span><span class="s">Could not initialize webhook alert provider: %s</span><span class="sh">"</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</code></pre></div>    </div>
+
+    <ul>
+      <li>❌ No tests for invalid Gotify URLs</li>
+      <li>❌ No tests for malformed ntfy topics</li>
+      <li>❌ No tests for Apprise URL validation failures</li>
+      <li>❌ No tests for webhook URL scheme validation</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>require_enabled Flag</strong> (Multiple functions)</p>
+
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">require_enabled</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">webhook_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">enabled</span><span class="sh">"</span><span class="p">,</span> <span class="bp">False</span><span class="p">):</span>
+    <span class="k">return</span>
+</code></pre></div>    </div>
+
+    <ul>
+      <li>❌ No tests verify <code class="language-plaintext highlighter-rouge">require_enabled=True</code> blocks disabled providers</li>
+      <li>❌ No tests for <code class="language-plaintext highlighter-rouge">require_enabled=False</code> (default) allowing all configured providers</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>Missing Configuration Scenarios</strong></p>
+    <ul>
+      <li>❌ Gotify without token</li>
+      <li>❌ ntfy without topic</li>
+      <li>❌ Apprise without URL</li>
+      <li>❌ Partially configured providers (URL present, token missing)</li>
+    </ul>
+  </li>
+</ol>
+
+<h4 id="recommended-tests">Recommended Tests</h4>
+
+<p><strong>Test File:</strong> <code class="language-plaintext highlighter-rouge">tests/test_alert_provider_factory.py</code> (new file)</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">test_register_webhook_provider_skips_when_require_enabled_true</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_register_webhook_provider_accepts_disabled_when_require_enabled_false</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_register_gotify_provider_raises_on_invalid_url</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_register_ntfy_provider_skips_when_topic_missing</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_register_apprise_provider_handles_initialization_error</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_register_all_providers_continues_on_partial_failure</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_register_all_providers_with_require_enabled_filters</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><strong>Estimated Tests:</strong> 15-20 new tests<br />
+<strong>Complexity:</strong> Low-Medium</p>
+
+<hr />
+
+<h3 id="h2-main-loop-and-startup-83-coverage--high-priority">H2: Main Loop and Startup (83% Coverage) — <strong>HIGH PRIORITY</strong></h3>
+
+<p><strong>Location:</strong> <code class="language-plaintext highlighter-rouge">src/main.py</code><br />
+<strong>Missing Lines:</strong> 125-149, 159, 161, 167-172, 337, 349-356, 368-392, 403-409, 472-473<br />
+<strong>Impact:</strong> Core application lifecycle</p>
+
+<h4 id="main-loop--missing-test-scenarios">Main Loop — Missing Test Scenarios</h4>
+
+<ol>
+  <li>
+    <p><strong>Build Alert Manager</strong> (Lines 125-149)</p>
+
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Only register providers if alerting is enabled
+</span><span class="k">if</span> <span class="n">alert_config</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span><span class="sh">"</span><span class="s">enabled</span><span class="sh">"</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span> <span class="ow">or</span> <span class="n">failure_threshold</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="nf">register_all_providers</span><span class="p">(</span><span class="n">manager</span><span class="p">,</span> <span class="p">...)</span>
+</code></pre></div>    </div>
+
+    <ul>
+      <li>❌ No test for <code class="language-plaintext highlighter-rouge">enabled=False</code> with <code class="language-plaintext highlighter-rouge">failure_threshold=0</code> (providers not registered)</li>
+      <li>❌ No test for <code class="language-plaintext highlighter-rouge">enabled=True</code> triggering provider registration</li>
+      <li>❌ No test for threshold minimum enforcement (<code class="language-plaintext highlighter-rouge">max(1, failure_threshold)</code>)</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>Update Alert Providers</strong> (Lines 159-172)</p>
+
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">update_alert_providers</span><span class="p">(</span><span class="n">manager</span><span class="p">:</span> <span class="n">AlertManager</span><span class="p">,</span> <span class="n">alert_config</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="sh">"</span><span class="s">failure_threshold</span><span class="sh">"</span> <span class="ow">in</span> <span class="n">alert_config</span><span class="p">:</span>
+        <span class="n">manager</span><span class="p">.</span><span class="n">failure_threshold</span> <span class="o">=</span> <span class="nf">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">alert_config</span><span class="p">[</span><span class="sh">"</span><span class="s">failure_threshold</span><span class="sh">"</span><span class="p">])</span>
+</code></pre></div>    </div>
+
+    <ul>
+      <li>❌ No test for runtime alert config updates</li>
+      <li>❌ No test for clearing and re-registering providers</li>
+      <li>❌ No test for failure threshold validation (minimum 1)</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>Development Mode Logging</strong> (Lines 407-409)</p>
+
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">config</span><span class="p">.</span><span class="n">APP_ENV</span> <span class="o">==</span> <span class="sh">"</span><span class="s">development</span><span class="sh">"</span><span class="p">:</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">critical</span><span class="p">(</span><span class="sh">"</span><span class="s">Speedtest failure in development mode</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div>    </div>
+
+    <ul>
+      <li>❌ No test verifies critical log in development</li>
+      <li>❌ No test verifies log absence in production</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>Environment Validation</strong> (Lines 368-392)</p>
+
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">_validate_environment</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Warn about misconfigured or unreachable services at startup.</span><span class="sh">"""</span>
+</code></pre></div>    </div>
+
+    <ul>
+      <li>❌ No tests for Loki endpoint validation warnings</li>
+      <li>❌ No tests for timeout/connection/HTTP errors</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>Main Loop Initialization</strong> (Lines 472-473)</p>
+
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">last_paused</span><span class="p">:</span>
+    <span class="n">scheduler</span><span class="p">.</span><span class="nf">pause_job</span><span class="p">(</span><span class="sh">"</span><span class="s">speedtest_run</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div>    </div>
+
+    <ul>
+      <li>❌ No test for restoring paused state on startup</li>
+      <li>❌ No test for scheduler state persistence across restarts</li>
+    </ul>
+  </li>
+</ol>
+
+<h4 id="main-loop--recommended-tests">Main Loop — Recommended Tests</h4>
+
+<p><strong>Test File:</strong> <code class="language-plaintext highlighter-rouge">tests/test_main.py</code> (add to existing)</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">test_build_alert_manager_skips_providers_when_disabled</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_build_alert_manager_enforces_minimum_threshold</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_update_alert_providers_clears_and_re_registers</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_update_alert_providers_updates_threshold</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_update_alert_providers_updates_cooldown</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_run_once_logs_critical_in_development</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_validate_environment_warns_on_loki_timeout</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_validate_environment_warns_on_loki_connection_error</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_main_loop_restores_paused_state</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><strong>Estimated Tests:</strong> 12-15 new tests<br />
+<strong>Complexity:</strong> Medium</p>
+
+<hr />
+
+<h3 id="h3-runtime-config-edge-cases-86-coverage--medium-priority">H3: Runtime Config Edge Cases (86% Coverage) — <strong>MEDIUM PRIORITY</strong></h3>
+
+<p><strong>Location:</strong> <code class="language-plaintext highlighter-rouge">src/runtime_config.py</code><br />
+<strong>Missing Lines:</strong> 39, 63, 79, 93, 105-106, 119, 153-154, 208-217, 233-246, 264-265<br />
+<strong>Impact:</strong> Configuration persistence reliability</p>
+
+<h4 id="runtime-config--missing-test-scenarios">Runtime Config — Missing Test Scenarios</h4>
+
+<ol>
+  <li>
+    <p><strong>Load Validation</strong> (Lines 39, 63, 79, 93, 105-106, 119)</p>
+
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="ow">not</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">warning</span><span class="p">(</span><span class="sh">"</span><span class="s">Runtime config is not a dict, resetting to defaults.</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{}</span>
+</code></pre></div>    </div>
+
+    <ul>
+      <li>❌ No test for non-dict JSON (e.g., array, string)</li>
+      <li>❌ No test for invalid interval types (non-integer)</li>
+      <li>❌ No test for out-of-range intervals (negative, zero, &gt; 10080)</li>
+      <li>❌ No test for invalid exporter lists (non-list, list of non-strings)</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>Save Error Handling</strong> (Lines 153-154)</p>
+
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">except</span> <span class="nb">OSError</span> <span class="k">as</span> <span class="n">cleanup_error</span><span class="p">:</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">warning</span><span class="p">(</span><span class="sh">"</span><span class="s">Failed to clean up temp file %s: %s</span><span class="sh">"</span><span class="p">,</span> <span class="n">temp_path</span><span class="p">,</span> <span class="n">cleanup_error</span><span class="p">)</span>
+</code></pre></div>    </div>
+
+    <ul>
+      <li>❌ No test for temp file cleanup failure (e.g., permission denied)</li>
+      <li>❌ No test for atomic rename failure</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>Alert Config Helpers</strong> (Lines 208-217, 233-246, 264-265)</p>
+
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">get_alert_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="c1"># Multiple fallback layers
+</span></code></pre></div>    </div>
+
+    <ul>
+      <li>❌ No test for <code class="language-plaintext highlighter-rouge">get_alert_config()</code> with missing runtime file</li>
+      <li>❌ No test for <code class="language-plaintext highlighter-rouge">set_alert_config()</code> with invalid provider names</li>
+      <li>❌ No test for partial alert config updates (only some fields)</li>
+    </ul>
+  </li>
+</ol>
+
+<h4 id="runtime-config--recommended-tests">Runtime Config — Recommended Tests</h4>
+
+<p><strong>Test File:</strong> <code class="language-plaintext highlighter-rouge">tests/test_runtime_config.py</code> (add to existing)</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">test_load_resets_on_non_dict_json</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_load_validates_interval_range</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_load_validates_exporter_list_type</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_save_handles_temp_file_cleanup_error</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_get_alert_config_falls_back_to_env_when_file_missing</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_set_alert_config_partial_update_preserves_other_fields</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><strong>Estimated Tests:</strong> 8-10 new tests<br />
+<strong>Complexity:</strong> Low-Medium</p>
+
+<hr />
+
+<h3 id="h4-alert-provider-error-paths-86-coverage--medium-priority">H4: Alert Provider Error Paths (86% Coverage) — <strong>MEDIUM PRIORITY</strong></h3>
+
+<p><strong>Location:</strong> <code class="language-plaintext highlighter-rouge">src/services/alert_providers.py</code><br />
+<strong>Missing Lines:</strong> 41, 45-49, 85, 142, 181-183, 213, 240, 256-260, 306, 321<br />
+<strong>Impact:</strong> Alert reliability under error conditions</p>
+
+<h4 id="alert-provider-error-paths--missing-test-scenarios">Alert Provider Error Paths — Missing Test Scenarios</h4>
+
+<ol>
+  <li>
+    <p><strong>Webhook Provider URL Validation</strong> (Lines 41, 45-49)</p>
+
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="ow">not</span> <span class="n">url</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sh">"</span><span class="s">Webhook URL cannot be empty</span><span class="sh">"</span><span class="p">)</span>
+<span class="n">parsed</span> <span class="o">=</span> <span class="nf">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">parsed</span><span class="p">.</span><span class="n">scheme</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="sh">"</span><span class="s">http</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">https</span><span class="sh">"</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Invalid URL scheme: </span><span class="si">{</span><span class="n">parsed</span><span class="p">.</span><span class="n">scheme</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div>    </div>
+
+    <ul>
+      <li>✅ Tested: Empty URL rejection</li>
+      <li>✅ Tested: Invalid scheme rejection</li>
+      <li>❌ <strong>Missing:</strong> Tests for edge cases like <code class="language-plaintext highlighter-rouge">ftp://</code>, <code class="language-plaintext highlighter-rouge">file://</code>, <code class="language-plaintext highlighter-rouge">javascript:</code></li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>Gotify Initialization</strong> (Lines 85, 142)</p>
+
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">url</span> <span class="ow">and</span> <span class="n">token</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sh">"</span><span class="s">Gotify URL and token are required</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div>    </div>
+
+    <ul>
+      <li>❌ No test for missing URL (only token provided)</li>
+      <li>❌ No test for missing token (only URL provided)</li>
+      <li>❌ No test for both missing</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>ntfy Token Authorization</strong> (Lines 181-183, 213)</p>
+
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">self</span><span class="p">.</span><span class="n">token</span><span class="p">:</span>
+    <span class="n">headers</span><span class="p">[</span><span class="sh">"</span><span class="s">Authorization</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="sh">"</span><span class="s">Bearer </span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">token</span><span class="si">}</span><span class="sh">"</span>
+</code></pre></div>    </div>
+
+    <ul>
+      <li>❌ No test verifies Bearer token header is set when token provided</li>
+      <li>❌ No test verifies header is absent when token is None/empty</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>Apprise Request Failure</strong> (Lines 240, 256-260, 306, 321)</p>
+
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">except</span> <span class="n">requests</span><span class="p">.</span><span class="n">exceptions</span><span class="p">.</span><span class="n">RequestException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sh">"</span><span class="s">Failed to send Apprise alert to %s: %s</span><span class="sh">"</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+    <span class="k">raise</span>
+</code></pre></div>    </div>
+
+    <ul>
+      <li>❌ No test for Apprise timeout</li>
+      <li>❌ No test for Apprise connection error</li>
+      <li>❌ No test for Apprise HTTP 4xx/5xx errors</li>
+    </ul>
+  </li>
+</ol>
+
+<h4 id="alert-provider-error-paths--recommended-tests">Alert Provider Error Paths — Recommended Tests</h4>
+
+<p><strong>Test File:</strong> <code class="language-plaintext highlighter-rouge">tests/test_alert_providers.py</code> (add to existing)</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">test_webhook_provider_rejects_ftp_scheme</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_gotify_provider_raises_when_url_missing</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_gotify_provider_raises_when_token_missing</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_ntfy_provider_includes_bearer_token_when_set</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_ntfy_provider_omits_auth_header_when_no_token</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_apprise_provider_raises_on_timeout</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_apprise_provider_raises_on_connection_error</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">test_apprise_provider_raises_on_http_500</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><strong>Estimated Tests:</strong> 10-12 new tests<br />
+<strong>Complexity:</strong> Low</p>
+
+<hr />
+
+<h3 id="h5-frontend-component-tests--high-priority">H5: Frontend Component Tests — <strong>HIGH PRIORITY</strong></h3>
+
+<p><strong>Current State:</strong> 12 tests across 3 files; ~75% of components untested</p>
+
+<h4 id="missing-test-coverage">Missing Test Coverage</h4>
+
+<ol>
+  <li><strong>Layout.tsx</strong> — <strong>HIGH PRIORITY</strong>
+    <ul>
+      <li>❌ Version display</li>
+      <li>❌ Update available banner</li>
+      <li>❌ Navigation menu rendering</li>
+      <li>❌ Mobile responsive menu toggle</li>
+      <li>❌ Active route highlighting</li>
+    </ul>
+  </li>
+  <li><strong>Dashboard.tsx</strong> — <strong>HIGH PRIORITY</strong>
+    <ul>
+      <li>❌ Data fetching on mount</li>
+      <li>❌ Loading state display</li>
+      <li>❌ Error state handling</li>
+      <li>❌ Stat card rendering with real data</li>
+      <li>❌ Chart integration</li>
+      <li>❌ “Run Now” button interaction</li>
+    </ul>
+  </li>
+  <li><strong>Settings.tsx</strong> — <strong>HIGH PRIORITY</strong>
+    <ul>
+      <li>❌ Config form rendering</li>
+      <li>❌ Interval slider validation</li>
+      <li>❌ Exporter toggles</li>
+      <li>❌ Alert provider configuration</li>
+      <li>❌ Form submission</li>
+      <li>❌ Success/error toast notifications</li>
+      <li>❌ Test alert button</li>
+    </ul>
+  </li>
+  <li><strong>SpeedChart.tsx</strong> — <strong>MEDIUM PRIORITY</strong>
+    <ul>
+      <li>❌ Chart renders with data</li>
+      <li>❌ Empty state when no data</li>
+      <li>❌ Tooltip formatting</li>
+      <li>❌ Time range filtering (if implemented)</li>
+      <li>❌ Responsive sizing</li>
+    </ul>
+  </li>
+  <li><strong>ResultsTable.tsx</strong> — <strong>MEDIUM PRIORITY</strong>
+    <ul>
+      <li>❌ Table renders with results</li>
+      <li>❌ Pagination controls</li>
+      <li>❌ Page navigation</li>
+      <li>❌ Empty state display</li>
+      <li>❌ ISP column display</li>
+      <li>❌ Timestamp formatting</li>
+    </ul>
+  </li>
+  <li><strong>HermesContext.tsx</strong> — <strong>MEDIUM PRIORITY</strong>
+    <ul>
+      <li>❌ Context provider initialization</li>
+      <li>❌ State updates</li>
+      <li>❌ API polling mechanism</li>
+      <li>❌ Error handling</li>
+      <li>❌ Health check updates</li>
+    </ul>
+  </li>
+</ol>
+
+<h4 id="frontend-components--recommended-tests">Frontend Components — Recommended Tests</h4>
+
+<p><strong>New Test Files:</strong></p>
+
+<div class="language-typescript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// frontend/src/test/Layout.test.tsx</span>
+<span class="nf">describe</span><span class="p">(</span><span class="dl">'</span><span class="s1">Layout</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">renders version number</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">shows update banner when newer version available</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">hides update banner when up to date</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">highlights active navigation item</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">toggles mobile menu on button click</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">})</span>
+
+<span class="c1">// frontend/src/test/Dashboard.test.tsx</span>
+<span class="nf">describe</span><span class="p">(</span><span class="dl">'</span><span class="s1">Dashboard</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">fetches health and results on mount</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">shows loading spinner while fetching</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">displays error message on fetch failure</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">renders stat cards with latest result</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">triggers test on Run Now button click</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">disables Run Now button when test running</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">})</span>
+
+<span class="c1">// frontend/src/test/Settings.test.tsx</span>
+<span class="nf">describe</span><span class="p">(</span><span class="dl">'</span><span class="s1">Settings</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">loads current config on mount</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">validates interval within bounds</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">toggles exporter checkboxes</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">submits config updates</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">shows success toast on save</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">shows error toast on save failure</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">sends test alert on button click</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">throttles test alert button (rate limit)</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">})</span>
+
+<span class="c1">// frontend/src/test/SpeedChart.test.tsx</span>
+<span class="nf">describe</span><span class="p">(</span><span class="dl">'</span><span class="s1">SpeedChart</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">renders chart with data points</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">shows empty state when no data</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">formats tooltip correctly</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">})</span>
+
+<span class="c1">// frontend/src/test/ResultsTable.test.tsx</span>
+<span class="nf">describe</span><span class="p">(</span><span class="dl">'</span><span class="s1">ResultsTable</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">renders table rows from results</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">shows pagination controls</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">navigates pages</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">shows empty state</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">})</span>
+
+<span class="c1">// frontend/src/test/HermesContext.test.tsx</span>
+<span class="nf">describe</span><span class="p">(</span><span class="dl">'</span><span class="s1">HermesContext</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">provides initial state</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">polls health endpoint</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">updates state on health change</span><span class="dl">'</span><span class="p">)</span>
+  <span class="nf">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">handles API errors gracefully</span><span class="dl">'</span><span class="p">)</span>
+<span class="p">})</span>
+</code></pre></div></div>
+
+<p><strong>Estimated Tests:</strong> 40-50 new tests<br />
+<strong>Complexity:</strong> Medium-High<br />
+<strong>Estimated Effort:</strong> 8-12 hours</p>
+
+<hr />
+
+<h3 id="h6-config-module-89-coverage--low-priority">H6: Config Module (89% Coverage) — <strong>LOW PRIORITY</strong></h3>
+
+<p><strong>Location:</strong> <code class="language-plaintext highlighter-rouge">src/config.py</code><br />
+<strong>Missing Lines:</strong> 33-37, 44, 55, 73-77<br />
+<strong>Impact:</strong> Configuration defaults and validation</p>
+
+<h4 id="config-module--missing-test-scenarios">Config Module — Missing Test Scenarios</h4>
+
+<ol>
+  <li>
+    <p><strong>API Key Validation</strong> (Lines 73-77)</p>
+
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">API_KEY</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nf">len</span><span class="p">(</span><span class="n">API_KEY</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">32</span><span class="p">:</span>
+    <span class="n">logging</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sh">"</span><span class="s">API_KEY must be at least 32 characters...</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="nc">SystemExit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>    </div>
+
+    <ul>
+      <li>❌ <strong>Cannot test:</strong> SystemExit on short API key (requires subprocess)</li>
+      <li>ℹ️ <strong>Justification:</strong> This is a startup-time guard; testing would require spawning subprocess with env var</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>Helper Function Defaults</strong> (Lines 33-37, 44, 55)</p>
+
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">_get_int</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">os</span><span class="p">.</span><span class="nf">getenv</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">default</span>  <span class="c1"># &lt;-- Line 33-35
+</span></code></pre></div>    </div>
+
+    <ul>
+      <li>❌ No explicit tests for helper functions (<code class="language-plaintext highlighter-rouge">_get_int</code>, <code class="language-plaintext highlighter-rouge">_get_bool</code>, <code class="language-plaintext highlighter-rouge">_get_csv_list</code>)</li>
+      <li>ℹ️ <strong>Justification:</strong> These are implicitly tested via config vars; explicit tests would be redundant</li>
+    </ul>
+  </li>
+</ol>
+
+<h4 id="recommendation">Recommendation</h4>
+
+<p><strong>Decision:</strong> DEFER — Lines 73-77 cannot be tested without subprocess isolation; lines 33-37,
+44, 55 are sufficiently covered by indirect tests.</p>
+
+<p><strong>Alternative:</strong> Add integration test in <code class="language-plaintext highlighter-rouge">tests/test_config.py</code> that spawns subprocess to verify startup failure:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">test_api_key_length_validation_causes_startup_failure</span><span class="p">():</span>
+    <span class="sh">"""</span><span class="s">Verify that short API_KEY causes SystemExit(1).</span><span class="sh">"""</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">os</span><span class="p">.</span><span class="n">environ</span><span class="p">.</span><span class="nf">copy</span><span class="p">()</span>
+    <span class="n">env</span><span class="p">[</span><span class="sh">"</span><span class="s">API_KEY</span><span class="sh">"</span><span class="p">]</span> <span class="o">=</span> <span class="sh">"</span><span class="s">short</span><span class="sh">"</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="p">.</span><span class="nf">run</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">sys</span><span class="p">.</span><span class="n">executable</span><span class="p">,</span> <span class="sh">"</span><span class="s">-c</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">import src.config</span><span class="sh">"</span><span class="p">],</span>
+        <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
+        <span class="n">capture_output</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+        <span class="n">check</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="n">result</span><span class="p">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="k">assert</span> <span class="sa">b</span><span class="sh">"</span><span class="s">API_KEY must be at least 32 characters</span><span class="sh">"</span> <span class="ow">in</span> <span class="n">result</span><span class="p">.</span><span class="n">stderr</span>
+</code></pre></div></div>
+
+<p><strong>Estimated Tests:</strong> 1 subprocess test (optional)<br />
+<strong>Complexity:</strong> Low<br />
+<strong>Priority:</strong> LOW — Deferred to v1.1</p>
+
+<hr />
+
+<h3 id="h7-resourcewarnings--unclosed-databases--medium-priority">H7: ResourceWarnings — Unclosed Databases — <strong>MEDIUM PRIORITY</strong></h3>
+
+<p><strong>Observation:</strong> 16 <code class="language-plaintext highlighter-rouge">ResourceWarning: unclosed database</code> warnings during test runs</p>
+
+<p><strong>Affected Tests:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">test_api_results.py::test_results_*</code> — Multiple warnings</li>
+  <li><code class="language-plaintext highlighter-rouge">test_api_ssrf.py::test_empty_url_accepted</code> — 7 warnings</li>
+  <li><code class="language-plaintext highlighter-rouge">test_api_trigger.py::test_run_test_no_loki_when_url_not_set</code> — 1 warning</li>
+</ul>
+
+<p><strong>Root Cause:</strong></p>
+
+<p>The <code class="language-plaintext highlighter-rouge">/api/results</code> endpoint in <code class="language-plaintext highlighter-rouge">src/api/routes/results.py</code> uses SQLite connections with
+context managers, but SQLite’s <code class="language-plaintext highlighter-rouge">Connection.__exit__</code> method <strong>does NOT close the connection</strong> —
+it only commits or rolls back transactions.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Current code (lines 59-68)
+</span><span class="k">with</span> <span class="nf">_connect</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>  <span class="c1"># &lt;-- __exit__ does NOT call close()
+</span>    <span class="n">total</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">conn</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"</span><span class="s">SELECT COUNT(*) FROM results</span><span class="sh">"</span><span class="p">).</span><span class="nf">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># Connection left open until garbage collection
+</span></code></pre></div></div>
+
+<p>From Python documentation:</p>
+<blockquote>
+  <p>“The <code class="language-plaintext highlighter-rouge">Connection</code> object can be used as a context manager that automatically commits or
+rolls back open transactions when leaving the body of the context manager. If there is an
+exception, the transaction is rolled back; otherwise, the transaction is committed.”</p>
+
+  <p><strong>Note:</strong> The context manager does NOT close the connection.</p>
+</blockquote>
+
+<p><strong>Impact:</strong></p>
+
+<ul>
+  <li><strong>Tests pass</strong> but leave connections open until garbage collection</li>
+  <li><strong>Not a critical production issue</strong> (connections are eventually garbage collected)</li>
+  <li><strong>Test suite cleanliness</strong> — warnings pollute test output</li>
+  <li><strong>Best practice violation</strong> — connections should be explicitly closed</li>
+</ul>
+
+<p><strong>Fix:</strong></p>
+
+<p>Use <code class="language-plaintext highlighter-rouge">contextlib.closing()</code> to ensure connections are closed, or add explicit <code class="language-plaintext highlighter-rouge">.close()</code> calls:</p>
+
+<p><strong>Option 1: Using <code class="language-plaintext highlighter-rouge">contextlib.closing()</code> (recommended)</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">contextlib</span> <span class="kn">import</span> <span class="n">closing</span>
+
+<span class="nd">@router.get</span><span class="p">(</span><span class="sh">"</span><span class="s">/results</span><span class="sh">"</span><span class="p">,</span> <span class="n">responses</span><span class="o">=</span><span class="n">_503</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">get_results</span><span class="p">(</span>
+    <span class="n">page</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nc">Query</span><span class="p">(</span><span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">page_size</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nc">Query</span><span class="p">(</span><span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">500</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ResultsPage</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Return paginated results, newest first.</span><span class="sh">"""</span>
+    <span class="k">with</span> <span class="nf">closing</span><span class="p">(</span><span class="nf">_connect</span><span class="p">())</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>  <span class="c1"># &lt;-- closing() ensures .close() is called
+</span>        <span class="n">total</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">conn</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"</span><span class="s">SELECT COUNT(*) FROM results</span><span class="sh">"</span><span class="p">).</span><span class="nf">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="p">(</span><span class="n">page</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">page_size</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">conn</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span>
+            <span class="sh">"</span><span class="s">SELECT * FROM results ORDER BY timestamp DESC LIMIT ? OFFSET ?</span><span class="sh">"</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">page_size</span><span class="p">,</span> <span class="n">offset</span><span class="p">),</span>
+        <span class="p">).</span><span class="nf">fetchall</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="nc">ResultsPage</span><span class="p">(</span>
+        <span class="n">results</span><span class="o">=</span><span class="p">[</span><span class="nc">SpeedResultSchema</span><span class="p">(</span><span class="o">**</span><span class="nf">dict</span><span class="p">(</span><span class="n">r</span><span class="p">))</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">],</span>
+        <span class="n">total</span><span class="o">=</span><span class="n">total</span><span class="p">,</span>
+        <span class="n">page</span><span class="o">=</span><span class="n">page</span><span class="p">,</span>
+        <span class="n">page_size</span><span class="o">=</span><span class="n">page_size</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Option 2: Explicit <code class="language-plaintext highlighter-rouge">.close()</code> with try/finally</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@router.get</span><span class="p">(</span><span class="sh">"</span><span class="s">/results</span><span class="sh">"</span><span class="p">,</span> <span class="n">responses</span><span class="o">=</span><span class="n">_503</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">get_results</span><span class="p">(</span>
+    <span class="n">page</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nc">Query</span><span class="p">(</span><span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">page_size</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nc">Query</span><span class="p">(</span><span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">500</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ResultsPage</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Return paginated results, newest first.</span><span class="sh">"""</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="nf">_connect</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">total</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">conn</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"</span><span class="s">SELECT COUNT(*) FROM results</span><span class="sh">"</span><span class="p">).</span><span class="nf">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="p">(</span><span class="n">page</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">page_size</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">conn</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span>
+            <span class="sh">"</span><span class="s">SELECT * FROM results ORDER BY timestamp DESC LIMIT ? OFFSET ?</span><span class="sh">"</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">page_size</span><span class="p">,</span> <span class="n">offset</span><span class="p">),</span>
+        <span class="p">).</span><span class="nf">fetchall</span><span class="p">()</span>
+        
+        <span class="k">return</span> <span class="nc">ResultsPage</span><span class="p">(</span>
+            <span class="n">results</span><span class="o">=</span><span class="p">[</span><span class="nc">SpeedResultSchema</span><span class="p">(</span><span class="o">**</span><span class="nf">dict</span><span class="p">(</span><span class="n">r</span><span class="p">))</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">],</span>
+            <span class="n">total</span><span class="o">=</span><span class="n">total</span><span class="p">,</span>
+            <span class="n">page</span><span class="o">=</span><span class="n">page</span><span class="p">,</span>
+            <span class="n">page_size</span><span class="o">=</span><span class="n">page_size</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">conn</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><strong>Files to Update:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">src/api/routes/results.py</code> — 2 endpoint functions (<code class="language-plaintext highlighter-rouge">get_results</code>, <code class="language-plaintext highlighter-rouge">get_latest_result</code>)</li>
+</ul>
+
+<p><strong>Verification:</strong>
+After fix, run tests with warnings as errors:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pytest tests/test_api_results.py <span class="nt">-W</span> error::ResourceWarning
+</code></pre></div></div>
+
+<p><strong>Estimated Effort:</strong> 20 minutes<br />
+<strong>Priority:</strong> MEDIUM<br />
+<strong>Conflict Check:</strong> ✅ No conflict with modernization review (SQLiteExporter already uses proper patterns)</p>
+
+<hr />
+
+<h3 id="h8-integration-and-end-to-end-tests--medium-priority">H8: Integration and End-to-End Tests — <strong>MEDIUM PRIORITY</strong></h3>
+
+<p><strong>Current State:</strong> <strong>NONE</strong></p>
+
+<p>All existing tests are <strong>unit tests</strong> or <strong>API endpoint tests</strong>. No integration or end-to-end tests exist.</p>
+
+<h4 id="missing-integration-test-scenarios">Missing Integration Test Scenarios</h4>
+
+<ol>
+  <li><strong>Full Speedtest → Export → Alert Flow</strong>
+    <ul>
+      <li>Speedtest runs → Result dispatched → All exporters receive data → Alert triggered on failure</li>
+      <li>Currently tested in isolation; never tested end-to-end</li>
+    </ul>
+  </li>
+  <li><strong>Runtime Config Persistence Across Restart</strong>
+    <ul>
+      <li>Set interval via API → Shutdown → Restart → Verify interval restored</li>
+      <li>Partially tested but not in full lifecycle</li>
+    </ul>
+  </li>
+  <li><strong>Alert Flow from Failure to Recovery</strong>
+    <ul>
+      <li>N consecutive failures → Alert sent → Success → Alert cleared → No re-alert on next failure</li>
+      <li>Currently tested via unit tests; never tested with real scheduler</li>
+    </ul>
+  </li>
+  <li><strong>Multi-Exporter Failure Handling</strong>
+    <ul>
+      <li>CSV succeeds, SQLite fails, Prometheus succeeds → Verify partial success handling</li>
+      <li>Currently tested via mock; never tested with real file I/O</li>
+    </ul>
+  </li>
+  <li><strong>API + Scheduler Interaction</strong>
+    <ul>
+      <li>Trigger test via API while scheduler is running → Verify lock prevents overlap</li>
+      <li>Currently tested via mock; never tested with real BackgroundScheduler</li>
+    </ul>
+  </li>
+</ol>
+
+<h4 id="recommended-integration-tests">Recommended Integration Tests</h4>
+
+<p><strong>New Test File:</strong> <code class="language-plaintext highlighter-rouge">tests/test_integration.py</code></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="sh">"""</span><span class="s">Integration tests — multi-component interactions.</span><span class="sh">"""</span>
+
+<span class="k">def</span> <span class="nf">test_full_speedtest_to_csv_export_flow</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="n">monkeypatch</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Run real speedtest, dispatch to CSV, verify file contents.</span><span class="sh">"""</span>
+    <span class="c1"># Configure CSV exporter with temp directory
+</span>    <span class="c1"># Mock Ookla speedtest CLI to return predictable result
+</span>    <span class="c1"># Run scheduler once
+</span>    <span class="c1"># Verify CSV contains result row
+</span>
+<span class="k">def</span> <span class="nf">test_alert_triggered_after_threshold_consecutive_failures</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Simulate N failures, verify alert sent, then success clears state.</span><span class="sh">"""</span>
+    <span class="c1"># Mock Ookla speedtest CLI to fail N times
+</span>    <span class="c1"># Run scheduler N times
+</span>    <span class="c1"># Verify alert provider received notification
+</span>    <span class="c1"># Mock Ookla speedtest CLI to succeed
+</span>    <span class="c1"># Run scheduler once
+</span>    <span class="c1"># Verify alert state cleared
+</span>
+<span class="k">def</span> <span class="nf">test_api_config_update_changes_scheduler_interval</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Update interval via API, verify scheduler job updated.</span><span class="sh">"""</span>
+    <span class="c1"># Start scheduler with 60-minute interval
+</span>    <span class="c1"># PUT /api/config with interval=30
+</span>    <span class="c1"># Verify scheduler job trigger updated to 30 minutes
+</span>
+<span class="k">def</span> <span class="nf">test_concurrent_api_trigger_blocks_scheduler_overlap</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Verify API trigger acquires lock, blocking scheduler run.</span><span class="sh">"""</span>
+    <span class="c1"># Start scheduler
+</span>    <span class="c1"># Trigger via API (hold lock)
+</span>    <span class="c1"># Attempt scheduler run (should skip due to lock)
+</span>    <span class="c1"># Verify only one test ran
+</span></code></pre></div></div>
+
+<p><strong>Estimated Tests:</strong> 8-12 integration tests<br />
+<strong>Complexity:</strong> Medium-High<br />
+<strong>Estimated Effort:</strong> 6-10 hours<br />
+<strong>Priority:</strong> MEDIUM — Recommended for v1.1</p>
+
+<hr />
+
+<h2 id="resource-warnings-summary">Resource Warnings Summary</h2>
+
+<p><strong>Issue:</strong> 16 <code class="language-plaintext highlighter-rouge">ResourceWarning: unclosed database</code> warnings during test runs<br />
+<strong>Root Cause:</strong> SQLite connections in <code class="language-plaintext highlighter-rouge">src/api/routes/results.py</code> not using context managers<br />
+<strong>Fix:</strong> Convert 3 connection usages to <code class="language-plaintext highlighter-rouge">with</code> statements<br />
+<strong>Impact:</strong> Test cleanliness; no production impact<br />
+<strong>Priority:</strong> MEDIUM</p>
+
+<p><strong>Quick Fix:</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># src/api/routes/results.py — Line 32, 64, 78
+# Replace all occurrences:
+</span><span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="p">.</span><span class="nf">connect</span><span class="p">(</span><span class="n">db_path</span><span class="p">)</span>
+<span class="c1"># With:
+</span><span class="k">with</span> <span class="n">sqlite3</span><span class="p">.</span><span class="nf">connect</span><span class="p">(</span><span class="n">db_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="test-metrics-summary">Test Metrics Summary</h2>
+
+<h3 id="python-backend">Python Backend</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Total Tests</strong></td>
+      <td>355</td>
+    </tr>
+    <tr>
+      <td><strong>Coverage</strong></td>
+      <td>91.36%</td>
+    </tr>
+    <tr>
+      <td><strong>Modules &lt;90%</strong></td>
+      <td>7 modules</td>
+    </tr>
+    <tr>
+      <td><strong>Lowest Coverage</strong></td>
+      <td>66% (alert_provider_factory.py)</td>
+    </tr>
+    <tr>
+      <td><strong>Statements</strong></td>
+      <td>1,588 total, 145 missed</td>
+    </tr>
+    <tr>
+      <td><strong>Test Files</strong></td>
+      <td>25 files</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="typescript-frontend">TypeScript Frontend</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Total Tests</strong></td>
+      <td>12</td>
+    </tr>
+    <tr>
+      <td><strong>Coverage</strong></td>
+      <td>~25% (estimated)</td>
+    </tr>
+    <tr>
+      <td><strong>Components Tested</strong></td>
+      <td>3 of 12 (25%)</td>
+    </tr>
+    <tr>
+      <td><strong>Test Files</strong></td>
+      <td>3 files</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="overall-project">Overall Project</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Total Tests</strong></td>
+      <td>367 (355 Python + 12 TypeScript)</td>
+    </tr>
+    <tr>
+      <td><strong>Estimated Combined Coverage</strong></td>
+      <td>~70-75%</td>
+    </tr>
+    <tr>
+      <td><strong>Test Execution Time</strong></td>
+      <td>21.5s (Python), 1.75s (TypeScript)</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="recommendations">Recommendations</h2>
+
+<h3 id="before-v10-release-required">Before v1.0 Release (Required)</h3>
+
+<ol>
+  <li>✅ <strong>Fix ResourceWarnings</strong> — 15 minutes
+    <ul>
+      <li>Convert SQLite connections to context managers in <code class="language-plaintext highlighter-rouge">results.py</code></li>
+    </ul>
+  </li>
+  <li>✅ <strong>Alert Provider Factory Tests</strong> — 3-4 hours
+    <ul>
+      <li>Add 15-20 tests for <code class="language-plaintext highlighter-rouge">alert_provider_factory.py</code></li>
+      <li>Target: 90%+ coverage</li>
+    </ul>
+  </li>
+  <li>⚠️ <strong>Main Loop Tests</strong> — 2-3 hours
+    <ul>
+      <li>Add 12-15 tests for <code class="language-plaintext highlighter-rouge">main.py</code> untested paths</li>
+      <li>Focus on alert manager initialization and update functions</li>
+      <li>Target: 90%+ coverage</li>
+    </ul>
+  </li>
+  <li>⚠️ <strong>Frontend Core Tests</strong> — 6-8 hours
+    <ul>
+      <li>Add tests for Layout, Dashboard, Settings (high-value components)</li>
+      <li>Target: 50%+ frontend coverage</li>
+    </ul>
+  </li>
+</ol>
+
+<p><strong>Estimated Total Effort:</strong> 12-16 hours</p>
+
+<h3 id="after-v10-release-v11-candidates">After v1.0 Release (v1.1 Candidates)</h3>
+
+<ol>
+  <li><strong>Frontend Comprehensive Tests</strong> — 8-12 hours
+    <ul>
+      <li>Test all remaining components</li>
+      <li>Target: 80%+ frontend coverage</li>
+    </ul>
+  </li>
+  <li><strong>Integration Tests</strong> — 6-10 hours
+    <ul>
+      <li>Add <code class="language-plaintext highlighter-rouge">test_integration.py</code> with 8-12 tests</li>
+      <li>Test multi-component flows</li>
+    </ul>
+  </li>
+  <li><strong>Runtime Config Edge Cases</strong> — 2-3 hours
+    <ul>
+      <li>Add 8-10 tests for <code class="language-plaintext highlighter-rouge">runtime_config.py</code></li>
+      <li>Target: 95%+ coverage</li>
+    </ul>
+  </li>
+  <li><strong>Alert Provider Error Paths</strong> — 2-3 hours
+    <ul>
+      <li>Add 10-12 tests for <code class="language-plaintext highlighter-rouge">alert_providers.py</code></li>
+      <li>Target: 95%+ coverage</li>
+    </ul>
+  </li>
+</ol>
+
+<p><strong>Estimated Total Effort:</strong> 18-28 hours</p>
+
+<hr />
+
+<h2 id="decision-v10-gate-status">Decision: v1.0 Gate Status</h2>
+
+<h3 id="required-before-v10">Required Before v1.0</h3>
+
+<ul>
+  <li>✅ <strong>Fix ResourceWarnings</strong> — MUST FIX (15 min)</li>
+  <li>✅ <strong>Alert Provider Factory Tests</strong> — MUST ADD (3-4 hrs)</li>
+</ul>
+
+<h3 id="recommended-before-v10-but-not-blockers">Recommended Before v1.0 (But Not Blockers)</h3>
+
+<ul>
+  <li>⚠️ <strong>Main Loop Tests</strong> — RECOMMENDED (2-3 hrs)</li>
+  <li>⚠️ <strong>Frontend Core Tests</strong> — RECOMMENDED (6-8 hrs)</li>
+</ul>
+
+<h3 id="deferred-to-v11">Deferred to v1.1</h3>
+
+<ul>
+  <li><strong>Frontend Comprehensive Tests</strong></li>
+  <li><strong>Integration Tests</strong></li>
+  <li><strong>Runtime Config Edge Cases</strong></li>
+  <li><strong>Alert Provider Error Paths</strong></li>
+  <li><strong>Config Module SystemExit Test</strong></li>
+</ul>
+
+<hr />
+
+<h2 id="approval-status">Approval Status</h2>
+
+<p><strong>Current Coverage:</strong> 91.36% (exceeds 90% requirement) ✅<br />
+<strong>Critical Gaps:</strong> 2 high-priority items (ResourceWarnings + alert_provider_factory)<br />
+<strong>Recommendation:</strong> <strong>FIX ResourceWarnings + Add alert_provider_factory tests before v1.0</strong></p>
+
+<p><strong>Approval Conditions:</strong></p>
+
+<ol>
+  <li>ResourceWarnings resolved (15 min)</li>
+  <li><code class="language-plaintext highlighter-rouge">alert_provider_factory.py</code> coverage ≥90% (~20 tests, 3-4 hrs)</li>
+  <li>Re-run full test suite with no warnings</li>
+</ol>
+
+<p><strong>Post-Fix Coverage Target:</strong> 92-93%</p>
+
+<hr />
+
+<p><strong>Review Completed By:</strong> GitHub Copilot<br />
+<strong>Approval Status:</strong> CONDITIONAL — Complete items 1-2 before v1.0 release<br />
+<strong>Next Steps:</strong> Implement required tests, re-run coverage, update this document with final metrics</p>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/Hermes" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Test Coverage Review
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

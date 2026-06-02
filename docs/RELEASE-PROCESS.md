@@ -2,9 +2,6 @@
 layout: default
 title: "Release Process"
 ---
-
-# Release Process
-
 ## Overview
 
 This document outlines the complete release process for Hermes to prevent incomplete or broken releases.

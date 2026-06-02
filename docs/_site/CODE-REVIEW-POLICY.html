@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Code Review Policy — Hermes Documentation</title>
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Code Review Policy | Hermes Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Code Review Policy" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<link rel="canonical" href="http://localhost:4001/CODE-REVIEW-POLICY.html" />
+<meta property="og:url" content="http://localhost:4001/CODE-REVIEW-POLICY.html" />
+<meta property="og:site_name" content="Hermes Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Code Review Policy" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted internet speed test monitoring with modern observability stack integration","headline":"Code Review Policy","url":"http://localhost:4001/CODE-REVIEW-POLICY.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration">
+
+<title>
+  
+    Code Review Policy — Hermes Documentation
+  
+</title>
+
+
+<link rel="icon" type="image/png" href="/assets/Hermes.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="/" class="nav-brand">
+    <span class="brand-name">
+      Hermes
+      <span>Docs</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/alloy"
+                 >
+                Grafana Alloy
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-ENHANCEMENTS"
+                 >
+                Security Enhancements
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Error Handling</h3>
+        <ul>
+          
+            <li>
+              <a href="/error-catalog"
+                 >
+                Error Catalog
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-handling-conventions"
+                 >
+                Handling Conventions
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-messages"
+                 >
+                Error Messages
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/RELEASE-PROCESS"
+                 >
+                Release Process
+              </a>
+            </li>
+          
+            <li>
+              <a href="/styleguide"
+                 >
+                Frontend Style Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/suppression-decisions"
+                 >
+                Suppression Decisions
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Code Reviews</h3>
+        <ul>
+          
+            <li>
+              <a href="/BEST-PRACTICES-REVIEW"
+                 >
+                Best Practices
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DEFENSIVE-CODING-REVIEW"
+                 >
+                Defensive Coding
+              </a>
+            </li>
+          
+            <li>
+              <a href="/ERROR-HANDLING-REVIEW"
+                 >
+                Error Handling Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/PERFORMANCE-OPTIMIZATION-REVIEW"
+                 >
+                Performance Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/TEST-COVERAGE-REVIEW"
+                 >
+                Test Coverage
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DOCUMENTATION-ACCURACY-REVIEW"
+                 >
+                Documentation Review
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Code Review Policy</h1>
+
+            
+          </header>
+        
+
+        <p><strong>Projects:</strong> Argus / Hermes (shared policy)
+<strong>Format:</strong> Human-readable reference. The machine-readable version for AI agents is
+<code class="language-plaintext highlighter-rouge">.github/instructions/code-review-policy.instructions.md</code>.</p>
+
+<blockquote>
+  <p><strong>Shared template notice</strong> — Sections 1–11 of this document are identical across Argus and
+Hermes. Only Section 12 (Project-Specific Configuration) differs per repo. When updating
+shared sections, apply the same change to the other project.</p>
+</blockquote>
+
+<hr />
+
+<h2 id="purpose">Purpose</h2>
+
+<p>This policy defines the nine review categories that must be completed before any release tag
+is cut. It establishes:</p>
+
+<ul>
+  <li><strong>What to check</strong> in each category</li>
+  <li><strong>Why each category exists</strong> and what failures it prevents</li>
+  <li><strong>How to run</strong> each check (commands and tooling)</li>
+  <li><strong>Exit criteria</strong> — the conditions that must all be true before a release tag is created</li>
+  <li><strong>Finding classification</strong> — how to record and track issues found during review</li>
+</ul>
+
+<p>The policy is designed to be consumed by both humans (as a pre-release checklist) and AI
+agents (via the companion <code class="language-plaintext highlighter-rouge">.instructions.md</code> file).</p>
+
+<hr />
+
+<h2 id="review-sequencing-and-dependencies">Review Sequencing and Dependencies</h2>
+
+<p>Reviews must be performed in order. Each category depends on the previous ones being clean
+because findings in early categories can invalidate conclusions drawn in later ones (e.g.
+a dependency CVE may make an application-level security control moot).</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1. Supply Chain Security        ← must be clean before anything else
+2. Application Security Audit   ← requires supply chain clean
+3. Defensive Coding Review      ← requires app security approved
+4. Best Practices Review        ← requires defensive coding reviewed
+5. Modernization Review         ← can run in parallel with Best Practices
+6. Error Handling Review        ← requires Best Practices and Modernization
+7. Test Coverage Review         ← requires all code changes from above complete
+8. Documentation Accuracy Review← requires test counts to be final
+9. Performance Review           ← requires all functional changes complete
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="severity-levels">Severity Levels</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Level</th>
+      <th>Meaning</th>
+      <th>Release Impact</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>🔴 HIGH</td>
+      <td>Critical defect, security vulnerability, or data integrity risk</td>
+      <td>Blocks release unconditionally</td>
+    </tr>
+    <tr>
+      <td>🟡 MEDIUM</td>
+      <td>Quality issue affecting reliability or maintainability</td>
+      <td>Should be resolved; may defer to next minor with tracked TODO</td>
+    </tr>
+    <tr>
+      <td>🟢 LOW</td>
+      <td>Polish item with minimal user impact</td>
+      <td>Defer to post-release backlog</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="category-1-supply-chain-security">Category 1: Supply Chain Security</h2>
+
+<h3 id="why-this-category-comes-first">Why This Category Comes First</h3>
+
+<p>This category was added after discovering that three known CVEs in <code class="language-plaintext highlighter-rouge">starlette</code> (CVE-2025-54121,
+CVE-2025-62727, PYSEC-2026-161) were shipped in a release because the security audit item was
+scoped to application-level controls only. Dependency CVEs are published continuously after
+packages are pinned — no manual review can catch them. Automated scanning must be the first
+gate, not an optional CI artifact.</p>
+
+<h3 id="what-to-check">What to Check</h3>
+
+<ul>
+  <li>No package in <code class="language-plaintext highlighter-rouge">requirements.txt</code> has a known CVE at any severity</li>
+  <li>No npm package in <code class="language-plaintext highlighter-rouge">frontend/package.json</code> has a high or critical vulnerability</li>
+  <li>Dependency update automation (Dependabot / Renovate) is active for pip, npm, and Actions</li>
+</ul>
+
+<h3 id="how-to-run">How to Run</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Python dependencies</span>
+pip-audit <span class="nt">-r</span> requirements.txt
+
+<span class="c"># Frontend dependencies (run from frontend/ directory)</span>
+<span class="nb">cd </span>frontend <span class="o">&amp;&amp;</span> npm audit <span class="nt">--omit</span><span class="o">=</span>dev
+</code></pre></div></div>
+
+<p>Both commands must exit 0 with no findings. If findings exist:</p>
+
+<ol>
+  <li>Identify the fix version from the <code class="language-plaintext highlighter-rouge">pip-audit</code> output (Fix Versions column)</li>
+  <li>Check if the direct dependency that pulls in the vulnerable package needs to be upgraded
+alongside it (version conflicts are common — use <code class="language-plaintext highlighter-rouge">pip install "pkg==X" "dep==Y" --dry-run</code>
+to verify compatibility)</li>
+  <li>Upgrade in <code class="language-plaintext highlighter-rouge">requirements.txt</code>, re-run the full test suite, then re-run <code class="language-plaintext highlighter-rouge">pip-audit</code></li>
+</ol>
+
+<h3 id="pass-criteria">Pass Criteria</h3>
+
+<p>All scan commands exit 0. Any CVE at HIGH or CRITICAL severity blocks release unconditionally,
+regardless of findings in any other category.</p>
+
+<hr />
+
+<h2 id="category-2-application-security-audit">Category 2: Application Security Audit</h2>
+
+<h3 id="why-this-category-exists">Why This Category Exists</h3>
+
+<p>The application handles API key authentication, operator-supplied URLs (alert providers), and
+user-submitted configuration. Failures here expose production deployments to authentication
+bypass, SSRF, SQL injection, or information disclosure.</p>
+
+<h3 id="what-to-check-1">What to Check</h3>
+
+<p><strong>Authentication:</strong> <code class="language-plaintext highlighter-rouge">secrets.compare_digest()</code> used for all key comparisons; correct HTTP
+status codes (401 vs 403); all write endpoints protected; minimum 32-character key enforced
+at startup.</p>
+
+<p><strong>Rate limiting:</strong> Middleware present on all routes; limit headers returned; configurable via
+environment variable.</p>
+
+<p><strong>Input validation:</strong> Pydantic models on all request bodies; no string concatenation into SQL
+queries.</p>
+
+<p><strong>SSRF:</strong> Operator-supplied URLs (Webhook, Gotify, ntfy, Apprise) validated to <code class="language-plaintext highlighter-rouge">https://</code>
+scheme before storage; validation at write time, not at call time.</p>
+
+<p><strong>Headers and CORS:</strong> <code class="language-plaintext highlighter-rouge">X-Content-Type-Options</code>, <code class="language-plaintext highlighter-rouge">X-Frame-Options</code> present; CORS origin not
+wildcard in production; no partial secrets in logs.</p>
+
+<h3 id="how-to-run-1">How to Run</h3>
+
+<p>No single command covers this category. Review the relevant source files directly:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">src/api/auth.py</code> — authentication and key comparison</li>
+  <li><code class="language-plaintext highlighter-rouge">src/api/middleware.py</code> (or equivalent) — rate limiting, headers</li>
+  <li><code class="language-plaintext highlighter-rouge">src/api/routes/*.py</code> — input validation, protected endpoints</li>
+  <li><code class="language-plaintext highlighter-rouge">src/services/alert_providers.py</code> — URL validation</li>
+</ul>
+
+<p>Run the API security test suite to verify controls work:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pytest tests/test_api<span class="k">*</span>.py <span class="nt">-v</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="category-3-defensive-coding-review">Category 3: Defensive Coding Review</h2>
+
+<h3 id="why-this-category-exists-1">Why This Category Exists</h3>
+
+<p>Well-typed code can still fail at runtime if it doesn’t account for edge cases: env vars set
+to negative numbers, config files partially written during a crash, database connections left
+open under error paths. This category ensures the code fails safely and predictably.</p>
+
+<h3 id="what-to-check-2">What to Check</h3>
+
+<ul>
+  <li>Env var helpers validate value range (not just type)</li>
+  <li>Persistent state (runtime config) uses atomic write: temp file → <code class="language-plaintext highlighter-rouge">os.replace()</code></li>
+  <li>All SQLite connections use <code class="language-plaintext highlighter-rouge">with conn:</code> and specify <code class="language-plaintext highlighter-rouge">timeout=</code></li>
+  <li>All file I/O uses <code class="language-plaintext highlighter-rouge">with</code> blocks</li>
+  <li>Thread-shared state protected by locks</li>
+  <li>All HTTP calls have explicit timeouts</li>
+  <li>Background threads catch and log exceptions at the thread boundary</li>
+</ul>
+
+<h3 id="how-to-run-2">How to Run</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Find non-context-manager SQLite usage</span>
+ruff check src <span class="nt">--select</span> E
+
+<span class="c"># Find potential missing timeouts in HTTP calls</span>
+<span class="nb">grep</span> <span class="nt">-rn</span> <span class="s2">"requests</span><span class="se">\.</span><span class="s2">"</span> src/ | <span class="nb">grep</span> <span class="nt">-v</span> <span class="nb">timeout</span>
+
+<span class="c"># Verify no file opens without context manager</span>
+<span class="nb">grep</span> <span class="nt">-rn</span> <span class="s2">"open("</span> src/ | <span class="nb">grep</span> <span class="nt">-v</span> <span class="s2">"with open"</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="category-4-best-practices-review">Category 4: Best Practices Review</h2>
+
+<h3 id="why-this-category-exists-2">Why This Category Exists</h3>
+
+<p>Repeated magic strings, duplicated logic, and inconsistent type annotations accumulate into
+a maintenance burden that compounds over time. This category addresses structural quality
+before patterns become entrenched.</p>
+
+<h3 id="what-to-check-3">What to Check</h3>
+
+<ul>
+  <li>All repeated string values extracted to <code class="language-plaintext highlighter-rouge">StrEnum</code> or constants</li>
+  <li>No logic copied across more than one module</li>
+  <li>Complete, consistent type annotations using Python 3.10+ union syntax</li>
+  <li>Imports organised: stdlib → third-party → local</li>
+  <li>No silent exception swallows</li>
+</ul>
+
+<h3 id="how-to-run-3">How to Run</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ruff check src
+mypy src
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="category-5-modernization-review">Category 5: Modernization Review</h2>
+
+<h3 id="why-this-category-exists-3">Why This Category Exists</h3>
+
+<p>Python deprecated several common patterns in 3.10–3.12. Using them makes the codebase harder
+to migrate and generates deprecation warnings in newer interpreters. This category prevents
+technical debt from accumulating.</p>
+
+<h3 id="what-to-check-4">What to Check</h3>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">datetime.utcnow()</code> → <code class="language-plaintext highlighter-rouge">datetime.now(timezone.utc)</code></li>
+  <li><code class="language-plaintext highlighter-rouge">os.path.*</code> → <code class="language-plaintext highlighter-rouge">pathlib.Path</code></li>
+  <li><code class="language-plaintext highlighter-rouge">Optional[X]</code> / <code class="language-plaintext highlighter-rouge">Union[X, Y]</code> → <code class="language-plaintext highlighter-rouge">X | None</code> / <code class="language-plaintext highlighter-rouge">X | Y</code></li>
+  <li><code class="language-plaintext highlighter-rouge">Dict</code>, <code class="language-plaintext highlighter-rouge">List</code>, <code class="language-plaintext highlighter-rouge">Tuple</code> from <code class="language-plaintext highlighter-rouge">typing</code> → lowercase builtins</li>
+  <li>String enums use <code class="language-plaintext highlighter-rouge">StrEnum</code></li>
+  <li>No <code class="language-plaintext highlighter-rouge">typing.io</code> / <code class="language-plaintext highlighter-rouge">typing.re</code> (removed in 3.12)</li>
+</ul>
+
+<h3 id="how-to-run-4">How to Run</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Ruff can catch many of these automatically</span>
+ruff check src <span class="nt">--select</span> UP
+
+<span class="c"># Mypy catches type annotation inconsistencies</span>
+mypy src
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="category-6-error-handling-review">Category 6: Error Handling Review</h2>
+
+<h3 id="why-this-category-exists-4">Why This Category Exists</h3>
+
+<p>Silent failures are the hardest class of bug to diagnose in production. A scheduler
+that swallows an exception and stops running looks identical to one that ran successfully
+until someone notices stale data. This category ensures every failure mode is observable.</p>
+
+<h3 id="what-to-check-5">What to Check</h3>
+
+<ul>
+  <li>Every <code class="language-plaintext highlighter-rouge">except</code> block logs or re-raises — no <code class="language-plaintext highlighter-rouge">pass</code></li>
+  <li>HTTP error responses return structured JSON, not Python tracebacks</li>
+  <li>All network calls have <code class="language-plaintext highlighter-rouge">timeout</code></li>
+  <li>Startup failures are fatal with a clear message</li>
+  <li>Background exceptions are logged with <code class="language-plaintext highlighter-rouge">exc_info=True</code></li>
+  <li>Error catalog updated for new messages</li>
+</ul>
+
+<h3 id="how-to-run-5">How to Run</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Ruff catches bare except and broad except</span>
+ruff check src <span class="nt">--select</span> E722,BLE001
+
+<span class="c"># Manual review of exception handling in scheduler</span>
+<span class="nb">grep</span> <span class="nt">-n</span> <span class="s2">"except"</span> src/main.py
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="category-7-test-coverage-review">Category 7: Test Coverage Review</h2>
+
+<h3 id="why-this-category-exists-5">Why This Category Exists</h3>
+
+<p>Coverage gates prevent regression paths from going undetected. <code class="language-plaintext highlighter-rouge">ResourceWarning</code> failures
+indicate unclosed database connections that will cause problems under load. Frontend coverage
+ensures UI logic is exercised, not just rendered.</p>
+
+<h3 id="what-to-check-6">What to Check</h3>
+
+<ul>
+  <li>Python backend ≥90% coverage</li>
+  <li>Frontend ≥70% statement coverage</li>
+  <li>Zero <code class="language-plaintext highlighter-rouge">ResourceWarning</code> in test run</li>
+  <li>New modules have tests</li>
+  <li>No skipped tests without justification</li>
+  <li>Integration paths covered end-to-end</li>
+</ul>
+
+<h3 id="how-to-run-6">How to Run</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Python — coverage gate</span>
+pytest <span class="nt">--cov</span><span class="o">=</span>src <span class="nt">--cov-report</span><span class="o">=</span>term-missing <span class="nt">--cov-fail-under</span><span class="o">=</span>90
+
+<span class="c"># Python — resource leak check</span>
+pytest <span class="nt">-W</span> error::ResourceWarning
+
+<span class="c"># Frontend — coverage</span>
+<span class="nb">cd </span>frontend <span class="o">&amp;&amp;</span> npx vitest run <span class="nt">--coverage</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="category-8-documentation-accuracy-review">Category 8: Documentation Accuracy Review</h2>
+
+<h3 id="why-this-category-exists-6">Why This Category Exists</h3>
+
+<p>Stale documentation erodes trust and creates friction for new contributors. Test count
+mismatches, wrong environment variable names, and outdated API tables are the most common
+class of documentation rot in these projects.</p>
+
+<h3 id="what-to-check-7">What to Check</h3>
+
+<ul>
+  <li>README setup commands work on a clean checkout</li>
+  <li>Test count and coverage percentage match CI</li>
+  <li><code class="language-plaintext highlighter-rouge">.env.example</code> covers all variables in <code class="language-plaintext highlighter-rouge">config.py</code></li>
+  <li>API table matches FastAPI route definitions</li>
+  <li><code class="language-plaintext highlighter-rouge">CHANGELOG.md</code> updated</li>
+  <li><code class="language-plaintext highlighter-rouge">CONTRIBUTING.md</code> tested on Windows and Linux</li>
+</ul>
+
+<h3 id="how-to-run-7">How to Run</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Verify test count matches README</span>
+pytest <span class="nt">--collect-only</span> <span class="nt">-q</span> | <span class="nb">tail</span> <span class="nt">-1</span>
+
+<span class="c"># Verify coverage matches README</span>
+pytest <span class="nt">--cov</span><span class="o">=</span>src <span class="nt">--cov-report</span><span class="o">=</span>term-missing | <span class="nb">grep</span> <span class="s2">"TOTAL"</span>
+
+<span class="c"># Check config.py env vars are all in .env.example</span>
+<span class="nb">grep</span> <span class="nt">-oP</span> <span class="s1">'(?&lt;=os\.getenv\()["\x27]\K[^"'</span><span class="se">\'</span><span class="s1">']+'</span> src/config.py | <span class="nb">sort
+grep</span> <span class="nt">-oP</span> <span class="s1">'^\w+'</span> .env.example | <span class="nb">sort</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="category-9-performance-review">Category 9: Performance Review</h2>
+
+<h3 id="why-this-category-exists-7">Why This Category Exists</h3>
+
+<p>Performance problems that are invisible in development become production incidents after
+data volume grows. Missing database indexes, blocking I/O on the async request path, and
+per-request config file reads are cheap to fix early and expensive to fix after data
+accumulates.</p>
+
+<h3 id="what-to-check-8">What to Check</h3>
+
+<ul>
+  <li>Timestamp indexes on all date-range query tables</li>
+  <li>No blocking I/O on FastAPI’s async request path</li>
+  <li>Runtime config cached (mtime check)</li>
+  <li>Alert providers use connection pooling</li>
+  <li>Prometheus labels are bounded</li>
+  <li>SQLite not reopened per request in hot paths</li>
+</ul>
+
+<h3 id="how-to-run-8">How to Run</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Verify indexes exist in SQLite schema</span>
+sqlite3 data/hermes.db <span class="s2">".schema results"</span>
+
+<span class="c"># Check for blocking calls on async routes</span>
+<span class="nb">grep</span> <span class="nt">-n</span> <span class="s2">"time.sleep</span><span class="se">\|</span><span class="s2">open(</span><span class="se">\|</span><span class="s2">conn = "</span> src/api/routes/<span class="k">*</span>.py
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="exit-criteria">Exit Criteria</h2>
+
+<p>A release tag <strong>must not</strong> be created until every item in this table is verified:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Gate</th>
+      <th>Command / Evidence</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Supply chain — pip</td>
+      <td><code class="language-plaintext highlighter-rouge">pip-audit -r requirements.txt</code> exits 0</td>
+    </tr>
+    <tr>
+      <td>Supply chain — npm</td>
+      <td><code class="language-plaintext highlighter-rouge">npm audit --omit=dev</code> exits 0 (no high/critical)</td>
+    </tr>
+    <tr>
+      <td>Tests pass</td>
+      <td><code class="language-plaintext highlighter-rouge">pytest</code> exits 0</td>
+    </tr>
+    <tr>
+      <td>Python coverage ≥90%</td>
+      <td><code class="language-plaintext highlighter-rouge">pytest --cov=src --cov-fail-under=90</code> exits 0</td>
+    </tr>
+    <tr>
+      <td>Frontend coverage ≥70%</td>
+      <td><code class="language-plaintext highlighter-rouge">vitest run --coverage</code> from <code class="language-plaintext highlighter-rouge">frontend/</code> ≥70% statements</td>
+    </tr>
+    <tr>
+      <td>No ResourceWarnings</td>
+      <td><code class="language-plaintext highlighter-rouge">pytest -W error::ResourceWarning</code> exits 0</td>
+    </tr>
+    <tr>
+      <td>Ruff lint clean</td>
+      <td><code class="language-plaintext highlighter-rouge">ruff check src</code> exits 0</td>
+    </tr>
+    <tr>
+      <td>Ruff format clean</td>
+      <td><code class="language-plaintext highlighter-rouge">ruff format --check src</code> exits 0</td>
+    </tr>
+    <tr>
+      <td>Mypy</td>
+      <td><code class="language-plaintext highlighter-rouge">mypy src</code> exits 0; all suppressions documented</td>
+    </tr>
+    <tr>
+      <td>No open HIGH findings</td>
+      <td>All 🔴 HIGH items across all 9 categories resolved</td>
+    </tr>
+    <tr>
+      <td>Docs current</td>
+      <td>README test count and API table match current codebase</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="recording-findings">Recording Findings</h2>
+
+<p>Use this format for every finding raised during a review:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ID:             SC-1  (category abbreviation + sequential number)
+File:           requirements.txt
+Severity:       HIGH
+Summary:        starlette 0.46.2 has three known CVEs
+Detail:         CVE-2025-54121 (fixed 0.47.2), CVE-2025-62727 (fixed 0.49.1),
+                PYSEC-2026-161 (fixed 1.0.1). fastapi 0.115.12 pins starlette&lt;0.47.0,
+                requiring a coordinated upgrade of both packages.
+Recommendation: Upgrade fastapi to 0.133.0, starlette to 1.0.1
+Resolution:     commit abc1234 — "fix: upgrade fastapi 0.133.0 / starlette 1.0.1 (SC-1)"
+</code></pre></div></div>
+
+<p>Category abbreviations: <code class="language-plaintext highlighter-rouge">SC</code>, <code class="language-plaintext highlighter-rouge">SEC</code>, <code class="language-plaintext highlighter-rouge">DEF</code>, <code class="language-plaintext highlighter-rouge">BP</code>, <code class="language-plaintext highlighter-rouge">MOD</code>, <code class="language-plaintext highlighter-rouge">ERR</code>, <code class="language-plaintext highlighter-rouge">COV</code>, <code class="language-plaintext highlighter-rouge">DOC</code>, <code class="language-plaintext highlighter-rouge">PERF</code></p>
+
+<p>HIGH findings must reference a resolving commit before the release tag is created.
+MEDIUM/LOW findings must have a TODO.md entry with a target milestone.</p>
+
+<hr />
+
+<h2 id="project-specific-configuration--hermes">Project-Specific Configuration — Hermes</h2>
+
+<p><strong>Runtime:</strong> Python 3.13+, Node.js 22+
+<strong>Architecture:</strong> Single-process — scheduler and API run in the same process
+<strong>Frontend:</strong> React 18 / TypeScript / Vite / Vitest
+<strong>Dependency automation:</strong> Renovate (pip, npm, GitHub Actions)</p>
+
+<h3 id="additional-supply-chain-steps">Additional Supply Chain Steps</h3>
+
+<p>Run <code class="language-plaintext highlighter-rouge">npm audit --omit=dev</code> from the <code class="language-plaintext highlighter-rouge">frontend/</code> subdirectory. Renovate PRs for patch-level
+dependency bumps may be merged without a release tag per the release policy, but confirm
+the updated dependency passes <code class="language-plaintext highlighter-rouge">pip-audit</code> before merging.</p>
+
+<h3 id="additional-security-checks">Additional Security Checks</h3>
+
+<ul>
+  <li>All alert provider URLs (Webhook, Gotify, ntfy, Apprise) validated for <code class="language-plaintext highlighter-rouge">https://</code> scheme
+before being written to <code class="language-plaintext highlighter-rouge">data/runtime_config.json</code></li>
+  <li>The speedtest binary path is not user-configurable; document and enforce this restriction
+to prevent command injection via config</li>
+</ul>
+
+<h3 id="coverage-thresholds">Coverage Thresholds</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Layer</th>
+      <th>Command</th>
+      <th>Gate</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Python</td>
+      <td><code class="language-plaintext highlighter-rouge">pytest --cov=src --cov-fail-under=90</code></td>
+      <td>≥90%</td>
+    </tr>
+    <tr>
+      <td>Frontend</td>
+      <td><code class="language-plaintext highlighter-rouge">vitest run --coverage</code> from <code class="language-plaintext highlighter-rouge">frontend/</code></td>
+      <td>≥70% statements</td>
+    </tr>
+  </tbody>
+</table>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/Hermes" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Code Review Policy
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+// ============================================================
+// Green Flame Tech — Code & Syntax Highlighting
+// ============================================================
+
+// Inline code
+code {
+  font-family: $font-code;
+  font-size: 0.875em;
+  background: $color-code-bg;
+  border: 1px solid $color-code-border;
+  border-radius: $radius-sm;
+  padding: 0.1em 0.4em;
+  color: $color-flame;
+}
+
+// Code blocks
+pre {
+  background: $color-code-bg;
+  border: 1px solid $color-code-border;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  overflow-x: auto;
+  margin: $spacing-md 0;
+  position: relative;
+
+  &[data-lang]::before {
+    content: attr(data-lang);
+    position: absolute;
+    top: $spacing-sm;
+    right: $spacing-md;
+    font-family: $font-ui;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: $color-text-muted;
+  }
+
+  code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 0.875rem;
+    font-family: $font-code;
+    color: $color-text;
+    border-radius: 0;
+  }
+}
+
+// --- Rouge Syntax Theme ---
+.highlight {
+  background: $color-code-bg;
+  border: 1px solid $color-code-border;
+  border-radius: $radius-md;
+  margin: $spacing-md 0;
+  overflow: hidden;
+
+  pre {
+    border: none;
+    border-radius: 0;
+    margin: 0;
+  }
+
+  .c, .cd, .cm, .c1, .cs   { color: #555; font-style: italic; }
+  .k, .kd, .kn, .kp, .kr, .kt, .kc { color: $color-flame; font-weight: 600; }
+  .s, .sb, .sc, .sd, .s2, .sh, .si, .sx, .s1 { color: $color-green; }
+  .m, .mf, .mh, .mi, .mo   { color: $color-accent-amber; }
+  .o, .ow                   { color: #ccc; }
+  .n, .na, .nb, .nc, .nd, .ni, .ne, .nl, .nn, .nt, .nv { color: $color-text; }
+  .nf                       { color: $color-accent-cyan; }
+  .bp                       { color: $color-accent-amber-dark; }
+  .err                      { color: #f87171; background: none; }
+  .vi                       { color: $color-accent-cyan-dark; }
+  .go                       { color: $color-text-muted; }
+  .gi                       { color: $color-green; }
+  .gd                       { color: $color-accent-red; }
+}
+
+// Copy button (added via JS)
+.code-block-wrapper {
+  position: relative;
+
+  .copy-btn {
+    position: absolute;
+    top: $spacing-sm;
+    right: $spacing-sm;
+    background: $color-surface-2;
+    border: $border-thin;
+    border-radius: $radius-sm;
+    color: $color-text-muted;
+    font-family: $font-ui;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    cursor: pointer;
+    transition: all $transition-fast;
+    z-index: 1;
+
+    &:hover {
+      border-color: $color-flame;
+      color: $color-flame;
+    }
+
+    &.copied {
+      color: $color-green;
+      border-color: $color-green;
+    }
+  }
+}

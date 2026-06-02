@@ -1,0 +1,568 @@
+// ============================================================
+// Green Flame Tech — Layout, Nav, Sidebar, Footer
+// ============================================================
+
+// --- Top Navbar ---
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.80);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(34, 197, 94, 0.20);
+  padding: 0 $spacing-lg;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    text-decoration: none;
+
+    .brand-name {
+      font-family: $font-display;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: $color-text;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+
+      span {
+        color: $color-flame;
+      }
+    }
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: $spacing-lg;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    a {
+      font-family: $font-ui;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: $color-text-muted;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: color $transition-fast;
+
+      &:hover, &.active {
+        color: $color-flame;
+        text-decoration: none;
+      }
+    }
+  }
+
+  .nav-back-link {
+    font-family: $font-ui;
+    font-size: 0.8rem;
+    color: $color-text-subtle;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    &:hover { color: $color-flame; }
+
+    svg { width: 14px; height: 14px; }
+  }
+
+  @media (max-width: $bp-md) {
+    padding: 0 $spacing-md;
+
+    .nav-links { display: none; }
+  }
+}
+
+// --- Page Wrapper ---
+.page-wrapper {
+  display: flex;
+  max-width: $max-width-wide;
+  margin: 0 auto;
+  min-height: calc(100vh - 60px - 80px);
+  padding: 0 24px;
+
+  @media (min-width: $bp-md) {
+    padding: 0 40px;
+  }
+}
+
+// --- Sidebar ---
+.sidebar {
+  width: $sidebar-width;
+  flex-shrink: 0;
+  padding: $spacing-lg $spacing-md $spacing-lg 0;
+  position: sticky;
+  top: 60px;
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+  border-right: $border-thin;
+
+  &::-webkit-scrollbar { width: 3px; }
+  &::-webkit-scrollbar-thumb { background: $color-border; }
+
+  .sidebar-section {
+    margin-bottom: $spacing-lg;
+
+    &-title {
+      font-family: $font-ui;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: $color-accent-cyan-text;
+      padding: 0 $spacing-sm;
+      margin-bottom: $spacing-sm;
+    }
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    li a {
+      display: block;
+      font-family: $font-ui;
+      font-size: 0.875rem;
+      color: $color-text-muted;
+      padding: 5px $spacing-sm;
+      border-radius: $radius-sm;
+      border-left: 2px solid transparent;
+      transition: all $transition-fast;
+
+      &:hover {
+        color: $color-text;
+        background: $color-surface;
+        border-left-color: $color-border;
+        text-decoration: none;
+      }
+
+      &.active {
+        color: $color-flame;
+        background: $color-success-bg;
+        border-left-color: $color-flame;
+        box-shadow: inset 2px 0 0 $color-flame;
+      }
+    }
+  }
+
+  @media (max-width: $bp-lg) {
+    display: none;
+  }
+}
+
+// --- Main Content ---
+.main-content {
+  flex: 1;
+  padding: 48px 0 64px 48px;
+  min-width: 0;
+
+  @media (max-width: $bp-lg) {
+    padding: 48px 0;
+  }
+}
+
+// --- Content Prose ---
+.prose {
+  max-width: $max-width-content;
+
+  h1 {
+    font-size: 2.25rem;
+    margin-bottom: $spacing-sm;
+    color: $color-text;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    margin-top: $spacing-xl;
+    margin-bottom: $spacing-md;
+    padding-bottom: $spacing-sm;
+    border-bottom: $border-thin;
+    color: $color-text;
+  }
+
+  h3 {
+    font-size: 1.15rem;
+    margin-top: $spacing-lg;
+    margin-bottom: $spacing-sm;
+    color: $color-text;
+  }
+
+  h4, h5, h6 {
+    margin-top: $spacing-md;
+    margin-bottom: $spacing-sm;
+    color: $color-text-muted;
+  }
+
+  p { margin-bottom: $spacing-md; }
+
+  h2, h3 {
+    .anchor {
+      opacity: 0;
+      color: $color-flame;
+      font-size: 0.75em;
+      margin-left: 0.5em;
+      transition: opacity $transition-fast;
+    }
+    &:hover .anchor { opacity: 1; }
+  }
+}
+
+// --- Home Layout Hero ---
+.doc-hero {
+  border-bottom: 1px solid $color-border;
+  padding: 5rem 24px 4rem;
+  text-align: center;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(34, 197, 94, 0.10) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(34, 197, 94, 0.10) 0%, transparent 50%);
+
+  @media (min-width: $bp-md) {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  &__inner {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  &__eyebrow {
+    font-family: $font-ui;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: $color-accent-cyan;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+
+  &__title {
+    font-family: $font-display;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: $color-text;
+    margin-bottom: 1rem;
+  }
+
+  &__subtitle {
+    font-family: $font-body;
+    font-size: 1rem;
+    color: $color-text-muted;
+    max-width: 640px;
+    margin: 0 auto 2rem;
+  }
+
+  &__ctas {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+.btn {
+  font-family: $font-ui;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 0.75rem 1.5rem;
+  border-radius: $radius-md;
+  transition: transform $transition-normal, box-shadow $transition-normal, background $transition-normal, color $transition-normal;
+  text-decoration: none;
+  display: inline-block;
+
+  &--primary {
+    color: #0b0f0d;
+    background: linear-gradient(45deg, $color-flame, $color-flame-bright);
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+
+    &:hover {
+      color: #0b0f0d;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
+      text-decoration: none;
+    }
+  }
+
+  &--outline {
+    border: 2px solid $color-flame;
+    color: $color-flame;
+    background: transparent;
+
+    &:hover {
+      background: $color-flame;
+      color: #0b0f0d;
+      transform: translateY(-2px);
+      text-decoration: none;
+    }
+  }
+}
+
+.quick-links {
+  padding: 3rem 24px;
+  border-bottom: 1px solid $color-border;
+
+  @media (min-width: $bp-md) {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
+
+  &__inner {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+    max-width: $max-width-wide;
+    margin: 0 auto;
+  }
+}
+
+.quick-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, rgba(26, 26, 26, 0.85), rgba(15, 15, 15, 0.95));
+  border: 1px solid $color-border;
+  border-radius: 16px;
+  transition: transform $transition-normal, border-color $transition-normal, box-shadow $transition-normal;
+  text-decoration: none;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: rgba(34, 197, 94, 0.4);
+    box-shadow: 0 0 22px rgba(34, 197, 94, 0.25);
+    text-decoration: none;
+  }
+
+  &__icon {
+    font-size: 1.4rem;
+    margin-bottom: 0.25rem;
+  }
+
+  &__title {
+    font-family: $font-display;
+    font-size: 1rem;
+    font-weight: 700;
+    color: $color-text;
+    letter-spacing: 0.02em;
+  }
+
+  &__desc {
+    font-family: $font-body;
+    font-size: 0.9rem;
+    color: $color-text-muted;
+    line-height: 1.6;
+  }
+}
+
+// --- Page Header ---
+.page-header {
+  margin-bottom: $spacing-xl;
+  padding-bottom: $spacing-lg;
+  border-bottom: $border-thin;
+
+  .page-meta {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    margin-bottom: $spacing-sm;
+    flex-wrap: wrap;
+  }
+
+  .page-lead {
+    color: $color-text-muted;
+    font-size: 1.1rem;
+    margin-top: $spacing-sm;
+  }
+
+  .badge {
+    font-family: $font-ui;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 2px 10px;
+    border-radius: 2px;
+    border: 1px solid;
+
+    &--version {
+      color: $color-accent-amber-text;
+      border-color: $color-accent-amber;
+      background: rgba($color-accent-amber, 0.15);
+    }
+
+    &--stable {
+      color: $color-green;
+      border-color: $color-green;
+      background: rgba($color-green, 0.15);
+    }
+
+    &--beta {
+      color: $color-accent-cyan-text;
+      border-color: $color-accent-cyan;
+      background: rgba($color-accent-cyan, 0.15);
+    }
+
+    &--deprecated {
+      color: $color-accent-red-text;
+      border-color: $color-accent-red;
+      background: rgba($color-accent-red, 0.15);
+    }
+  }
+}
+
+// --- Footer ---
+.site-footer {
+  background: rgba($color-bg, 0.75);
+  border-top: 1px solid $color-border;
+  padding: $spacing-lg $spacing-lg;
+  margin-top: auto;
+
+  .footer-inner {
+    max-width: $max-width-wide;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: $spacing-md;
+  }
+
+  .footer-brand {
+    font-family: $font-display;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    color: $color-text-muted;
+
+    span { color: $color-flame; }
+  }
+
+  .footer-links {
+    display: flex;
+    gap: $spacing-md;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    a {
+      font-family: $font-ui;
+      font-size: 0.8rem;
+      color: $color-text-muted;
+
+      &:hover { color: $color-flame; }
+    }
+  }
+
+  .footer-copy {
+    font-family: $font-ui;
+    font-size: 0.75rem;
+    color: $color-text-muted;
+    width: 100%;
+  }
+}
+
+// --- Callout Boxes ---
+.callout {
+  border-left: 3px solid;
+  padding: $spacing-md;
+  border-radius: 0 $radius-md $radius-md 0;
+  margin: $spacing-md 0;
+  background: rgba($color-surface, 0.9);
+
+  &__title {
+    font-family: $font-ui;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: $spacing-xs;
+  }
+
+  p:last-child { margin-bottom: 0; }
+
+  &--note {
+    border-color: $color-accent-cyan;
+    background: $color-accent-bg;
+    box-shadow: 0 0 8px rgba($color-accent-cyan, 0.15);
+
+    .callout__title { color: $color-accent-cyan-text; }
+  }
+
+  &--tip {
+    border-color: $color-green;
+    background: $color-success-bg;
+
+    .callout__title { color: $color-green; }
+  }
+
+  &--warning {
+    border-color: $color-accent-amber;
+    background: $color-warning-bg;
+
+    .callout__title { color: $color-accent-amber-text; }
+  }
+
+  &--danger {
+    border-color: $color-accent-red;
+    background: $color-danger-bg;
+
+    .callout__title { color: $color-accent-red-text; }
+  }
+}
+
+// --- Prev / Next Navigation ---
+.page-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: $spacing-md;
+  margin-top: $spacing-2xl;
+  padding-top: $spacing-lg;
+  border-top: $border-thin;
+
+  a {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 48%;
+    padding: $spacing-md;
+    background: linear-gradient(135deg, rgba(26, 26, 26, 0.85), rgba(15, 15, 15, 0.95));
+    border: $border-thin;
+    border-radius: $radius-md;
+    transition: transform $transition-normal, border-color $transition-normal, box-shadow $transition-normal;
+    text-decoration: none;
+
+    &:hover {
+      transform: translateY(-2px);
+      border-color: rgba(34, 197, 94, 0.4);
+      box-shadow: 0 0 22px rgba(34, 197, 94, 0.25);
+    }
+
+    .nav-label {
+      font-family: $font-ui;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: $color-text-subtle;
+    }
+
+    .nav-title {
+      font-family: $font-display;
+      font-size: 1rem;
+      font-weight: 600;
+      color: $color-text;
+    }
+
+    &.prev { align-items: flex-start; }
+    &.next { align-items: flex-end; margin-left: auto; }
+  }
+}

@@ -1,0 +1,39 @@
+<aside class="sidebar" aria-label="Page navigation">
+  {% assign nav = site.data.nav %}
+
+  {% if nav %}
+    {% for section in nav %}
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">{{ section.title }}</h3>
+        <ul>
+          {% for item in section.links %}
+            <li>
+              <a href="{{ item.url | relative_url }}"
+                 {% if page.url == item.url %}class="active" aria-current="page"{% endif %}>
+                {{ item.title }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endfor %}
+
+  {% else %}
+    <div class="sidebar-section">
+      <h3 class="sidebar-section-title">Pages</h3>
+      <ul>
+        {% assign pages = site.pages | sort: "order" %}
+        {% for p in pages %}
+          {% unless p.url contains '/assets/' or p.title == nil %}
+            <li>
+              <a href="{{ p.url | relative_url }}"
+                 {% if p.url == page.url %}class="active" aria-current="page"{% endif %}>
+                {{ p.title }}
+              </a>
+            </li>
+          {% endunless %}
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+</aside>

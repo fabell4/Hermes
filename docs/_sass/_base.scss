@@ -1,0 +1,206 @@
+// ============================================================
+// Green Flame Tech — Base Styles & Reset
+// ============================================================
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+// --- Skip navigation link (WCAG 2.4.1) ---
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: $spacing-sm;
+  z-index: 9999;
+  padding: $spacing-xs $spacing-md;
+  background: $color-flame;
+  color: #0b0f0d;
+  font-family: $font-ui;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: $radius-sm;
+  text-decoration: none;
+
+  &:focus {
+    top: $spacing-sm;
+  }
+}
+
+// --- Focus visible ring ---
+:focus-visible {
+  outline: 2px solid $color-flame;
+  outline-offset: 3px;
+  border-radius: $radius-sm;
+}
+
+html {
+  font-size: $font-size-base;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+// --- Reduced motion ---
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
+
+body {
+  position: relative;
+  background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0a2818 100%);
+  color: $color-text;
+  font-family: $font-body;
+  font-size: 1rem;
+  line-height: $line-height-base;
+  min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(34, 197, 94, 0.10) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(34, 197, 94, 0.10) 0%, transparent 50%);
+}
+
+// --- Links ---
+a {
+  color: $color-accent-purple;
+  text-decoration: none;
+  text-underline-offset: 0.15em;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: $color-accent-purple-text;
+    text-decoration: underline;
+  }
+}
+
+// --- Headings ---
+h1, h2, h3, h4, h5, h6 {
+  font-family: $font-display;
+  font-weight: 700;
+  line-height: 1.2;
+  color: $color-text;
+  letter-spacing: 0.02em;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 1.875rem; }
+h3 { font-size: 1.375rem; }
+h4 { font-size: 1.125rem; }
+h5 { font-size: 1rem; }
+h6 { font-size: 0.875rem; }
+
+// --- Paragraphs ---
+p {
+  margin-bottom: $spacing-md;
+  color: $color-text-muted;
+}
+
+// --- Lists ---
+ul, ol {
+  margin: $spacing-sm 0 $spacing-md $spacing-lg;
+
+  li {
+    margin-bottom: $spacing-xs;
+  }
+}
+
+// --- Horizontal rule ---
+hr {
+  border: none;
+  border-top: $border-thin;
+  margin: $spacing-lg 0;
+}
+
+// --- Images ---
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+// --- Strong / Em ---
+strong { font-weight: 600; color: $color-accent-cyan; }
+em     { color: $color-green; font-style: italic; }
+
+mark,
+.text-highlight {
+  color: $color-accent-cyan;
+  background: transparent;
+  font-weight: 500;
+}
+
+// --- Blockquote ---
+blockquote {
+  border-left: 3px solid $color-flame;
+  padding: $spacing-sm $spacing-md;
+  margin: $spacing-md 0;
+  background: linear-gradient(135deg, rgba(26, 26, 26, 0.95), rgba(15, 15, 15, 0.98));
+  border-radius: 0 $radius-sm $radius-sm 0;
+  color: $color-text-muted;
+  font-style: italic;
+
+  p:last-child { margin-bottom: 0; }
+}
+
+// --- Tables ---
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: $spacing-md 0;
+  font-size: 0.9rem;
+
+  th {
+    background: $color-surface-2;
+    color: $color-text;
+    font-family: $font-ui;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    padding: $spacing-sm $spacing-md;
+    border: $border-thin;
+    border-bottom: 1px solid $color-flame;
+    text-align: left;
+  }
+
+  td {
+    padding: $spacing-sm $spacing-md;
+    border: $border-thin;
+    vertical-align: top;
+  }
+
+  tr:nth-child(even) td {
+    background: $color-surface;
+  }
+}
+
+// --- Selection ---
+::selection {
+  background: $color-accent-cyan-glow;
+  color: $color-accent-cyan;
+}
+
+// --- Scrollbar (webkit) ---
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track { background: $color-bg; }
+::-webkit-scrollbar-thumb {
+  background: $color-flame;
+  border-radius: 3px;
+  &:hover { background: $color-flame-bright; }
+}

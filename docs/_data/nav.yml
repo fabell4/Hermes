@@ -1,0 +1,63 @@
+- title: Documentation
+  links:
+    - title: Home
+      url: /
+    - title: Getting Started
+      url: /getting-started
+    - title: Architecture
+      url: /architecture
+    - title: API Reference
+      url: /api-reference
+    - title: Grafana Alloy
+      url: /alloy
+    - title: Runbook
+      url: /runbook
+
+- title: Security
+  links:
+    - title: Security Guide
+      url: /security
+    - title: Security Audit
+      url: /SECURITY-AUDIT
+    - title: Security Enhancements
+      url: /SECURITY-ENHANCEMENTS
+
+- title: Alerts
+  links:
+    - title: Alert Configuration
+      url: /alerts
+
+- title: Error Handling
+  links:
+    - title: Error Catalog
+      url: /error-catalog
+    - title: Handling Conventions
+      url: /error-handling-conventions
+    - title: Error Messages
+      url: /error-messages
+
+- title: Reference
+  links:
+    - title: Release Process
+      url: /RELEASE-PROCESS
+    - title: Frontend Style Guide
+      url: /styleguide
+    - title: Suppression Decisions
+      url: /suppression-decisions
+
+- title: Code Reviews
+  links:
+    - title: Best Practices
+      url: /BEST-PRACTICES-REVIEW
+    - title: Defensive Coding
+      url: /DEFENSIVE-CODING-REVIEW
+    - title: Error Handling Review
+      url: /ERROR-HANDLING-REVIEW
+    - title: Performance Review
+      url: /PERFORMANCE-OPTIMIZATION-REVIEW
+    - title: Test Coverage
+      url: /TEST-COVERAGE-REVIEW
+    - title: Security Audit
+      url: /SECURITY-AUDIT
+    - title: Documentation Review
+      url: /DOCUMENTATION-ACCURACY-REVIEW

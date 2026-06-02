@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Release Process — Hermes Documentation</title>
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Release Process | Hermes Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Release Process" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<link rel="canonical" href="http://localhost:4001/RELEASE-PROCESS.html" />
+<meta property="og:url" content="http://localhost:4001/RELEASE-PROCESS.html" />
+<meta property="og:site_name" content="Hermes Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Release Process" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted internet speed test monitoring with modern observability stack integration","headline":"Release Process","url":"http://localhost:4001/RELEASE-PROCESS.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration">
+
+<title>
+  
+    Release Process — Hermes Documentation
+  
+</title>
+
+
+<link rel="icon" type="image/png" href="/assets/Hermes.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="/" class="nav-brand">
+    <span class="brand-name">
+      Hermes
+      <span>Docs</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/alloy"
+                 >
+                Grafana Alloy
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-ENHANCEMENTS"
+                 >
+                Security Enhancements
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Error Handling</h3>
+        <ul>
+          
+            <li>
+              <a href="/error-catalog"
+                 >
+                Error Catalog
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-handling-conventions"
+                 >
+                Handling Conventions
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-messages"
+                 >
+                Error Messages
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/RELEASE-PROCESS"
+                 >
+                Release Process
+              </a>
+            </li>
+          
+            <li>
+              <a href="/styleguide"
+                 >
+                Frontend Style Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/suppression-decisions"
+                 >
+                Suppression Decisions
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Code Reviews</h3>
+        <ul>
+          
+            <li>
+              <a href="/BEST-PRACTICES-REVIEW"
+                 >
+                Best Practices
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DEFENSIVE-CODING-REVIEW"
+                 >
+                Defensive Coding
+              </a>
+            </li>
+          
+            <li>
+              <a href="/ERROR-HANDLING-REVIEW"
+                 >
+                Error Handling Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/PERFORMANCE-OPTIMIZATION-REVIEW"
+                 >
+                Performance Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/TEST-COVERAGE-REVIEW"
+                 >
+                Test Coverage
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DOCUMENTATION-ACCURACY-REVIEW"
+                 >
+                Documentation Review
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Release Process</h1>
+
+            
+          </header>
+        
+
+        <h2 id="overview">Overview</h2>
+
+<p>This document outlines the complete release process for Hermes to prevent incomplete or broken releases.</p>
+
+<h2 id="release-architecture">Release Architecture</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Hermes-dev (GitHub) → Forgejo CI → Public Hermes (GitHub)
+                          ↓
+                    Docker Registries (GHCR + Private)
+</code></pre></div></div>
+
+<h2 id="pre-release-checklist">Pre-Release Checklist</h2>
+
+<h3 id="1-code-validation-local">1. Code Validation (Local)</h3>
+
+<p>Run all checks locally before committing:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Activate virtual environment</span><span class="w">
+</span><span class="o">.</span><span class="n">\.venv\Scripts\Activate.ps1</span><span class="w">
+
+</span><span class="c"># Format code</span><span class="w">
+</span><span class="n">ruff</span><span class="w"> </span><span class="nx">format</span><span class="w"> </span><span class="nx">src</span><span class="w"> </span><span class="nx">tests</span><span class="w">
+
+</span><span class="c"># Lint code</span><span class="w">
+</span><span class="n">ruff</span><span class="w"> </span><span class="nx">check</span><span class="w"> </span><span class="nx">src</span><span class="w"> </span><span class="nx">tests</span><span class="w">
+
+</span><span class="c"># Type checking</span><span class="w">
+</span><span class="n">mypy</span><span class="w"> </span><span class="nx">src</span><span class="w">
+
+</span><span class="c"># Run tests</span><span class="w">
+</span><span class="n">pytest</span><span class="w"> </span><span class="nt">--cov</span><span class="o">=</span><span class="n">src</span><span class="w"> </span><span class="nt">-v</span><span class="w">
+
+</span><span class="c"># Security scan (optional)</span><span class="w">
+</span><span class="n">bandit</span><span class="w"> </span><span class="nt">-r</span><span class="w"> </span><span class="nx">src</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>All checks must pass</strong> before proceeding.</p>
+
+<h3 id="2-version-update">2. Version Update</h3>
+
+<p>Update version in all required files:</p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">CHANGELOG.md</code> - Add new version entry with changes</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">frontend/package.json</code> - Update <code class="language-plaintext highlighter-rouge">"version"</code> field</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Verify version format: <code class="language-plaintext highlighter-rouge">X.Y.Z</code> or <code class="language-plaintext highlighter-rouge">X.Y.Z-beta</code></li>
+</ul>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Example for v0.3.7-beta</span><span class="w">
+</span><span class="c"># Edit CHANGELOG.md to add:</span><span class="w">
+</span><span class="c">## [0.3.7-beta] - YYYY-MM-DD</span><span class="w">
+</span><span class="c">### Fixed</span><span class="w">
+</span><span class="o">-</span><span class="w"> </span><span class="o">...</span><span class="w">
+
+</span><span class="c"># Edit frontend/package.json:</span><span class="w">
+</span><span class="s2">"version"</span><span class="p">:</span><span class="w"> </span><span class="s2">"0.3.7"</span><span class="w">
+
+</span><span class="c"># Commit changes</span><span class="w">
+</span><span class="n">git</span><span class="w"> </span><span class="nx">add</span><span class="w"> </span><span class="nx">CHANGELOG.md</span><span class="w"> </span><span class="nx">frontend/package.json</span><span class="w">
+</span><span class="n">git</span><span class="w"> </span><span class="nx">commit</span><span class="w"> </span><span class="nt">-m</span><span class="w"> </span><span class="s2">"Bump to v0.3.7-beta"</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="3-pre-release-validation-ci">3. Pre-Release Validation (CI)</h3>
+
+<p>Trigger the pre-release check workflow:</p>
+
+<ol>
+  <li>Go to GitHub Actions on Hermes-dev repo</li>
+  <li>Select “Pre-Release Check” workflow</li>
+  <li>Click “Run workflow”</li>
+  <li>Enter version number (e.g., <code class="language-plaintext highlighter-rouge">0.3.7-beta</code>)</li>
+  <li>Wait for all checks to complete</li>
+</ol>
+
+<p><strong>Do not proceed if any checks fail.</strong></p>
+
+<h3 id="4-create-and-push-tag">4. Create and Push Tag</h3>
+
+<p>Only after pre-release validation passes:</p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Create annotated tag</span><span class="w">
+</span><span class="n">git</span><span class="w"> </span><span class="nx">tag</span><span class="w"> </span><span class="nt">-a</span><span class="w"> </span><span class="nx">v0.3.7-beta</span><span class="w"> </span><span class="nt">-m</span><span class="w"> </span><span class="s2">"Release v0.3.7-beta: Brief description of changes"</span><span class="w">
+
+</span><span class="c"># Push commit and tag</span><span class="w">
+</span><span class="n">git</span><span class="w"> </span><span class="nx">push</span><span class="w"> </span><span class="nx">origin</span><span class="w"> </span><span class="nx">main</span><span class="w">
+</span><span class="n">git</span><span class="w"> </span><span class="nx">push</span><span class="w"> </span><span class="nx">origin</span><span class="w"> </span><span class="nx">v0.3.7-beta</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="5-monitor-forgejo-pipeline">5. Monitor Forgejo Pipeline</h3>
+
+<p>Watch the Forgejo release workflow:</p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />All CI checks pass (ruff, mypy, pytest, bandit, semgrep)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />SonarQube Quality Gate: PASSED</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Docker image built successfully</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Image pushed to GHCR and private registry</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Internal CI files stripped (.forgejo/, renovate.json, etc.)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Force-pushed to public Hermes repo</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />GitHub release created with tag</li>
+</ul>
+
+<h3 id="6-verify-public-release">6. Verify Public Release</h3>
+
+<p>Check the public Hermes repository:</p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Tag <code class="language-plaintext highlighter-rouge">v0.3.7-beta</code> exists and points to correct commit</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />GitHub Actions workflow passes on public repo</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Release created with proper description</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Docker images available:
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">ghcr.io/.../hermes:0.3.7-beta</code></li>
+      <li><code class="language-plaintext highlighter-rouge">ghcr.io/.../hermes:latest</code></li>
+      <li><code class="language-plaintext highlighter-rouge">registry.greenflametech.net/hermes:0.3.7-beta</code></li>
+      <li><code class="language-plaintext highlighter-rouge">registry.greenflametech.net/hermes:latest</code></li>
+    </ul>
+  </li>
+</ul>
+
+<h2 id="rollback-procedure">Rollback Procedure</h2>
+
+<p>If a release fails or has critical issues:</p>
+
+<h3 id="option-1-create-patch-version-recommended">Option 1: Create Patch Version (Recommended)</h3>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Fix issues locally</span><span class="w">
+</span><span class="c"># Update version to next patch (e.g., 0.3.7 → 0.3.8)</span><span class="w">
+</span><span class="n">git</span><span class="w"> </span><span class="nx">add</span><span class="w"> </span><span class="o">.</span><span class="w">
+</span><span class="n">git</span><span class="w"> </span><span class="nx">commit</span><span class="w"> </span><span class="nt">-m</span><span class="w"> </span><span class="s2">"Fix: Critical issue in v0.3.7"</span><span class="w">
+</span><span class="c"># Follow release process from step 2</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="option-2-delete-failed-release">Option 2: Delete Failed Release</h3>
+
+<p><strong>Only for releases that never completed successfully:</strong></p>
+
+<div class="language-powershell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Delete local tag</span><span class="w">
+</span><span class="n">git</span><span class="w"> </span><span class="nx">tag</span><span class="w"> </span><span class="nt">-d</span><span class="w"> </span><span class="nx">v0.3.7-beta</span><span class="w">
+
+</span><span class="c"># Delete remote tags</span><span class="w">
+</span><span class="n">git</span><span class="w"> </span><span class="nx">push</span><span class="w"> </span><span class="nx">origin</span><span class="w"> </span><span class="nt">--delete</span><span class="w"> </span><span class="nx">v0.3.7-beta</span><span class="w">
+</span><span class="n">git</span><span class="w"> </span><span class="nx">push</span><span class="w"> </span><span class="nx">forgejo</span><span class="w"> </span><span class="nt">--delete</span><span class="w"> </span><span class="nx">v0.3.7-beta</span><span class="w">
+
+</span><span class="c"># Manually delete GitHub/Forgejo releases via UI</span><span class="w">
+</span><span class="c"># Manually delete Docker images if pushed</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>⚠️ Warning</strong>: Public repo may have protection rules preventing tag deletion.</p>
+
+<h2 id="common-issues">Common Issues</h2>
+
+<h3 id="issue-tag-created-before-final-fixes">Issue: Tag Created Before Final Fixes</h3>
+
+<p><strong>Symptom</strong>: Release workflow uses old commit, tests fail<br />
+<strong>Cause</strong>: Tag created before pushing all commits<br />
+<strong>Solution</strong>:</p>
+
+<ul>
+  <li>Delete tag and recreate at correct commit, OR</li>
+  <li>Create new patch version with fixes</li>
+</ul>
+
+<h3 id="issue-sonarqube-quality-gate-failed">Issue: SonarQube Quality Gate Failed</h3>
+
+<p><strong>Symptom</strong>: Pipeline stops at SonarQube analysis<br />
+<strong>Cause</strong>: Code quality issues, security vulnerabilities, or unused suppressions<br />
+<strong>Solution</strong>:</p>
+
+<ul>
+  <li>Check SonarQube dashboard for specific issues</li>
+  <li>Fix locally and re-test</li>
+  <li>Do not disable quality gates to force release</li>
+</ul>
+
+<h3 id="issue-github-actions-fail-on-public-repo">Issue: GitHub Actions Fail on Public Repo</h3>
+
+<p><strong>Symptom</strong>: Public repo CI fails but Forgejo CI passed<br />
+<strong>Cause</strong>: Environment differences, missing configuration files<br />
+<strong>Solution</strong>:</p>
+
+<ul>
+  <li>Ensure <code class="language-plaintext highlighter-rouge">mypy.ini</code>, <code class="language-plaintext highlighter-rouge">pytest.ini</code>, etc. are not in <code class="language-plaintext highlighter-rouge">.forgejo/</code> (would be stripped)</li>
+  <li>Keep CI config files at repo root</li>
+  <li>Test on fresh checkout to simulate public repo state</li>
+</ul>
+
+<h3 id="issue-version-mismatch">Issue: Version Mismatch</h3>
+
+<p><strong>Symptom</strong>: Pre-release check fails on version consistency<br />
+<strong>Cause</strong>: Forgot to update CHANGELOG.md or frontend/package.json<br />
+<strong>Solution</strong>: Update all version files before tagging</p>
+
+<h2 id="best-practices">Best Practices</h2>
+
+<ol>
+  <li><strong>Never skip local validation</strong> - Run full test suite before committing</li>
+  <li><strong>Use pre-release workflow</strong> - Always trigger pre-release check before tagging</li>
+  <li><strong>One commit, one tag</strong> - Don’t push multiple commits after creating tag</li>
+  <li><strong>Meaningful release notes</strong> - Document changes clearly in CHANGELOG.md</li>
+  <li><strong>Monitor the full pipeline</strong> - Watch Forgejo workflow to completion</li>
+  <li><strong>Verify public release</strong> - Check public repo and Docker registries</li>
+  <li><strong>Keep history clean</strong> - Delete tags for failed releases that never completed</li>
+</ol>
+
+<h2 id="release-cadence">Release Cadence</h2>
+
+<ul>
+  <li><strong>Beta releases</strong>: As needed for testing and validation</li>
+  <li><strong>Stable releases</strong>: After beta testing period with no critical issues</li>
+  <li><strong>Hotfixes</strong>: Immediate for critical bugs in production</li>
+</ul>
+
+<h2 id="contact">Contact</h2>
+
+<p>For questions about the release process, refer to:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">.forgejo/workflows/release.yml</code> - Forgejo CI pipeline</li>
+  <li><code class="language-plaintext highlighter-rouge">.github/workflows/</code> - GitHub Actions configuration</li>
+  <li><code class="language-plaintext highlighter-rouge">docs/RELEASE-SETUP.md</code> - Infrastructure setup documentation</li>
+</ul>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/Hermes" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Release Process
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

@@ -2,9 +2,6 @@
 layout: default
 title: "Grafana Alloy Integration"
 ---
-
-# Grafana Alloy Integration
-
 `alloy/hermes.alloy` is an importable [Grafana Alloy](https://grafana.com/docs/alloy/latest/)
 module that adds Hermes telemetry to your **existing** Alloy deployment.  It does not define its
 own remote_write or loki.write endpoints — it wires into the receivers your config already has.

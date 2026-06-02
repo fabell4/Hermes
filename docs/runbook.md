@@ -1,4 +1,8 @@
-# Hermes Monitoring Runbook
+---
+layout: default
+title: "Runbook"
+description: "Operational guide for diagnosing and resolving production issues using logs and metrics."
+---
 
 Operational guide for diagnosing and resolving production issues using logs and metrics.
 

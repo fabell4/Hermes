@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Outage Detection Implementation Plan — Hermes Documentation</title>
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Outage Detection Implementation Plan | Hermes Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Outage Detection Implementation Plan" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<link rel="canonical" href="http://localhost:4001/OUTAGE-DETECTION-PLAN.html" />
+<meta property="og:url" content="http://localhost:4001/OUTAGE-DETECTION-PLAN.html" />
+<meta property="og:site_name" content="Hermes Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Outage Detection Implementation Plan" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted internet speed test monitoring with modern observability stack integration","headline":"Outage Detection Implementation Plan","url":"http://localhost:4001/OUTAGE-DETECTION-PLAN.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration">
+
+<title>
+  
+    Outage Detection Implementation Plan — Hermes Documentation
+  
+</title>
+
+
+<link rel="icon" type="image/png" href="/assets/Hermes.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="/" class="nav-brand">
+    <span class="brand-name">
+      Hermes
+      <span>Docs</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/alloy"
+                 >
+                Grafana Alloy
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-ENHANCEMENTS"
+                 >
+                Security Enhancements
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Error Handling</h3>
+        <ul>
+          
+            <li>
+              <a href="/error-catalog"
+                 >
+                Error Catalog
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-handling-conventions"
+                 >
+                Handling Conventions
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-messages"
+                 >
+                Error Messages
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/RELEASE-PROCESS"
+                 >
+                Release Process
+              </a>
+            </li>
+          
+            <li>
+              <a href="/styleguide"
+                 >
+                Frontend Style Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/suppression-decisions"
+                 >
+                Suppression Decisions
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Code Reviews</h3>
+        <ul>
+          
+            <li>
+              <a href="/BEST-PRACTICES-REVIEW"
+                 >
+                Best Practices
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DEFENSIVE-CODING-REVIEW"
+                 >
+                Defensive Coding
+              </a>
+            </li>
+          
+            <li>
+              <a href="/ERROR-HANDLING-REVIEW"
+                 >
+                Error Handling Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/PERFORMANCE-OPTIMIZATION-REVIEW"
+                 >
+                Performance Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/TEST-COVERAGE-REVIEW"
+                 >
+                Test Coverage
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DOCUMENTATION-ACCURACY-REVIEW"
+                 >
+                Documentation Review
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Outage Detection Implementation Plan</h1>
+
+            
+          </header>
+        
+
+        <p><strong>Status:</strong> Not started<br />
+<strong>Target:</strong> v1.4<br />
+<strong>Estimated Total Effort:</strong> 10–14 hours</p>
+
+<hr />
+
+<h2 id="overview">Overview</h2>
+
+<p>Three-tier passive outage detection wired into the existing scheduler loop. A new <code class="language-plaintext highlighter-rouge">OutageDetector</code>
+service performs TCP socket probes before each speedtest to distinguish complete connectivity loss
+from degraded performance. When an outage is confirmed the speedtest is skipped, an <code class="language-plaintext highlighter-rouge">OutageEvent</code>
+is persisted to SQLite and CSV, and existing alert providers are notified via new <code class="language-plaintext highlighter-rouge">AlertManager</code>
+methods. Optional RIPE Stat BGP enrichment and Cloudflare Radar annotation enrichment provide ISP
+context in alert messages.</p>
+
+<p><strong>Detection tiers:</strong></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Tier</th>
+      <th>Condition</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>TCP probe majority-vote fails N consecutive rounds</td>
+      <td>Skip speedtest; fire <code class="language-plaintext highlighter-rouge">CONNECTIVITY_LOST</code> alert</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Probe passes; speedtest SLA/anomaly flags degraded results</td>
+      <td>Enrich alert with ASN/BGP context (opt-in)</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Probe passes; speedtest raises socket exception</td>
+      <td>Fire <code class="language-plaintext highlighter-rouge">DNS_FAILURE</code> or <code class="language-plaintext highlighter-rouge">SPEEDTEST_SERVER_UNREACHABLE</code> alert</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Design decisions (confirmed):</strong></p>
+
+<ul>
+  <li>Outage declared after N consecutive probe-failure rounds (<code class="language-plaintext highlighter-rouge">OUTAGE_PROBE_FAILURE_THRESHOLD</code>, default
+2), not immediately — mirrors the <code class="language-plaintext highlighter-rouge">AlertManager.failure_threshold</code> model</li>
+  <li>RIPE Stat BGP enrichment is opt-in (<code class="language-plaintext highlighter-rouge">OUTAGE_ISP_CHECK_ENABLED=true</code>, default <code class="language-plaintext highlighter-rouge">false</code>)</li>
+  <li>Cloudflare Radar annotation enrichment is optional behind <code class="language-plaintext highlighter-rouge">CLOUDFLARE_API_TOKEN</code></li>
+  <li>Outage suppression (<code class="language-plaintext highlighter-rouge">SharedState.outage_in_progress</code>) is internal state, separate from the
+user-controlled scan-pause toggle</li>
+  <li>BGP enrichment is informational only — does not gate whether an alert fires</li>
+  <li><code class="language-plaintext highlighter-rouge">OutageEvent</code> records are stored in both SQLite and CSV alongside <code class="language-plaintext highlighter-rouge">SpeedResult</code></li>
+  <li>ASN is fetched once at startup via RIPE Stat <code class="language-plaintext highlighter-rouge">network-info</code> and cached in <code class="language-plaintext highlighter-rouge">SharedState</code></li>
+  <li>BGP and CF check results are cached for 15 minutes to avoid API hammering</li>
+</ul>
+
+<p><strong>External APIs evaluated:</strong></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>API</th>
+      <th>Decision</th>
+      <th>Reason</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ipapi.co</code></td>
+      <td>Rejected</td>
+      <td>Free tier explicitly “not for production use”</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ip-api.com</code></td>
+      <td>Rejected</td>
+      <td>HTTP-only on free tier (OWASP A02 cleartext transmission)</td>
+    </tr>
+    <tr>
+      <td>Downdetector</td>
+      <td>Rejected</td>
+      <td>Commercial API only; no public access</td>
+    </tr>
+    <tr>
+      <td>RIPE Stat <code class="language-plaintext highlighter-rouge">network-info</code></td>
+      <td><strong>Selected</strong></td>
+      <td>Free, no key required, HTTPS, returns ASN from public IP</td>
+    </tr>
+    <tr>
+      <td>RIPE Stat <code class="language-plaintext highlighter-rouge">bgpupdate-activity</code></td>
+      <td><strong>Selected (opt-in)</strong></td>
+      <td>Free, no key required, HTTPS, BGP instability proxy</td>
+    </tr>
+    <tr>
+      <td>Cloudflare Radar annotations</td>
+      <td><strong>Selected (optional)</strong></td>
+      <td>Free with API key; curated outage events</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="new-environment-variables">New Environment Variables</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">OUTAGE_PROBE_HOSTS</code></td>
+      <td>csv list</td>
+      <td><code class="language-plaintext highlighter-rouge">1.1.1.1:53,8.8.8.8:53,9.9.9.9:53</code></td>
+      <td>TCP probe endpoints</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">OUTAGE_PROBE_TIMEOUT</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">3</code></td>
+      <td>Seconds per probe attempt</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">OUTAGE_PROBE_FAILURE_THRESHOLD</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">2</code></td>
+      <td>Consecutive failure rounds to declare DOWN</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">OUTAGE_PROBE_QUORUM</code></td>
+      <td>int</td>
+      <td><code class="language-plaintext highlighter-rouge">2</code></td>
+      <td>Number of probes that must fail per round to count as a failure</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">OUTAGE_ISP_CHECK_ENABLED</code></td>
+      <td>bool</td>
+      <td><code class="language-plaintext highlighter-rouge">false</code></td>
+      <td>Enable RIPE Stat BGP enrichment</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">CLOUDFLARE_API_TOKEN</code></td>
+      <td>str/None</td>
+      <td>None</td>
+      <td>Enables Cloudflare Radar annotation enrichment</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="phase-1--data-layer">Phase 1 — Data Layer</h2>
+
+<h3 id="step-11-outageeventtype-constants">Step 1.1: <code class="language-plaintext highlighter-rouge">OutageEventType</code> Constants</h3>
+
+<p><strong>Status:</strong> Not started<br />
+<strong>Estimated Effort:</strong> 0.5 hours<br />
+<strong>Priority:</strong> High — required by all other steps</p>
+
+<p><strong>Changes Required:</strong></p>
+
+<ol>
+  <li>Add <code class="language-plaintext highlighter-rouge">OutageEventType(StrEnum)</code> enum after <code class="language-plaintext highlighter-rouge">ProviderType</code> with values: <code class="language-plaintext highlighter-rouge">CONNECTIVITY_LOST</code>,
+<code class="language-plaintext highlighter-rouge">CONNECTIVITY_RESTORED</code>, <code class="language-plaintext highlighter-rouge">SPEEDTEST_SERVER_UNREACHABLE</code>, <code class="language-plaintext highlighter-rouge">DNS_FAILURE</code></li>
+  <li>Add probe default constants: <code class="language-plaintext highlighter-rouge">DEFAULT_PROBE_HOSTS</code>, <code class="language-plaintext highlighter-rouge">DEFAULT_PROBE_TIMEOUT</code>,
+<code class="language-plaintext highlighter-rouge">DEFAULT_PROBE_FAILURE_THRESHOLD</code>, <code class="language-plaintext highlighter-rouge">DEFAULT_PROBE_QUORUM</code></li>
+</ol>
+
+<p><strong>Files to modify:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">src/constants.py</code> — add enum after <code class="language-plaintext highlighter-rouge">ProviderType</code></li>
+</ul>
+
+<p><strong>Test coverage:</strong></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">OutageEventType</code> members accessible as strings (StrEnum behaviour)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />All four values present and unique</li>
+</ul>
+
+<hr />
+
+<h3 id="step-12-outageevent-model">Step 1.2: <code class="language-plaintext highlighter-rouge">OutageEvent</code> Model</h3>
+
+<p><strong>Status:</strong> Not started<br />
+<strong>Estimated Effort:</strong> 0.5 hours<br />
+<strong>Priority:</strong> High</p>
+
+<p><strong>Changes Required:</strong></p>
+
+<ol>
+  <li>Create <code class="language-plaintext highlighter-rouge">src/models/outage_event.py</code> with <code class="language-plaintext highlighter-rouge">OutageEvent</code> dataclass</li>
+  <li>Fields: <code class="language-plaintext highlighter-rouge">event_type: OutageEventType</code>, <code class="language-plaintext highlighter-rouge">timestamp: datetime</code>, <code class="language-plaintext highlighter-rouge">duration_seconds: float | None</code>,
+<code class="language-plaintext highlighter-rouge">isp_name: str | None</code>, <code class="language-plaintext highlighter-rouge">asn: str | None</code>, <code class="language-plaintext highlighter-rouge">bgp_unstable: bool | None</code>,
+<code class="language-plaintext highlighter-rouge">cloudflare_outage_desc: str | None</code>, <code class="language-plaintext highlighter-rouge">probe_results: str</code></li>
+</ol>
+
+<p><strong>Files to modify:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">src/models/outage_event.py</code> (new file)</li>
+</ul>
+
+<p><strong>Test coverage:</strong></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">OutageEvent</code> instantiation with required fields only</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">OutageEvent</code> instantiation with all optional fields populated</li>
+</ul>
+
+<hr />
+
+<h3 id="step-13-config--new-env-vars">Step 1.3: Config — New Env Vars</h3>
+
+<p><strong>Status:</strong> Not started<br />
+<strong>Estimated Effort:</strong> 0.5 hours<br />
+<strong>Priority:</strong> High</p>
+
+<p><strong>Changes Required:</strong></p>
+
+<ol>
+  <li>Add the six new env vars to <code class="language-plaintext highlighter-rouge">src/config.py</code> after the alerting section using existing
+<code class="language-plaintext highlighter-rouge">_get_int()</code>, <code class="language-plaintext highlighter-rouge">_get_bool()</code>, <code class="language-plaintext highlighter-rouge">_get_str()</code>, and <code class="language-plaintext highlighter-rouge">_get_csv_list()</code> helpers</li>
+</ol>
+
+<p><strong>Files to modify:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">src/config.py</code> — add six new attributes after alerting section</li>
+</ul>
+
+<p><strong>Test coverage:</strong></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Default values applied when env vars absent</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">OUTAGE_PROBE_FAILURE_THRESHOLD</code> respects int coercion</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">OUTAGE_PROBE_QUORUM</code> defaults to 2</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">OUTAGE_ISP_CHECK_ENABLED</code> defaults to <code class="language-plaintext highlighter-rouge">False</code></li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">CLOUDFLARE_API_TOKEN</code> returns <code class="language-plaintext highlighter-rouge">None</code> when unset</li>
+</ul>
+
+<hr />
+
+<h3 id="step-14-sharedstate--outage-state-fields">Step 1.4: <code class="language-plaintext highlighter-rouge">SharedState</code> — Outage State Fields</h3>
+
+<p><strong>Status:</strong> Not started<br />
+<strong>Estimated Effort:</strong> 0.5 hours<br />
+<strong>Priority:</strong> High</p>
+
+<p><strong>Changes Required:</strong></p>
+
+<ol>
+  <li>Add module-level globals after existing globals: <code class="language-plaintext highlighter-rouge">_outage_in_progress: bool = False</code>,
+<code class="language-plaintext highlighter-rouge">_outage_start_time: datetime | None = None</code></li>
+  <li>Add thread-safe getter/setter functions: <code class="language-plaintext highlighter-rouge">set_outage_in_progress()</code>,
+<code class="language-plaintext highlighter-rouge">get_outage_in_progress()</code>, <code class="language-plaintext highlighter-rouge">set_outage_start_time()</code>, <code class="language-plaintext highlighter-rouge">get_outage_start_time()</code></li>
+</ol>
+
+<p><strong>Files to modify:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">src/shared_state.py</code> — add globals and accessor functions</li>
+</ul>
+
+<p><strong>Test coverage:</strong></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">get_outage_in_progress()</code> returns <code class="language-plaintext highlighter-rouge">False</code> by default</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">set_outage_in_progress(True)</code> / <code class="language-plaintext highlighter-rouge">get_outage_in_progress()</code> round-trip</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">get_outage_start_time()</code> returns <code class="language-plaintext highlighter-rouge">None</code> by default</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Thread-safety: concurrent reads and writes do not corrupt state</li>
+</ul>
+
+<hr />
+
+<h2 id="phase-2--detection-service">Phase 2 — Detection Service</h2>
+
+<h3 id="step-21-outagedetector-service">Step 2.1: <code class="language-plaintext highlighter-rouge">OutageDetector</code> Service</h3>
+
+<p><strong>Status:</strong> Not started<br />
+<strong>Estimated Effort:</strong> 3–4 hours<br />
+<strong>Priority:</strong> High</p>
+
+<p><strong>Changes Required:</strong></p>
+
+<ol>
+  <li>Create <code class="language-plaintext highlighter-rouge">src/services/outage_detector.py</code> with <code class="language-plaintext highlighter-rouge">OutageDetector</code> class</li>
+  <li><code class="language-plaintext highlighter-rouge">check_connectivity() → ConnectivityStatus</code>: performs TCP <code class="language-plaintext highlighter-rouge">socket.create_connection()</code> probes
+against <code class="language-plaintext highlighter-rouge">OUTAGE_PROBE_HOSTS</code>; applies majority-vote quorum; increments or resets
+<code class="language-plaintext highlighter-rouge">_consecutive_probe_failures</code>; returns <code class="language-plaintext highlighter-rouge">UP</code> or <code class="language-plaintext highlighter-rouge">DOWN</code>. Declares <code class="language-plaintext highlighter-rouge">DOWN</code> only after
+<code class="language-plaintext highlighter-rouge">OUTAGE_PROBE_FAILURE_THRESHOLD</code> consecutive failure rounds</li>
+  <li><code class="language-plaintext highlighter-rouge">get_public_ip() → str | None</code>: HTTPS <code class="language-plaintext highlighter-rouge">GET https://stat.ripe.net/data/network-info/data.json?resource={local_ip}</code>;
+called once at startup; result cached in <code class="language-plaintext highlighter-rouge">SharedState</code></li>
+  <li><code class="language-plaintext highlighter-rouge">get_isp_asn(ip: str) → str | None</code>: parses ASN from RIPE Stat <code class="language-plaintext highlighter-rouge">network-info</code> response</li>
+  <li><code class="language-plaintext highlighter-rouge">check_bgp_stability(asn: str) → bool</code>: <code class="language-plaintext highlighter-rouge">GET https://stat.ripe.net/data/bgpupdate-activity/data.json?resource=AS{asn}</code>;
+result cached 15 minutes; returns <code class="language-plaintext highlighter-rouge">True</code> if BGP update activity is anomalously high</li>
+  <li><code class="language-plaintext highlighter-rouge">check_cloudflare_outage(asn: str) → str | None</code>: <code class="language-plaintext highlighter-rouge">GET https://api.cloudflare.com/client/v4/radar/annotations/outages?asns={asn}</code>
+with <code class="language-plaintext highlighter-rouge">Authorization: Bearer {CLOUDFLARE_API_TOKEN}</code>; returns annotation description or <code class="language-plaintext highlighter-rouge">None</code>;
+only called when token is set; result cached 15 minutes</li>
+  <li>Internal state: <code class="language-plaintext highlighter-rouge">_consecutive_probe_failures: int</code>, <code class="language-plaintext highlighter-rouge">_bgp_cache: dict[str, tuple[bool, datetime]]</code>,
+<code class="language-plaintext highlighter-rouge">_cf_cache: dict[str, tuple[str | None, datetime]]</code></li>
+</ol>
+
+<p><strong>Files to modify:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">src/services/outage_detector.py</code> (new file)</li>
+</ul>
+
+<p><strong>Test coverage:</strong></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">check_connectivity()</code> returns <code class="language-plaintext highlighter-rouge">DOWN</code> when quorum of probes fail</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">check_connectivity()</code> returns <code class="language-plaintext highlighter-rouge">UP</code> when fewer than quorum fail</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Consecutive failure counter increments; resets on first <code class="language-plaintext highlighter-rouge">UP</code> round</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">DOWN</code> not declared until <code class="language-plaintext highlighter-rouge">OUTAGE_PROBE_FAILURE_THRESHOLD</code> consecutive failure rounds</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Single <code class="language-plaintext highlighter-rouge">UP</code> round restores <code class="language-plaintext highlighter-rouge">UP</code> state</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">get_isp_asn()</code> result cached; <code class="language-plaintext highlighter-rouge">get_public_ip()</code> only called once</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />BGP cache honours 15-minute TTL; fresh call made after expiry</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />CF Radar not called when <code class="language-plaintext highlighter-rouge">CLOUDFLARE_API_TOKEN</code> is unset</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />CF Radar result cached 15 minutes</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />All HTTP calls use HTTPS; plain HTTP URLs rejected</li>
+</ul>
+
+<hr />
+
+<h3 id="step-22-alertmanager--outage-methods">Step 2.2: <code class="language-plaintext highlighter-rouge">AlertManager</code> — Outage Methods</h3>
+
+<p><strong>Status:</strong> Not started<br />
+<strong>Estimated Effort:</strong> 1.5 hours<br />
+<strong>Priority:</strong> High</p>
+
+<p><strong>Changes Required:</strong></p>
+
+<ol>
+  <li>Modify <code class="language-plaintext highlighter-rouge">record_failure()</code> at line 100 in <code class="language-plaintext highlighter-rouge">src/services/alert_manager.py</code>: add early return
+(no-op) when <code class="language-plaintext highlighter-rouge">SharedState.get_outage_in_progress() is True</code></li>
+  <li>Add <code class="language-plaintext highlighter-rouge">record_outage_start(isp_name: str | None, bgp_context: str | None) -&gt; None</code> after
+<code class="language-plaintext highlighter-rouge">reset()</code> at line 301: sets <code class="language-plaintext highlighter-rouge">SharedState.outage_in_progress = True</code>, resets
+<code class="language-plaintext highlighter-rouge">_consecutive_failures</code>, sends outage-start alert via existing <code class="language-plaintext highlighter-rouge">_send_alert_async()</code></li>
+  <li>Add <code class="language-plaintext highlighter-rouge">record_outage_recovered(duration_s: float) -&gt; None</code>: sets
+<code class="language-plaintext highlighter-rouge">SharedState.outage_in_progress = False</code>, sends recovery alert with duration in message</li>
+</ol>
+
+<p><strong>Files to modify:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">src/services/alert_manager.py</code> — modify <code class="language-plaintext highlighter-rouge">record_failure()</code> at line 100; add two methods after <code class="language-plaintext highlighter-rouge">reset()</code> at line 301</li>
+</ul>
+
+<p><strong>Test coverage:</strong></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">record_failure()</code> is a no-op when <code class="language-plaintext highlighter-rouge">outage_in_progress = True</code></li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">record_failure()</code> operates normally when <code class="language-plaintext highlighter-rouge">outage_in_progress = False</code></li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">record_outage_start()</code> sets <code class="language-plaintext highlighter-rouge">SharedState.outage_in_progress = True</code></li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">record_outage_start()</code> resets <code class="language-plaintext highlighter-rouge">_consecutive_failures</code> to zero</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">record_outage_start()</code> dispatches alert with ISP name and BGP context in message</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">record_outage_recovered()</code> sets <code class="language-plaintext highlighter-rouge">SharedState.outage_in_progress = False</code></li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">record_outage_recovered()</code> dispatches alert with duration in message</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Cooldown still applies to outage-start alert</li>
+</ul>
+
+<hr />
+
+<h2 id="phase-3--integration">Phase 3 — Integration</h2>
+
+<h3 id="step-31-wire-outagedetector-into-run_once">Step 3.1: Wire <code class="language-plaintext highlighter-rouge">OutageDetector</code> into <code class="language-plaintext highlighter-rouge">run_once()</code></h3>
+
+<p><strong>Status:</strong> Not started<br />
+<strong>Estimated Effort:</strong> 2 hours<br />
+<strong>Priority:</strong> High</p>
+
+<p><strong>Changes Required:</strong></p>
+
+<ol>
+  <li>Add <code class="language-plaintext highlighter-rouge">outage_detector: OutageDetector | None = None</code> parameter to <code class="language-plaintext highlighter-rouge">run_once()</code> at line 159</li>
+  <li>At the top of <code class="language-plaintext highlighter-rouge">run_once()</code> body, call <code class="language-plaintext highlighter-rouge">outage_detector.check_connectivity()</code> when detector is
+not <code class="language-plaintext highlighter-rouge">None</code></li>
+  <li>If <code class="language-plaintext highlighter-rouge">ConnectivityStatus.DOWN</code>: dispatch <code class="language-plaintext highlighter-rouge">OutageEvent(CONNECTIVITY_LOST, ...)</code>, call
+<code class="language-plaintext highlighter-rouge">alert_manager.record_outage_start()</code>, return early (skip speedtest)</li>
+  <li>If state transitions from DOWN to UP: dispatch <code class="language-plaintext highlighter-rouge">OutageEvent(CONNECTIVITY_RESTORED, duration=...)</code>,
+call <code class="language-plaintext highlighter-rouge">alert_manager.record_outage_recovered()</code></li>
+  <li>In the <code class="language-plaintext highlighter-rouge">except RuntimeError</code> block (line 211): inspect exception <code class="language-plaintext highlighter-rouge">__cause__</code> — <code class="language-plaintext highlighter-rouge">socket.gaierror</code>
+maps to <code class="language-plaintext highlighter-rouge">OutageEventType.DNS_FAILURE</code>; <code class="language-plaintext highlighter-rouge">socket.timeout</code> / <code class="language-plaintext highlighter-rouge">ConnectionError</code> maps to
+<code class="language-plaintext highlighter-rouge">OutageEventType.SPEEDTEST_SERVER_UNREACHABLE</code>; then fall through to existing
+<code class="language-plaintext highlighter-rouge">alert_manager.record_failure(str(e))</code></li>
+  <li>Construct <code class="language-plaintext highlighter-rouge">OutageDetector</code> in <code class="language-plaintext highlighter-rouge">_poll_once()</code> at line 264 (or in <code class="language-plaintext highlighter-rouge">main()</code> at line 417) and
+pass through; confirm via <code class="language-plaintext highlighter-rouge">_validate_environment()</code> at line 404 that required config is present</li>
+</ol>
+
+<p><strong>Files to modify:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">src/main.py</code> — modify <code class="language-plaintext highlighter-rouge">run_once()</code> at line 159; update <code class="language-plaintext highlighter-rouge">_poll_once()</code> at line 264 and <code class="language-plaintext highlighter-rouge">main()</code> at line 417</li>
+</ul>
+
+<p><strong>Test coverage:</strong></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">run_once()</code> returns early without calling speedtest runner when detector returns <code class="language-plaintext highlighter-rouge">DOWN</code></li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">run_once()</code> dispatches <code class="language-plaintext highlighter-rouge">CONNECTIVITY_LOST</code> event on DOWN</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">run_once()</code> dispatches <code class="language-plaintext highlighter-rouge">CONNECTIVITY_RESTORED</code> event with correct duration when transitioning UP</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">socket.gaierror</code> in speedtest produces <code class="language-plaintext highlighter-rouge">DNS_FAILURE</code> event type</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">socket.timeout</code> in speedtest produces <code class="language-plaintext highlighter-rouge">SPEEDTEST_SERVER_UNREACHABLE</code> event type</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">outage_detector=None</code> (default) preserves existing behaviour unchanged</li>
+</ul>
+
+<hr />
+
+<h2 id="phase-4--persistence">Phase 4 — Persistence</h2>
+
+<h3 id="step-41-sqlite-outage_events-table">Step 4.1: SQLite <code class="language-plaintext highlighter-rouge">outage_events</code> Table</h3>
+
+<p><strong>Status:</strong> Not started<br />
+<strong>Estimated Effort:</strong> 1 hour<br />
+<strong>Priority:</strong> Medium</p>
+
+<p><strong>Changes Required:</strong></p>
+
+<ol>
+  <li>Add <code class="language-plaintext highlighter-rouge">_CREATE_OUTAGE_TABLE</code> DDL constant to <code class="language-plaintext highlighter-rouge">src/exporters/sqlite_exporter.py</code> after the
+existing <code class="language-plaintext highlighter-rouge">_CREATE_INDEX</code> constant at line 47:</li>
+</ol>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">IF</span> <span class="k">NOT</span> <span class="k">EXISTS</span> <span class="n">outage_events</span> <span class="p">(</span>
+    <span class="n">id</span>                      <span class="nb">INTEGER</span> <span class="k">PRIMARY</span> <span class="k">KEY</span> <span class="n">AUTOINCREMENT</span><span class="p">,</span>
+    <span class="n">event_type</span>              <span class="nb">TEXT</span>    <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+    <span class="nb">timestamp</span>               <span class="nb">TEXT</span>    <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+    <span class="n">duration_seconds</span>        <span class="nb">REAL</span><span class="p">,</span>
+    <span class="n">isp_name</span>                <span class="nb">TEXT</span><span class="p">,</span>
+    <span class="n">asn</span>                     <span class="nb">TEXT</span><span class="p">,</span>
+    <span class="n">bgp_unstable</span>            <span class="nb">INTEGER</span><span class="p">,</span>
+    <span class="n">cloudflare_outage_desc</span>  <span class="nb">TEXT</span><span class="p">,</span>
+    <span class="n">probe_results</span>           <span class="nb">TEXT</span>    <span class="k">NOT</span> <span class="k">NULL</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<ol>
+  <li>Append migration tuple to <code class="language-plaintext highlighter-rouge">_MIGRATIONS</code> list at line 105:
+<code class="language-plaintext highlighter-rouge">("add_outage_events_table", _CREATE_OUTAGE_TABLE)</code></li>
+  <li>Add <code class="language-plaintext highlighter-rouge">export_outage_event(event: OutageEvent) -&gt; None</code> method after <code class="language-plaintext highlighter-rouge">export()</code> at line 153</li>
+</ol>
+
+<p><strong>Files to modify:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">src/exporters/sqlite_exporter.py</code> — add DDL constant after line 47;
+append to <code class="language-plaintext highlighter-rouge">_MIGRATIONS</code> at line 105; add method after line 153</li>
+</ul>
+
+<p><strong>Test coverage:</strong></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Migration applied idempotently (running <code class="language-plaintext highlighter-rouge">_init_db()</code> twice does not raise)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">outage_events</code> table created on first <code class="language-plaintext highlighter-rouge">_init_db()</code></li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">export_outage_event()</code> inserts all column values correctly</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">duration_seconds</code> stored as <code class="language-plaintext highlighter-rouge">NULL</code> when field is <code class="language-plaintext highlighter-rouge">None</code></li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">bgp_unstable</code> stored as <code class="language-plaintext highlighter-rouge">0</code>/<code class="language-plaintext highlighter-rouge">1</code> integer</li>
+</ul>
+
+<hr />
+
+<h3 id="step-42-csv-outage_events-export">Step 4.2: CSV <code class="language-plaintext highlighter-rouge">outage_events</code> Export</h3>
+
+<p><strong>Status:</strong> Not started<br />
+<strong>Estimated Effort:</strong> 0.5 hours<br />
+<strong>Priority:</strong> Low</p>
+
+<p><strong>Changes Required:</strong></p>
+
+<ol>
+  <li>Add <code class="language-plaintext highlighter-rouge">OUTAGE_FIELDNAMES</code> list to <code class="language-plaintext highlighter-rouge">src/exporters/csv_exporter.py</code> after <code class="language-plaintext highlighter-rouge">FIELDNAMES</code> at line 13</li>
+  <li>Add <code class="language-plaintext highlighter-rouge">export_outage_event(event: OutageEvent) -&gt; None</code> method after <code class="language-plaintext highlighter-rouge">export()</code> at line 71;
+writes to a separate <code class="language-plaintext highlighter-rouge">outage_events.csv</code> file using the same rotation and prune logic as the
+main results CSV</li>
+</ol>
+
+<p><strong>Files to modify:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">src/exporters/csv_exporter.py</code> — add <code class="language-plaintext highlighter-rouge">OUTAGE_FIELDNAMES</code> after line 13; add method after line 71</li>
+</ul>
+
+<p><strong>Test coverage:</strong></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">outage_events.csv</code> created when it does not yet exist</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">export_outage_event()</code> appends a row with correct field names and values</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />File rotation triggers at same size threshold as <code class="language-plaintext highlighter-rouge">results.csv</code></li>
+</ul>
+
+<hr />
+
+<h2 id="phase-5--api">Phase 5 — API</h2>
+
+<h3 id="step-51-outage-api-routes">Step 5.1: Outage API Routes</h3>
+
+<p><strong>Status:</strong> Not started<br />
+<strong>Estimated Effort:</strong> 1.5 hours<br />
+<strong>Priority:</strong> Medium</p>
+
+<p><strong>Changes Required:</strong></p>
+
+<ol>
+  <li>Create <code class="language-plaintext highlighter-rouge">src/api/routes/outages.py</code> with <code class="language-plaintext highlighter-rouge">router = APIRouter(tags=["outages"])</code></li>
+  <li><code class="language-plaintext highlighter-rouge">GET /outages</code>: paginated list of <code class="language-plaintext highlighter-rouge">OutageEvent</code> records from SQLite; mirrors the <code class="language-plaintext highlighter-rouge">ResultsPage</code>
+pattern in <code class="language-plaintext highlighter-rouge">src/api/routes/results.py</code> with <code class="language-plaintext highlighter-rouge">page</code> and <code class="language-plaintext highlighter-rouge">page_size</code> (max 500) query params</li>
+  <li><code class="language-plaintext highlighter-rouge">GET /outage-status</code>: returns <code class="language-plaintext highlighter-rouge">{ "outage_in_progress": bool, "outage_start_time": str | null }</code>
+from <code class="language-plaintext highlighter-rouge">SharedState</code></li>
+  <li>Register router in <code class="language-plaintext highlighter-rouge">src/api/main.py</code> at line 156 (after <code class="language-plaintext highlighter-rouge">analysis.router</code>):
+<code class="language-plaintext highlighter-rouge">app.include_router(outages.router, prefix="/api")</code></li>
+</ol>
+
+<p><strong>Files to modify:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">src/api/routes/outages.py</code> (new file)</li>
+  <li><code class="language-plaintext highlighter-rouge">src/api/main.py</code> — add <code class="language-plaintext highlighter-rouge">include_router</code> call at line 156</li>
+</ul>
+
+<p><strong>Test coverage:</strong></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">GET /api/outages</code> returns empty list when no events recorded</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">GET /api/outages</code> pagination: <code class="language-plaintext highlighter-rouge">page=1&amp;page_size=10</code> returns correct slice and correct <code class="language-plaintext highlighter-rouge">total</code></li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">GET /api/outages</code> rejects <code class="language-plaintext highlighter-rouge">page_size</code> &gt; 500</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">GET /api/outage-status</code> returns <code class="language-plaintext highlighter-rouge">outage_in_progress: false</code> by default</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><code class="language-plaintext highlighter-rouge">GET /api/outage-status</code> reflects <code class="language-plaintext highlighter-rouge">SharedState</code> after <code class="language-plaintext highlighter-rouge">record_outage_start()</code> called</li>
+</ul>
+
+<hr />
+
+<h2 id="open--deferred-questions">Open / Deferred Questions</h2>
+
+<ul>
+  <li><strong>Recovery threshold:</strong> Current preference is that one successful probe round restores the UP
+state. Alternative: require M consecutive successes before clearing DOWN to reduce flap noise.
+Deferred until real-world testing.</li>
+  <li><strong>DNS failure sub-type handling:</strong> Tier 3 <code class="language-plaintext highlighter-rouge">DNS_FAILURE</code> events currently fall through to the
+existing <code class="language-plaintext highlighter-rouge">record_failure()</code> alert path. A fully separate alert flow (skip <code class="language-plaintext highlighter-rouge">record_failure()</code>,
+use outage-style message) is deferred.</li>
+  <li><strong>BGP enrichment latency:</strong> RIPE Stat <code class="language-plaintext highlighter-rouge">bgpupdate-activity</code> data can lag real-time BGP events by
+several minutes. Acceptable given enrichment is informational only.</li>
+  <li><strong>CF Radar editorial lag:</strong> Cloudflare Radar annotations are curated and may lag 15–60 minutes,
+or not appear at all for minor outages. To be documented in <code class="language-plaintext highlighter-rouge">.env.example</code>.</li>
+</ul>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/Hermes" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Outage Detection Implementation Plan
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

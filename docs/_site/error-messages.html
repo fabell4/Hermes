@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Error Message Reference — Hermes Documentation</title>
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Error Message Reference | Hermes Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Error Message Reference" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<link rel="canonical" href="http://localhost:4001/error-messages.html" />
+<meta property="og:url" content="http://localhost:4001/error-messages.html" />
+<meta property="og:site_name" content="Hermes Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Error Message Reference" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted internet speed test monitoring with modern observability stack integration","headline":"Error Message Reference","url":"http://localhost:4001/error-messages.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration">
+
+<title>
+  
+    Error Message Reference — Hermes Documentation
+  
+</title>
+
+
+<link rel="icon" type="image/png" href="/assets/Hermes.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="/" class="nav-brand">
+    <span class="brand-name">
+      Hermes
+      <span>Docs</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/alloy"
+                 >
+                Grafana Alloy
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-ENHANCEMENTS"
+                 >
+                Security Enhancements
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Error Handling</h3>
+        <ul>
+          
+            <li>
+              <a href="/error-catalog"
+                 >
+                Error Catalog
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-handling-conventions"
+                 >
+                Handling Conventions
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-messages"
+                 >
+                Error Messages
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/RELEASE-PROCESS"
+                 >
+                Release Process
+              </a>
+            </li>
+          
+            <li>
+              <a href="/styleguide"
+                 >
+                Frontend Style Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/suppression-decisions"
+                 >
+                Suppression Decisions
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Code Reviews</h3>
+        <ul>
+          
+            <li>
+              <a href="/BEST-PRACTICES-REVIEW"
+                 >
+                Best Practices
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DEFENSIVE-CODING-REVIEW"
+                 >
+                Defensive Coding
+              </a>
+            </li>
+          
+            <li>
+              <a href="/ERROR-HANDLING-REVIEW"
+                 >
+                Error Handling Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/PERFORMANCE-OPTIMIZATION-REVIEW"
+                 >
+                Performance Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/TEST-COVERAGE-REVIEW"
+                 >
+                Test Coverage
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DOCUMENTATION-ACCURACY-REVIEW"
+                 >
+                Documentation Review
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Error Message Reference</h1>
+
+            
+          </header>
+        
+
+        <p><strong>Project:</strong> Hermes Speed Monitor<br />
+<strong>Last Updated:</strong> 2026-05-01<br />
+<strong>Purpose:</strong> Centralized error message reference with troubleshooting steps</p>
+
+<hr />
+
+<h2 id="table-of-contents">Table of Contents</h2>
+
+<ul>
+  <li><a href="#api-errors">API Errors</a></li>
+  <li><a href="#configuration-errors">Configuration Errors</a></li>
+  <li><a href="#exporter-errors">Exporter Errors</a></li>
+  <li><a href="#alert-provider-errors">Alert Provider Errors</a></li>
+  <li><a href="#speedtest-errors">Speedtest Errors</a></li>
+  <li><a href="#dispatcher-errors">Dispatcher Errors</a></li>
+  <li><a href="#database-errors">Database Errors</a></li>
+</ul>
+
+<hr />
+
+<h2 id="api-errors">API Errors</h2>
+
+<h3 id="authentication--authorization">Authentication &amp; Authorization</h3>
+
+<h4 id="missing-x-api-key-header"><code class="language-plaintext highlighter-rouge">Missing X-Api-Key header</code></h4>
+
+<p><strong>HTTP Status:</strong> 401 Unauthorized<br />
+<strong>Source:</strong> <a href="../src/api/auth.py">src/api/auth.py</a><br />
+<strong>Cause:</strong> API request missing required <code class="language-plaintext highlighter-rouge">X-Api-Key</code> header<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Verify API key is configured in <code class="language-plaintext highlighter-rouge">.env</code> file (<code class="language-plaintext highlighter-rouge">API_KEY=your-key-here</code>)</li>
+  <li>Ensure API client is sending <code class="language-plaintext highlighter-rouge">X-Api-Key</code> header with all requests</li>
+  <li>Check API key is not empty or whitespace-only</li>
+</ol>
+
+<p><strong>Example Fix:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Add API key to .env</span>
+<span class="nb">echo</span> <span class="s2">"API_KEY=</span><span class="si">$(</span>openssl rand <span class="nt">-hex</span> 32<span class="si">)</span><span class="s2">"</span> <span class="o">&gt;&gt;</span> .env
+
+<span class="c"># Test with curl</span>
+curl <span class="nt">-H</span> <span class="s2">"X-Api-Key: your-key-here"</span> http://localhost:8080/api/health
+</code></pre></div></div>
+
+<hr />
+
+<h4 id="invalid-api-key"><code class="language-plaintext highlighter-rouge">Invalid API key</code></h4>
+
+<p><strong>HTTP Status:</strong> 403 Forbidden<br />
+<strong>Source:</strong> <a href="../src/api/auth.py">src/api/auth.py</a><br />
+<strong>Cause:</strong> API key provided does not match configured key<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Verify API key matches value in <code class="language-plaintext highlighter-rouge">.env</code> file</li>
+  <li>Check for leading/trailing whitespace in API key</li>
+  <li>Ensure API key has not been rotated without updating clients</li>
+  <li>Verify environment variables are loaded correctly (<code class="language-plaintext highlighter-rouge">docker-compose logs hermes-api</code>)</li>
+</ol>
+
+<hr />
+
+<h4 id="rate-limit-exceeded"><code class="language-plaintext highlighter-rouge">Rate limit exceeded</code></h4>
+
+<p><strong>HTTP Status:</strong> 429 Too Many Requests<br />
+<strong>Source:</strong> <a href="../src/api/auth.py">src/api/auth.py</a><br />
+<strong>Cause:</strong> Client exceeded configured rate limit<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Check <code class="language-plaintext highlighter-rouge">RATE_LIMIT_PER_MINUTE</code> configuration (default: 60 requests/minute)</li>
+  <li>Reduce request frequency or batch operations</li>
+  <li>Implement exponential backoff in client code</li>
+  <li>Consider increasing rate limit if legitimate use case requires it</li>
+</ol>
+
+<p><strong>Configuration:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Increase rate limit (use with caution)</span>
+<span class="nv">RATE_LIMIT_PER_MINUTE</span><span class="o">=</span>120
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="resource-errors">Resource Errors</h3>
+
+<h4 id="no-database-found-yet"><code class="language-plaintext highlighter-rouge">No database found yet</code></h4>
+
+<p><strong>HTTP Status:</strong> 503 Service Unavailable<br />
+<strong>Source:</strong> <a href="../src/api/routes/results.py">src/api/routes/results.py</a><br />
+<strong>Cause:</strong> SQLite database not initialized (no speedtests have run yet)<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Wait for first speedtest to complete (check logs)</li>
+  <li>Manually trigger test: <code class="language-plaintext highlighter-rouge">POST /api/trigger</code></li>
+  <li>Verify SQLite exporter is enabled in runtime config</li>
+  <li>Check filesystem permissions on data directory</li>
+</ol>
+
+<p><strong>Expected Behavior:</strong> This error is normal on first startup before the first speedtest completes.</p>
+
+<hr />
+
+<h4 id="failed-to-start-manual-test-thread"><code class="language-plaintext highlighter-rouge">Failed to start manual test thread</code></h4>
+
+<p><strong>HTTP Status:</strong> 500 Internal Server Error<br />
+<strong>Source:</strong> <a href="../src/api/routes/trigger.py">src/api/routes/trigger.py</a><br />
+<strong>Cause:</strong> Unable to start background thread for manual speedtest<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Check system resources (CPU, memory)</li>
+  <li>Review logs for thread creation errors</li>
+  <li>Verify no resource exhaustion (too many threads)</li>
+  <li>Restart container if thread pool is exhausted</li>
+</ol>
+
+<hr />
+
+<h3 id="configuration-endpoint-errors">Configuration Endpoint Errors</h3>
+
+<h4 id="invalid-configuration-payload"><code class="language-plaintext highlighter-rouge">Invalid configuration payload</code></h4>
+
+<p><strong>HTTP Status:</strong> 400 Bad Request<br />
+<strong>Source:</strong> <a href="../src/api/routes/config.py">src/api/routes/config.py</a><br />
+<strong>Cause:</strong> Configuration update contains invalid values<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Verify <code class="language-plaintext highlighter-rouge">interval_minutes</code> is between 5 and 1440</li>
+  <li>Ensure <code class="language-plaintext highlighter-rouge">enabled_exporters</code> is an array of valid exporter names</li>
+  <li>Check JSON syntax is valid</li>
+  <li>Review validation error details in response body</li>
+</ol>
+
+<p><strong>Valid Exporter Names:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">csv</code></li>
+  <li><code class="language-plaintext highlighter-rouge">prometheus</code></li>
+  <li><code class="language-plaintext highlighter-rouge">loki</code></li>
+  <li><code class="language-plaintext highlighter-rouge">sqlite</code></li>
+</ul>
+
+<hr />
+
+<h3 id="alert-configuration-errors">Alert Configuration Errors</h3>
+
+<h4 id="threshold-must-be-a-positive-integer"><code class="language-plaintext highlighter-rouge">Threshold must be a positive integer</code></h4>
+
+<p><strong>HTTP Status:</strong> 400 Bad Request<br />
+<strong>Source:</strong> <a href="../src/api/routes/alerts.py">src/api/routes/alerts.py</a><br />
+<strong>Cause:</strong> Alert threshold value is invalid<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Ensure threshold is an integer ≥ 1</li>
+  <li>Recommended range: 2-5 consecutive failures</li>
+  <li>Too low (1) may cause false positives</li>
+  <li>Too high (&gt;10) may delay critical alerts</li>
+</ol>
+
+<hr />
+
+<h4 id="cooldown-must-be-a-positive-integer"><code class="language-plaintext highlighter-rouge">Cooldown must be a positive integer</code></h4>
+
+<p><strong>HTTP Status:</strong> 400 Bad Request<br />
+<strong>Source:</strong> <a href="../src/api/routes/alerts.py">src/api/routes/alerts.py</a><br />
+<strong>Cause:</strong> Alert cooldown period is invalid<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Ensure cooldown is an integer ≥ 1 (minutes)</li>
+  <li>Recommended: 60 minutes to avoid alert storms</li>
+  <li>Minimum: 1 minute (for testing only)</li>
+</ol>
+
+<hr />
+
+<h4 id="webhook-url-must-start-with-http-or-https"><code class="language-plaintext highlighter-rouge">Webhook URL must start with http:// or https://</code></h4>
+
+<p><strong>HTTP Status:</strong> 400 Bad Request<br />
+<strong>Source:</strong> <a href="../src/api/routes/alerts.py">src/api/routes/alerts.py</a><br />
+<strong>Cause:</strong> Webhook URL has invalid scheme<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Ensure URL starts with <code class="language-plaintext highlighter-rouge">http://</code> or <code class="language-plaintext highlighter-rouge">https://</code></li>
+  <li>No other schemes (ftp, file, etc.) are supported</li>
+  <li>Check for typos in URL</li>
+</ol>
+
+<hr />
+
+<h4 id="gotifyntfy-url-is-required"><code class="language-plaintext highlighter-rouge">Gotify/ntfy URL is required</code></h4>
+
+<p><strong>HTTP Status:</strong> 400 Bad Request<br />
+<strong>Source:</strong> <a href="../src/api/routes/alerts.py">src/api/routes/alerts.py</a><br />
+<strong>Cause:</strong> Alert provider enabled but URL not configured<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Provide valid URL for alert provider</li>
+  <li>Verify URL is accessible from container</li>
+  <li>Check network connectivity to alert service</li>
+</ol>
+
+<hr />
+
+<hr />
+
+<h2 id="configuration-errors">Configuration Errors</h2>
+
+<h3 id="runtime-configuration">Runtime Configuration</h3>
+
+<h4 id="runtime-config-validation-failed"><code class="language-plaintext highlighter-rouge">Runtime config validation failed</code></h4>
+
+<p><strong>Level:</strong> WARNING<br />
+<strong>Source:</strong> <a href="../src/runtime_config.py">src/runtime_config.py</a><br />
+<strong>Cause:</strong> Stored configuration contains invalid values<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Check <code class="language-plaintext highlighter-rouge">data/runtime_config.json</code> for malformed JSON</li>
+  <li>Review validation warnings in logs</li>
+  <li>Delete config file to reset to defaults (make backup first)</li>
+  <li>Verify file permissions allow read/write</li>
+</ol>
+
+<p><strong>Manual Reset:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Backup current config</span>
+<span class="nb">cp </span>data/runtime_config.json data/runtime_config.json.bak
+
+<span class="c"># Reset to defaults (container will regenerate)</span>
+<span class="nb">rm </span>data/runtime_config.json
+docker-compose restart hermes-api hermes-scheduler
+</code></pre></div></div>
+
+<hr />
+
+<h4 id="could-not-save-runtime-config"><code class="language-plaintext highlighter-rouge">Could not save runtime config</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/runtime_config.py">src/runtime_config.py</a><br />
+<strong>Cause:</strong> Failed to write configuration file<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Check filesystem permissions on <code class="language-plaintext highlighter-rouge">data/</code> directory</li>
+  <li>Verify disk space is available (<code class="language-plaintext highlighter-rouge">df -h</code>)</li>
+  <li>Check for read-only filesystem</li>
+  <li>Review logs for underlying OS errors</li>
+</ol>
+
+<hr />
+
+<h4 id="interval_minutes-out-of-range"><code class="language-plaintext highlighter-rouge">interval_minutes out of range</code></h4>
+
+<p><strong>Level:</strong> WARNING<br />
+<strong>Source:</strong> <a href="../src/runtime_config.py">src/runtime_config.py</a><br />
+<strong>Cause:</strong> Interval value outside allowed range (5-1440)<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Ensure interval is between 5 minutes and 24 hours</li>
+  <li>Minimum: 5 minutes (to avoid ISP throttling)</li>
+  <li>Maximum: 1440 minutes (24 hours)</li>
+  <li>Default will be used if invalid</li>
+</ol>
+
+<hr />
+
+<hr />
+
+<h2 id="exporter-errors">Exporter Errors</h2>
+
+<h3 id="csv-exporter">CSV Exporter</h3>
+
+<h4 id="csv-write-failed"><code class="language-plaintext highlighter-rouge">CSV write failed</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/exporters/csv_exporter.py">src/exporters/csv_exporter.py</a><br />
+<strong>Cause:</strong> Unable to write to CSV file<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Check filesystem permissions on logs directory</li>
+  <li>Verify disk space available</li>
+  <li>Ensure CSV path is valid and writable</li>
+  <li>Check for file locks from other processes</li>
+</ol>
+
+<hr />
+
+<h4 id="csv-prune-failed"><code class="language-plaintext highlighter-rouge">CSV prune failed</code></h4>
+
+<p><strong>Level:</strong> WARNING<br />
+<strong>Source:</strong> <a href="../src/exporters/csv_exporter.py">src/exporters/csv_exporter.py</a><br />
+<strong>Cause:</strong> Unable to prune old rows (non-fatal)<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Check CSV file is not corrupted</li>
+  <li>Verify sufficient disk space for temp file</li>
+  <li>Review retention configuration</li>
+  <li>Note: This warning does not prevent new writes</li>
+</ol>
+
+<p><strong>Note:</strong> CSV pruning failures are non-fatal. New results will still be written.</p>
+
+<hr />
+
+<h3 id="prometheus-exporter">Prometheus Exporter</h3>
+
+<h4 id="invalid-port-number"><code class="language-plaintext highlighter-rouge">Invalid port number</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/exporters/prometheus_exporter.py">src/exporters/prometheus_exporter.py</a><br />
+<strong>Cause:</strong> Prometheus port is not a valid integer or is out of range<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Verify <code class="language-plaintext highlighter-rouge">PROMETHEUS_PORT</code> is an integer (1-65535)</li>
+  <li>Common ports: 9090 (Prometheus), 9100 (Node Exporter), 8000-9999 (custom)</li>
+  <li>Ensure port is not already in use</li>
+  <li>Check for typos in environment variable</li>
+</ol>
+
+<hr />
+
+<h4 id="prometheus-port-already-in-use"><code class="language-plaintext highlighter-rouge">Prometheus port already in use</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/exporters/prometheus_exporter.py">src/exporters/prometheus_exporter.py</a><br />
+<strong>Cause:</strong> Another process is listening on configured port<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Check for duplicate Hermes instances</li>
+  <li>Use different port: <code class="language-plaintext highlighter-rouge">PROMETHEUS_PORT=9091</code></li>
+  <li>Identify conflicting process: <code class="language-plaintext highlighter-rouge">lsof -i :9090</code> (Linux) or <code class="language-plaintext highlighter-rouge">netstat -ano | findstr :9090</code> (Windows)</li>
+  <li>Kill conflicting process or choose different port</li>
+</ol>
+
+<hr />
+
+<h4 id="failed-to-update-prometheus-gauges"><code class="language-plaintext highlighter-rouge">Failed to update Prometheus gauges</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/exporters/prometheus_exporter.py">src/exporters/prometheus_exporter.py</a><br />
+<strong>Cause:</strong> Error updating metrics (likely label mismatch)<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Check result data contains all required fields</li>
+  <li>Review logs for label cardinality warnings</li>
+  <li>Verify ISP field is not excessively long</li>
+  <li>Restart exporter to reset metrics</li>
+</ol>
+
+<hr />
+
+<h3 id="loki-exporter">Loki Exporter</h3>
+
+<h4 id="loki-url-is-required"><code class="language-plaintext highlighter-rouge">Loki URL is required</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/exporters/loki_exporter.py">src/exporters/loki_exporter.py</a><br />
+<strong>Cause:</strong> Loki exporter enabled but URL not configured<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Set <code class="language-plaintext highlighter-rouge">LOKI_URL</code> environment variable</li>
+  <li>Example: <code class="language-plaintext highlighter-rouge">LOKI_URL=http://loki:3100</code></li>
+  <li>Verify Loki is accessible from container</li>
+  <li>Test connectivity: <code class="language-plaintext highlighter-rouge">curl http://loki:3100/ready</code></li>
+</ol>
+
+<hr />
+
+<h4 id="loki-url-must-use-http-or-https"><code class="language-plaintext highlighter-rouge">Loki URL must use http or https</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/exporters/loki_exporter.py">src/exporters/loki_exporter.py</a><br />
+<strong>Cause:</strong> Invalid URL scheme<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Ensure URL starts with <code class="language-plaintext highlighter-rouge">http://</code> or <code class="language-plaintext highlighter-rouge">https://</code></li>
+  <li>No other schemes supported (file, ftp, etc.)</li>
+  <li>Check for typos</li>
+</ol>
+
+<hr />
+
+<h4 id="loki-push-connection-error"><code class="language-plaintext highlighter-rouge">Loki push connection error</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/exporters/loki_exporter.py">src/exporters/loki_exporter.py</a><br />
+<strong>Cause:</strong> Network connectivity issue to Loki<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Verify Loki service is running</li>
+  <li>Check network connectivity: <code class="language-plaintext highlighter-rouge">docker exec hermes-scheduler curl http://loki:3100/ready</code></li>
+  <li>Verify Docker network configuration</li>
+  <li>Check firewall rules</li>
+  <li>Review Loki logs for errors</li>
+</ol>
+
+<hr />
+
+<h4 id="loki-push-timed-out"><code class="language-plaintext highlighter-rouge">Loki push timed out</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/exporters/loki_exporter.py">src/exporters/loki_exporter.py</a><br />
+<strong>Cause:</strong> Loki did not respond within timeout period<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Check Loki service health and load</li>
+  <li>Increase timeout: <code class="language-plaintext highlighter-rouge">LOKI_TIMEOUT=10</code> (default: 5)</li>
+  <li>Verify network latency is acceptable</li>
+  <li>Review Loki resource usage (CPU, memory)</li>
+  <li>Check for Loki ingester backlogs</li>
+</ol>
+
+<hr />
+
+<h4 id="loki-push-rejected"><code class="language-plaintext highlighter-rouge">Loki push rejected</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/exporters/loki_exporter.py">src/exporters/loki_exporter.py</a><br />
+<strong>Cause:</strong> Loki returned HTTP error<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Check Loki authentication if required</li>
+  <li>Verify push path is correct (default: <code class="language-plaintext highlighter-rouge">/loki/api/v1/push</code>)</li>
+  <li>Review Loki error response in logs</li>
+  <li>Check Loki tenant configuration if multi-tenant</li>
+  <li>Verify log labels are valid (no special characters)</li>
+</ol>
+
+<hr />
+
+<h3 id="sqlite-exporter">SQLite Exporter</h3>
+
+<h4 id="sqlite-write-failed"><code class="language-plaintext highlighter-rouge">SQLite write failed</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/exporters/sqlite_exporter.py">src/exporters/sqlite_exporter.py</a><br />
+<strong>Cause:</strong> Failed to insert row into database<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Check filesystem permissions on data directory</li>
+  <li>Verify disk space available</li>
+  <li>Check database is not corrupted: <code class="language-plaintext highlighter-rouge">sqlite3 data/results.db "PRAGMA integrity_check;"</code></li>
+  <li>Review schema migration status</li>
+</ol>
+
+<hr />
+
+<h4 id="sqlite-database-locked-timeout-after-xs"><code class="language-plaintext highlighter-rouge">SQLite database locked (timeout after Xs)</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/exporters/sqlite_exporter.py">src/exporters/sqlite_exporter.py</a><br />
+<strong>Cause:</strong> Database locked by another process<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Check for long-running queries (API result endpoint with large page size)</li>
+  <li>Reduce page_size in API queries</li>
+  <li>Verify WAL mode is enabled (better concurrency)</li>
+  <li>Check for zombie processes holding locks: <code class="language-plaintext highlighter-rouge">fuser data/results.db</code></li>
+  <li>Restart container if lock persists</li>
+</ol>
+
+<p><strong>Note:</strong> Lock timeout is configured in code (default: 30 seconds)</p>
+
+<hr />
+
+<hr />
+
+<h2 id="alert-provider-errors">Alert Provider Errors</h2>
+
+<h3 id="generic-alert-errors">Generic Alert Errors</h3>
+
+<h4 id="alert-provider-name-failed-to-send"><code class="language-plaintext highlighter-rouge">Alert provider [name] failed to send</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/services/alert_manager.py">src/services/alert_manager.py</a><br />
+<strong>Cause:</strong> Alert provider failed to send notification<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Check provider-specific logs for details</li>
+  <li>Verify provider URL is accessible</li>
+  <li>Test provider manually (curl/API client)</li>
+  <li>Check network connectivity</li>
+  <li>Review provider authentication credentials</li>
+</ol>
+
+<p><strong>Note:</strong> Alert sending is async. Failures are logged but do not block speedtest execution.</p>
+
+<hr />
+
+<h3 id="webhook-provider">Webhook Provider</h3>
+
+<h4 id="webhook-delivery-failed"><code class="language-plaintext highlighter-rouge">Webhook delivery failed</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/services/alert_providers.py">src/services/alert_providers.py</a><br />
+<strong>Cause:</strong> HTTP request to webhook URL failed<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Verify webhook URL is correct and accessible</li>
+  <li>Check webhook endpoint logs for errors</li>
+  <li>Verify endpoint accepts POST with JSON payload</li>
+  <li>Test manually: <code class="language-plaintext highlighter-rouge">curl -X POST -H "Content-Type: application/json" -d '{"test": true}' YOUR_WEBHOOK_URL</code></li>
+  <li>Check for SSRF protection blocking private IPs</li>
+</ol>
+
+<hr />
+
+<h3 id="gotify-provider">Gotify Provider</h3>
+
+<h4 id="gotify-notification-failed"><code class="language-plaintext highlighter-rouge">Gotify notification failed</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/services/alert_providers.py">src/services/alert_providers.py</a><br />
+<strong>Cause:</strong> Failed to send notification to Gotify<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Verify Gotify URL and app token</li>
+  <li>Check Gotify service is running</li>
+  <li>Test token: <code class="language-plaintext highlighter-rouge">curl "http://gotify:80/message?token=YOUR_TOKEN" -F "message=test"</code></li>
+  <li>Review Gotify logs for errors</li>
+  <li>Verify network connectivity from container</li>
+</ol>
+
+<hr />
+
+<h3 id="ntfy-provider">ntfy Provider</h3>
+
+<h4 id="ntfy-notification-failed"><code class="language-plaintext highlighter-rouge">ntfy notification failed</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/services/alert_providers.py">src/services/alert_providers.py</a><br />
+<strong>Cause:</strong> Failed to send notification to ntfy<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Verify ntfy URL and topic name</li>
+  <li>Check ntfy service is running</li>
+  <li>Test: <code class="language-plaintext highlighter-rouge">curl -d "test message" http://ntfy:80/YOUR_TOPIC</code></li>
+  <li>Review ntfy logs for errors</li>
+  <li>Verify topic name does not contain invalid characters</li>
+</ol>
+
+<hr />
+
+<hr />
+
+<h2 id="speedtest-errors">Speedtest Errors</h2>
+
+<h3 id="runner-errors">Runner Errors</h3>
+
+<h4 id="ookla-cli-not-found"><code class="language-plaintext highlighter-rouge">Ookla CLI not found</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/providers/ookla.py">src/providers/ookla.py</a><br />
+<strong>Cause:</strong> The Ookla <code class="language-plaintext highlighter-rouge">speedtest</code> binary is not installed or is not in <code class="language-plaintext highlighter-rouge">PATH</code><br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Install from <a href="https://www.speedtest.net/apps/cli">https://www.speedtest.net/apps/cli</a></li>
+  <li>Verify: <code class="language-plaintext highlighter-rouge">speedtest --version</code> (should print “Speedtest by Ookla”)</li>
+  <li>If using only <code class="language-plaintext highlighter-rouge">ndt7</code> or <code class="language-plaintext highlighter-rouge">custom</code> providers, the Ookla CLI is not required — remove <code class="language-plaintext highlighter-rouge">ookla</code> from <code class="language-plaintext highlighter-rouge">SPEEDTEST_PROVIDERS</code></li>
+</ol>
+
+<hr />
+
+<h4 id="speedtest-execution-failed"><code class="language-plaintext highlighter-rouge">Speedtest execution failed</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/providers/ookla.py">src/providers/ookla.py</a><br />
+<strong>Cause:</strong> Ookla CLI returned a non-zero exit code<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Verify CLI is installed: <code class="language-plaintext highlighter-rouge">speedtest --version</code></li>
+  <li>Check internet connectivity</li>
+  <li>Test manually: <code class="language-plaintext highlighter-rouge">speedtest --format=json</code></li>
+  <li>Review stderr output in logs</li>
+  <li>Check for ISP blocking speedtest traffic</li>
+</ol>
+
+<hr />
+
+<h4 id="speedtest-timed-out"><code class="language-plaintext highlighter-rouge">Speedtest timed out</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/providers/ookla.py">src/providers/ookla.py</a><br />
+<strong>Cause:</strong> Ookla CLI did not complete within 120 seconds<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Check for network congestion</li>
+  <li>Pin to a faster server via <code class="language-plaintext highlighter-rouge">SPEEDTEST_SERVER_ID</code></li>
+  <li>Verify sufficient bandwidth available</li>
+  <li>Check for ISP throttling</li>
+  <li>Consider adding <code class="language-plaintext highlighter-rouge">ndt7</code> as a fallback: <code class="language-plaintext highlighter-rouge">SPEEDTEST_PROVIDERS=ookla,ndt7</code></li>
+</ol>
+
+<hr />
+
+<h4 id="ndt7-test-failed"><code class="language-plaintext highlighter-rouge">NDT7 test failed</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/providers/ndt7.py">src/providers/ndt7.py</a><br />
+<strong>Cause:</strong> M-Lab Locate API unreachable, or WebSocket connection dropped<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Confirm outbound HTTPS is allowed (Locate API at <code class="language-plaintext highlighter-rouge">locate.measurementlab.net</code>)</li>
+  <li>Confirm outbound WSS (port 443) is not blocked by firewall</li>
+  <li>M-Lab may be temporarily at capacity — check <a href="https://www.measurementlab.net/status/">https://www.measurementlab.net/status/</a></li>
+</ol>
+
+<hr />
+
+<h4 id="custom-http-test-failed"><code class="language-plaintext highlighter-rouge">Custom HTTP test failed</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/providers/custom_http.py">src/providers/custom_http.py</a><br />
+<strong>Cause:</strong> Request to the configured download or upload URL failed<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Verify <code class="language-plaintext highlighter-rouge">SPEEDTEST_CUSTOM_URL_DOWNLOAD</code> is reachable from the container</li>
+  <li>Confirm the URL scheme is <code class="language-plaintext highlighter-rouge">http://</code> or <code class="language-plaintext highlighter-rouge">https://</code> (other schemes are rejected for security)</li>
+  <li>For upload: verify the upload endpoint accepts <code class="language-plaintext highlighter-rouge">POST</code> with <code class="language-plaintext highlighter-rouge">application/octet-stream</code></li>
+  <li>Check firewall rules between the Hermes container and the custom endpoint</li>
+</ol>
+
+<hr />
+
+<h4 id="all-providers-exhausted"><code class="language-plaintext highlighter-rouge">All providers exhausted</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/services/speedtest_runner.py">src/services/speedtest_runner.py</a><br />
+<strong>Cause:</strong> Every provider in the <code class="language-plaintext highlighter-rouge">SPEEDTEST_PROVIDERS</code>
+chain failed; the primary provider was retried once before falling back</p>
+
+<p><strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Review per-provider error entries above for root cause</li>
+  <li>Check consecutive failure count for alerting</li>
+  <li>Verify internet connectivity is stable</li>
+  <li>Add a resilient fallback, e.g., <code class="language-plaintext highlighter-rouge">SPEEDTEST_PROVIDERS=ookla,ndt7</code></li>
+</ol>
+
+<p><strong>Note:</strong> The primary provider is retried once on failure. Subsequent providers in the chain are each attempted once.
+The error from the last failed provider is surfaced.</p>
+
+<hr />
+
+<hr />
+
+<h2 id="dispatcher-errors">Dispatcher Errors</h2>
+
+<h3 id="dispatch-failures">Dispatch Failures</h3>
+
+<h4 id="exporter-name-failed"><code class="language-plaintext highlighter-rouge">Exporter '[name]' failed</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/result_dispatcher.py">src/result_dispatcher.py</a><br />
+<strong>Cause:</strong> One or more exporters failed during dispatch<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Review exporter-specific error in logs</li>
+  <li>Check exporter configuration</li>
+  <li>Verify exporter dependencies are running (Loki, Prometheus)</li>
+  <li>Test exporter individually</li>
+  <li>Disable failing exporter if blocking progress</li>
+</ol>
+
+<p><strong>Note:</strong> Dispatcher continues even if one exporter fails. Partial success is possible.</p>
+
+<hr />
+
+<h4 id="dispatch-called-but-no-exporters-are-registered"><code class="language-plaintext highlighter-rouge">Dispatch called but no exporters are registered</code></h4>
+
+<p><strong>Level:</strong> WARNING<br />
+<strong>Source:</strong> <a href="../src/result_dispatcher.py">src/result_dispatcher.py</a><br />
+<strong>Cause:</strong> No exporters configured<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Enable at least one exporter in runtime config</li>
+  <li>Verify <code class="language-plaintext highlighter-rouge">enabled_exporters</code> list is not empty</li>
+  <li>Check exporter registration in main.py</li>
+  <li>Review startup logs for exporter initialization</li>
+</ol>
+
+<p><strong>Note:</strong> This is a configuration issue, not an error. Add at least one exporter to store results.</p>
+
+<hr />
+
+<h4 id="invalid-result-type-passed-to-register"><code class="language-plaintext highlighter-rouge">Invalid result type passed to register</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/result_dispatcher.py">src/result_dispatcher.py</a><br />
+<strong>Cause:</strong> Attempted to register a non-exporter object<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>This is a programming error, not a configuration issue</li>
+  <li>Verify custom exporters inherit from <code class="language-plaintext highlighter-rouge">BaseExporter</code></li>
+  <li>Review exporter registration code</li>
+  <li>Report bug if using only built-in exporters</li>
+</ol>
+
+<hr />
+
+<hr />
+
+<h2 id="database-errors">Database Errors</h2>
+
+<h3 id="migration-errors">Migration Errors</h3>
+
+<h4 id="sqlite-migration-failed"><code class="language-plaintext highlighter-rouge">SQLite migration failed</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> <a href="../src/exporters/sqlite_exporter.py">src/exporters/sqlite_exporter.py</a><br />
+<strong>Cause:</strong> Failed to initialize or migrate database schema<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Check database file is not corrupted</li>
+  <li>Verify filesystem permissions</li>
+  <li>Review migration logic for errors</li>
+  <li>Backup and delete database to recreate: <code class="language-plaintext highlighter-rouge">mv data/results.db data/results.db.bak</code></li>
+</ol>
+
+<hr />
+
+<h4 id="sqlite-integrity-check-failed"><code class="language-plaintext highlighter-rouge">SQLite integrity check failed</code></h4>
+
+<p><strong>Level:</strong> ERROR<br />
+<strong>Source:</strong> Manual troubleshooting<br />
+<strong>Cause:</strong> Database file is corrupted<br />
+<strong>Troubleshooting:</strong></p>
+
+<ol>
+  <li>Stop container</li>
+  <li>Backup database: <code class="language-plaintext highlighter-rouge">cp data/results.db data/results.db.bak</code></li>
+  <li>Attempt repair: <code class="language-plaintext highlighter-rouge">sqlite3 data/results.db ".recover" | sqlite3 data/results_repaired.db</code></li>
+  <li>If unrecoverable, restore from backup or start fresh</li>
+</ol>
+
+<hr />
+
+<hr />
+
+<h2 id="general-troubleshooting-tips">General Troubleshooting Tips</h2>
+
+<h3 id="logs">Logs</h3>
+
+<ul>
+  <li><strong>Scheduler logs:</strong> <code class="language-plaintext highlighter-rouge">docker-compose logs -f hermes-scheduler</code></li>
+  <li><strong>API logs:</strong> <code class="language-plaintext highlighter-rouge">docker-compose logs -f hermes-api</code></li>
+  <li><strong>Combined:</strong> <code class="language-plaintext highlighter-rouge">docker-compose logs -f</code></li>
+</ul>
+
+<h3 id="health-checks">Health Checks</h3>
+
+<ul>
+  <li><strong>API health:</strong> <code class="language-plaintext highlighter-rouge">curl http://localhost:8080/api/health</code></li>
+  <li><strong>Prometheus metrics:</strong> <code class="language-plaintext highlighter-rouge">curl http://localhost:9090/metrics</code></li>
+  <li><strong>Loki ready:</strong> <code class="language-plaintext highlighter-rouge">curl http://loki:3100/ready</code></li>
+</ul>
+
+<h3 id="configuration-validation">Configuration Validation</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Check runtime config</span>
+<span class="nb">cat </span>data/runtime_config.json | jq <span class="nb">.</span>
+
+<span class="c"># Validate JSON syntax</span>
+jq empty data/runtime_config.json <span class="o">&amp;&amp;</span> <span class="nb">echo</span> <span class="s2">"Valid JSON"</span> <span class="o">||</span> <span class="nb">echo</span> <span class="s2">"Invalid JSON"</span>
+</code></pre></div></div>
+
+<h3 id="database-inspection">Database Inspection</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Connect to SQLite database</span>
+sqlite3 data/results.db
+
+<span class="c"># Check schema</span>
+.schema
+
+<span class="c"># Count rows</span>
+SELECT COUNT<span class="o">(</span><span class="k">*</span><span class="o">)</span> FROM speed_results<span class="p">;</span>
+
+<span class="c"># View latest result</span>
+SELECT <span class="k">*</span> FROM speed_results ORDER BY timestamp DESC LIMIT 1<span class="p">;</span>
+</code></pre></div></div>
+
+<h3 id="network-debugging">Network Debugging</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Test connectivity from scheduler container</span>
+docker <span class="nb">exec </span>hermes-scheduler curl <span class="nt">-v</span> http://loki:3100/ready
+
+<span class="c"># Test external connectivity</span>
+docker <span class="nb">exec </span>hermes-scheduler curl <span class="nt">-v</span> https://www.google.com
+
+<span class="c"># Check DNS resolution</span>
+docker <span class="nb">exec </span>hermes-scheduler nslookup loki
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="related-documentation">Related Documentation</h2>
+
+<ul>
+  <li><a href="/error-handling-conventions.html">Error Handling Conventions</a> — Exception patterns and guidelines</li>
+  <li><a href="/error-catalog.html">Error Catalog</a> — Complete list of errors by module</li>
+  <li><a href="../README.md#troubleshooting">Monitoring Runbook</a> — Production monitoring guide</li>
+  <li><a href="/architecture.html">Architecture</a> — System design and component interaction</li>
+  <li><a href="/api-reference.html">API Reference</a> — Complete API documentation</li>
+</ul>
+
+<hr />
+
+<h2 id="document-history">Document History</h2>
+
+<ul>
+  <li><strong>2026-05-01:</strong> Initial documentation (M2 from ERROR-HANDLING-REVIEW.md)</li>
+</ul>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/Hermes" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Error Message Reference
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

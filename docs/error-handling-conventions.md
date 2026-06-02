@@ -2,9 +2,6 @@
 layout: default
 title: "Error Handling Conventions"
 ---
-
-# Error Handling Conventions
-
 **Project:** Hermes Speed Monitor  
 **Last Updated:** 2026-05-01  
 **Purpose:** Document error handling patterns, exception hierarchies, and conventions

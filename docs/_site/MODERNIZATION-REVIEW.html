@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Modernization Review — Hermes Documentation</title>
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Modernization Review | Hermes Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Modernization Review" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<link rel="canonical" href="http://localhost:4001/MODERNIZATION-REVIEW.html" />
+<meta property="og:url" content="http://localhost:4001/MODERNIZATION-REVIEW.html" />
+<meta property="og:site_name" content="Hermes Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Modernization Review" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted internet speed test monitoring with modern observability stack integration","headline":"Modernization Review","url":"http://localhost:4001/MODERNIZATION-REVIEW.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration">
+
+<title>
+  
+    Modernization Review — Hermes Documentation
+  
+</title>
+
+
+<link rel="icon" type="image/png" href="/assets/Hermes.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="/" class="nav-brand">
+    <span class="brand-name">
+      Hermes
+      <span>Docs</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/alloy"
+                 >
+                Grafana Alloy
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-ENHANCEMENTS"
+                 >
+                Security Enhancements
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Error Handling</h3>
+        <ul>
+          
+            <li>
+              <a href="/error-catalog"
+                 >
+                Error Catalog
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-handling-conventions"
+                 >
+                Handling Conventions
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-messages"
+                 >
+                Error Messages
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/RELEASE-PROCESS"
+                 >
+                Release Process
+              </a>
+            </li>
+          
+            <li>
+              <a href="/styleguide"
+                 >
+                Frontend Style Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/suppression-decisions"
+                 >
+                Suppression Decisions
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Code Reviews</h3>
+        <ul>
+          
+            <li>
+              <a href="/BEST-PRACTICES-REVIEW"
+                 >
+                Best Practices
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DEFENSIVE-CODING-REVIEW"
+                 >
+                Defensive Coding
+              </a>
+            </li>
+          
+            <li>
+              <a href="/ERROR-HANDLING-REVIEW"
+                 >
+                Error Handling Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/PERFORMANCE-OPTIMIZATION-REVIEW"
+                 >
+                Performance Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/TEST-COVERAGE-REVIEW"
+                 >
+                Test Coverage
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DOCUMENTATION-ACCURACY-REVIEW"
+                 >
+                Documentation Review
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Modernization Review</h1>
+
+            
+          </header>
+        
+
+        <p><strong>Project:</strong> Hermes Speed Monitor<br />
+<strong>Review Date:</strong> 2026-04-30<br />
+<strong>Python Version:</strong> 3.13<br />
+<strong>Scope:</strong> Review for deprecated Python features and modernization opportunities<br />
+<strong>Prerequisites:</strong> Security Audit ✅ | Defensive Coding Review ✅ | Best Practices Review ✅</p>
+
+<hr />
+
+<h2 id="executive-summary">Executive Summary</h2>
+
+<p>This review scans the codebase for deprecated Python features, outdated patterns, and opportunities to leverage modern Python capabilities (3.10+). The codebase is already quite modern, having recently undergone type hint standardization and best practices improvements. The issues identified focus on consistency (context managers, configuration), type safety (enums), and technical debt cleanup.</p>
+
+<p><strong>Overall Assessment:</strong> ✅ <strong>Approved for v1.0</strong> with recommended improvements</p>
+
+<p><strong>Key Findings:</strong></p>
+
+<ul>
+  <li>✅ No deprecated Python features or Python 2 artifacts found</li>
+  <li>✅ Already using modern type hints (<code class="language-plaintext highlighter-rouge">|</code> syntax, <code class="language-plaintext highlighter-rouge">list[T]</code>, <code class="language-plaintext highlighter-rouge">dict[K, V]</code>)</li>
+  <li>✅ Already using <code class="language-plaintext highlighter-rouge">datetime.now(timezone.utc)</code> (not deprecated <code class="language-plaintext highlighter-rouge">utcnow()</code>)</li>
+  <li>✅ Already using <code class="language-plaintext highlighter-rouge">pathlib.Path</code> extensively</li>
+  <li>✅ Proper context managers for most file operations</li>
+  <li>🔧 6 modernization opportunities identified (2 high, 3 medium, 1 low priority)</li>
+</ul>
+
+<p><strong>Recommendation:</strong> Implement high and medium priority improvements before v1.0 release. Low priority item is optional.</p>
+
+<hr />
+
+<h2 id="priority-levels">Priority Levels</h2>
+
+<ul>
+  <li>🔴 <strong>HIGH</strong> — Modern Python patterns that improve safety, reliability, or consistency</li>
+  <li>🟡 <strong>MEDIUM</strong> — Worthwhile improvements that reduce technical debt or enforce architecture</li>
+  <li>🟢 <strong>LOW</strong> — Optional stylistic improvements with minimal impact</li>
+</ul>
+
+<hr />
+
+<h2 id="issues-identified">Issues Identified</h2>
+
+<h3 id="-high-priority">🔴 HIGH Priority</h3>
+
+<h4 id="issue-1-sqlite-connections-not-using-context-managers">Issue #1: SQLite Connections Not Using Context Managers</h4>
+
+<p><strong>Files:</strong> <a href="../src/api/routes/results.py">src/api/routes/results.py</a> (lines 62-76, 81-94)<br />
+<strong>Severity:</strong> High — Inconsistent resource management pattern</p>
+
+<p><strong>Problem:</strong>
+API route handlers for results pagination use manual <code class="language-plaintext highlighter-rouge">try/finally</code> blocks for SQLite connection cleanup:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">conn</span> <span class="o">=</span> <span class="nf">_connect</span><span class="p">()</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">total</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">conn</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"</span><span class="s">SELECT COUNT(*) FROM results</span><span class="sh">"</span><span class="p">).</span><span class="nf">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># ... more operations
+</span><span class="k">finally</span><span class="p">:</span>
+    <span class="n">conn</span><span class="p">.</span><span class="nf">close</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><strong>Impact:</strong></p>
+
+<ul>
+  <li>Inconsistent with Python best practices (context managers preferred)</li>
+  <li>More verbose than necessary</li>
+  <li>While functionally correct, violates “prefer context managers for resource management” pattern</li>
+</ul>
+
+<p><strong>Recommendation:</strong>
+Modify to use context manager protocol:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">with</span> <span class="nf">_connect</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+    <span class="n">total</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">conn</span><span class="p">.</span><span class="nf">execute</span><span class="p">(</span><span class="sh">"</span><span class="s">SELECT COUNT(*) FROM results</span><span class="sh">"</span><span class="p">).</span><span class="nf">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># ... more operations
+</span></code></pre></div></div>
+
+<p><strong>Implementation Note:</strong> The <code class="language-plaintext highlighter-rouge">_connect()</code> function returns <code class="language-plaintext highlighter-rouge">sqlite3.Connection</code>, which already supports context manager protocol. Can use directly.</p>
+
+<p><strong>Estimated Effort:</strong> 15 minutes<br />
+<strong>Breaking Changes:</strong> None (internal implementation only)</p>
+
+<hr />
+
+<h4 id="issue-2-string-constants-should-be-enums">Issue #2: String Constants Should Be Enums</h4>
+
+<p><strong>File:</strong> <a href="../src/constants.py">src/constants.py</a><br />
+<strong>Severity:</strong> High — Missed opportunity for type safety</p>
+
+<p><strong>Problem:</strong>
+Exporter and alert provider names are defined as string constants:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Exporter names
+</span><span class="n">EXPORTER_CSV</span> <span class="o">=</span> <span class="sh">"</span><span class="s">csv</span><span class="sh">"</span>
+<span class="n">EXPORTER_PROMETHEUS</span> <span class="o">=</span> <span class="sh">"</span><span class="s">prometheus</span><span class="sh">"</span>
+<span class="n">EXPORTER_LOKI</span> <span class="o">=</span> <span class="sh">"</span><span class="s">loki</span><span class="sh">"</span>
+<span class="n">EXPORTER_SQLITE</span> <span class="o">=</span> <span class="sh">"</span><span class="s">sqlite</span><span class="sh">"</span>
+
+<span class="c1"># Alert provider names
+</span><span class="n">PROVIDER_WEBHOOK</span> <span class="o">=</span> <span class="sh">"</span><span class="s">webhook</span><span class="sh">"</span>
+<span class="n">PROVIDER_GOTIFY</span> <span class="o">=</span> <span class="sh">"</span><span class="s">gotify</span><span class="sh">"</span>
+<span class="n">PROVIDER_NTFY</span> <span class="o">=</span> <span class="sh">"</span><span class="s">ntfy</span><span class="sh">"</span>
+<span class="n">PROVIDER_APPRISE</span> <span class="o">=</span> <span class="sh">"</span><span class="s">apprise</span><span class="sh">"</span>
+</code></pre></div></div>
+
+<p><strong>Impact:</strong></p>
+
+<ul>
+  <li>No type safety — can pass arbitrary strings where exporter/provider names expected</li>
+  <li>No IDE autocomplete support</li>
+  <li>Risk of typos (“prometeus” vs “prometheus”)</li>
+  <li>Less clear intent</li>
+</ul>
+
+<p><strong>Recommendation:</strong>
+Convert to <code class="language-plaintext highlighter-rouge">StrEnum</code> (Python 3.11+, available in 3.13):</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">enum</span> <span class="kn">import</span> <span class="n">StrEnum</span>
+
+<span class="k">class</span> <span class="nc">ExporterType</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Valid exporter type identifiers.</span><span class="sh">"""</span>
+    <span class="n">CSV</span> <span class="o">=</span> <span class="sh">"</span><span class="s">csv</span><span class="sh">"</span>
+    <span class="n">PROMETHEUS</span> <span class="o">=</span> <span class="sh">"</span><span class="s">prometheus</span><span class="sh">"</span>
+    <span class="n">LOKI</span> <span class="o">=</span> <span class="sh">"</span><span class="s">loki</span><span class="sh">"</span>
+    <span class="n">SQLITE</span> <span class="o">=</span> <span class="sh">"</span><span class="s">sqlite</span><span class="sh">"</span>
+
+<span class="k">class</span> <span class="nc">AlertProviderType</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Valid alert provider type identifiers.</span><span class="sh">"""</span>
+    <span class="n">WEBHOOK</span> <span class="o">=</span> <span class="sh">"</span><span class="s">webhook</span><span class="sh">"</span>
+    <span class="n">GOTIFY</span> <span class="o">=</span> <span class="sh">"</span><span class="s">gotify</span><span class="sh">"</span>
+    <span class="n">NTFY</span> <span class="o">=</span> <span class="sh">"</span><span class="s">ntfy</span><span class="sh">"</span>
+    <span class="n">APPRISE</span> <span class="o">=</span> <span class="sh">"</span><span class="s">apprise</span><span class="sh">"</span>
+</code></pre></div></div>
+
+<p><strong>Benefits:</strong></p>
+
+<ul>
+  <li>Type safety: <code class="language-plaintext highlighter-rouge">def export(exporter: ExporterType)</code> vs <code class="language-plaintext highlighter-rouge">def export(exporter: str)</code></li>
+  <li><code class="language-plaintext highlighter-rouge">StrEnum</code> inherits from <code class="language-plaintext highlighter-rouge">str</code>, so direct string comparisons still work: <code class="language-plaintext highlighter-rouge">if name == ExporterType.CSV</code></li>
+  <li>IDE autocomplete and refactoring support</li>
+  <li>Self-documenting: all valid values visible in enum definition</li>
+</ul>
+
+<p><strong>Migration Impact:</strong></p>
+
+<ul>
+  <li>Need to update imports across codebase</li>
+  <li>Can maintain backward compatibility by keeping <code class="language-plaintext highlighter-rouge">EXPORTER_*</code> as aliases during transition</li>
+  <li>Type checkers will catch any invalid usage</li>
+</ul>
+
+<p><strong>Estimated Effort:</strong> 1 hour<br />
+<strong>Breaking Changes:</strong> None if using aliases; minor if switching all references to enum</p>
+
+<hr />
+
+<h3 id="-medium-priority">🟡 MEDIUM Priority</h3>
+
+<h4 id="issue-3-environment-variable-access-outside-config-module">Issue #3: Environment Variable Access Outside Config Module</h4>
+
+<p><strong>File:</strong> <a href="../src/services/speedtest_runner.py">src/services/speedtest_runner.py</a> (line 75)<br />
+<strong>Severity:</strong> Medium — Architecture principle violation</p>
+
+<p><strong>Problem:</strong>
+The <a href="../src/config.py">config.py</a> module explicitly documents:</p>
+<blockquote>
+  <p>“Nowhere else in the app calls os.getenv() directly; everything imports from here.”</p>
+</blockquote>
+
+<p>However, <code class="language-plaintext highlighter-rouge">speedtest_runner.py</code> violates this:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">_tz_name</span> <span class="o">=</span> <span class="n">os</span><span class="p">.</span><span class="nf">getenv</span><span class="p">(</span><span class="sh">"</span><span class="s">TZ</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">UTC</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Impact:</strong></p>
+
+<ul>
+  <li>Inconsistent configuration pattern</li>
+  <li>Makes testing harder (can’t easily mock all config in one place)</li>
+  <li>Violates stated architecture principle</li>
+  <li>Duplicate default values across modules</li>
+</ul>
+
+<p><strong>Recommendation:</strong>
+Add to <a href="../src/config.py">config.py</a>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Timezone
+</span><span class="n">TIMEZONE</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">os</span><span class="p">.</span><span class="nf">getenv</span><span class="p">(</span><span class="sh">"</span><span class="s">TZ</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">UTC</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Update <a href="../src/services/speedtest_runner.py">speedtest_runner.py</a>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="n">src</span> <span class="kn">import</span> <span class="n">config</span>
+<span class="c1"># ...
+</span><span class="n">_tz_name</span> <span class="o">=</span> <span class="n">config</span><span class="p">.</span><span class="n">TIMEZONE</span>
+</code></pre></div></div>
+
+<p><strong>Estimated Effort:</strong> 5 minutes<br />
+<strong>Breaking Changes:</strong> None (environment variable name unchanged)</p>
+
+<hr />
+
+<h4 id="issue-4-dead-log-service-code">Issue #4: Dead Log Service Code</h4>
+
+<p><strong>File:</strong> <a href="../src/services/log_service.py">src/services/log_service.py</a><br />
+<strong>Severity:</strong> Medium — Technical debt</p>
+
+<p><strong>Problem:</strong>
+The entire <code class="language-plaintext highlighter-rouge">Log</code> class is a placeholder with no functionality:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">Log</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Placeholder logging service kept for compatibility with earlier imports.</span><span class="sh">"""</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="bp">True</span>
+</code></pre></div></div>
+
+<p><strong>Impact:</strong></p>
+
+<ul>
+  <li>Confuses new developers (“What does this do?”)</li>
+  <li>Increases maintenance burden (file must be maintained, type-checked, etc.)</li>
+  <li>“Kept for compatibility” suggests unfinished migration</li>
+</ul>
+
+<p><strong>Recommendation:</strong>
+Option A (Preferred): Remove the file entirely and fix any imports<br />
+Option B: Add deprecation warning if removal is blocked:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">warnings</span>
+
+<span class="k">class</span> <span class="nc">Log</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Deprecated: This class is no longer used and will be removed in v2.0.</span><span class="sh">"""</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="p">.</span><span class="nf">warn</span><span class="p">(</span>
+            <span class="sh">"</span><span class="s">Log service is deprecated and will be removed in v2.0. </span><span class="sh">"</span>
+            <span class="sh">"</span><span class="s">Use standard logging module instead.</span><span class="sh">"</span><span class="p">,</span>
+            <span class="nb">DeprecationWarning</span><span class="p">,</span>
+            <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span>
+        <span class="p">)</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="bp">True</span>
+</code></pre></div></div>
+
+<p><strong>Action Required:</strong></p>
+
+<ol>
+  <li>Search codebase for <code class="language-plaintext highlighter-rouge">from src.services.log_service import Log</code></li>
+  <li>If found, migrate to standard <code class="language-plaintext highlighter-rouge">logging</code> module</li>
+  <li>If not found, delete file</li>
+</ol>
+
+<p><strong>Estimated Effort:</strong> 15 minutes (verify no usage + delete) or 30 minutes (migration)<br />
+<strong>Breaking Changes:</strong> None if file is truly unused</p>
+
+<hr />
+
+<h4 id="issue-5-lock-usage-in-trigger-route-could-use-context-manager">Issue #5: Lock Usage in Trigger Route Could Use Context Manager</h4>
+
+<p><strong>File:</strong> <a href="../src/api/routes/trigger.py">src/api/routes/trigger.py</a> (lines 66-79)<br />
+<strong>Severity:</strong> Medium — Consistency improvement</p>
+
+<p><strong>Problem:</strong>
+Background task manually releases lock in <code class="language-plaintext highlighter-rouge">finally</code> block:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">try</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="nc">SpeedtestRunner</span><span class="p">().</span><span class="nf">run</span><span class="p">()</span>
+    <span class="n">dispatcher</span><span class="p">.</span><span class="nf">dispatch</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="c1"># ... logging
+</span><span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">exception</span><span class="p">(</span><span class="sh">"</span><span class="s">Manual trigger failed: %s</span><span class="sh">"</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+<span class="k">finally</span><span class="p">:</span>
+    <span class="n">_test_lock</span><span class="p">.</span><span class="nf">release</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p>Earlier in the function, the lock is acquired explicitly:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="ow">not</span> <span class="n">_test_lock</span><span class="p">.</span><span class="nf">acquire</span><span class="p">(</span><span class="n">blocking</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="nc">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">409</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sh">"</span><span class="s">Test already running</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Impact:</strong></p>
+
+<ul>
+  <li>Less Pythonic than context manager</li>
+  <li>Slightly more verbose</li>
+  <li>Pattern inconsistency with rest of codebase</li>
+</ul>
+
+<p><strong>Recommendation:</strong>
+Refactor to use context manager:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="ow">not</span> <span class="n">_test_lock</span><span class="p">.</span><span class="nf">acquire</span><span class="p">(</span><span class="n">blocking</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="nc">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">409</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sh">"</span><span class="s">Test already running</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="n">_test_lock</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="nc">SpeedtestRunner</span><span class="p">().</span><span class="nf">run</span><span class="p">()</span>
+    <span class="n">dispatcher</span><span class="p">.</span><span class="nf">dispatch</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="c1"># ... logging
+</span></code></pre></div></div>
+
+<p><strong>Note:</strong> This requires <code class="language-plaintext highlighter-rouge">_test_lock.acquire(blocking=False)</code> <em>before</em> the <code class="language-plaintext highlighter-rouge">with</code> statement to maintain the non-blocking check. The <code class="language-plaintext highlighter-rouge">with</code> statement should use <code class="language-plaintext highlighter-rouge">_test_lock</code> in “already acquired” mode. However, Python’s <code class="language-plaintext highlighter-rouge">Lock</code> context manager will attempt to acquire again, so this pattern needs careful review.</p>
+
+<p><strong>Alternative (Simpler):</strong>
+Keep current pattern as it’s actually more correct for the non-blocking check. The issue is borderline — current implementation is valid.</p>
+
+<p><strong>Estimated Effort:</strong> 30 minutes (with testing to verify behavior)<br />
+<strong>Breaking Changes:</strong> None</p>
+
+<p><strong>Status:</strong> <strong>OPTIONAL</strong> — Current pattern is actually appropriate given the non-blocking requirement. Context manager would require more complex refactoring.</p>
+
+<hr />
+
+<h3 id="-low-priority">🟢 LOW Priority</h3>
+
+<h4 id="issue-6-dict-merge-could-use--operator">Issue #6: Dict Merge Could Use | Operator</h4>
+
+<p><strong>File:</strong> <a href="../src/exporters/loki_exporter.py">src/exporters/loki_exporter.py</a> (lines 57-63)<br />
+<strong>Severity:</strong> Low — Stylistic preference</p>
+
+<p><strong>Current:</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">labels</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="sh">"</span><span class="s">job</span><span class="sh">"</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">_job_label</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">server_name</span><span class="sh">"</span><span class="p">:</span> <span class="n">result</span><span class="p">.</span><span class="n">server_name</span> <span class="ow">or</span> <span class="sh">"</span><span class="s">unknown</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">server_location</span><span class="sh">"</span><span class="p">:</span> <span class="n">result</span><span class="p">.</span><span class="n">server_location</span> <span class="ow">or</span> <span class="sh">"</span><span class="s">unknown</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">labels</span><span class="p">.</span><span class="nf">update</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">_static_labels</span><span class="p">)</span>
+<span class="k">return</span> <span class="n">labels</span>
+</code></pre></div></div>
+
+<p><strong>Could be:</strong></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">return</span> <span class="p">{</span>
+    <span class="sh">"</span><span class="s">job</span><span class="sh">"</span><span class="p">:</span> <span class="n">self</span><span class="p">.</span><span class="n">_job_label</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">server_name</span><span class="sh">"</span><span class="p">:</span> <span class="n">result</span><span class="p">.</span><span class="n">server_name</span> <span class="ow">or</span> <span class="sh">"</span><span class="s">unknown</span><span class="sh">"</span><span class="p">,</span>
+    <span class="sh">"</span><span class="s">server_location</span><span class="sh">"</span><span class="p">:</span> <span class="n">result</span><span class="p">.</span><span class="n">server_location</span> <span class="ow">or</span> <span class="sh">"</span><span class="s">unknown</span><span class="sh">"</span><span class="p">,</span>
+<span class="p">}</span> <span class="o">|</span> <span class="n">self</span><span class="p">.</span><span class="n">_static_labels</span>
+</code></pre></div></div>
+
+<p><strong>Assessment:</strong></p>
+
+<ul>
+  <li>Python 3.9+ dict merge operator (<code class="language-plaintext highlighter-rouge">|</code>) is more functional/concise</li>
+  <li>However, current pattern is clear, readable, and explicit</li>
+  <li>This is purely stylistic with no functional benefit</li>
+</ul>
+
+<p><strong>Recommendation:</strong> <strong>NO ACTION</strong> — Current code is fine. The <code class="language-plaintext highlighter-rouge">update()</code> pattern is well-understood and equally modern.</p>
+
+<hr />
+
+<h2 id="summary">Summary</h2>
+
+<h3 id="issues-by-priority">Issues by Priority</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Priority</th>
+      <th>Count</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>🔴 High</td>
+      <td>2</td>
+      <td>To implement</td>
+    </tr>
+    <tr>
+      <td>🟡 Medium</td>
+      <td>3</td>
+      <td>To implement (1 optional)</td>
+    </tr>
+    <tr>
+      <td>🟢 Low</td>
+      <td>1</td>
+      <td>No action</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="deprecated-features-found">Deprecated Features Found</h3>
+
+<p><strong>None.</strong> The codebase does not use any deprecated Python features:</p>
+
+<ul>
+  <li>✅ No <code class="language-plaintext highlighter-rouge">datetime.utcnow()</code> (uses <code class="language-plaintext highlighter-rouge">datetime.now(timezone.utc)</code>)</li>
+  <li>✅ No Python 2 artifacts (<code class="language-plaintext highlighter-rouge">unicode</code>, <code class="language-plaintext highlighter-rouge">basestring</code>, old exception syntax)</li>
+  <li>✅ No deprecated standard library functions</li>
+  <li>✅ Modern type hints throughout</li>
+  <li>✅ No <code class="language-plaintext highlighter-rouge">typing.Dict/List/Tuple</code> (uses <code class="language-plaintext highlighter-rouge">dict</code>/<code class="language-plaintext highlighter-rouge">list</code>/<code class="language-plaintext highlighter-rouge">tuple</code>)</li>
+</ul>
+
+<h3 id="already-modernized">Already Modernized</h3>
+
+<ul>
+  <li>✅ Type hints use modern <code class="language-plaintext highlighter-rouge">|</code> syntax (<code class="language-plaintext highlighter-rouge">str | None</code> instead of <code class="language-plaintext highlighter-rouge">Optional[str]</code>)</li>
+  <li>✅ Collections use lowercase (<code class="language-plaintext highlighter-rouge">list[str]</code> not <code class="language-plaintext highlighter-rouge">List[str]</code>)</li>
+  <li>✅ <code class="language-plaintext highlighter-rouge">from __future__ import annotations</code> where needed</li>
+  <li>✅ Dataclasses used (<code class="language-plaintext highlighter-rouge">SpeedResult</code>)</li>
+  <li>✅ Context managers for file I/O</li>
+  <li>✅ <code class="language-plaintext highlighter-rouge">pathlib.Path</code> preferred over <code class="language-plaintext highlighter-rouge">os.path</code></li>
+  <li>✅ Logging uses <code class="language-plaintext highlighter-rouge">%</code> formatting (correct pattern for logging performance)</li>
+</ul>
+
+<hr />
+
+<h2 id="implementation-plan">Implementation Plan</h2>
+
+<h3 id="phase-1-high-priority-required-for-v10">Phase 1: High Priority (Required for v1.0)</h3>
+
+<ol>
+  <li><strong>SQLite Context Managers</strong> (#1)
+    <ul>
+      <li>Update <code class="language-plaintext highlighter-rouge">src/api/routes/results.py</code></li>
+      <li>Convert <code class="language-plaintext highlighter-rouge">try/finally</code> to <code class="language-plaintext highlighter-rouge">with</code> statements</li>
+      <li>Test pagination endpoints</li>
+    </ul>
+  </li>
+  <li><strong>String to Enum Conversion</strong> (#2)
+    <ul>
+      <li>Add <code class="language-plaintext highlighter-rouge">ExporterType</code> and <code class="language-plaintext highlighter-rouge">AlertProviderType</code> enums to <code class="language-plaintext highlighter-rouge">constants.py</code></li>
+      <li>Update all references across codebase</li>
+      <li>Verify type checking passes</li>
+      <li>Run full test suite</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="phase-2-medium-priority-recommended-for-v10">Phase 2: Medium Priority (Recommended for v1.0)</h3>
+
+<ol>
+  <li><strong>Centralize TZ Config</strong> (#3)
+    <ul>
+      <li>Add <code class="language-plaintext highlighter-rouge">TIMEZONE</code> to <code class="language-plaintext highlighter-rouge">config.py</code></li>
+      <li>Update <code class="language-plaintext highlighter-rouge">speedtest_runner.py</code> to import from config</li>
+      <li>Verify no behavior changes</li>
+    </ul>
+  </li>
+  <li><strong>Clean Up Dead Code</strong> (#4)
+    <ul>
+      <li>Search for <code class="language-plaintext highlighter-rouge">log_service</code> imports</li>
+      <li>Remove file if unused or add deprecation warning</li>
+      <li>Update any references</li>
+    </ul>
+  </li>
+  <li><strong>Review Lock Context Manager</strong> (#5)
+    <ul>
+      <li>Analyze non-blocking lock semantics</li>
+      <li>Decide if refactoring improves clarity</li>
+      <li>Keep current pattern if it’s most correct</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="phase-3-validation">Phase 3: Validation</h3>
+
+<ol>
+  <li><strong>Testing</strong>
+    <ul>
+      <li>Run <code class="language-plaintext highlighter-rouge">pytest</code> with coverage (must remain &gt;90%)</li>
+      <li>Run <code class="language-plaintext highlighter-rouge">mypy</code> (must pass)</li>
+      <li>Run <code class="language-plaintext highlighter-rouge">ruff check</code> (must pass)</li>
+      <li>Manual smoke test of API endpoints</li>
+    </ul>
+  </li>
+  <li><strong>Documentation</strong>
+    <ul>
+      <li>Update this document with implementation results</li>
+      <li>Mark TODO.md item as complete</li>
+      <li>Update CHANGELOG.md</li>
+    </ul>
+  </li>
+</ol>
+
+<hr />
+
+<h2 id="test-coverage-impact">Test Coverage Impact</h2>
+
+<p><strong>Expected:</strong> All changes are refactoring/modernization with identical behavior. Test coverage should remain stable (~95%). No new test cases required unless behavior changes.</p>
+
+<p><strong>Validation:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pytest <span class="nt">--cov</span><span class="o">=</span>src <span class="nt">--cov-report</span><span class="o">=</span>html <span class="nt">--cov-report</span><span class="o">=</span>term
+<span class="c"># Must show ≥90% coverage</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="approval-status">Approval Status</h2>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />High priority fixes implemented</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Medium priority fixes implemented (lock usage marked as optional - current pattern is correct)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />All tests passing (344 tests)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Static analysis clean (mypy, ruff)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Code coverage ≥90% (91.36%)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" checked="checked" />Ready for v1.0 release</li>
+</ul>
+
+<hr />
+
+<h2 id="implementation-results">Implementation Results</h2>
+
+<p><strong>Date Completed:</strong> 2026-04-30</p>
+
+<h3 id="changes-implemented">Changes Implemented</h3>
+
+<h4 id="-issue-1-sqlite-connections-context-managers">✅ Issue #1: SQLite Connections Context Managers</h4>
+
+<p><strong>Status:</strong> COMPLETE<br />
+<strong>Files Modified:</strong> <a href="../src/api/routes/results.py">src/api/routes/results.py</a></p>
+
+<p>Converted both <code class="language-plaintext highlighter-rouge">get_results()</code> and <code class="language-plaintext highlighter-rouge">get_latest_result()</code> to use context managers:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">with</span> <span class="nf">_connect</span><span class="p">()</span> <span class="k">as</span> <span class="n">conn</span><span class="p">:</span>
+    <span class="c1"># database operations
+</span></code></pre></div></div>
+
+<p><strong>Result:</strong> Code is now more concise and consistent with Python best practices.</p>
+
+<hr />
+
+<h4 id="-issue-2-string-constants-to-enums">✅ Issue #2: String Constants to Enums</h4>
+
+<p><strong>Status:</strong> COMPLETE<br />
+<strong>Files Modified:</strong> <a href="../src/constants.py">src/constants.py</a>, <a href="../src/main.py">src/main.py</a></p>
+
+<p>Added <code class="language-plaintext highlighter-rouge">ExporterType</code> and <code class="language-plaintext highlighter-rouge">AlertProviderType</code> as <code class="language-plaintext highlighter-rouge">StrEnum</code> classes:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">ExporterType</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+    <span class="n">CSV</span> <span class="o">=</span> <span class="sh">"</span><span class="s">csv</span><span class="sh">"</span>
+    <span class="n">PROMETHEUS</span> <span class="o">=</span> <span class="sh">"</span><span class="s">prometheus</span><span class="sh">"</span>
+    <span class="n">LOKI</span> <span class="o">=</span> <span class="sh">"</span><span class="s">loki</span><span class="sh">"</span>
+    <span class="n">SQLITE</span> <span class="o">=</span> <span class="sh">"</span><span class="s">sqlite</span><span class="sh">"</span>
+
+<span class="k">class</span> <span class="nc">AlertProviderType</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
+    <span class="n">WEBHOOK</span> <span class="o">=</span> <span class="sh">"</span><span class="s">webhook</span><span class="sh">"</span>
+    <span class="n">GOTIFY</span> <span class="o">=</span> <span class="sh">"</span><span class="s">gotify</span><span class="sh">"</span>
+    <span class="n">NTFY</span> <span class="o">=</span> <span class="sh">"</span><span class="s">ntfy</span><span class="sh">"</span>
+    <span class="n">APPRISE</span> <span class="o">=</span> <span class="sh">"</span><span class="s">apprise</span><span class="sh">"</span>
+</code></pre></div></div>
+
+<p>Maintained backward compatibility by keeping old constant names as aliases. Updated type annotations in <code class="language-plaintext highlighter-rouge">main.py</code> to use <code class="language-plaintext highlighter-rouge">dict[str, Callable[[], BaseExporter]]</code> for runtime flexibility while maintaining type safety.</p>
+
+<p><strong>Result:</strong> Type safety improved with IDE autocomplete support, while maintaining full backward compatibility.</p>
+
+<hr />
+
+<h4 id="-issue-3-centralized-tz-environment-variable">✅ Issue #3: Centralized TZ Environment Variable</h4>
+
+<p><strong>Status:</strong> COMPLETE<br />
+<strong>Files Modified:</strong> <a href="../src/config.py">src/config.py</a>, <a href="../src/services/speedtest_runner.py">src/services/speedtest_runner.py</a></p>
+
+<p>Added <code class="language-plaintext highlighter-rouge">TIMEZONE</code> constant to <code class="language-plaintext highlighter-rouge">config.py</code>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">TIMEZONE</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">os</span><span class="p">.</span><span class="nf">getenv</span><span class="p">(</span><span class="sh">"</span><span class="s">TZ</span><span class="sh">"</span><span class="p">,</span> <span class="sh">"</span><span class="s">UTC</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Updated <code class="language-plaintext highlighter-rouge">speedtest_runner.py</code> to import from config instead of calling <code class="language-plaintext highlighter-rouge">os.getenv()</code> directly.</p>
+
+<p><strong>Result:</strong> All configuration now centralized in <code class="language-plaintext highlighter-rouge">config.py</code>, enforcing architecture principle.</p>
+
+<hr />
+
+<h4 id="-issue-4-removed-dead-log-service-code">✅ Issue #4: Removed Dead Log Service Code</h4>
+
+<p><strong>Status:</strong> COMPLETE<br />
+<strong>Files Deleted:</strong> <code class="language-plaintext highlighter-rouge">src/services/log_service.py</code></p>
+
+<p>Verified no imports existed and removed the unused placeholder class.</p>
+
+<p><strong>Result:</strong> Reduced technical debt, removed confusing dead code.</p>
+
+<hr />
+
+<h4 id="-issue-5-lock-usage-in-triggerpy">⚪ Issue #5: Lock Usage in trigger.py</h4>
+
+<p><strong>Status:</strong> NO ACTION (OPTIONAL)<br />
+<strong>Rationale:</strong> Current pattern is correct for the non-blocking lock acquisition across thread boundaries. Lock is acquired in <code class="language-plaintext highlighter-rouge">trigger_test()</code> and released in <code class="language-plaintext highlighter-rouge">_run_test()</code> running in a background thread. Context manager refactoring would be more complex without benefits.</p>
+
+<p><strong>Result:</strong> Keeping existing implementation as it is appropriate for the use case.</p>
+
+<hr />
+
+<h3 id="test-results">Test Results</h3>
+
+<p><strong>All 344 tests passing:</strong></p>
+
+<ul>
+  <li>Unit tests: ✅</li>
+  <li>Integration tests: ✅</li>
+  <li>API tests: ✅</li>
+  <li>Coverage: <strong>91.36%</strong> (target: ≥90%)</li>
+</ul>
+
+<p><strong>Static Analysis:</strong></p>
+
+<ul>
+  <li>mypy: ✅ No errors (26 files checked)</li>
+  <li>ruff: ✅ All checks passed</li>
+</ul>
+
+<hr />
+
+<h2 id="notes">Notes</h2>
+
+<p>This review represents the fourth and final planned code quality review before v1.0 release. Combined with the Security Audit, Defensive Coding Review, and Best Practices Review, the codebase has undergone comprehensive scrutiny. The issues identified are minor modernization opportunities rather than fundamental problems.</p>
+
+<p>Post-v1.0 quality improvements can be tracked in the “Post-Release Enhancements” section of TODO.md.</p>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/Hermes" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Modernization Review
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

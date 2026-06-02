@@ -1,0 +1,89 @@
+// ============================================================
+// Green Flame Tech — Jekyll Theme Variables
+// Brand-matched design tokens
+// ============================================================
+
+// --- Colors ---
+$color-bg:            #0f0f0f;
+$color-surface:       #1a1a1a;
+$color-surface-2:     #141414;
+$color-border:        rgba(34, 197, 94, 0.20);
+
+$color-flame:         #22c55e;
+$color-flame-bright:  #16a34a;
+$color-flame-glow:    rgba(34, 197, 94, 0.18);
+
+$color-accent-amber:       #f59e0b;
+$color-accent-amber-dark:  #d97706;
+$color-accent-amber-text:  #fbbf24;
+$color-accent-amber-glow:  rgba(245, 158, 11, 0.20);
+
+$color-accent-orange:      #f97316;
+$color-accent-orange-text: #fb923c;
+
+$color-accent-cyan:        #22d3ee;
+$color-accent-cyan-dark:   #06b6d4;
+$color-accent-cyan-text:   #67e8f9;
+$color-accent-cyan-glow:   rgba(34, 211, 238, 0.18);
+
+$color-accent-red:         #ef4444;
+$color-accent-red-dark:    #ef4444;
+$color-accent-red-text:    #fca5a5;
+
+$color-accent-bg:     rgba(34, 211, 238, 0.08);
+$color-accent-border: rgba(34, 211, 238, 0.4);
+$color-success-bg:    rgba(34, 197, 94, 0.08);
+$color-warning-bg:    rgba(234, 179, 8, 0.08);
+$color-danger-bg:     rgba(239, 68, 68, 0.08);
+
+$color-green:         #22c55e;
+$color-green-dim:     #16a34a;
+
+$color-text:          #ffffff;
+$color-text-muted:    #d4d4d4;
+$color-text-subtle:   #a3a3a3;
+
+$color-accent-purple:      #c084fc;
+$color-accent-purple-text: #e9d5ff;
+
+$color-code-bg:       #111111;
+$color-code-border:   rgba(34, 197, 94, 0.20);
+
+// --- Typography ---
+$font-display:  'Inter', system-ui, sans-serif;
+$font-body:     'Inter', system-ui, sans-serif;
+$font-ui:       'Inter', system-ui, sans-serif;
+$font-code:     'JetBrains Mono', 'IBM Plex Mono', monospace;
+
+$font-size-base:   16px;
+$line-height-base: 1.7;
+
+// --- Spacing ---
+$spacing-xs:  0.25rem;
+$spacing-sm:  0.5rem;
+$spacing-md:  1rem;
+$spacing-lg:  2rem;
+$spacing-xl:  4rem;
+$spacing-2xl: 8rem;
+
+// --- Layout ---
+$max-width-content:  1120px;
+$max-width-wide:     1120px;
+$sidebar-width:      260px;
+
+// --- Borders & Radius ---
+$radius-sm:   4px;
+$radius-md:   12px;
+$radius-lg:   12px;
+$border-thin: 1px solid $color-border;
+$border-accent: 1px solid $color-flame;
+
+// --- Transitions ---
+$transition-fast:   0.15s ease;
+$transition-normal: 0.25s ease;
+
+// --- Breakpoints ---
+$bp-sm:  576px;
+$bp-md:  768px;
+$bp-lg:  1024px;
+$bp-xl:  1280px;

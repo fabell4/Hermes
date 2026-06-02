@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Error Handling Conventions — Hermes Documentation</title>
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Error Handling Conventions | Hermes Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Error Handling Conventions" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<link rel="canonical" href="http://localhost:4001/error-handling-conventions.html" />
+<meta property="og:url" content="http://localhost:4001/error-handling-conventions.html" />
+<meta property="og:site_name" content="Hermes Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Error Handling Conventions" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted internet speed test monitoring with modern observability stack integration","headline":"Error Handling Conventions","url":"http://localhost:4001/error-handling-conventions.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration">
+
+<title>
+  
+    Error Handling Conventions — Hermes Documentation
+  
+</title>
+
+
+<link rel="icon" type="image/png" href="/assets/Hermes.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="/" class="nav-brand">
+    <span class="brand-name">
+      Hermes
+      <span>Docs</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/alloy"
+                 >
+                Grafana Alloy
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-ENHANCEMENTS"
+                 >
+                Security Enhancements
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Error Handling</h3>
+        <ul>
+          
+            <li>
+              <a href="/error-catalog"
+                 >
+                Error Catalog
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-handling-conventions"
+                 >
+                Handling Conventions
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-messages"
+                 >
+                Error Messages
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/RELEASE-PROCESS"
+                 >
+                Release Process
+              </a>
+            </li>
+          
+            <li>
+              <a href="/styleguide"
+                 >
+                Frontend Style Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/suppression-decisions"
+                 >
+                Suppression Decisions
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Code Reviews</h3>
+        <ul>
+          
+            <li>
+              <a href="/BEST-PRACTICES-REVIEW"
+                 >
+                Best Practices
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DEFENSIVE-CODING-REVIEW"
+                 >
+                Defensive Coding
+              </a>
+            </li>
+          
+            <li>
+              <a href="/ERROR-HANDLING-REVIEW"
+                 >
+                Error Handling Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/PERFORMANCE-OPTIMIZATION-REVIEW"
+                 >
+                Performance Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/TEST-COVERAGE-REVIEW"
+                 >
+                Test Coverage
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DOCUMENTATION-ACCURACY-REVIEW"
+                 >
+                Documentation Review
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Error Handling Conventions</h1>
+
+            
+          </header>
+        
+
+        <p><strong>Project:</strong> Hermes Speed Monitor<br />
+<strong>Last Updated:</strong> 2026-05-01<br />
+<strong>Purpose:</strong> Document error handling patterns, exception hierarchies, and conventions</p>
+
+<hr />
+
+<h2 id="table-of-contents">Table of Contents</h2>
+
+<ul>
+  <li><a href="#guiding-principles">Guiding Principles</a></li>
+  <li><a href="#when-to-raise-vs-log">When to Raise vs Log</a></li>
+  <li><a href="#exception-hierarchies">Exception Hierarchies</a></li>
+  <li><a href="#exception-wrapping-guidelines">Exception Wrapping Guidelines</a></li>
+  <li><a href="#logging-guidelines">Logging Guidelines</a></li>
+  <li><a href="#error-recovery-patterns">Error Recovery Patterns</a></li>
+  <li><a href="#testing-error-paths">Testing Error Paths</a></li>
+</ul>
+
+<hr />
+
+<h2 id="guiding-principles">Guiding Principles</h2>
+
+<h3 id="1-fail-fast-fail-loudly">1. Fail Fast, Fail Loudly</h3>
+
+<ul>
+  <li>Raise exceptions for programming errors and invalid states</li>
+  <li>Make problems visible immediately, not silently swallowed</li>
+  <li>Use assertions for invariants that should never be violated</li>
+</ul>
+
+<p><strong>Example:</strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">exporter</span><span class="p">:</span> <span class="n">BaseExporter</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">exporter</span><span class="p">,</span> <span class="n">BaseExporter</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="nc">TypeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="sh">"</span><span class="s">Exporter must inherit from BaseExporter, got </span><span class="si">{</span><span class="nf">type</span><span class="p">(</span><span class="n">exporter</span><span class="p">).</span><span class="n">__name__</span><span class="si">}</span><span class="sh">"</span>
+        <span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="2-be-resilient-to-external-failures">2. Be Resilient to External Failures</h3>
+
+<ul>
+  <li>Catch and log exceptions from external systems (network, filesystem, databases)</li>
+  <li>Continue operation when possible (e.g., one exporter fails, others succeed)</li>
+  <li>Implement retry logic for transient failures</li>
+</ul>
+
+<p><strong>Example:</strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">try</span><span class="p">:</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">_prune</span><span class="p">()</span>
+<span class="k">except</span> <span class="nb">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="c1"># Pruning failure should not prevent writing new results
+</span>    <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sh">"</span><span class="s">Failed to prune CSV file: %s</span><span class="sh">"</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="3-provide-actionable-error-messages">3. Provide Actionable Error Messages</h3>
+
+<ul>
+  <li>Include context: what failed, why, and how to fix it</li>
+  <li>Include relevant values (URLs, file paths, counts)</li>
+  <li>Use specific exception types to enable targeted error handling</li>
+</ul>
+
+<p><strong>Example:</strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">raise</span> <span class="nc">SQLiteLockTimeout</span><span class="p">(</span>
+    <span class="sa">f</span><span class="sh">"</span><span class="s">Database locked for </span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">timeout_seconds</span><span class="si">}</span><span class="s">s: </span><span class="si">{</span><span class="n">self</span><span class="p">.</span><span class="n">db_path</span><span class="si">}</span><span class="s">. </span><span class="sh">"</span>
+    <span class="sh">"</span><span class="s">Check for long-running queries or reduce page_size.</span><span class="sh">"</span>
+<span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="when-to-raise-vs-log">When to Raise vs Log</h2>
+
+<h3 id="raise-an-exception-when">Raise an Exception When:</h3>
+
+<ol>
+  <li><strong>Programming Error:</strong> Invalid arguments, type mismatches, violated contracts
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="ow">not</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="nc">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Expected dict, got </span><span class="si">{</span><span class="nf">type</span><span class="p">(</span><span class="n">data</span><span class="p">).</span><span class="n">__name__</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>Unrecoverable Error:</strong> Configuration is invalid, required dependency missing
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="ow">not</span> <span class="n">url</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sh">"</span><span class="s">Loki URL is required</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>Caller Must Handle:</strong> Error requires specific handling by caller
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">response</span><span class="p">.</span><span class="n">status_code</span> <span class="o">&gt;=</span> <span class="mi">400</span><span class="p">:</span>
+    <span class="n">response</span><span class="p">.</span><span class="nf">raise_for_status</span><span class="p">()</span>  <span class="c1"># Caller decides retry logic
+</span></code></pre></div>    </div>
+  </li>
+  <li><strong>Fatal System Error:</strong> Cannot continue execution (startup failures)
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="ow">not</span> <span class="n">API_KEY</span><span class="p">:</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">critical</span><span class="p">(</span><span class="sh">"</span><span class="s">API_KEY environment variable is required</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">sys</span><span class="p">.</span><span class="nf">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<hr />
+
+<h3 id="log-without-raising-when">Log Without Raising When:</h3>
+
+<ol>
+  <li><strong>Expected Operational Failures:</strong> Network timeouts, temporary unavailability
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">try</span><span class="p">:</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="p">.</span><span class="nf">post</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="k">except</span> <span class="n">Timeout</span><span class="p">:</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">warning</span><span class="p">(</span><span class="sh">"</span><span class="s">Alert webhook timed out (5s): %s</span><span class="sh">"</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+    <span class="c1"># Continue execution, alert sending is best-effort
+</span></code></pre></div>    </div>
+  </li>
+  <li><strong>Non-Fatal Errors:</strong> One component fails but system continues
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">exporter</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">exporters</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">exporter</span><span class="p">.</span><span class="nf">export</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sh">"</span><span class="s">Exporter </span><span class="sh">'</span><span class="s">%s</span><span class="sh">'</span><span class="s"> failed: %s</span><span class="sh">"</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="c1"># Continue dispatching to remaining exporters
+</span></code></pre></div>    </div>
+  </li>
+  <li><strong>Degraded Functionality:</strong> Feature unavailable but core functionality works
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">try</span><span class="p">:</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">_prune</span><span class="p">()</span>
+<span class="k">except</span> <span class="nb">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">warning</span><span class="p">(</span><span class="sh">"</span><span class="s">CSV pruning failed: %s - file may grow unbounded</span><span class="sh">"</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+    <span class="c1"># Write still succeeds
+</span></code></pre></div>    </div>
+  </li>
+  <li><strong>Validation Warnings:</strong> Input sanitized to safe default
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="ow">not</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">interval</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">5</span> <span class="o">&lt;=</span> <span class="n">interval</span> <span class="o">&lt;=</span> <span class="mi">1440</span><span class="p">):</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">warning</span><span class="p">(</span><span class="sh">"</span><span class="s">Invalid interval %s, using default %d</span><span class="sh">"</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">DEFAULT_INTERVAL</span><span class="p">)</span>
+    <span class="n">interval</span> <span class="o">=</span> <span class="n">DEFAULT_INTERVAL</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<hr />
+
+<h2 id="exception-hierarchies">Exception Hierarchies</h2>
+
+<h3 id="standard-library-exceptions">Standard Library Exceptions</h3>
+
+<p>Use built-in exceptions where appropriate:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Exception</th>
+      <th>Use Case</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ValueError</code></td>
+      <td>Invalid value (wrong range, format, content)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">TypeError</code></td>
+      <td>Wrong type passed to function</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">KeyError</code></td>
+      <td>Missing required key in dict</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">OSError</code></td>
+      <td>Filesystem, network, or OS-level errors</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">RuntimeError</code></td>
+      <td>Generic runtime error (avoid if more specific exists)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">TimeoutError</code></td>
+      <td>Operation exceeded time limit</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h3 id="http-exceptions-fastapi">HTTP Exceptions (FastAPI)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Status Code</th>
+      <th>Exception</th>
+      <th>Use Case</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>400</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(status_code=400)</code></td>
+      <td>Invalid request payload</td>
+    </tr>
+    <tr>
+      <td>401</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(status_code=401)</code></td>
+      <td>Missing authentication</td>
+    </tr>
+    <tr>
+      <td>403</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(status_code=403)</code></td>
+      <td>Invalid credentials</td>
+    </tr>
+    <tr>
+      <td>404</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(status_code=404)</code></td>
+      <td>Resource not found</td>
+    </tr>
+    <tr>
+      <td>429</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(status_code=429)</code></td>
+      <td>Rate limit exceeded</td>
+    </tr>
+    <tr>
+      <td>500</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(status_code=500)</code></td>
+      <td>Internal server error</td>
+    </tr>
+    <tr>
+      <td>503</td>
+      <td><code class="language-plaintext highlighter-rouge">HTTPException(status_code=503)</code></td>
+      <td>Service unavailable (temporary)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Example:</strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="ow">not</span> <span class="nf">validate_api_key</span><span class="p">(</span><span class="n">x_api_key</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="nc">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">403</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sh">"</span><span class="s">Invalid API key.</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="custom-exceptions">Custom Exceptions</h3>
+
+<h4 id="dispatcherror"><code class="language-plaintext highlighter-rouge">DispatchError</code></h4>
+
+<p><strong>Source:</strong> <a href="../src/result_dispatcher.py">src/result_dispatcher.py</a><br />
+<strong>Purpose:</strong> Aggregate multiple exporter failures<br />
+<strong>When to Use:</strong> Dispatcher collected failures from multiple exporters</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">DispatchError</span><span class="p">(</span><span class="nb">Exception</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Raised when one or more exporters fail during dispatch.
+    Contains mapping of exporter names to their exceptions.
+    </span><span class="sh">"""</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">failures</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">Exception</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">failures</span> <span class="o">=</span> <span class="n">failures</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="si">{</span><span class="nf">len</span><span class="p">(</span><span class="n">failures</span><span class="p">)</span><span class="si">}</span><span class="s"> exporter(s) failed</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Usage:</strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="n">failures</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="nc">DispatchError</span><span class="p">(</span><span class="n">failures</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h4 id="sqlitelocktimeout"><code class="language-plaintext highlighter-rouge">SQLiteLockTimeout</code></h4>
+
+<p><strong>Source:</strong> <a href="../src/exporters/sqlite_exporter.py">src/exporters/sqlite_exporter.py</a><br />
+<strong>Purpose:</strong> Specific timeout error with diagnostic context<br />
+<strong>When to Use:</strong> SQLite database locked beyond configured timeout</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">SQLiteLockTimeout</span><span class="p">(</span><span class="nb">Exception</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">
+    Raised when SQLite database is locked for longer than the configured timeout.
+    Includes timeout duration and database path for diagnostics.
+    </span><span class="sh">"""</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">db_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">timeout_seconds</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">db_path</span> <span class="o">=</span> <span class="n">db_path</span>
+        <span class="n">self</span><span class="p">.</span><span class="n">timeout_seconds</span> <span class="o">=</span> <span class="n">timeout_seconds</span>
+        <span class="nf">super</span><span class="p">().</span><span class="nf">__init__</span><span class="p">(</span>
+            <span class="sa">f</span><span class="sh">"</span><span class="s">Database locked for </span><span class="si">{</span><span class="n">timeout_seconds</span><span class="si">}</span><span class="s">s: </span><span class="si">{</span><span class="n">db_path</span><span class="si">}</span><span class="s">. </span><span class="sh">"</span>
+            <span class="sh">"</span><span class="s">Check for long-running queries or reduce page_size.</span><span class="sh">"</span>
+        <span class="p">)</span>
+</code></pre></div></div>
+
+<p><strong>Usage:</strong></p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">except</span> <span class="n">sqlite3</span><span class="p">.</span><span class="n">OperationalError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">if</span> <span class="sh">"</span><span class="s">database is locked</span><span class="sh">"</span> <span class="ow">in</span> <span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="nc">SQLiteLockTimeout</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">db_path</span><span class="p">,</span> <span class="n">self</span><span class="p">.</span><span class="n">timeout_seconds</span><span class="p">)</span> <span class="k">from</span> <span class="n">e</span>
+    <span class="k">raise</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="exception-wrapping-guidelines">Exception Wrapping Guidelines</h2>
+
+<h3 id="when-to-wrap-exceptions">When to Wrap Exceptions</h3>
+
+<p>Wrap lower-level exceptions with context when:</p>
+
+<ol>
+  <li><strong>Adding Business Context:</strong> Low-level error needs domain-specific meaning
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">except</span> <span class="n">sqlite3</span><span class="p">.</span><span class="n">OperationalError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="nc">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">SQLite write failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span> <span class="k">from</span> <span class="n">e</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>Abstracting Implementation Details:</strong> Hide internal library from API
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">except</span> <span class="n">requests</span><span class="p">.</span><span class="n">RequestException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="nc">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Loki push connection error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span> <span class="k">from</span> <span class="n">e</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>Aggregating Multiple Errors:</strong> Collect failures into single exception
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">raise</span> <span class="nc">DispatchError</span><span class="p">(</span><span class="n">failures</span><span class="p">)</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<hr />
+
+<h3 id="when-not-to-wrap">When NOT to Wrap</h3>
+
+<p>Don’t wrap exceptions when:</p>
+
+<ol>
+  <li><strong>No Added Value:</strong> Wrapping adds no context
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Bad - no context added
+</span><span class="k">try</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="nf">some_operation</span><span class="p">()</span>
+<span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="nc">RuntimeError</span><span class="p">(</span><span class="nf">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span> <span class="k">from</span> <span class="n">e</span>
+   
+<span class="c1"># Good - let it propagate
+</span><span class="n">result</span> <span class="o">=</span> <span class="nf">some_operation</span><span class="p">()</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>Caller Expects Specific Type:</strong> Wrapping breaks caller’s error handling
+    <div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Bad - caller expects ValueError
+</span><span class="k">try</span><span class="p">:</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="n">input_string</span><span class="p">)</span>
+<span class="k">except</span> <span class="nb">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="nc">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Invalid number: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span> <span class="k">from</span> <span class="n">e</span>
+   
+<span class="c1"># Good - preserve exception type
+</span><span class="n">value</span> <span class="o">=</span> <span class="nf">int</span><span class="p">(</span><span class="n">input_string</span><span class="p">)</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<hr />
+
+<h3 id="always-use-from-for-exception-chaining">Always Use <code class="language-plaintext highlighter-rouge">from</code> for Exception Chaining</h3>
+
+<p>Preserve exception chain for debugging:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Good - preserves traceback
+</span><span class="k">try</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="nf">risky_operation</span><span class="p">()</span>
+<span class="k">except</span> <span class="nb">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="nc">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Operation failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span> <span class="k">from</span> <span class="n">e</span>
+
+<span class="c1"># Bad - loses original exception context
+</span><span class="k">except</span> <span class="nb">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="nc">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Operation failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="logging-guidelines">Logging Guidelines</h2>
+
+<h3 id="log-levels">Log Levels</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Level</th>
+      <th>Use Case</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">DEBUG</code></td>
+      <td>Detailed diagnostic information</td>
+      <td>Function entry/exit, variable values</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">INFO</code></td>
+      <td>Significant operational events</td>
+      <td>Server started, config loaded, test completed</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">WARNING</code></td>
+      <td>Unexpected but handled events</td>
+      <td>Validation fallback, retry triggered, non-fatal error</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ERROR</code></td>
+      <td>Operation failed but system continues</td>
+      <td>Exporter failed, alert send failed</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">CRITICAL</code></td>
+      <td>Fatal error requiring intervention</td>
+      <td>Startup failure, invalid API key</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h3 id="logging-best-practices">Logging Best Practices</h3>
+
+<h4 id="1-use-structured-logging">1. Use Structured Logging</h4>
+
+<p>Include context in log messages:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Good - includes context
+</span><span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span>
+    <span class="sh">"</span><span class="s">Speedtest complete: %.2f Mbps down, %.2f Mbps up, %.0f ms ping</span><span class="sh">"</span><span class="p">,</span>
+    <span class="n">result</span><span class="p">.</span><span class="n">download_mbps</span><span class="p">,</span> <span class="n">result</span><span class="p">.</span><span class="n">upload_mbps</span><span class="p">,</span> <span class="n">result</span><span class="p">.</span><span class="n">ping_ms</span>
+<span class="p">)</span>
+
+<span class="c1"># Bad - vague
+</span><span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sh">"</span><span class="s">Test complete</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h4 id="2-include-exception-info-for-errors">2. Include Exception Info for Errors</h4>
+
+<p>Use <code class="language-plaintext highlighter-rouge">exc_info=True</code> to include full traceback:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">try</span><span class="p">:</span>
+    <span class="n">self</span><span class="p">.</span><span class="nf">_prune</span><span class="p">()</span>
+<span class="k">except</span> <span class="nb">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sh">"</span><span class="s">Failed to prune CSV file: %s</span><span class="sh">"</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h4 id="3-use-parameterized-logging">3. Use Parameterized Logging</h4>
+
+<p>Let logging library handle string formatting:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Good - efficient, proper escaping
+</span><span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sh">"</span><span class="s">Loaded config: interval=%d, exporters=%s</span><span class="sh">"</span><span class="p">,</span> <span class="n">interval</span><span class="p">,</span> <span class="n">exporters</span><span class="p">)</span>
+
+<span class="c1"># Bad - always formats string even if log level disabled
+</span><span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Loaded config: interval=</span><span class="si">{</span><span class="n">interval</span><span class="si">}</span><span class="s">, exporters=</span><span class="si">{</span><span class="n">exporters</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h4 id="4-log-at-appropriate-level">4. Log at Appropriate Level</h4>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Critical startup failure - CRITICAL
+</span><span class="k">if</span> <span class="ow">not</span> <span class="n">API_KEY</span><span class="p">:</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">critical</span><span class="p">(</span><span class="sh">"</span><span class="s">API_KEY environment variable is required</span><span class="sh">"</span><span class="p">)</span>
+    <span class="n">sys</span><span class="p">.</span><span class="nf">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># Expected validation fallback - WARNING
+</span><span class="k">if</span> <span class="ow">not</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">interval</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">warning</span><span class="p">(</span><span class="sh">"</span><span class="s">Invalid interval %s, using default</span><span class="sh">"</span><span class="p">,</span> <span class="n">interval</span><span class="p">)</span>
+
+<span class="c1"># Unexpected failure in non-critical path - ERROR
+</span><span class="k">try</span><span class="p">:</span>
+    <span class="nf">send_alert</span><span class="p">()</span>
+<span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sh">"</span><span class="s">Alert failed: %s</span><span class="sh">"</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c1"># Normal operation - INFO
+</span><span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sh">"</span><span class="s">Speedtest completed successfully</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h4 id="5-avoid-sensitive-data-in-logs">5. Avoid Sensitive Data in Logs</h4>
+
+<p>Never log secrets, credentials, or PII:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Bad - logs API key
+</span><span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sh">"</span><span class="s">Authenticated with key: %s</span><span class="sh">"</span><span class="p">,</span> <span class="n">api_key</span><span class="p">)</span>
+
+<span class="c1"># Good - logs prefix only
+</span><span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sh">"</span><span class="s">Authenticated with key prefix=%.4s</span><span class="sh">"</span><span class="p">,</span> <span class="n">api_key</span><span class="p">)</span>
+
+<span class="c1"># Good - no sensitive data
+</span><span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sh">"</span><span class="s">Authentication successful</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="error-recovery-patterns">Error Recovery Patterns</h2>
+
+<h3 id="pattern-1-retry-with-exponential-backoff">Pattern 1: Retry with Exponential Backoff</h3>
+
+<p>For transient failures (network, temporary unavailability):</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="n">time</span>
+
+<span class="k">def</span> <span class="nf">run_with_retry</span><span class="p">(</span><span class="n">max_attempts</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SpeedResult</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Run speedtest with retry on transient failure.</span><span class="sh">"""</span>
+    <span class="k">for</span> <span class="n">attempt</span> <span class="ow">in</span> <span class="nf">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_attempts</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">self</span><span class="p">.</span><span class="nf">_run_once</span><span class="p">()</span>
+        <span class="nf">except </span><span class="p">(</span><span class="nb">TimeoutError</span><span class="p">,</span> <span class="nb">OSError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">attempt</span> <span class="o">==</span> <span class="n">max_attempts</span><span class="p">:</span>
+                <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sh">"</span><span class="s">Speedtest failed after %d attempts</span><span class="sh">"</span><span class="p">,</span> <span class="n">max_attempts</span><span class="p">)</span>
+                <span class="k">raise</span>
+            
+            <span class="n">backoff</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="n">attempt</span>  <span class="c1"># 2s, 4s, 8s
+</span>            <span class="n">logger</span><span class="p">.</span><span class="nf">warning</span><span class="p">(</span>
+                <span class="sh">"</span><span class="s">Speedtest attempt %d failed: %s - retrying in %ds</span><span class="sh">"</span><span class="p">,</span>
+                <span class="n">attempt</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">backoff</span>
+            <span class="p">)</span>
+            <span class="n">time</span><span class="p">.</span><span class="nf">sleep</span><span class="p">(</span><span class="n">backoff</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="pattern-2-fallback-to-default">Pattern 2: Fallback to Default</h3>
+
+<p>For configuration validation errors:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">_validate_interval</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Validate interval, fallback to default if invalid.</span><span class="sh">"""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="mi">5</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">1440</span><span class="p">):</span>
+        <span class="n">logger</span><span class="p">.</span><span class="nf">warning</span><span class="p">(</span>
+            <span class="sh">"</span><span class="s">Invalid interval %s (expected 5-1440), using default %d</span><span class="sh">"</span><span class="p">,</span>
+            <span class="n">value</span><span class="p">,</span> <span class="n">DEFAULT_INTERVAL</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">DEFAULT_INTERVAL</span>
+    <span class="k">return</span> <span class="n">value</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="pattern-3-partial-success">Pattern 3: Partial Success</h3>
+
+<p>For batch operations where one failure shouldn’t block others:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">dispatch</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">SpeedResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Dispatch to all exporters, continue on failure.</span><span class="sh">"""</span>
+    <span class="n">failures</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">Exception</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">exporter</span> <span class="ow">in</span> <span class="n">self</span><span class="p">.</span><span class="n">exporters</span><span class="p">.</span><span class="nf">items</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">exporter</span><span class="p">.</span><span class="nf">export</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sh">"</span><span class="s">Exporter </span><span class="sh">'</span><span class="s">%s</span><span class="sh">'</span><span class="s"> failed: %s</span><span class="sh">"</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">e</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">failures</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">e</span>
+    
+    <span class="k">if</span> <span class="n">failures</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="nc">DispatchError</span><span class="p">(</span><span class="n">failures</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="pattern-4-atomic-operations-with-rollback">Pattern 4: Atomic Operations with Rollback</h3>
+
+<p>For operations that must complete fully or not at all:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Save config atomically to prevent corruption.</span><span class="sh">"""</span>
+    <span class="n">fd</span><span class="p">,</span> <span class="n">temp_path</span> <span class="o">=</span> <span class="n">tempfile</span><span class="p">.</span><span class="nf">mkstemp</span><span class="p">(</span><span class="nb">dir</span><span class="o">=</span><span class="n">config_dir</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="sh">"</span><span class="s">.runtime_config_</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">os</span><span class="p">.</span><span class="nf">fdopen</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="sh">"</span><span class="s">w</span><span class="sh">"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="sh">"</span><span class="s">utf-8</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="p">.</span><span class="nf">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        
+        <span class="c1"># Atomic rename (POSIX guarantee)
+</span>        <span class="nc">Path</span><span class="p">(</span><span class="n">temp_path</span><span class="p">).</span><span class="nf">replace</span><span class="p">(</span><span class="n">RUNTIME_CONFIG_PATH</span><span class="p">)</span>
+        <span class="n">logger</span><span class="p">.</span><span class="nf">info</span><span class="p">(</span><span class="sh">"</span><span class="s">Runtime config saved successfully</span><span class="sh">"</span><span class="p">)</span>
+    <span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="c1"># Rollback - clean up temp file
+</span>        <span class="nc">Path</span><span class="p">(</span><span class="n">temp_path</span><span class="p">).</span><span class="nf">unlink</span><span class="p">(</span><span class="n">missing_ok</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sh">"</span><span class="s">Failed to save config: %s</span><span class="sh">"</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+        <span class="k">raise</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="pattern-5-graceful-degradation">Pattern 5: Graceful Degradation</h3>
+
+<p>For non-critical features:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="n">result</span><span class="p">:</span> <span class="n">SpeedResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="sh">"""</span><span class="s">Export to CSV, continue even if pruning fails.</span><span class="sh">"""</span>
+    <span class="c1"># Critical: Write new result
+</span>    <span class="k">with</span> <span class="nf">open</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">path</span><span class="p">,</span> <span class="sh">"</span><span class="s">a</span><span class="sh">"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="sh">"</span><span class="s">utf-8</span><span class="sh">"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">writer</span> <span class="o">=</span> <span class="n">csv</span><span class="p">.</span><span class="nc">DictWriter</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">fieldnames</span><span class="o">=</span><span class="n">FIELDNAMES</span><span class="p">)</span>
+        <span class="n">writer</span><span class="p">.</span><span class="nf">writerow</span><span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="nf">to_dict</span><span class="p">())</span>
+    
+    <span class="c1"># Non-critical: Prune old results
+</span>    <span class="k">try</span><span class="p">:</span>
+        <span class="n">self</span><span class="p">.</span><span class="nf">_prune</span><span class="p">()</span>
+    <span class="k">except</span> <span class="nb">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="p">.</span><span class="nf">warning</span><span class="p">(</span><span class="sh">"</span><span class="s">CSV pruning failed: %s - file may grow unbounded</span><span class="sh">"</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+        <span class="c1"># Continue - write succeeded
+</span></code></pre></div></div>
+
+<hr />
+
+<h2 id="testing-error-paths">Testing Error Paths</h2>
+
+<h3 id="test-every-exception-path">Test Every Exception Path</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">test_invalid_api_key_raises_403</span><span class="p">():</span>
+    <span class="sh">"""</span><span class="s">Verify 403 response for invalid API key.</span><span class="sh">"""</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="p">.</span><span class="nf">get</span><span class="p">(</span>
+        <span class="sh">"</span><span class="s">/api/config</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="sh">"</span><span class="s">X-Api-Key</span><span class="sh">"</span><span class="p">:</span> <span class="sh">"</span><span class="s">invalid-key</span><span class="sh">"</span><span class="p">}</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="n">response</span><span class="p">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">403</span>
+    <span class="k">assert</span> <span class="sh">"</span><span class="s">Invalid API key</span><span class="sh">"</span> <span class="ow">in</span> <span class="n">response</span><span class="p">.</span><span class="nf">json</span><span class="p">()[</span><span class="sh">"</span><span class="s">detail</span><span class="sh">"</span><span class="p">]</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="test-error-messages">Test Error Messages</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">test_loki_url_validation_error_message</span><span class="p">():</span>
+    <span class="sh">"""</span><span class="s">Verify error message includes actionable guidance.</span><span class="sh">"""</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="p">.</span><span class="nf">raises</span><span class="p">(</span><span class="nb">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc_info</span><span class="p">:</span>
+        <span class="nc">LokiExporter</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="sh">""</span><span class="p">,</span> <span class="n">job</span><span class="o">=</span><span class="sh">"</span><span class="s">test</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="k">assert</span> <span class="sh">"</span><span class="s">Loki URL is required</span><span class="sh">"</span> <span class="ow">in</span> <span class="nf">str</span><span class="p">(</span><span class="n">exc_info</span><span class="p">.</span><span class="n">value</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="test-exception-chaining">Test Exception Chaining</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">test_sqlite_write_failure_chains_exception</span><span class="p">():</span>
+    <span class="sh">"""</span><span class="s">Verify original exception is preserved in chain.</span><span class="sh">"""</span>
+    <span class="k">with</span> <span class="n">pytest</span><span class="p">.</span><span class="nf">raises</span><span class="p">(</span><span class="nb">RuntimeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc_info</span><span class="p">:</span>
+        <span class="n">exporter</span><span class="p">.</span><span class="nf">export</span><span class="p">(</span><span class="n">mock_result</span><span class="p">)</span>
+    
+    <span class="k">assert</span> <span class="n">exc_info</span><span class="p">.</span><span class="n">value</span><span class="p">.</span><span class="n">__cause__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+    <span class="k">assert</span> <span class="nf">isinstance</span><span class="p">(</span><span class="n">exc_info</span><span class="p">.</span><span class="n">value</span><span class="p">.</span><span class="n">__cause__</span><span class="p">,</span> <span class="n">sqlite3</span><span class="p">.</span><span class="n">Error</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="test-partial-failures">Test Partial Failures</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">test_dispatcher_continues_after_exporter_failure</span><span class="p">(</span><span class="n">mocker</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Verify dispatcher continues when one exporter fails.</span><span class="sh">"""</span>
+    <span class="n">mock_csv</span> <span class="o">=</span> <span class="n">mocker</span><span class="p">.</span><span class="nc">Mock</span><span class="p">(</span><span class="n">spec</span><span class="o">=</span><span class="n">BaseExporter</span><span class="p">)</span>
+    <span class="n">mock_sqlite</span> <span class="o">=</span> <span class="n">mocker</span><span class="p">.</span><span class="nc">Mock</span><span class="p">(</span><span class="n">spec</span><span class="o">=</span><span class="n">BaseExporter</span><span class="p">)</span>
+    <span class="n">mock_sqlite</span><span class="p">.</span><span class="n">export</span><span class="p">.</span><span class="n">side_effect</span> <span class="o">=</span> <span class="nc">RuntimeError</span><span class="p">(</span><span class="sh">"</span><span class="s">DB locked</span><span class="sh">"</span><span class="p">)</span>
+    
+    <span class="n">dispatcher</span><span class="p">.</span><span class="nf">register</span><span class="p">(</span><span class="sh">"</span><span class="s">csv</span><span class="sh">"</span><span class="p">,</span> <span class="n">mock_csv</span><span class="p">)</span>
+    <span class="n">dispatcher</span><span class="p">.</span><span class="nf">register</span><span class="p">(</span><span class="sh">"</span><span class="s">sqlite</span><span class="sh">"</span><span class="p">,</span> <span class="n">mock_sqlite</span><span class="p">)</span>
+    
+    <span class="k">with</span> <span class="n">pytest</span><span class="p">.</span><span class="nf">raises</span><span class="p">(</span><span class="n">DispatchError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc_info</span><span class="p">:</span>
+        <span class="n">dispatcher</span><span class="p">.</span><span class="nf">dispatch</span><span class="p">(</span><span class="n">mock_result</span><span class="p">)</span>
+    
+    <span class="c1"># CSV succeeded, SQLite failed
+</span>    <span class="n">mock_csv</span><span class="p">.</span><span class="n">export</span><span class="p">.</span><span class="nf">assert_called_once</span><span class="p">()</span>
+    <span class="k">assert</span> <span class="sh">"</span><span class="s">sqlite</span><span class="sh">"</span> <span class="ow">in</span> <span class="n">exc_info</span><span class="p">.</span><span class="n">value</span><span class="p">.</span><span class="n">failures</span>
+    <span class="k">assert</span> <span class="sh">"</span><span class="s">csv</span><span class="sh">"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exc_info</span><span class="p">.</span><span class="n">value</span><span class="p">.</span><span class="n">failures</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="test-retry-logic">Test Retry Logic</h3>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">test_speedtest_retries_on_timeout</span><span class="p">(</span><span class="n">mocker</span><span class="p">):</span>
+    <span class="sh">"""</span><span class="s">Verify speedtest retries once on timeout.</span><span class="sh">"""</span>
+    <span class="n">mock_run</span> <span class="o">=</span> <span class="n">mocker</span><span class="p">.</span><span class="n">patch</span><span class="p">.</span><span class="nf">object</span><span class="p">(</span>
+        <span class="n">runner</span><span class="p">,</span> <span class="sh">"</span><span class="s">_run_once</span><span class="sh">"</span><span class="p">,</span>
+        <span class="n">side_effect</span><span class="o">=</span><span class="p">[</span><span class="nc">TimeoutError</span><span class="p">(</span><span class="sh">"</span><span class="s">Test timed out</span><span class="sh">"</span><span class="p">),</span> <span class="n">mock_result</span><span class="p">]</span>
+    <span class="p">)</span>
+    
+    <span class="n">result</span> <span class="o">=</span> <span class="n">runner</span><span class="p">.</span><span class="nf">run</span><span class="p">()</span>
+    
+    <span class="k">assert</span> <span class="n">mock_run</span><span class="p">.</span><span class="n">call_count</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="n">mock_result</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="anti-patterns-to-avoid">Anti-Patterns to Avoid</h2>
+
+<h3 id="-bare-except">❌ Bare <code class="language-plaintext highlighter-rouge">except:</code></h3>
+
+<p>Never catch all exceptions without specifying type:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Bad - catches KeyboardInterrupt, SystemExit, etc.
+</span><span class="k">try</span><span class="p">:</span>
+    <span class="nf">risky_operation</span><span class="p">()</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sh">"</span><span class="s">Something failed</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Good - catch specific exceptions
+</span><span class="k">try</span><span class="p">:</span>
+    <span class="nf">risky_operation</span><span class="p">()</span>
+<span class="nf">except </span><span class="p">(</span><span class="nb">ValueError</span><span class="p">,</span> <span class="nb">OSError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sh">"</span><span class="s">Operation failed: %s</span><span class="sh">"</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="-swallowing-exceptions-silently">❌ Swallowing Exceptions Silently</h3>
+
+<p>Don’t ignore exceptions without logging:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Bad - silent failure
+</span><span class="k">try</span><span class="p">:</span>
+    <span class="nf">optional_cleanup</span><span class="p">()</span>
+<span class="k">except</span> <span class="nb">Exception</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+<span class="c1"># Good - log the failure
+</span><span class="k">try</span><span class="p">:</span>
+    <span class="nf">optional_cleanup</span><span class="p">()</span>
+<span class="k">except</span> <span class="nb">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">warning</span><span class="p">(</span><span class="sh">"</span><span class="s">Cleanup failed (non-fatal): %s</span><span class="sh">"</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="-raising-generic-exception">❌ Raising Generic <code class="language-plaintext highlighter-rouge">Exception</code></h3>
+
+<p>Use specific exception types:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Bad - too generic
+</span><span class="k">if</span> <span class="ow">not</span> <span class="n">url</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="nc">Exception</span><span class="p">(</span><span class="sh">"</span><span class="s">URL missing</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Good - specific type
+</span><span class="k">if</span> <span class="ow">not</span> <span class="n">url</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="nc">ValueError</span><span class="p">(</span><span class="sh">"</span><span class="s">Loki URL is required</span><span class="sh">"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="-logging-then-raising">❌ Logging Then Raising</h3>
+
+<p>Don’t log and raise - let caller decide:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Bad - logs at ERROR then raises (caller might log again)
+</span><span class="k">try</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="nf">operation</span><span class="p">()</span>
+<span class="k">except</span> <span class="nb">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">logger</span><span class="p">.</span><span class="nf">error</span><span class="p">(</span><span class="sh">"</span><span class="s">Operation failed: %s</span><span class="sh">"</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+    <span class="k">raise</span>
+
+<span class="c1"># Good - just raise, let caller log
+</span><span class="n">result</span> <span class="o">=</span> <span class="nf">operation</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><strong>Exception:</strong> Logging at WARNING or INFO before raising is acceptable for context.</p>
+
+<hr />
+
+<h3 id="-modifying-exception-message-without-context">❌ Modifying Exception Message Without Context</h3>
+
+<p>Don’t lose original error:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Bad - loses original error details
+</span><span class="k">except</span> <span class="n">requests</span><span class="p">.</span><span class="n">RequestException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="nc">RuntimeError</span><span class="p">(</span><span class="sh">"</span><span class="s">Request failed</span><span class="sh">"</span><span class="p">)</span>
+
+<span class="c1"># Good - preserves original error and adds context
+</span><span class="k">except</span> <span class="n">requests</span><span class="p">.</span><span class="n">RequestException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="nc">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="sh">"</span><span class="s">Loki push failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="sh">"</span><span class="p">)</span> <span class="k">from</span> <span class="n">e</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="related-documentation">Related Documentation</h2>
+
+<ul>
+  <li><a href="/error-messages.html">Error Message Reference</a> — Complete error catalog with troubleshooting</li>
+  <li><a href="/error-catalog.html">Error Catalog</a> — Errors by module with causes and remediation</li>
+  <li><a href="/architecture.html">Architecture</a> — System design and error boundaries</li>
+  <li><a href="../README.md#testing">Testing Strategy</a> — Test coverage and strategy</li>
+</ul>
+
+<hr />
+
+<h2 id="document-history">Document History</h2>
+
+<ul>
+  <li><strong>2026-05-01:</strong> Initial documentation (M3 from ERROR-HANDLING-REVIEW.md)</li>
+</ul>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/Hermes" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Error Handling Conventions
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<nav class="site-nav" aria-label="Main navigation">
+  <a href="{{ '/' | relative_url }}" class="nav-brand">
+    <span class="brand-name">
+      Hermes
+      <span>Docs</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    {% for link in site.nav_links %}
+      <li>
+        <a href="{{ link.url | relative_url }}"
+           {% if page.url == link.url %}class="active" aria-current="page"{% endif %}>
+          {{ link.title }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+
+  {% if site.footer.main_site %}
+    <a href="{{ site.footer.main_site }}" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  {% endif %}
+</nav>

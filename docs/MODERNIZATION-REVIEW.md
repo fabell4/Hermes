@@ -2,9 +2,6 @@
 layout: default
 title: "Modernization Review"
 ---
-
-# Modernization & Deprecation Review
-
 **Project:** Hermes Speed Monitor  
 **Review Date:** 2026-04-30  
 **Python Version:** 3.13  

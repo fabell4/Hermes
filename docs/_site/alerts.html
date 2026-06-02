@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Alert Configuration — Hermes Documentation</title>
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Alert Configuration | Hermes Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Alert Configuration" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<link rel="canonical" href="http://localhost:4001/alerts.html" />
+<meta property="og:url" content="http://localhost:4001/alerts.html" />
+<meta property="og:site_name" content="Hermes Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Alert Configuration" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted internet speed test monitoring with modern observability stack integration","headline":"Alert Configuration","url":"http://localhost:4001/alerts.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration">
+
+<title>
+  
+    Alert Configuration — Hermes Documentation
+  
+</title>
+
+
+<link rel="icon" type="image/png" href="/assets/Hermes.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="/" class="nav-brand">
+    <span class="brand-name">
+      Hermes
+      <span>Docs</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/alloy"
+                 >
+                Grafana Alloy
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-ENHANCEMENTS"
+                 >
+                Security Enhancements
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Error Handling</h3>
+        <ul>
+          
+            <li>
+              <a href="/error-catalog"
+                 >
+                Error Catalog
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-handling-conventions"
+                 >
+                Handling Conventions
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-messages"
+                 >
+                Error Messages
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/RELEASE-PROCESS"
+                 >
+                Release Process
+              </a>
+            </li>
+          
+            <li>
+              <a href="/styleguide"
+                 >
+                Frontend Style Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/suppression-decisions"
+                 >
+                Suppression Decisions
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Code Reviews</h3>
+        <ul>
+          
+            <li>
+              <a href="/BEST-PRACTICES-REVIEW"
+                 >
+                Best Practices
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DEFENSIVE-CODING-REVIEW"
+                 >
+                Defensive Coding
+              </a>
+            </li>
+          
+            <li>
+              <a href="/ERROR-HANDLING-REVIEW"
+                 >
+                Error Handling Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/PERFORMANCE-OPTIMIZATION-REVIEW"
+                 >
+                Performance Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/TEST-COVERAGE-REVIEW"
+                 >
+                Test Coverage
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DOCUMENTATION-ACCURACY-REVIEW"
+                 >
+                Documentation Review
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Alert Configuration</h1>
+
+            
+          </header>
+        
+
+        <p>Hermes can send notifications when speed tests fail consecutively. Alerts are configurable via the
+dedicated <strong>Alert Settings</strong> page in the web UI or environment variables.</p>
+
+<hr />
+
+<h2 id="supported-alert-providers">Supported Alert Providers</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Provider</th>
+      <th>Description</th>
+      <th>Setup Complexity</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Webhook</strong></td>
+      <td>POST JSON to any HTTP endpoint</td>
+      <td>⭐ Simple</td>
+    </tr>
+    <tr>
+      <td><strong>Gotify</strong></td>
+      <td>Self-hosted push notifications (<a href="https://gotify.net">gotify.net</a>)</td>
+      <td>⭐⭐ Moderate</td>
+    </tr>
+    <tr>
+      <td><strong>ntfy</strong></td>
+      <td>Simple pub-sub notifications (<a href="https://ntfy.sh">ntfy.sh</a>)</td>
+      <td>⭐ Simple</td>
+    </tr>
+    <tr>
+      <td><strong>Apprise</strong></td>
+      <td>100+ services via Apprise API (<a href="https://github.com/caronc/apprise-api">caronc/apprise-api</a>)</td>
+      <td>⭐⭐⭐ Advanced</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="alert-configuration-methods">Alert Configuration Methods</h2>
+
+<h3 id="method-1-alert-settings-ui-recommended">Method 1: Alert Settings UI (Recommended)</h3>
+
+<ol>
+  <li>Navigate to <strong>Alert Settings</strong> in the sidebar</li>
+  <li>Toggle alerts <strong>ON</strong> and set failure threshold and cooldown</li>
+  <li>Enable desired providers and fill in their settings</li>
+  <li>Use <strong>“Send Test Notification”</strong> to verify configuration</li>
+  <li>Click <strong>“Save Changes”</strong> to persist to <code class="language-plaintext highlighter-rouge">runtime_config.json</code></li>
+</ol>
+
+<p><strong>Advantages:</strong></p>
+
+<ul>
+  <li>No container restart required</li>
+  <li>Test notifications before saving</li>
+  <li>Visual validation of settings</li>
+  <li>Supports runtime changes</li>
+</ul>
+
+<h3 id="method-2-environment-variables">Method 2: Environment Variables</h3>
+
+<p>Add to your <code class="language-plaintext highlighter-rouge">.env</code> file before first container start:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Enable alerting (set threshold &gt; 0)</span>
+<span class="nv">ALERT_FAILURE_THRESHOLD</span><span class="o">=</span>3          <span class="c"># Send alert after 3 consecutive failures</span>
+<span class="nv">ALERT_COOLDOWN_MINUTES</span><span class="o">=</span>60          <span class="c"># Minimum 60 minutes between alerts</span>
+
+<span class="c"># Provider-specific settings (see examples below)</span>
+<span class="nv">ALERT_WEBHOOK_URL</span><span class="o">=</span>https://webhook.example.com/alerts
+</code></pre></div></div>
+
+<p><strong>Advantages:</strong></p>
+
+<ul>
+  <li>Configuration as code</li>
+  <li>Easy to version control</li>
+  <li>Consistent across deployments</li>
+</ul>
+
+<p><strong>Disadvantages:</strong>**</p>
+
+<ul>
+  <li>Requires container restart to change settings</li>
+  <li>No test notification feature</li>
+</ul>
+
+<hr />
+
+<h2 id="provider-setup-guides">Provider Setup Guides</h2>
+
+<h3 id="apprise-recommended-for-multiple-recipients">Apprise (Recommended for Multiple Recipients)</h3>
+
+<p>Apprise supports 100+ services including Discord, Telegram, Slack, Email, SMS, and more.</p>
+
+<h4 id="with-persistent-config-recommended">With Persistent Config (Recommended)</h4>
+
+<p><strong>1. Deploy Apprise API:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="nt">-p</span> 8000:8000 <span class="se">\</span>
+  <span class="nt">-v</span> <span class="si">$(</span><span class="nb">pwd</span><span class="si">)</span>/apprise-config:/config <span class="se">\</span>
+  caronc/apprise-api
+</code></pre></div></div>
+
+<p><strong>2. Configure Hermes:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ALERT_APPRISE_URL</span><span class="o">=</span>https://apprise.example.com/notify/myconfig
+</code></pre></div></div>
+
+<p><strong>3. Manage recipients in Apprise’s web UI</strong> at <code class="language-plaintext highlighter-rouge">http://apprise.example.com</code></p>
+
+<h4 id="with-stateless-mode">With Stateless Mode</h4>
+
+<p><strong>1. Set Apprise URL:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ALERT_APPRISE_URL</span><span class="o">=</span>https://apprise.example.com
+</code></pre></div></div>
+
+<p><strong>2. Add service URLs in Hermes UI:</strong> Alert Settings → Apprise → Service URLs:</p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ntfys://ntfy.example.com/topic?token=tk_xxx
+gotify://gotify.example.com/token
+discord://webhook_id/webhook_token
+tgram://bot_token/chat_id
+</code></pre></div></div>
+
+<p>See <a href="https://github.com/caronc/apprise/wiki">Apprise URL documentation</a> for service-specific URL formats.</p>
+
+<hr />
+
+<h3 id="ntfy">ntfy</h3>
+
+<p>Simple pub-sub notifications using <a href="https://ntfy.sh">ntfy.sh</a> or self-hosted ntfy server.</p>
+
+<h4 id="public-topic-no-authentication">Public Topic (No Authentication)</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ALERT_NTFY_TOPIC</span><span class="o">=</span>hermes_alerts
+<span class="nv">ALERT_NTFY_PRIORITY</span><span class="o">=</span>3                    <span class="c"># 1-5 (default: 3)</span>
+<span class="nv">ALERT_NTFY_TAGS</span><span class="o">=</span>warning,rotating_light   <span class="c"># Comma-separated emoji tags</span>
+</code></pre></div></div>
+
+<p>Subscribe with the mobile app or web UI: <code class="language-plaintext highlighter-rouge">https://ntfy.sh/hermes_alerts</code></p>
+
+<h4 id="private-topic-with-authentication">Private Topic (With Authentication)</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ALERT_NTFY_TOPIC</span><span class="o">=</span>hermes_alerts
+<span class="nv">ALERT_NTFY_TOKEN</span><span class="o">=</span>tk_xxxxxxxxxxxxx        <span class="c"># Access token from ntfy.sh</span>
+<span class="nv">ALERT_NTFY_PRIORITY</span><span class="o">=</span>4
+</code></pre></div></div>
+
+<h4 id="self-hosted-ntfy">Self-Hosted ntfy</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ALERT_NTFY_URL</span><span class="o">=</span>https://ntfy.yourdomain.com  <span class="c"># Custom ntfy server</span>
+<span class="nv">ALERT_NTFY_TOPIC</span><span class="o">=</span>hermes_alerts
+</code></pre></div></div>
+
+<p><strong>Priority Levels:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">1</code> = Min priority</li>
+  <li><code class="language-plaintext highlighter-rouge">2</code> = Low priority</li>
+  <li><code class="language-plaintext highlighter-rouge">3</code> = Default priority (default)</li>
+  <li><code class="language-plaintext highlighter-rouge">4</code> = High priority</li>
+  <li><code class="language-plaintext highlighter-rouge">5</code> = Urgent priority (bypasses Do Not Disturb)</li>
+</ul>
+
+<hr />
+
+<h3 id="gotify">Gotify</h3>
+
+<p>Self-hosted push notification server. Requires deployment of Gotify server.</p>
+
+<p><strong>1. Deploy Gotify:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="nt">-p</span> 80:80 <span class="se">\</span>
+  <span class="nt">-v</span> <span class="si">$(</span><span class="nb">pwd</span><span class="si">)</span>/gotify-data:/app/data <span class="se">\</span>
+  gotify/server
+</code></pre></div></div>
+
+<p><strong>2. Create an Application in Gotify UI</strong> and copy the app token</p>
+
+<p><strong>3. Configure Hermes:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ALERT_GOTIFY_URL</span><span class="o">=</span>https://gotify.example.com
+<span class="nv">ALERT_GOTIFY_TOKEN</span><span class="o">=</span>your_app_token_here
+<span class="nv">ALERT_GOTIFY_PRIORITY</span><span class="o">=</span>5                    <span class="c"># 0-10 (default: 5)</span>
+</code></pre></div></div>
+
+<p><strong>Priority Levels:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">0-3</code> = Low priority</li>
+  <li><code class="language-plaintext highlighter-rouge">4-7</code> = Normal priority</li>
+  <li><code class="language-plaintext highlighter-rouge">8-10</code> = High priority</li>
+</ul>
+
+<hr />
+
+<h3 id="webhook">Webhook</h3>
+
+<p>Send JSON POST requests to any HTTP endpoint.</p>
+
+<h4 id="setup">Setup</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ALERT_WEBHOOK_URL</span><span class="o">=</span>https://your-webhook.example.com/alerts
+</code></pre></div></div>
+
+<h4 id="payload-format">Payload Format</h4>
+
+<p>Hermes sends the following JSON payload:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"failure_count"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"last_error"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Connection timeout"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-04-29T12:00:00Z"</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h4 id="example-integrate-with-home-assistant">Example: Integrate with Home Assistant</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ALERT_WEBHOOK_URL</span><span class="o">=</span>http://homeassistant.local:8123/api/webhook/hermes-alert-webhook-id
+</code></pre></div></div>
+
+<p>Then create an automation in Home Assistant to handle the webhook.</p>
+
+<h4 id="example-integrate-with-n8n">Example: Integrate with n8n</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ALERT_WEBHOOK_URL</span><span class="o">=</span>https://n8n.example.com/webhook/hermes-alerts
+</code></pre></div></div>
+
+<p>Create a workflow in n8n triggered by the webhook to forward to multiple destinations.</p>
+
+<hr />
+
+<h2 id="alert-behavior">Alert Behavior</h2>
+
+<h3 id="failure-detection">Failure Detection</h3>
+
+<ul>
+  <li>Hermes tracks <strong>consecutive</strong> failures only</li>
+  <li>A single successful test resets the failure counter</li>
+  <li>Alerts trigger when <code class="language-plaintext highlighter-rouge">failure_count &gt;= ALERT_FAILURE_THRESHOLD</code></li>
+</ul>
+
+<h3 id="cooldown-period">Cooldown Period</h3>
+
+<ul>
+  <li>After sending an alert, Hermes waits <code class="language-plaintext highlighter-rouge">ALERT_COOLDOWN_MINUTES</code> before sending another</li>
+  <li>Prevents notification spam during extended outages</li>
+  <li>Cooldown applies globally across all providers</li>
+</ul>
+
+<h3 id="example-timeline">Example Timeline</h3>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Threshold = 3, Cooldown = 60 minutes
+
+10:00 - Test fails (count: 1)
+10:15 - Test fails (count: 2)
+10:30 - Test fails (count: 3) → Alert sent, cooldown starts
+10:45 - Test fails (count: 4) → No alert (in cooldown)
+11:00 - Test fails (count: 5) → No alert (in cooldown)
+11:30 - Test succeeds → Counter resets to 0, cooldown cleared
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="testing-alerts">Testing Alerts</h2>
+
+<p>Before deploying, verify your alert configuration:</p>
+
+<h3 id="via-ui">Via UI</h3>
+
+<ol>
+  <li>Navigate to <strong>Alert Settings</strong> in the sidebar</li>
+  <li>Configure your provider settings</li>
+  <li>Click <strong>“Send Test Notification”</strong></li>
+  <li>Check that you receive the test message</li>
+  <li>Click <strong>“Save Changes”</strong> to persist</li>
+</ol>
+
+<h3 id="via-api">Via API</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-X</span> POST http://localhost:8080/api/alerts/test <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"X-Api-Key: your-api-key-here"</span>
+</code></pre></div></div>
+
+<p>Response:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"success"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Test alert sent successfully to 2 provider(s)"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"webhook"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"ntfy"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Note:</strong> Test notifications have a <strong>10-second cooldown</strong> to prevent spam. If you attempt multiple tests rapidly, you’ll receive a “Rate limited” error response. Wait 10 seconds before sending another test notification.</p>
+
+<hr />
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+
+<h3 id="no-alerts-received">No Alerts Received</h3>
+
+<ol>
+  <li><strong>Check threshold:</strong> Ensure <code class="language-plaintext highlighter-rouge">ALERT_FAILURE_THRESHOLD &gt; 0</code></li>
+  <li><strong>Verify provider enabled:</strong> Check Alert Settings in the sidebar or environment variables</li>
+  <li><strong>Check cooldown:</strong> Wait <code class="language-plaintext highlighter-rouge">ALERT_COOLDOWN_MINUTES</code> after last alert</li>
+  <li><strong>Test notification:</strong> Use “Send Test Notification” button in UI</li>
+  <li>
+    <p><strong>Check logs:</strong> Look for alert-related errors in container logs:</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker logs hermes-scheduler | <span class="nb">grep</span> <span class="nt">-i</span> alert
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h3 id="partial-provider-failure">Partial Provider Failure</h3>
+
+<p>If one provider fails but others succeed, check:</p>
+
+<ul>
+  <li><strong>Webhook:</strong> Verify URL is reachable and returns 2xx status</li>
+  <li><strong>Gotify:</strong> Check server URL and app token validity</li>
+  <li><strong>ntfy:</strong> Verify topic name and authentication token</li>
+  <li><strong>Apprise:</strong> Check Apprise API is running and config ID exists</li>
+</ul>
+
+<h3 id="alert-sent-too-frequently">Alert Sent Too Frequently</h3>
+
+<p>Increase <code class="language-plaintext highlighter-rouge">ALERT_COOLDOWN_MINUTES</code> to reduce notification frequency:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ALERT_COOLDOWN_MINUTES</span><span class="o">=</span>120  <span class="c"># Wait 2 hours between alerts</span>
+</code></pre></div></div>
+
+<h3 id="alert-not-sent-despite-failures">Alert Not Sent Despite Failures</h3>
+
+<p>Check <code class="language-plaintext highlighter-rouge">ALERT_FAILURE_THRESHOLD</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ALERT_FAILURE_THRESHOLD</span><span class="o">=</span>3  <span class="c"># Requires 3 consecutive failures</span>
+</code></pre></div></div>
+
+<p>Lower the threshold if you want faster alerts:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ALERT_FAILURE_THRESHOLD</span><span class="o">=</span>1  <span class="c"># Alert on first failure</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="api-reference">API Reference</h2>
+
+<h3 id="get-apialerts">GET /api/alerts</h3>
+
+<p>Get current alert configuration.</p>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"failure_threshold"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"cooldown_minutes"</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"providers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"webhook"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://webhook.example.com/alerts"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"gotify"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"token"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"priority"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"ntfy"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://ntfy.sh"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"topic"</span><span class="p">:</span><span class="w"> </span><span class="s2">"hermes_alerts"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"token"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"priority"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"tags"</span><span class="p">:</span><span class="w"> </span><span class="s2">"warning,rotating_light"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"apprise"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"urls"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h3 id="put-apialerts">PUT /api/alerts</h3>
+
+<p>Update alert configuration. Requires <code class="language-plaintext highlighter-rouge">X-Api-Key</code> header if authentication is enabled.</p>
+
+<p><strong>Request:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"failure_threshold"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"cooldown_minutes"</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"providers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"webhook"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://webhook.example.com/alerts"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"ntfy"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://ntfy.sh"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"topic"</span><span class="p">:</span><span class="w"> </span><span class="s2">"hermes_alerts"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"priority"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Response:</strong> <code class="language-plaintext highlighter-rouge">200 OK</code> with updated configuration</p>
+
+<h3 id="post-apialertstest">POST /api/alerts/test</h3>
+
+<p>Send test notification to all enabled providers. Requires <code class="language-plaintext highlighter-rouge">X-Api-Key</code> header if authentication is enabled.</p>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"success"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Test alert sent successfully to 2 provider(s)"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"results"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"webhook"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"ntfy"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<hr />
+
+<h2 id="environment-variables-reference">Environment Variables Reference</h2>
+
+<p>Complete list of alert-related environment variables:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_FAILURE_THRESHOLD</code></td>
+      <td><code class="language-plaintext highlighter-rouge">0</code> (disabled)</td>
+      <td>Consecutive failures before alerting</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_COOLDOWN_MINUTES</code></td>
+      <td><code class="language-plaintext highlighter-rouge">60</code></td>
+      <td>Minimum minutes between alerts</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_WEBHOOK_URL</code></td>
+      <td><em>(unset)</em></td>
+      <td>Webhook URL for HTTP POST</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_GOTIFY_URL</code></td>
+      <td><em>(unset)</em></td>
+      <td>Gotify server URL</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_GOTIFY_TOKEN</code></td>
+      <td><em>(unset)</em></td>
+      <td>Gotify application token</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_GOTIFY_PRIORITY</code></td>
+      <td><code class="language-plaintext highlighter-rouge">5</code></td>
+      <td>Gotify priority (0-10)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_NTFY_URL</code></td>
+      <td><code class="language-plaintext highlighter-rouge">https://ntfy.sh</code></td>
+      <td>ntfy server URL</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_NTFY_TOPIC</code></td>
+      <td><em>(unset)</em></td>
+      <td>ntfy topic name</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_NTFY_TOKEN</code></td>
+      <td><em>(unset)</em></td>
+      <td>ntfy authentication token (optional)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_NTFY_PRIORITY</code></td>
+      <td><code class="language-plaintext highlighter-rouge">3</code></td>
+      <td>ntfy priority (1-5)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_NTFY_TAGS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">warning,rotating_light</code></td>
+      <td>Comma-separated emoji tags</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_APPRISE_URL</code></td>
+      <td><em>(unset)</em></td>
+      <td>Apprise API URL with config ID</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>See <a href="https://github.com/fabell4/hermes/blob/main/.env.example">.env.example</a> for detailed comments and examples.</p>
+
+<hr />
+
+<h2 id="see-also">See Also</h2>
+
+<ul>
+  <li><a href="getting-started">Getting Started</a> — Deployment and configuration</li>
+  <li><a href="api-reference">API Reference</a> — Complete API documentation</li>
+  <li><a href="security">Security Guide</a> — SSRF protection on alert URLs</li>
+</ul>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/Hermes" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Alert Configuration
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

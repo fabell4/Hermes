@@ -68,19 +68,40 @@
 			"group": "build"
 		},
 		{
-			"label": "Validate Jekyll Docs Build",
+			"label": "Serve Docs (Jekyll)",
 			"type": "shell",
-			"command": "docker",
-			"args": [
-				"run",
-				"--rm",
-				"-v",
-				"${workspaceFolder}/docs:/docs",
-				"jekyll/jekyll:latest",
-				"sh", "-c",
-				"gem install jekyll-theme-hacker --no-document --quiet && jekyll build --source /docs --destination /tmp/jekyll-build --config /docs/_config.yml"
-			],
-			"group": "test",
+			"command": "bundle exec jekyll serve --port 4001 --livereload",
+			"options": {
+				"cwd": "${workspaceFolder}/docs"
+			},
+			"isBackground": true,
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"clear": true
+			},
+			"problemMatcher": {
+				"owner": "jekyll",
+				"pattern": {
+					"regexp": "^.*$",
+					"message": 1
+				},
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "Generating\\.\\.\\.",
+					"endsPattern": "Server running\\.\\.\\."
+				}
+			}
+		},
+		{
+			"label": "Build Docs (Jekyll)",
+			"type": "shell",
+			"command": "bundle exec jekyll build",
+			"options": {
+				"cwd": "${workspaceFolder}/docs"
+			},
+			"group": "build",
 			"presentation": {
 				"reveal": "always",
 				"panel": "dedicated",

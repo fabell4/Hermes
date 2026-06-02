@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Getting Started — Hermes Documentation</title>
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Getting Started | Hermes Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Getting Started" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<link rel="canonical" href="http://localhost:4001/getting-started.html" />
+<meta property="og:url" content="http://localhost:4001/getting-started.html" />
+<meta property="og:site_name" content="Hermes Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Getting Started" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted internet speed test monitoring with modern observability stack integration","headline":"Getting Started","url":"http://localhost:4001/getting-started.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration">
+
+<title>
+  
+    Getting Started — Hermes Documentation
+  
+</title>
+
+
+<link rel="icon" type="image/png" href="/assets/Hermes.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="/" class="nav-brand">
+    <span class="brand-name">
+      Hermes
+      <span>Docs</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/alloy"
+                 >
+                Grafana Alloy
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-ENHANCEMENTS"
+                 >
+                Security Enhancements
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Error Handling</h3>
+        <ul>
+          
+            <li>
+              <a href="/error-catalog"
+                 >
+                Error Catalog
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-handling-conventions"
+                 >
+                Handling Conventions
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-messages"
+                 >
+                Error Messages
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/RELEASE-PROCESS"
+                 >
+                Release Process
+              </a>
+            </li>
+          
+            <li>
+              <a href="/styleguide"
+                 >
+                Frontend Style Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/suppression-decisions"
+                 >
+                Suppression Decisions
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Code Reviews</h3>
+        <ul>
+          
+            <li>
+              <a href="/BEST-PRACTICES-REVIEW"
+                 >
+                Best Practices
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DEFENSIVE-CODING-REVIEW"
+                 >
+                Defensive Coding
+              </a>
+            </li>
+          
+            <li>
+              <a href="/ERROR-HANDLING-REVIEW"
+                 >
+                Error Handling Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/PERFORMANCE-OPTIMIZATION-REVIEW"
+                 >
+                Performance Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/TEST-COVERAGE-REVIEW"
+                 >
+                Test Coverage
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DOCUMENTATION-ACCURACY-REVIEW"
+                 >
+                Documentation Review
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Getting Started</h1>
+
+            
+          </header>
+        
+
+        <p>This guide covers deployment, configuration, and first steps with Hermes.</p>
+
+<hr />
+
+<h2 id="quick-start-with-docker-compose">Quick Start with Docker Compose</h2>
+
+<p>The fastest way to get Hermes running:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Create docker-compose.yml</span>
+curl <span class="nt">-o</span> docker-compose.yml https://raw.githubusercontent.com/fabell4/hermes/main/docker-compose.yml
+
+<span class="c"># Create .env file</span>
+curl <span class="nt">-o</span> .env https://raw.githubusercontent.com/fabell4/hermes/main/.env.example
+
+<span class="c"># Start containers</span>
+docker compose up <span class="nt">-d</span>
+
+<span class="c"># Access the UI</span>
+open http://localhost:8080
+</code></pre></div></div>
+
+<p>The React UI will be available at <code class="language-plaintext highlighter-rouge">http://localhost:8080</code>.</p>
+
+<hr />
+
+<h2 id="self-hosting-guide">Self-Hosting Guide</h2>
+
+<p>Hermes runs as two containers from the same Docker image:</p>
+
+<ul>
+  <li><strong>hermes-scheduler</strong> — Background worker running speed tests on schedule</li>
+  <li><strong>hermes-api</strong> — FastAPI REST API serving the React frontend</li>
+</ul>
+
+<h3 id="minimal-docker-composeyml">Minimal docker-compose.yml</h3>
+
+<p>Create a <code class="language-plaintext highlighter-rouge">docker-compose.yml</code> on your server:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">services</span><span class="pi">:</span>
+  <span class="na">hermes-scheduler</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">ghcr.io/fabell4/hermes:latest</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">hermes-scheduler</span>
+    <span class="na">restart</span><span class="pi">:</span> <span class="s">always</span>
+    <span class="na">command</span><span class="pi">:</span> <span class="pi">[</span><span class="s2">"</span><span class="s">python"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">-m"</span><span class="pi">,</span> <span class="s2">"</span><span class="s">src.main"</span><span class="pi">]</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">${PROMETHEUS_PORT:-8000}:8000"</span> <span class="c1"># Prometheus /metrics endpoint</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">hermes-logs:/app/logs</span>           <span class="c1"># CSV result history + hermes.log</span>
+      <span class="pi">-</span> <span class="s">hermes-data:/app/data</span>           <span class="c1"># runtime_config.json, .run_trigger, hermes.db</span>
+    <span class="na">environment</span><span class="pi">:</span>
+      <span class="na">APP_ENV</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${APP_ENV:-production}"</span>
+      <span class="na">LOG_LEVEL</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${LOG_LEVEL:-INFO}"</span>
+      <span class="na">TZ</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${TZ:-UTC}"</span>
+      <span class="na">SPEEDTEST_INTERVAL_MINUTES</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${SPEEDTEST_INTERVAL_MINUTES:-60}"</span>
+      <span class="na">RUN_ON_STARTUP</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${RUN_ON_STARTUP:-true}"</span>
+      <span class="na">ENABLED_EXPORTERS</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${ENABLED_EXPORTERS:-csv}"</span>
+      <span class="na">CSV_LOG_PATH</span><span class="pi">:</span> <span class="s2">"</span><span class="s">logs/results.csv"</span>
+      <span class="na">SQLITE_DB_PATH</span><span class="pi">:</span> <span class="s2">"</span><span class="s">data/hermes.db"</span>
+      <span class="na">PROMETHEUS_PORT</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${PROMETHEUS_PORT:-8000}"</span>
+      <span class="na">LOKI_URL</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${LOKI_URL:-}"</span>
+      <span class="na">LOKI_JOB_LABEL</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${LOKI_JOB_LABEL:-hermes_speedtest}"</span>
+      <span class="c1"># Alert configuration (optional) - see Alerts section</span>
+      <span class="na">ALERT_FAILURE_THRESHOLD</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${ALERT_FAILURE_THRESHOLD:-0}"</span>
+      <span class="na">ALERT_COOLDOWN_MINUTES</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${ALERT_COOLDOWN_MINUTES:-60}"</span>
+      <span class="na">ALERT_WEBHOOK_URL</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${ALERT_WEBHOOK_URL:-}"</span>
+      <span class="na">ALERT_GOTIFY_URL</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${ALERT_GOTIFY_URL:-}"</span>
+      <span class="na">ALERT_GOTIFY_TOKEN</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${ALERT_GOTIFY_TOKEN:-}"</span>
+      <span class="na">ALERT_GOTIFY_PRIORITY</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${ALERT_GOTIFY_PRIORITY:-5}"</span>
+      <span class="na">ALERT_NTFY_URL</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${ALERT_NTFY_URL:-https://ntfy.sh}"</span>
+      <span class="na">ALERT_NTFY_TOPIC</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${ALERT_NTFY_TOPIC:-}"</span>
+      <span class="na">ALERT_NTFY_TOKEN</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${ALERT_NTFY_TOKEN:-}"</span>
+      <span class="na">ALERT_NTFY_PRIORITY</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${ALERT_NTFY_PRIORITY:-3}"</span>
+      <span class="na">ALERT_NTFY_TAGS</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${ALERT_NTFY_TAGS:-warning,rotating_light}"</span>
+      <span class="na">ALERT_APPRISE_URL</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${ALERT_APPRISE_URL:-}"</span>
+    <span class="na">env_file</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">path</span><span class="pi">:</span> <span class="s">.env</span>
+        <span class="na">required</span><span class="pi">:</span> <span class="kc">false</span>
+
+  <span class="na">hermes-api</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">ghcr.io/fabell4/hermes:latest</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">hermes-api</span>
+    <span class="na">restart</span><span class="pi">:</span> <span class="s">always</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">${API_PORT:-8080}:8080"</span>        <span class="c1"># FastAPI REST + React SPA</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">hermes-logs:/app/logs</span>
+      <span class="pi">-</span> <span class="s">hermes-data:/app/data</span>
+    <span class="na">environment</span><span class="pi">:</span>
+      <span class="na">APP_ENV</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${APP_ENV:-production}"</span>
+      <span class="na">APP_VERSION</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${APP_VERSION:-dev}"</span>
+      <span class="na">LOG_LEVEL</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${LOG_LEVEL:-INFO}"</span>
+      <span class="na">TZ</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${TZ:-UTC}"</span>
+      <span class="na">SPEEDTEST_INTERVAL_MINUTES</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${SPEEDTEST_INTERVAL_MINUTES:-60}"</span>
+      <span class="na">ENABLED_EXPORTERS</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${ENABLED_EXPORTERS:-csv}"</span>
+      <span class="na">CSV_LOG_PATH</span><span class="pi">:</span> <span class="s2">"</span><span class="s">logs/results.csv"</span>
+      <span class="na">SQLITE_DB_PATH</span><span class="pi">:</span> <span class="s2">"</span><span class="s">data/hermes.db"</span>
+      <span class="na">API_KEY</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${API_KEY:-}"</span>
+      <span class="na">RATE_LIMIT_PER_MINUTE</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${RATE_LIMIT_PER_MINUTE:-60}"</span>
+    <span class="na">env_file</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">path</span><span class="pi">:</span> <span class="s">.env</span>
+        <span class="na">required</span><span class="pi">:</span> <span class="kc">false</span>
+    <span class="na">depends_on</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">hermes-scheduler</span>
+
+<span class="na">volumes</span><span class="pi">:</span>
+  <span class="na">hermes-logs</span><span class="pi">:</span>
+    <span class="na">driver</span><span class="pi">:</span> <span class="s">local</span>
+  <span class="na">hermes-data</span><span class="pi">:</span>
+    <span class="na">driver</span><span class="pi">:</span> <span class="s">local</span>
+</code></pre></div></div>
+
+<h3 id="configuration-via-env">Configuration via .env</h3>
+
+<p>Create a <code class="language-plaintext highlighter-rouge">.env</code> file alongside <code class="language-plaintext highlighter-rouge">docker-compose.yml</code>. The <code class="language-plaintext highlighter-rouge">.env.example</code> in the repo lists every variable with comments:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-o</span> .env https://raw.githubusercontent.com/fabell4/hermes/main/.env.example
+</code></pre></div></div>
+
+<p><strong>Key <code class="language-plaintext highlighter-rouge">.env</code> variables:</strong></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">TZ</code></td>
+      <td><code class="language-plaintext highlighter-rouge">UTC</code></td>
+      <td>IANA timezone name for log timestamps</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ENABLED_EXPORTERS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">csv</code></td>
+      <td>Comma-separated: <code class="language-plaintext highlighter-rouge">csv</code>, <code class="language-plaintext highlighter-rouge">sqlite</code>, <code class="language-plaintext highlighter-rouge">prometheus</code>, <code class="language-plaintext highlighter-rouge">loki</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SPEEDTEST_INTERVAL_MINUTES</code></td>
+      <td><code class="language-plaintext highlighter-rouge">60</code></td>
+      <td>How often to run speed tests</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">RUN_ON_STARTUP</code></td>
+      <td><code class="language-plaintext highlighter-rouge">true</code></td>
+      <td>Run a test immediately on container start</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SPEEDTEST_PROVIDERS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">ookla</code></td>
+      <td>Ordered comma-separated provider chain: <code class="language-plaintext highlighter-rouge">ookla</code>, <code class="language-plaintext highlighter-rouge">ndt7</code>, <code class="language-plaintext highlighter-rouge">custom</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SPEEDTEST_SERVER_ID</code></td>
+      <td><em>(auto)</em></td>
+      <td>Pin Ookla tests to a specific server ID</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SPEEDTEST_CUSTOM_URL_DOWNLOAD</code></td>
+      <td><em>(unset)</em></td>
+      <td>Download URL for the <code class="language-plaintext highlighter-rouge">custom</code> provider (required when using <code class="language-plaintext highlighter-rouge">custom</code>)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SPEEDTEST_CUSTOM_URL_UPLOAD</code></td>
+      <td><em>(unset)</em></td>
+      <td>Upload URL for the <code class="language-plaintext highlighter-rouge">custom</code> provider (optional)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SPEEDTEST_CUSTOM_DURATION_S</code></td>
+      <td><code class="language-plaintext highlighter-rouge">10</code></td>
+      <td>Download stream duration in seconds for <code class="language-plaintext highlighter-rouge">custom</code> provider</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SPEEDTEST_CUSTOM_CONNECTIONS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">1</code></td>
+      <td>Parallel download connections for <code class="language-plaintext highlighter-rouge">custom</code> provider</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SPEEDTEST_CUSTOM_CHUNK_SIZE_MB</code></td>
+      <td><code class="language-plaintext highlighter-rouge">25</code></td>
+      <td>Upload payload size in MB for <code class="language-plaintext highlighter-rouge">custom</code> provider</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">CSV_LOG_PATH</code></td>
+      <td><code class="language-plaintext highlighter-rouge">logs/results.csv</code></td>
+      <td>Path to CSV results file</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">CSV_MAX_ROWS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">0</code> (unlimited)</td>
+      <td>Maximum CSV rows to keep</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">CSV_RETENTION_DAYS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">0</code> (unlimited)</td>
+      <td>Delete CSV rows older than N days</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SQLITE_DB_PATH</code></td>
+      <td><code class="language-plaintext highlighter-rouge">data/hermes.db</code></td>
+      <td>Path to SQLite database</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SQLITE_MAX_ROWS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">0</code> (unlimited)</td>
+      <td>Maximum SQLite rows to keep</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SQLITE_RETENTION_DAYS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">0</code> (unlimited)</td>
+      <td>Delete SQLite rows older than N days</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">PROMETHEUS_PORT</code></td>
+      <td><code class="language-plaintext highlighter-rouge">8000</code></td>
+      <td>Port for <code class="language-plaintext highlighter-rouge">/metrics</code> scrape endpoint</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">LOKI_URL</code></td>
+      <td><em>(unset)</em></td>
+      <td>Loki push URL, e.g., <code class="language-plaintext highlighter-rouge">http://loki:3100</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">LOKI_JOB_LABEL</code></td>
+      <td><code class="language-plaintext highlighter-rouge">hermes_speedtest</code></td>
+      <td>Job label for Loki log entries</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">API_PORT</code></td>
+      <td><code class="language-plaintext highlighter-rouge">8080</code></td>
+      <td>Host port for FastAPI + React frontend</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">API_KEY</code></td>
+      <td><em>(unset)</em></td>
+      <td>API key for auth (disables auth if unset)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">RATE_LIMIT_PER_MINUTE</code></td>
+      <td><code class="language-plaintext highlighter-rouge">60</code></td>
+      <td>Max write requests per API key per 60s</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_FAILURE_THRESHOLD</code></td>
+      <td><code class="language-plaintext highlighter-rouge">0</code> (disabled)</td>
+      <td>Consecutive failures before alerting</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_COOLDOWN_MINUTES</code></td>
+      <td><code class="language-plaintext highlighter-rouge">60</code></td>
+      <td>Minimum minutes between alerts</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>See <a href="alerts">Alert Configuration</a> for alert-related environment variables.</p>
+
+<h3 id="start-the-containers">Start the Containers</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker compose up <span class="nt">-d</span>
+</code></pre></div></div>
+
+<p>Check logs:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker logs hermes-scheduler
+docker logs hermes-api
+</code></pre></div></div>
+
+<h3 id="enable-sqlite-for-best-ui-experience">Enable SQLite for Best UI Experience</h3>
+
+<p>The React dashboard reads from <code class="language-plaintext highlighter-rouge">hermes.db</code> when available and falls back to <code class="language-plaintext highlighter-rouge">results.csv</code> otherwise. Add <code class="language-plaintext highlighter-rouge">sqlite</code> to <code class="language-plaintext highlighter-rouge">ENABLED_EXPORTERS</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ENABLED_EXPORTERS</span><span class="o">=</span>csv,sqlite
+</code></pre></div></div>
+
+<p>Then restart:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker compose restart
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="building-from-source">Building from Source</h2>
+
+<p>If you prefer to build the Docker image locally instead of using the pre-built image:</p>
+
+<h3 id="building-docker-image">Building Docker Image</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Clone the repository</span>
+git clone https://github.com/fabell4/hermes.git
+<span class="nb">cd </span>hermes
+
+<span class="c"># Build the image</span>
+docker build <span class="nt">-t</span> hermes:local <span class="nb">.</span>
+
+<span class="c"># Use the local image in docker-compose</span>
+<span class="nb">export </span><span class="nv">HERMES_IMAGE</span><span class="o">=</span>hermes:local
+docker compose up <span class="nt">-d</span>
+</code></pre></div></div>
+
+<h3 id="running-directly-with-python-without-docker">Running Directly with Python (Without Docker)</h3>
+
+<p>For production deployment without Docker:</p>
+
+<p><strong>Prerequisites:</strong></p>
+
+<ul>
+  <li>Python 3.12+</li>
+  <li><strong>Ookla speedtest CLI</strong> — Required only when using the <code class="language-plaintext highlighter-rouge">ookla</code> provider (default). Download from <a href="https://www.speedtest.net/apps/cli">https://www.speedtest.net/apps/cli</a>
+    <ul>
+      <li>On Debian/Ubuntu: Follow the official installation script</li>
+      <li>On macOS: <code class="language-plaintext highlighter-rouge">brew install speedtest-cli</code> (official Ookla CLI)</li>
+      <li>On Windows: Download the installer from the official Ookla website</li>
+      <li>The <code class="language-plaintext highlighter-rouge">speedtest</code> binary must be available in your system PATH</li>
+      <li>Not required when using only <code class="language-plaintext highlighter-rouge">ndt7</code> or <code class="language-plaintext highlighter-rouge">custom</code> providers</li>
+    </ul>
+  </li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Install Python 3.12+</span>
+python <span class="nt">--version</span>  <span class="c"># Verify Python 3.12 or higher</span>
+
+<span class="c"># Verify Ookla CLI is installed</span>
+speedtest <span class="nt">--version</span>  <span class="c"># Should show "Speedtest by Ookla"</span>
+
+<span class="c"># Create and activate virtual environment</span>
+python <span class="nt">-m</span> venv .venv
+
+<span class="c"># Windows</span>
+.venv<span class="se">\S</span>cripts<span class="se">\a</span>ctivate
+
+<span class="c"># macOS/Linux</span>
+<span class="nb">source</span> .venv/bin/activate
+
+<span class="c"># Install dependencies</span>
+pip <span class="nb">install</span> <span class="nt">-r</span> requirements.txt
+
+<span class="c"># Run the scheduler (background worker)</span>
+python <span class="nt">-m</span> src.main
+</code></pre></div></div>
+
+<p>In a separate terminal (or systemd service), run the API server:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Activate virtual environment first</span>
+<span class="nb">source</span> .venv/bin/activate  <span class="c"># or .venv\Scripts\activate on Windows</span>
+
+<span class="c"># Run FastAPI server</span>
+uvicorn src.api.main:app <span class="nt">--host</span> 0.0.0.0 <span class="nt">--port</span> 8080
+</code></pre></div></div>
+
+<p><strong>Note:</strong> For production deployments, consider using:</p>
+
+<ul>
+  <li><strong>systemd</strong> service units to manage both processes</li>
+  <li><strong>Gunicorn</strong> or <strong>Hypercorn</strong> for the FastAPI server</li>
+  <li><strong>Process manager</strong> like supervisord to ensure both services restart on failure</li>
+</ul>
+
+<hr />
+
+<h2 id="development-setup">Development Setup</h2>
+
+<p>For local development with hot reload:</p>
+
+<h3 id="prerequisites">Prerequisites</h3>
+
+<ul>
+  <li>Python 3.12+</li>
+  <li>Node.js 18+</li>
+  <li>Virtual environment (venv)</li>
+  <li><strong>Ookla speedtest CLI</strong> — Required only for the <code class="language-plaintext highlighter-rouge">ookla</code> provider (default). Install from <a href="https://www.speedtest.net/apps/cli">https://www.speedtest.net/apps/cli</a></li>
+</ul>
+
+<h3 id="backend-setup">Backend Setup</h3>
+
+<ol>
+  <li>
+    <p><strong>Create and activate virtual environment:</strong></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python <span class="nt">-m</span> venv .venv
+   
+<span class="c"># Windows</span>
+.venv<span class="se">\S</span>cripts<span class="se">\a</span>ctivate
+   
+<span class="c"># macOS/Linux</span>
+<span class="nb">source</span> .venv/bin/activate
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Install Python dependencies:</strong></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pip <span class="nb">install</span> <span class="nt">-r</span> requirements.txt
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Configure environment variables:</strong></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>copy .env.example .env
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Run scheduler:</strong></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python <span class="nt">-m</span> src.main
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Run API server (separate terminal):</strong></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>uvicorn src.api.main:app <span class="nt">--port</span> 8080 <span class="nt">--reload</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h3 id="frontend-setup">Frontend Setup</h3>
+
+<ol>
+  <li>
+    <p><strong>Install frontend dependencies:</strong></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd </span>frontend
+npm <span class="nb">install</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Start dev server:</strong></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm run dev
+</code></pre></div>    </div>
+
+    <p>The dev server proxies API calls to <code class="language-plaintext highlighter-rouge">:8080</code> automatically.</p>
+  </li>
+</ol>
+
+<h3 id="running-tests">Running Tests</h3>
+
+<p><strong>Python tests with coverage:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pytest
+</code></pre></div></div>
+
+<p><strong>Frontend type-check + lint:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd </span>frontend
+npm run type-check
+npm run lint
+</code></pre></div></div>
+
+<h3 id="vs-code-tasks">VS Code Tasks</h3>
+
+<p>Use pre-configured tasks (Terminal → Run Task):</p>
+
+<ul>
+  <li><strong>Run Hermes</strong> — Start Python scheduler</li>
+  <li><strong>Run Hermes API</strong> — Start FastAPI server</li>
+  <li><strong>Run Hermes Frontend (dev)</strong> — Start React dev server</li>
+</ul>
+
+<hr />
+
+<h2 id="first-steps">First Steps</h2>
+
+<h3 id="1-access-the-web-ui">1. Access the Web UI</h3>
+
+<p>Navigate to <code class="language-plaintext highlighter-rouge">http://localhost:8080</code> (or your server IP).</p>
+
+<h3 id="2-view-dashboard">2. View Dashboard</h3>
+
+<p>The <strong>Dashboard</strong> page shows:</p>
+
+<ul>
+  <li>Latest speed test result</li>
+  <li>Download/upload trend charts</li>
+  <li>Ping/jitter statistics</li>
+  <li>Historical data (if SQLite enabled)</li>
+</ul>
+
+<h3 id="3-trigger-manual-test">3. Trigger Manual Test</h3>
+
+<p>Click <strong>“Run Speed Test”</strong> on the Dashboard to trigger an on-demand test.</p>
+
+<h3 id="4-configure-settings">4. Configure Settings</h3>
+
+<p>Navigate to <strong>Settings</strong> to adjust:</p>
+
+<ul>
+  <li><strong>Test interval</strong> — How often to run automatic tests</li>
+  <li><strong>Enabled exporters</strong> — Which destinations to write results to</li>
+  <li><strong>Test window</strong> — Restrict automated tests to specific hours</li>
+</ul>
+
+<p>Changes are saved to <code class="language-plaintext highlighter-rouge">data/runtime_config.json</code> and apply immediately (no restart required).</p>
+
+<h3 id="5-configure-alert-notifications">5. Configure Alert Notifications</h3>
+
+<p>Navigate to <strong>Alert Settings</strong> (sidebar) to configure failure notifications:</p>
+
+<ul>
+  <li>Enable alerts and set the consecutive failure threshold</li>
+  <li>Add one or more providers (Webhook, Gotify, ntfy, Apprise)</li>
+  <li>Use <strong>“Send Test Notification”</strong> to verify before saving</li>
+</ul>
+
+<p>See <a href="alerts">Alert Configuration</a> for provider-specific setup guides.</p>
+
+<h3 id="6-explore-analysis-and-reports">6. Explore Analysis and Reports</h3>
+
+<ul>
+  <li><strong>Analysis</strong> — Anomaly detection, time-of-day speed patterns, and month-over-month trend charts</li>
+  <li><strong>Reports</strong> — Filter your full test history by date, speed range, ISP, or server; toggle column
+visibility; and export a custom CSV</li>
+</ul>
+
+<h3 id="7-integrate-with-observability-stack">7. Integrate with Observability Stack</h3>
+
+<p><strong>Prometheus:</strong></p>
+
+<ul>
+  <li>Add scrape job targeting <code class="language-plaintext highlighter-rouge">http://&lt;hermes-host&gt;:8000/metrics</code></li>
+  <li>Scrape interval: 15 seconds recommended</li>
+</ul>
+
+<p><strong>Loki:</strong></p>
+
+<ul>
+  <li>Set <code class="language-plaintext highlighter-rouge">LOKI_URL=http://loki:3100</code> in <code class="language-plaintext highlighter-rouge">.env</code></li>
+  <li>Hermes pushes on each test completion</li>
+</ul>
+
+<p><strong>Grafana:</strong></p>
+
+<ul>
+  <li>Import dashboard from <code class="language-plaintext highlighter-rouge">docs/grafana-dashboard.json</code></li>
+  <li>Configure Prometheus and Loki datasources</li>
+  <li>View download/upload/ping trends with annotations</li>
+</ul>
+
+<hr />
+
+<h2 id="troubleshooting">Troubleshooting</h2>
+
+<h3 id="container-wont-start">Container Won’t Start</h3>
+
+<p>Check logs:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker logs hermes-scheduler
+docker logs hermes-api
+</code></pre></div></div>
+
+<p>Common issues:</p>
+
+<ul>
+  <li><strong>Port already in use:</strong> Change <code class="language-plaintext highlighter-rouge">API_PORT</code> or <code class="language-plaintext highlighter-rouge">PROMETHEUS_PORT</code> in <code class="language-plaintext highlighter-rouge">.env</code></li>
+  <li><strong>Missing .env file:</strong> Ensure <code class="language-plaintext highlighter-rouge">.env</code> exists or remove <code class="language-plaintext highlighter-rouge">required: true</code> from <code class="language-plaintext highlighter-rouge">docker-compose.yml</code></li>
+  <li><strong>Invalid API_KEY length:</strong> Must be 32+ characters if set</li>
+</ul>
+
+<h3 id="no-results-in-ui">No Results in UI</h3>
+
+<ol>
+  <li>
+    <p><strong>Check scheduler logs:</strong></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker logs hermes-scheduler
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Verify test interval:</strong></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://localhost:8080/api/config
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Trigger manual test:</strong></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-X</span> POST http://localhost:8080/api/trigger
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Check SQLite enabled:</strong></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ENABLED_EXPORTERS</span><span class="o">=</span>csv,sqlite
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h3 id="prometheus-metrics-not-scraping">Prometheus Metrics Not Scraping</h3>
+
+<ol>
+  <li>
+    <p><strong>Verify <code class="language-plaintext highlighter-rouge">/metrics</code> endpoint:</strong></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://localhost:8000/metrics
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Check Prometheus scrape config:</strong></p>
+
+    <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">scrape_configs</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">job_name</span><span class="pi">:</span> <span class="s1">'</span><span class="s">hermes'</span>
+    <span class="na">scrape_interval</span><span class="pi">:</span> <span class="s">15s</span>
+    <span class="na">static_configs</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">targets</span><span class="pi">:</span> <span class="pi">[</span><span class="s1">'</span><span class="s">hermes-scheduler:8000'</span><span class="pi">]</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Check port exposure in <code class="language-plaintext highlighter-rouge">docker-compose.yml</code>:</strong></p>
+
+    <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">ports</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s2">"</span><span class="s">8000:8000"</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h3 id="loki-logs-not-appearing">Loki Logs Not Appearing</h3>
+
+<ol>
+  <li>
+    <p><strong>Verify <code class="language-plaintext highlighter-rouge">LOKI_URL</code> is set:</strong></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker <span class="nb">exec </span>hermes-scheduler <span class="nb">printenv </span>LOKI_URL
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Check Loki is reachable:</strong></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker <span class="nb">exec </span>hermes-scheduler curl <span class="nv">$LOKI_URL</span>/ready
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Enable loki exporter:</strong></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ENABLED_EXPORTERS</span><span class="o">=</span>csv,sqlite,loki
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h3 id="authentication-errors">Authentication Errors</h3>
+
+<p>When <code class="language-plaintext highlighter-rouge">API_KEY</code> is set, protected endpoints require <code class="language-plaintext highlighter-rouge">X-Api-Key</code> header:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-X</span> POST http://localhost:8080/api/trigger <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"X-Api-Key: your-api-key-here"</span>
+</code></pre></div></div>
+
+<p><strong>Generate secure key:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python <span class="nt">-c</span> <span class="s1">'import secrets; print(secrets.token_urlsafe(32))'</span>
+</code></pre></div></div>
+
+<h3 id="rate-limit-exceeded">Rate Limit Exceeded</h3>
+
+<p>Response <code class="language-plaintext highlighter-rouge">429 Too Many Requests</code> means you’ve exceeded <code class="language-plaintext highlighter-rouge">RATE_LIMIT_PER_MINUTE</code> (default: 60 requests per 60 seconds).</p>
+
+<p>Check <code class="language-plaintext highlighter-rouge">Retry-After</code> header for wait time:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-i</span> http://localhost:8080/api/trigger <span class="nt">-H</span> <span class="s2">"X-Api-Key: key"</span>
+</code></pre></div></div>
+
+<p>Adjust rate limit in <code class="language-plaintext highlighter-rouge">.env</code>:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">RATE_LIMIT_PER_MINUTE</span><span class="o">=</span>120
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="next-steps">Next Steps</h2>
+
+<ul>
+  <li><strong><a href="alerts">Configure Alerts</a></strong> — Set up failure notifications</li>
+  <li><strong><a href="api-reference">Explore API</a></strong> — Automate with REST endpoints</li>
+  <li><strong><a href="security">Review Security</a></strong> — Production best practices</li>
+  <li><strong><a href="architecture">View Architecture</a></strong> — Understand system design</li>
+</ul>
+
+<hr />
+
+<h2 id="support">Support</h2>
+
+<ul>
+  <li><strong>Issues:</strong> <a href="https://github.com/fabell4/hermes/issues">GitHub Issues</a></li>
+  <li><strong>Discussions:</strong> <a href="https://github.com/fabell4/hermes/discussions">GitHub Discussions</a></li>
+  <li><strong>Changelog:</strong> <a href="https://github.com/fabell4/hermes/blob/main/CHANGELOG.md">CHANGELOG.md</a></li>
+</ul>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/Hermes" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Getting Started
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

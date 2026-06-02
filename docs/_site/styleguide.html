@@ -1,0 +1,2209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Frontend Style Guide — Hermes Documentation</title>
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Frontend Style Guide | Hermes Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Frontend Style Guide" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Design tokens, component patterns, and conventions used across the Hermes frontend." />
+<meta name="twitter:description" property="og:description" content="Design tokens, component patterns, and conventions used across the Hermes frontend." />
+<link rel="canonical" href="http://localhost:4001/styleguide.html" />
+<meta property="og:url" content="http://localhost:4001/styleguide.html" />
+<meta property="og:site_name" content="Hermes Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Frontend Style Guide" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Design tokens, component patterns, and conventions used across the Hermes frontend.","headline":"Frontend Style Guide","url":"http://localhost:4001/styleguide.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Design tokens, component patterns, and conventions used across the Hermes frontend.">
+
+<title>
+  
+    Frontend Style Guide — Hermes Documentation
+  
+</title>
+
+
+<link rel="icon" type="image/png" href="/assets/Hermes.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="/" class="nav-brand">
+    <span class="brand-name">
+      Hermes
+      <span>Docs</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/alloy"
+                 >
+                Grafana Alloy
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-ENHANCEMENTS"
+                 >
+                Security Enhancements
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Error Handling</h3>
+        <ul>
+          
+            <li>
+              <a href="/error-catalog"
+                 >
+                Error Catalog
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-handling-conventions"
+                 >
+                Handling Conventions
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-messages"
+                 >
+                Error Messages
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/RELEASE-PROCESS"
+                 >
+                Release Process
+              </a>
+            </li>
+          
+            <li>
+              <a href="/styleguide"
+                 >
+                Frontend Style Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/suppression-decisions"
+                 >
+                Suppression Decisions
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Code Reviews</h3>
+        <ul>
+          
+            <li>
+              <a href="/BEST-PRACTICES-REVIEW"
+                 >
+                Best Practices
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DEFENSIVE-CODING-REVIEW"
+                 >
+                Defensive Coding
+              </a>
+            </li>
+          
+            <li>
+              <a href="/ERROR-HANDLING-REVIEW"
+                 >
+                Error Handling Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/PERFORMANCE-OPTIMIZATION-REVIEW"
+                 >
+                Performance Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/TEST-COVERAGE-REVIEW"
+                 >
+                Test Coverage
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DOCUMENTATION-ACCURACY-REVIEW"
+                 >
+                Documentation Review
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Frontend Style Guide</h1>
+
+            
+              <p class="page-lead">Design tokens, component patterns, and conventions used across the Hermes frontend.</p>
+            
+          </header>
+        
+
+        <p>Design tokens, component patterns, and conventions used across the Hermes frontend.</p>
+
+<blockquote>
+  <p><strong>Scope:</strong> This is a <strong>dark-mode-only</strong> interface.
+All opacity-based surfaces (<code class="language-plaintext highlighter-rouge">bg-slate-900/40</code>, <code class="language-plaintext highlighter-rouge">bg-slate-900/50</code>, etc.)
+assume a <code class="language-plaintext highlighter-rouge">#0f172a</code> parent background. Do not render this UI in a light container or iframe without a full theme audit.</p>
+</blockquote>
+
+<hr />
+
+<h2 id="table-of-contents">Table of Contents</h2>
+
+<ol>
+  <li><a href="#1-stack">Stack</a></li>
+  <li><a href="#2-color-palette">Color Palette</a></li>
+  <li><a href="#3-accessibility--color-compliance">Accessibility — Color Compliance</a></li>
+  <li><a href="#4-typography">Typography</a></li>
+  <li><a href="#5-spacing--layout">Spacing &amp; Layout</a></li>
+  <li><a href="#6-borders--surfaces">Borders &amp; Surfaces</a></li>
+  <li><a href="#7-components">Components</a></li>
+  <li><a href="#8-charts-recharts">Charts (Recharts)</a></li>
+  <li><a href="#9-scrollbar">Scrollbar</a></li>
+  <li><a href="#10-motion-patterns-framer-motion">Motion Patterns (Framer Motion)</a></li>
+  <li><a href="#11-empty--loading-states">Empty &amp; Loading States</a></li>
+  <li><a href="#12-logo--brand-rules">Logo &amp; Brand Rules</a></li>
+  <li><a href="#13-ai-assistance-notes">AI Assistance Notes</a></li>
+  <li><a href="#14-changelog">Changelog</a></li>
+</ol>
+
+<hr />
+
+<h2 id="1-stack">1. Stack</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Concern</th>
+      <th>Tool</th>
+      <th>Version</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Styling</td>
+      <td>Tailwind CSS</td>
+      <td>v3</td>
+    </tr>
+    <tr>
+      <td>Component framework</td>
+      <td>React + TypeScript</td>
+      <td>18</td>
+    </tr>
+    <tr>
+      <td>Animation</td>
+      <td>Framer Motion</td>
+      <td>v10+</td>
+    </tr>
+    <tr>
+      <td>Icons</td>
+      <td>Lucide React</td>
+      <td>latest</td>
+    </tr>
+    <tr>
+      <td>Charts</td>
+      <td>Recharts</td>
+      <td>v2</td>
+    </tr>
+    <tr>
+      <td>Font</td>
+      <td>Inter (Google Fonts, weights 300–800)</td>
+      <td>—</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="2-color-palette">2. Color Palette</h2>
+
+<h3 id="21-base--backgrounds">2.1 Base / Backgrounds</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Token</th>
+      <th>Hex</th>
+      <th>Usage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slate-950</code></td>
+      <td><code class="language-plaintext highlighter-rouge">#0f172a</code></td>
+      <td>App background, header, sidebar</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slate-900/40</code></td>
+      <td><code class="language-plaintext highlighter-rouge">#0f172a66</code></td>
+      <td>Card surface</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slate-900/50</code></td>
+      <td><code class="language-plaintext highlighter-rouge">#0f172a80</code></td>
+      <td>Metric card surface</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slate-800</code></td>
+      <td><code class="language-plaintext highlighter-rouge">#1e293b</code></td>
+      <td>Borders, hover surfaces, chart grid</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slate-700</code></td>
+      <td><code class="language-plaintext highlighter-rouge">#334155</code></td>
+      <td>Input borders, muted borders</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="22-text">2.2 Text</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Token</th>
+      <th>Hex</th>
+      <th>Ratio on slate-950</th>
+      <th>Usage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slate-100</code></td>
+      <td><code class="language-plaintext highlighter-rouge">#f1f5f9</code></td>
+      <td>16.8:1 AAA</td>
+      <td>Primary text, page titles</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slate-200</code></td>
+      <td><code class="language-plaintext highlighter-rouge">#e2e8f0</code></td>
+      <td>13.4:1 AAA</td>
+      <td>Section/card headings, table data</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slate-300</code></td>
+      <td><code class="language-plaintext highlighter-rouge">#cbd5e1</code></td>
+      <td>9.8:1 AAA</td>
+      <td>Form labels, table cell text; <strong>minimum for body text on card surfaces</strong></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slate-400</code></td>
+      <td><code class="language-plaintext highlighter-rouge">#94a3b8</code></td>
+      <td>5.9:1 AA</td>
+      <td>Secondary text, nav inactive, captions, chart axes, placeholders</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slate-500</code></td>
+      <td><code class="language-plaintext highlighter-rouge">#64748b</code></td>
+      <td>3.1:1 ✗</td>
+      <td><strong>Do not use for readable text.</strong> Decorative/non-text only (borders, dividers).</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p>⚠️ <strong><code class="language-plaintext highlighter-rouge">slate-500</code> text is a WCAG AA failure (3.1:1).</strong>
+Use <code class="language-plaintext highlighter-rouge">slate-400</code> as the minimum for any text the user needs to read.
+See <a href="#3-accessibility--color-compliance">Section 3</a> for full details.</p>
+</blockquote>
+
+<h3 id="23-accent--semantic">2.3 Accent / Semantic</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Token</th>
+      <th>Hex</th>
+      <th>Ratio on slate-950</th>
+      <th>Role</th>
+      <th>Used for</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">cyan-400</code></td>
+      <td><code class="language-plaintext highlighter-rouge">#22d3ee</code></td>
+      <td>7.4:1 AAA</td>
+      <td>Primary accent</td>
+      <td>Download metric, nav active, links</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">cyan-500</code></td>
+      <td><code class="language-plaintext highlighter-rouge">#06b6d4</code></td>
+      <td>4.3:1 AA†</td>
+      <td>Primary action</td>
+      <td>Primary button bg, toggle-on (default)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">violet-400</code></td>
+      <td><code class="language-plaintext highlighter-rouge">#a78bfa</code></td>
+      <td>5.6:1 AA</td>
+      <td>Upload</td>
+      <td>Upload metric, Exporters icon</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">amber-400</code></td>
+      <td><code class="language-plaintext highlighter-rouge">#fbbf24</code></td>
+      <td>9.3:1 AAA</td>
+      <td>Warning / Ping</td>
+      <td>Ping metric, countdown clock</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">emerald-400</code></td>
+      <td><code class="language-plaintext highlighter-rouge">#34d399</code></td>
+      <td>8.2:1 AAA</td>
+      <td>Success / Jitter</td>
+      <td>Jitter metric, success states</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">orange-400</code></td>
+      <td><code class="language-plaintext highlighter-rouge">#fb923c</code></td>
+      <td>5.2:1 AA</td>
+      <td>Alerts</td>
+      <td>Alerts section icon, toggle-on (alerts)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">red-400</code></td>
+      <td><code class="language-plaintext highlighter-rouge">#f87171</code></td>
+      <td>5.1:1 AA</td>
+      <td>Error</td>
+      <td>Error banners, failed states</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p>† <code class="language-plaintext highlighter-rouge">cyan-500</code> button text uses <code class="language-plaintext highlighter-rouge">slate-950</code> as the label color
+(4.3:1 — passes AA for large/bold text at the current button spec of
+<code class="language-plaintext highlighter-rouge">font-medium</code> / 14px+). Do not reduce button font size below 14px bold
+without switching to <code class="language-plaintext highlighter-rouge">cyan-400</code> background.</p>
+</blockquote>
+
+<h3 id="24-semantic-color-boundary--red-vs-orange">2.4 Semantic Color Boundary — Red vs Orange</h3>
+
+<p>These two colors appear close in purpose. Their boundaries are explicit:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Color</th>
+      <th>Token</th>
+      <th>Meaning</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Red</td>
+      <td><code class="language-plaintext highlighter-rouge">red-400</code></td>
+      <td><strong>System / test failure</strong> — the speed test itself errored or returned no result</td>
+    </tr>
+    <tr>
+      <td>Orange</td>
+      <td><code class="language-plaintext highlighter-rouge">orange-400</code></td>
+      <td><strong>User-configured alert notification</strong> — thresholds triggered a user’s alert rules</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Never use red for alert notifications or orange for system failures.</p>
+
+<h3 id="25-tint-surface-system">2.5 Tint Surface System</h3>
+
+<p>All colored tint surfaces follow the same pattern: <code class="language-plaintext highlighter-rouge">bg-{color}-500/10 border border-{color}-500/20 text-{color}-400</code>.
+This ensures consistent contrast on the dark parent background.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric / State</th>
+      <th>Bg tint</th>
+      <th>Border</th>
+      <th>Text</th>
+      <th>Ratio</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Download / Cyan</td>
+      <td><code class="language-plaintext highlighter-rouge">bg-cyan-500/10</code></td>
+      <td><code class="language-plaintext highlighter-rouge">border-cyan-500/20</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-cyan-400</code></td>
+      <td>7.4:1 AAA</td>
+    </tr>
+    <tr>
+      <td>Upload / Violet</td>
+      <td><code class="language-plaintext highlighter-rouge">bg-violet-500/10</code></td>
+      <td><code class="language-plaintext highlighter-rouge">border-violet-500/20</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-violet-400</code></td>
+      <td>5.6:1 AA</td>
+    </tr>
+    <tr>
+      <td>Ping / Amber</td>
+      <td><code class="language-plaintext highlighter-rouge">bg-amber-500/10</code></td>
+      <td><code class="language-plaintext highlighter-rouge">border-amber-500/20</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-amber-400</code></td>
+      <td>9.3:1 AAA</td>
+    </tr>
+    <tr>
+      <td>Jitter / Emerald</td>
+      <td><code class="language-plaintext highlighter-rouge">bg-emerald-500/10</code></td>
+      <td><code class="language-plaintext highlighter-rouge">border-emerald-500/20</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-emerald-400</code></td>
+      <td>8.2:1 AAA</td>
+    </tr>
+    <tr>
+      <td>Error</td>
+      <td><code class="language-plaintext highlighter-rouge">bg-red-500/10</code></td>
+      <td><code class="language-plaintext highlighter-rouge">border-red-500/20</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-red-400</code></td>
+      <td>5.1:1 AA</td>
+    </tr>
+    <tr>
+      <td>Success</td>
+      <td><code class="language-plaintext highlighter-rouge">bg-emerald-500/10</code></td>
+      <td><code class="language-plaintext highlighter-rouge">border-emerald-500/20</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-emerald-400</code></td>
+      <td>8.2:1 AAA</td>
+    </tr>
+    <tr>
+      <td>Warning</td>
+      <td><code class="language-plaintext highlighter-rouge">bg-amber-500/10</code></td>
+      <td><code class="language-plaintext highlighter-rouge">border-amber-500/20</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-amber-400</code></td>
+      <td>9.3:1 AAA</td>
+    </tr>
+    <tr>
+      <td>Alert</td>
+      <td><code class="language-plaintext highlighter-rouge">bg-orange-500/10</code></td>
+      <td><code class="language-plaintext highlighter-rouge">border-orange-500/20</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-orange-400</code></td>
+      <td>5.2:1 AA</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="26-disabled-color-pattern">2.6 Disabled Color Pattern</h3>
+
+<p>Disabled colored elements use their normal color at reduced opacity:</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* Disabled toggle, button, or colored indicator */</span>
+<span class="nt">opacity</span><span class="o">:</span> <span class="m">40%</span><span class="o">;</span>
+<span class="nt">cursor</span><span class="o">:</span> <span class="nt">not-allowed</span><span class="o">;</span>
+
+<span class="c">/* Example — disabled cyan toggle */</span>
+<span class="c">/* bg-cyan-500/40 instead of bg-cyan-500 */</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="3-accessibility--color-compliance">3. Accessibility — Color Compliance</h2>
+
+<h3 id="31-summary">3.1 Summary</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Status</th>
+      <th>Count</th>
+      <th>Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>✅ Pass AAA (7:1+)</td>
+      <td>6 pairs</td>
+      <td>slate-100/200/300 on slate-950; cyan-400, amber-400, emerald-400 on slate-950</td>
+    </tr>
+    <tr>
+      <td>✅ Pass AA (4.5:1+)</td>
+      <td>9 pairs</td>
+      <td>All accent colors on slate-950; slate-400 on slate-950</td>
+    </tr>
+    <tr>
+      <td>⚠️ Borderline</td>
+      <td>2 pairs</td>
+      <td>cyan-500 button (4.3:1 — AA large text); slate-400 on card surfaces</td>
+    </tr>
+    <tr>
+      <td>❌ Fail</td>
+      <td>2 pairs</td>
+      <td><strong>slate-500 on slate-950 (3.1:1); slate-500 on slate-800 (2.1:1)</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="32-the-4-required-token-changes">3.2 The 4 Required Token Changes</h3>
+
+<p>These are the only changes needed to reach full WCAG AA compliance.
+The visual design, all accent colors, all backgrounds, and all component shapes are unchanged.</p>
+
+<h4 id="change-1--muted--caption--axis-text">Change 1 — Muted / caption / axis text</h4>
+
+<p><strong><code class="language-plaintext highlighter-rouge">slate-500</code> → <code class="language-plaintext highlighter-rouge">slate-400</code></strong> everywhere it is used for readable text.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th>Before</th>
+      <th>After</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Token</td>
+      <td><code class="language-plaintext highlighter-rouge">text-slate-500</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-slate-400</code></td>
+    </tr>
+    <tr>
+      <td>Hex</td>
+      <td><code class="language-plaintext highlighter-rouge">#64748b</code></td>
+      <td><code class="language-plaintext highlighter-rouge">#94a3b8</code></td>
+    </tr>
+    <tr>
+      <td>Ratio on slate-950</td>
+      <td>3.1:1 ❌</td>
+      <td>5.9:1 ✅</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Affected locations: helper/caption text, chart axis labels,
+empty state sub-text, version badge text, table header labels, placeholder text.</p>
+
+<h4 id="change-2--input-placeholder-text">Change 2 — Input placeholder text</h4>
+
+<p><strong><code class="language-plaintext highlighter-rouge">placeholder:text-slate-500</code> → <code class="language-plaintext highlighter-rouge">placeholder:text-slate-400</code></strong> on all inputs and textareas.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th>Before</th>
+      <th>After</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Token</td>
+      <td><code class="language-plaintext highlighter-rouge">placeholder:text-slate-500</code></td>
+      <td><code class="language-plaintext highlighter-rouge">placeholder:text-slate-400</code></td>
+    </tr>
+    <tr>
+      <td>Ratio on slate-950</td>
+      <td>3.1:1 ❌</td>
+      <td>5.9:1 ✅</td>
+    </tr>
+    <tr>
+      <td>Ratio on slate-800 (hover)</td>
+      <td>2.1:1 ❌</td>
+      <td>3.6:1 ⚠️→✅</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Lock this explicitly so it doesn’t regress on hover state elevation:</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">::placeholder</span> <span class="p">{</span>
+  <span class="nl">color</span><span class="p">:</span> <span class="nx">#94a3b8</span><span class="p">;</span> <span class="c">/* slate-400 */</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="change-3--scrollbar-thumb">Change 3 — Scrollbar thumb</h4>
+
+<p><strong><code class="language-plaintext highlighter-rouge">#334155</code> (slate-700) → <code class="language-plaintext highlighter-rouge">#475569</code> (slate-600)</strong></p>
+
+<p>Addresses WCAG 1.4.11 Non-text Contrast (3:1 minimum for UI components).</p>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th>Before</th>
+      <th>After</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Hex</td>
+      <td><code class="language-plaintext highlighter-rouge">#334155</code> (slate-700)</td>
+      <td><code class="language-plaintext highlighter-rouge">#475569</code> (slate-600)</td>
+    </tr>
+    <tr>
+      <td>Non-text contrast</td>
+      <td>1.6:1 ❌</td>
+      <td>~3.4:1 ✅</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* Updated scrollbar */</span>
+<span class="nt">scrollbar-color</span><span class="o">:</span> <span class="err">#475569</span> <span class="nt">transparent</span><span class="o">;</span>
+
+<span class="nd">::-webkit-scrollbar-thumb</span> <span class="p">{</span>
+  <span class="nl">background-color</span><span class="p">:</span> <span class="nx">#475569</span><span class="p">;</span> <span class="c">/* was #334155 */</span>
+  <span class="nl">border-radius</span><span class="p">:</span> <span class="m">9999px</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="change-4--body-text-on-semi-transparent-card-surfaces">Change 4 — Body text on semi-transparent card surfaces</h4>
+
+<p>On <code class="language-plaintext highlighter-rouge">bg-slate-900/40</code> card surfaces, use <strong><code class="language-plaintext highlighter-rouge">slate-300</code> minimum</strong>
+for body-size text. <code class="language-plaintext highlighter-rouge">slate-400</code> is still acceptable for
+secondary/meta text (timestamps, labels) but not for primary descriptions.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th>Before</th>
+      <th>After</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Card body text</td>
+      <td><code class="language-plaintext highlighter-rouge">text-slate-400</code> (~3.8:1 on card)</td>
+      <td><code class="language-plaintext highlighter-rouge">text-slate-300</code> (~8.4:1 on card) ✅</td>
+    </tr>
+    <tr>
+      <td>Card secondary/meta</td>
+      <td><code class="language-plaintext highlighter-rouge">text-slate-400</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-slate-400</code> (acceptable for small/secondary)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="33-what-does-not-change">3.3 What Does Not Change</h3>
+
+<p>Every accent color, metric color, semantic tint, background,
+border, chart line, and motion pattern is <strong>unchanged</strong>.
+The cyberpunk/technical aesthetic is fully preserved.
+The 4 changes above affect only secondary neutral text — one step lighter in the slate ramp in each case.</p>
+
+<h3 id="34-full-contrast-reference-table">3.4 Full Contrast Reference Table</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Foreground</th>
+      <th>Background</th>
+      <th>Ratio</th>
+      <th>AA Normal</th>
+      <th>AA Large</th>
+      <th>Used for</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slate-100</code> <code class="language-plaintext highlighter-rouge">#f1f5f9</code></td>
+      <td><code class="language-plaintext highlighter-rouge">slate-950</code></td>
+      <td>16.8:1</td>
+      <td>✅ AAA</td>
+      <td>✅ AAA</td>
+      <td>Page titles</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slate-200</code> <code class="language-plaintext highlighter-rouge">#e2e8f0</code></td>
+      <td><code class="language-plaintext highlighter-rouge">slate-950</code></td>
+      <td>13.4:1</td>
+      <td>✅ AAA</td>
+      <td>✅ AAA</td>
+      <td>Card headings</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slate-300</code> <code class="language-plaintext highlighter-rouge">#cbd5e1</code></td>
+      <td><code class="language-plaintext highlighter-rouge">slate-950</code></td>
+      <td>9.8:1</td>
+      <td>✅ AAA</td>
+      <td>✅ AAA</td>
+      <td>Form labels</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slate-400</code> <code class="language-plaintext highlighter-rouge">#94a3b8</code></td>
+      <td><code class="language-plaintext highlighter-rouge">slate-950</code></td>
+      <td>5.9:1</td>
+      <td>✅ AA</td>
+      <td>✅ AA</td>
+      <td>Secondary text</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slate-500</code> <code class="language-plaintext highlighter-rouge">#64748b</code></td>
+      <td><code class="language-plaintext highlighter-rouge">slate-950</code></td>
+      <td>3.1:1</td>
+      <td>❌ FAIL</td>
+      <td>⚠️ large only</td>
+      <td><strong>Text use prohibited</strong></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slate-500</code> <code class="language-plaintext highlighter-rouge">#64748b</code></td>
+      <td><code class="language-plaintext highlighter-rouge">slate-800</code></td>
+      <td>2.1:1</td>
+      <td>❌ FAIL</td>
+      <td>❌ FAIL</td>
+      <td><strong>Text use prohibited</strong></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slate-400</code> <code class="language-plaintext highlighter-rouge">#94a3b8</code></td>
+      <td><code class="language-plaintext highlighter-rouge">slate-900/40</code></td>
+      <td>~3.8:1</td>
+      <td>⚠️ borderline</td>
+      <td>✅ AA</td>
+      <td>Secondary/meta only</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slate-300</code> <code class="language-plaintext highlighter-rouge">#cbd5e1</code></td>
+      <td><code class="language-plaintext highlighter-rouge">slate-900/40</code></td>
+      <td>~8.4:1</td>
+      <td>✅ AAA</td>
+      <td>✅ AAA</td>
+      <td>Card body text</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">cyan-400</code> <code class="language-plaintext highlighter-rouge">#22d3ee</code></td>
+      <td><code class="language-plaintext highlighter-rouge">slate-950</code></td>
+      <td>7.4:1</td>
+      <td>✅ AAA</td>
+      <td>✅ AAA</td>
+      <td>Nav active, links, metric</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">cyan-500</code> <code class="language-plaintext highlighter-rouge">#06b6d4</code> (as bg)</td>
+      <td><code class="language-plaintext highlighter-rouge">slate-950</code> text on it</td>
+      <td>4.3:1</td>
+      <td>⚠️ borderline†</td>
+      <td>✅ AA</td>
+      <td>Button label</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">violet-400</code> <code class="language-plaintext highlighter-rouge">#a78bfa</code></td>
+      <td><code class="language-plaintext highlighter-rouge">slate-950</code></td>
+      <td>5.6:1</td>
+      <td>✅ AA</td>
+      <td>✅ AA</td>
+      <td>Upload metric</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">amber-400</code> <code class="language-plaintext highlighter-rouge">#fbbf24</code></td>
+      <td><code class="language-plaintext highlighter-rouge">slate-950</code></td>
+      <td>9.3:1</td>
+      <td>✅ AAA</td>
+      <td>✅ AAA</td>
+      <td>Ping metric</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">emerald-400</code> <code class="language-plaintext highlighter-rouge">#34d399</code></td>
+      <td><code class="language-plaintext highlighter-rouge">slate-950</code></td>
+      <td>8.2:1</td>
+      <td>✅ AAA</td>
+      <td>✅ AAA</td>
+      <td>Jitter metric</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">orange-400</code> <code class="language-plaintext highlighter-rouge">#fb923c</code></td>
+      <td><code class="language-plaintext highlighter-rouge">slate-950</code></td>
+      <td>5.2:1</td>
+      <td>✅ AA</td>
+      <td>✅ AA</td>
+      <td>Alerts</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">red-400</code> <code class="language-plaintext highlighter-rouge">#f87171</code></td>
+      <td><code class="language-plaintext highlighter-rouge">slate-950</code></td>
+      <td>5.1:1</td>
+      <td>✅ AA</td>
+      <td>✅ AA</td>
+      <td>Errors</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">slate-600</code> <code class="language-plaintext highlighter-rouge">#475569</code></td>
+      <td>transparent/dark</td>
+      <td>~3.4:1</td>
+      <td>✅ 1.4.11</td>
+      <td>✅</td>
+      <td>Scrollbar thumb</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>† Passes at <code class="language-plaintext highlighter-rouge">font-medium</code> / 14px+. Do not use below this spec.</p>
+
+<hr />
+
+<h2 id="4-typography">4. Typography</h2>
+
+<p>Font family: <strong>Inter</strong> — <code class="language-plaintext highlighter-rouge">font-family: 'Inter', system-ui, sans-serif</code>
+Anti-aliasing: <code class="language-plaintext highlighter-rouge">-webkit-font-smoothing: antialiased</code></p>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;link</span> <span class="na">href=</span><span class="s">"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap"</span> <span class="na">rel=</span><span class="s">"stylesheet"</span> <span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Style</th>
+      <th>Tailwind classes</th>
+      <th>Example</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Display (metric value)</td>
+      <td><code class="language-plaintext highlighter-rouge">text-3xl md:text-4xl font-bold tracking-tighter</code></td>
+      <td><code class="language-plaintext highlighter-rouge">95.3</code></td>
+    </tr>
+    <tr>
+      <td>Page title</td>
+      <td><code class="language-plaintext highlighter-rouge">text-2xl font-bold text-slate-100</code></td>
+      <td><code class="language-plaintext highlighter-rouge">Dashboard</code></td>
+    </tr>
+    <tr>
+      <td>Section heading</td>
+      <td><code class="language-plaintext highlighter-rouge">text-lg font-semibold text-slate-200</code></td>
+      <td><code class="language-plaintext highlighter-rouge">Performance History</code></td>
+    </tr>
+    <tr>
+      <td>Card heading</td>
+      <td><code class="language-plaintext highlighter-rouge">text-base font-semibold text-slate-200</code></td>
+      <td><code class="language-plaintext highlighter-rouge">Test Interval</code></td>
+    </tr>
+    <tr>
+      <td>Sub-section heading</td>
+      <td><code class="language-plaintext highlighter-rouge">text-sm font-medium text-slate-300</code></td>
+      <td><code class="language-plaintext highlighter-rouge">Webhook</code></td>
+    </tr>
+    <tr>
+      <td>Body / description</td>
+      <td><code class="language-plaintext highlighter-rouge">text-sm text-slate-300</code></td>
+      <td><code class="language-plaintext highlighter-rouge">Scheduler running · last run…</code></td>
+    </tr>
+    <tr>
+      <td>Form label</td>
+      <td><code class="language-plaintext highlighter-rouge">text-sm font-medium text-slate-300</code></td>
+      <td><code class="language-plaintext highlighter-rouge">Interval (minutes)</code></td>
+    </tr>
+    <tr>
+      <td>Helper / caption</td>
+      <td><code class="language-plaintext highlighter-rouge">text-xs text-slate-400</code></td>
+      <td><code class="language-plaintext highlighter-rouge">Minimum 5 minutes.</code></td>
+    </tr>
+    <tr>
+      <td>Table header</td>
+      <td><code class="language-plaintext highlighter-rouge">text-xs font-medium uppercase tracking-wider text-slate-400</code></td>
+      <td><code class="language-plaintext highlighter-rouge">DATE &amp; TIME</code></td>
+    </tr>
+    <tr>
+      <td>Monospace data</td>
+      <td><code class="language-plaintext highlighter-rouge">font-mono font-medium text-slate-200</code></td>
+      <td><code class="language-plaintext highlighter-rouge">04:22</code></td>
+    </tr>
+    <tr>
+      <td>Badge / pill text</td>
+      <td><code class="language-plaintext highlighter-rouge">text-xs</code></td>
+      <td><code class="language-plaintext highlighter-rouge">24 entries</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p><strong>Changed from original:</strong>mi
+<code class="language-plaintext highlighter-rouge">body/description</code> promoted from <code class="language-plaintext highlighter-rouge">text-slate-400</code> →
+<code class="language-plaintext highlighter-rouge">text-slate-300</code> on card surfaces.
+<code class="language-plaintext highlighter-rouge">helper/caption</code> promoted from <code class="language-plaintext highlighter-rouge">text-slate-500</code> → <code class="language-plaintext highlighter-rouge">text-slate-400</code>.</p>
+</blockquote>
+
+<hr />
+
+<h2 id="5-spacing--layout">5. Spacing &amp; Layout</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Token</th>
+      <th>Value</th>
+      <th>Usage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Header height</td>
+      <td><code class="language-plaintext highlighter-rouge">h-14</code> (56px)</td>
+      <td>Fixed top bar</td>
+    </tr>
+    <tr>
+      <td>Sidebar width</td>
+      <td><code class="language-plaintext highlighter-rouge">w-56</code> (224px)</td>
+      <td>Desktop left sidebar</td>
+    </tr>
+    <tr>
+      <td>Page max-width</td>
+      <td><code class="language-plaintext highlighter-rouge">max-w-6xl</code></td>
+      <td>Dashboard content area</td>
+    </tr>
+    <tr>
+      <td>Settings max-width</td>
+      <td><code class="language-plaintext highlighter-rouge">max-w-3xl</code></td>
+      <td>Settings page</td>
+    </tr>
+    <tr>
+      <td>Content padding (mobile)</td>
+      <td><code class="language-plaintext highlighter-rouge">p-4</code></td>
+      <td>Main content wrapper</td>
+    </tr>
+    <tr>
+      <td>Content padding (desktop)</td>
+      <td><code class="language-plaintext highlighter-rouge">md:p-6</code></td>
+      <td>Main content wrapper</td>
+    </tr>
+    <tr>
+      <td>Section gap</td>
+      <td><code class="language-plaintext highlighter-rouge">space-y-6</code></td>
+      <td>Between top-level page sections</td>
+    </tr>
+    <tr>
+      <td>Card padding</td>
+      <td><code class="language-plaintext highlighter-rouge">p-6</code></td>
+      <td>Standard card interior</td>
+    </tr>
+    <tr>
+      <td>Card border-radius</td>
+      <td><code class="language-plaintext highlighter-rouge">rounded-2xl</code></td>
+      <td>Cards, metric tiles</td>
+    </tr>
+    <tr>
+      <td>Panel border-radius</td>
+      <td><code class="language-plaintext highlighter-rouge">rounded-xl</code></td>
+      <td>Collapsible panels (Result Log)</td>
+    </tr>
+    <tr>
+      <td>Input border-radius</td>
+      <td><code class="language-plaintext highlighter-rouge">rounded-lg</code></td>
+      <td>Text inputs, textareas</td>
+    </tr>
+    <tr>
+      <td>Badge border-radius</td>
+      <td><code class="language-plaintext highlighter-rouge">rounded-full</code></td>
+      <td>Pills and status chips</td>
+    </tr>
+    <tr>
+      <td>Badge border-radius (chip)</td>
+      <td><code class="language-plaintext highlighter-rouge">rounded-md</code></td>
+      <td>Inline status badges (e.g. “Test Running”)</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="6-borders--surfaces">6. Borders &amp; Surfaces</h2>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* Card */</span>
+<span class="nt">bg-slate-900</span><span class="o">/</span><span class="err">40</span>  <span class="nt">border</span> <span class="nt">border-slate-800</span>  <span class="nt">rounded-2xl</span>
+
+<span class="c">/* Panel */</span>
+<span class="nt">bg-slate-900</span><span class="o">/</span><span class="err">30</span>  <span class="nt">border</span> <span class="nt">border-slate-800</span>  <span class="nt">rounded-xl</span>
+
+<span class="c">/* Row item */</span>
+<span class="nt">bg-slate-800</span><span class="o">/</span><span class="err">30</span>  <span class="nt">border</span> <span class="nt">border-slate-700</span><span class="o">/</span><span class="err">50</span>  <span class="nt">rounded-lg</span>
+
+<span class="c">/* Header */</span>
+<span class="nt">bg-slate-950</span><span class="o">/</span><span class="err">90</span>  <span class="nt">border-b</span> <span class="nt">border-slate-800</span>  <span class="nt">backdrop-blur</span>
+
+<span class="c">/* Sidebar */</span>
+<span class="nt">bg-slate-950</span><span class="o">/</span><span class="err">50</span>  <span class="nt">border-r</span> <span class="nt">border-slate-800</span>
+
+<span class="c">/* Input */</span>
+<span class="nt">bg-slate-950</span>  <span class="nt">border</span> <span class="nt">border-slate-700</span>  <span class="nt">rounded-lg</span>
+
+<span class="c">/* Divider (within cards) */</span>
+<span class="nt">border-t</span> <span class="nt">border-slate-700</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="7-components">7. Components</h2>
+
+<h3 id="71-buttons">7.1 Buttons</h3>
+
+<h4 id="primary">Primary</h4>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">bg-cyan-500</span> <span class="nt">hover</span><span class="nd">:bg-cyan-400</span> <span class="nt">text-slate-950</span>
+<span class="nt">shadow-lg</span> <span class="nt">shadow-cyan-500</span><span class="o">/</span><span class="err">20</span>
+<span class="nt">px-4</span> <span class="nt">py-2</span> <span class="nt">rounded-lg</span> <span class="nt">font-medium</span> <span class="nt">transition-all</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>Button label text: <code class="language-plaintext highlighter-rouge">text-slate-950</code> on <code class="language-plaintext highlighter-rouge">bg-cyan-500</code> = 4.3:1 (AA at font-medium 14px+). Do not reduce below this spec.</p>
+</blockquote>
+
+<h4 id="ghost--tinted-cyan">Ghost / Tinted (cyan)</h4>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">bg-cyan-500</span><span class="o">/</span><span class="err">10</span> <span class="nt">hover</span><span class="nd">:bg-cyan-500</span><span class="o">/</span><span class="err">20</span> <span class="nt">text-cyan-400</span>
+<span class="nt">border</span> <span class="nt">border-cyan-500</span><span class="o">/</span><span class="err">30</span>
+<span class="nt">px-4</span> <span class="nt">py-2</span> <span class="nt">rounded-lg</span> <span class="nt">font-medium</span> <span class="nt">transition-all</span>
+</code></pre></div></div>
+
+<h4 id="success-state">Success state</h4>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">bg-emerald-500</span><span class="o">/</span><span class="err">20</span> <span class="nt">text-emerald-400</span> <span class="nt">border</span> <span class="nt">border-emerald-500</span><span class="o">/</span><span class="err">30</span>
+</code></pre></div></div>
+
+<h4 id="error-state">Error state</h4>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">bg-red-500</span><span class="o">/</span><span class="err">10</span> <span class="nt">text-red-400</span> <span class="nt">border</span> <span class="nt">border-red-500</span><span class="o">/</span><span class="err">20</span>
+</code></pre></div></div>
+
+<h4 id="disabled">Disabled</h4>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">bg-slate-800</span> <span class="nt">text-slate-500</span> <span class="nt">cursor-not-allowed</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>Note: <code class="language-plaintext highlighter-rouge">slate-500</code> is acceptable here because disabled text is intentionally non-readable per WCAG
+(disabled elements are exempt from contrast requirements under 1.4.3).</p>
+</blockquote>
+
+<h4 id="icon-only">Icon-only</h4>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">p-2</span> <span class="nt">rounded-md</span> <span class="nt">text-slate-400</span>
+<span class="nt">hover</span><span class="nd">:text-slate-200</span> <span class="nt">hover</span><span class="nd">:bg-slate-800</span><span class="o">/</span><span class="err">50</span> <span class="nt">transition-colors</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>Required:</strong> every icon-only button must have <code class="language-plaintext highlighter-rouge">aria-label="[action description]"</code>. Examples: <code class="language-plaintext highlighter-rouge">aria-label="Show API key"</code>,
+<code class="language-plaintext highlighter-rouge">aria-label="Export CSV"</code>, <code class="language-plaintext highlighter-rouge">aria-label="Collapse result log"</code>.</p>
+</blockquote>
+
+<hr />
+
+<h3 id="72-inputs--textareas">7.2 Inputs &amp; Textareas</h3>
+
+<p>Base classes shared by all inputs:</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">bg-slate-950</span> <span class="nt">border</span> <span class="nt">border-slate-700</span> <span class="nt">rounded-lg</span>
+<span class="nt">px-4</span> <span class="nt">py-2</span> <span class="nt">text-slate-200</span>
+<span class="nt">placeholder</span><span class="nd">:text-slate-400</span>
+<span class="nt">focus</span><span class="nd">:outline-none</span> <span class="nt">focus</span><span class="nd">:ring-1</span> <span class="nt">transition-all</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>Changed from original:</strong> <code class="language-plaintext highlighter-rouge">placeholder:text-slate-500</code> →
+<code class="language-plaintext highlighter-rouge">placeholder:text-slate-400</code> (fixes 2.1:1 contrast failure on hover state).</p>
+</blockquote>
+
+<p>Focus ring color varies by section:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Context</th>
+      <th>Focus border / ring</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>General / Settings</td>
+      <td><code class="language-plaintext highlighter-rouge">focus:border-cyan-500 focus:ring-cyan-500</code></td>
+    </tr>
+    <tr>
+      <td>API Key</td>
+      <td><code class="language-plaintext highlighter-rouge">focus:border-amber-500 focus:ring-amber-500</code></td>
+    </tr>
+    <tr>
+      <td>Alerts</td>
+      <td><code class="language-plaintext highlighter-rouge">focus:border-orange-500 focus:ring-orange-500</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Monospace textarea (Apprise URLs):</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">font-mono</span>  <span class="c">/* added to the base classes above */</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="73-toggles">7.3 Toggles</h3>
+
+<p>Large (h-5 w-9) — used for exporters and alerts master toggle:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nt">button</span>
+  <span class="na">role</span><span class="p">=</span><span class="s">"switch"</span>
+  <span class="na">aria-checked</span><span class="p">=</span><span class="si">{</span><span class="nx">enabled</span><span class="si">}</span>
+  <span class="na">aria-label</span><span class="p">=</span><span class="s">"Enable CSV Export"</span>
+  <span class="na">onClick</span><span class="p">=</span><span class="si">{</span><span class="p">()</span> <span class="o">=&gt;</span> <span class="nf">setEnabled</span><span class="p">(</span><span class="o">!</span><span class="nx">enabled</span><span class="p">)</span><span class="si">}</span>
+  <span class="na">className</span><span class="p">=</span><span class="si">{</span><span class="nf">cn</span><span class="p">(</span>
+    <span class="dl">"</span><span class="s2">relative inline-flex h-5 w-9 items-center rounded-full transition-colors</span><span class="dl">"</span><span class="p">,</span>
+    <span class="nx">enabled</span> <span class="p">?</span> <span class="dl">"</span><span class="s2">bg-cyan-500</span><span class="dl">"</span> <span class="p">:</span> <span class="dl">"</span><span class="s2">bg-slate-700</span><span class="dl">"</span>
+  <span class="p">)</span><span class="si">}</span>
+<span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nt">span</span>
+    <span class="na">className</span><span class="p">=</span><span class="si">{</span><span class="nf">cn</span><span class="p">(</span>
+      <span class="dl">"</span><span class="s2">inline-block h-3 w-3 rounded-full bg-white transition-transform</span><span class="dl">"</span><span class="p">,</span>
+      <span class="nx">enabled</span> <span class="p">?</span> <span class="dl">"</span><span class="s2">translate-x-5</span><span class="dl">"</span> <span class="p">:</span> <span class="dl">"</span><span class="s2">translate-x-1</span><span class="dl">"</span>
+    <span class="p">)</span><span class="si">}</span>
+  <span class="p">/&gt;</span>
+<span class="p">&lt;/</span><span class="nt">button</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<p>Small (h-4 w-8) — used for alert providers:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Same pattern, different sizing:</span>
+<span class="c1">// h-4 w-8 · thumb: h-2.5 w-2.5</span>
+<span class="c1">// enabled: translate-x-4.5 · disabled: translate-x-1</span>
+</code></pre></div></div>
+
+<p>Toggle-on color by context:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Context</th>
+      <th>Active color</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Exporters / Webhook / Gotify / ntfy / Apprise</td>
+      <td><code class="language-plaintext highlighter-rouge">bg-cyan-500</code></td>
+    </tr>
+    <tr>
+      <td>Alerts master toggle</td>
+      <td><code class="language-plaintext highlighter-rouge">bg-orange-500</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p><strong>ARIA required:</strong> <code class="language-plaintext highlighter-rouge">role="switch"</code> and <code class="language-plaintext highlighter-rouge">aria-checked={boolean}</code> must be present on every toggle.
+Screen readers announce the element as a switch with on/off state.
+<code class="language-plaintext highlighter-rouge">aria-label</code> must describe the specific setting being toggled.</p>
+</blockquote>
+
+<hr />
+
+<h3 id="74-badges--pills">7.4 Badges &amp; Pills</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Variant</th>
+      <th>Classes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Default count/label</td>
+      <td><code class="language-plaintext highlighter-rouge">text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700</code></td>
+    </tr>
+    <tr>
+      <td>Version mono</td>
+      <td><code class="language-plaintext highlighter-rouge">text-xs px-2 py-0.5 rounded-full bg-slate-800/60 text-slate-400 border border-slate-700/50 font-mono</code></td>
+    </tr>
+    <tr>
+      <td>Status chip (active)</td>
+      <td><code class="language-plaintext highlighter-rouge">text-xs px-2 py-1 rounded-md bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 font-medium</code></td>
+    </tr>
+    <tr>
+      <td>Update available</td>
+      <td><code class="language-plaintext highlighter-rouge">text-xs px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/30</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p><strong>Changed from original:</strong> version badge <code class="language-plaintext highlighter-rouge">text-slate-500</code> → <code class="language-plaintext highlighter-rouge">text-slate-400</code>.</p>
+</blockquote>
+
+<hr />
+
+<h3 id="75-alert-banners">7.5 Alert Banners</h3>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">flex</span> <span class="nt">items-center</span> <span class="nt">gap-2</span> <span class="nt">px-4</span> <span class="nt">py-3</span> <span class="nt">rounded-lg</span> <span class="nt">text-sm</span>
+</code></pre></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Background</th>
+      <th>Border</th>
+      <th>Text</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Error</td>
+      <td><code class="language-plaintext highlighter-rouge">bg-red-500/10</code></td>
+      <td><code class="language-plaintext highlighter-rouge">border-red-500/20</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-red-400</code></td>
+    </tr>
+    <tr>
+      <td>Success</td>
+      <td><code class="language-plaintext highlighter-rouge">bg-emerald-500/10</code></td>
+      <td><code class="language-plaintext highlighter-rouge">border-emerald-500/20</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-emerald-400</code></td>
+    </tr>
+    <tr>
+      <td>Warning</td>
+      <td><code class="language-plaintext highlighter-rouge">bg-amber-500/10</code></td>
+      <td><code class="language-plaintext highlighter-rouge">border-amber-500/20</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-amber-400</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h3 id="76-navigation-links">7.6 Navigation Links</h3>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">flex</span> <span class="nt">items-center</span> <span class="nt">gap-3</span> <span class="nt">px-4</span> <span class="nt">py-2</span><span class="o">.</span><span class="err">5</span> <span class="nt">rounded-lg</span> <span class="nt">text-sm</span> <span class="nt">font-medium</span> <span class="nt">transition-all</span>
+</code></pre></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>State</th>
+      <th>Classes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Active</td>
+      <td><code class="language-plaintext highlighter-rouge">bg-cyan-500/10 text-cyan-400 border border-cyan-500/20</code></td>
+    </tr>
+    <tr>
+      <td>Inactive</td>
+      <td><code class="language-plaintext highlighter-rouge">text-slate-400 hover:text-slate-200 hover:bg-slate-800/50</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h3 id="77-metric-cards-speedgauge">7.7 Metric Cards (SpeedGauge)</h3>
+
+<p>Each metric card is a <code class="language-plaintext highlighter-rouge">rounded-2xl border bg-slate-900/50</code> with a thin top accent strip:</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">relative</span> <span class="nt">overflow-hidden</span> <span class="nt">rounded-2xl</span> <span class="nt">border</span> <span class="p">{</span><span class="err">metric.border</span><span class="p">}</span> <span class="nt">bg-slate-900</span><span class="o">/</span><span class="err">50</span> <span class="nt">p-5</span>
+<span class="nt">flex</span> <span class="nt">flex-col</span> <span class="nt">items-center</span> <span class="nt">justify-center</span> <span class="nt">text-center</span>
+</code></pre></div></div>
+
+<p>Top accent strip:</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">absolute</span> <span class="nt">top-0</span> <span class="nt">left-0</span> <span class="nt">w-full</span> <span class="nt">h-0</span><span class="o">.</span><span class="err">5</span> <span class="p">{</span><span class="err">metric.bg</span><span class="p">}</span>
+</code></pre></div></div>
+
+<p>Icon container:</p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">p-2</span><span class="o">.</span><span class="err">5</span> <span class="nt">rounded-full</span> <span class="p">{</span><span class="err">metric.bg</span><span class="p">}</span> <span class="p">{</span><span class="err">metric.color</span><span class="p">}</span> <span class="nt">mb-3</span>
+</code></pre></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Text color</th>
+      <th>Background tint</th>
+      <th>Border</th>
+      <th>Label color</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Download</td>
+      <td><code class="language-plaintext highlighter-rouge">text-cyan-400</code></td>
+      <td><code class="language-plaintext highlighter-rouge">bg-cyan-500/10</code></td>
+      <td><code class="language-plaintext highlighter-rouge">border-cyan-500/20</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-slate-400</code></td>
+    </tr>
+    <tr>
+      <td>Upload</td>
+      <td><code class="language-plaintext highlighter-rouge">text-violet-400</code></td>
+      <td><code class="language-plaintext highlighter-rouge">bg-violet-500/10</code></td>
+      <td><code class="language-plaintext highlighter-rouge">border-violet-500/20</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-slate-400</code></td>
+    </tr>
+    <tr>
+      <td>Ping</td>
+      <td><code class="language-plaintext highlighter-rouge">text-amber-400</code></td>
+      <td><code class="language-plaintext highlighter-rouge">bg-amber-500/10</code></td>
+      <td><code class="language-plaintext highlighter-rouge">border-amber-500/20</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-slate-400</code></td>
+    </tr>
+    <tr>
+      <td>Jitter</td>
+      <td><code class="language-plaintext highlighter-rouge">text-emerald-400</code></td>
+      <td><code class="language-plaintext highlighter-rouge">bg-emerald-500/10</code></td>
+      <td><code class="language-plaintext highlighter-rouge">border-emerald-500/20</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-slate-400</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p><strong>Changed from original:</strong> metric label color <code class="language-plaintext highlighter-rouge">text-slate-500</code> → <code class="language-plaintext highlighter-rouge">text-slate-400</code>.</p>
+</blockquote>
+
+<hr />
+
+<h3 id="78-result-log--collapsible-panel">7.8 Result Log / Collapsible Panel</h3>
+
+<p>The Result Log is a collapsible panel with a header row, badge count, export action, and animated body.</p>
+
+<p><strong>Panel header:</strong></p>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">flex</span> <span class="nt">items-center</span> <span class="nt">justify-between</span> <span class="nt">px-6</span> <span class="nt">py-4</span>
+</code></pre></div></div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Element</th>
+      <th>Classes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Title</td>
+      <td><code class="language-plaintext highlighter-rouge">text-lg font-semibold text-slate-200</code></td>
+    </tr>
+    <tr>
+      <td>Entry count badge</td>
+      <td><code class="language-plaintext highlighter-rouge">text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700</code></td>
+    </tr>
+    <tr>
+      <td>Export CSV button</td>
+      <td>Ghost/tinted button variant (cyan)</td>
+    </tr>
+    <tr>
+      <td>Collapse chevron</td>
+      <td>Icon-only button — requires <code class="language-plaintext highlighter-rouge">aria-label="Collapse result log"</code> and <code class="language-plaintext highlighter-rouge">aria-expanded={open}</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Collapse animation:</strong></p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nc">AnimatePresence</span><span class="p">&gt;</span>
+  <span class="si">{</span><span class="nx">open</span> <span class="o">&amp;&amp;</span> <span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">motion</span><span class="p">.</span><span class="nt">div</span>
+      <span class="na">initial</span><span class="p">=</span><span class="si">{</span><span class="p">{</span> <span class="na">height</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="na">opacity</span><span class="p">:</span> <span class="mi">0</span> <span class="p">}</span><span class="si">}</span>
+      <span class="na">animate</span><span class="p">=</span><span class="si">{</span><span class="p">{</span> <span class="na">height</span><span class="p">:</span> <span class="dl">"</span><span class="s2">auto</span><span class="dl">"</span><span class="p">,</span> <span class="na">opacity</span><span class="p">:</span> <span class="mi">1</span> <span class="p">}</span><span class="si">}</span>
+      <span class="na">exit</span><span class="p">=</span><span class="si">{</span><span class="p">{</span> <span class="na">height</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="na">opacity</span><span class="p">:</span> <span class="mi">0</span> <span class="p">}</span><span class="si">}</span>
+      <span class="na">transition</span><span class="p">=</span><span class="si">{</span><span class="p">{</span> <span class="na">duration</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span> <span class="na">ease</span><span class="p">:</span> <span class="dl">"</span><span class="s2">easeInOut</span><span class="dl">"</span> <span class="p">}</span><span class="si">}</span>
+    <span class="p">&gt;</span>
+      <span class="si">{</span><span class="cm">/* table content */</span><span class="si">}</span>
+    <span class="p">&lt;/</span><span class="nt">motion</span><span class="p">.</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">)</span><span class="si">}</span>
+<span class="p">&lt;/</span><span class="nc">AnimatePresence</span><span class="p">&gt;</span>
+</code></pre></div></div>
+
+<p><strong>Data table inside panel:</strong></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Element</th>
+      <th>Classes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Table header row</td>
+      <td><code class="language-plaintext highlighter-rouge">text-xs font-medium uppercase tracking-wider text-slate-400 border-b border-slate-700</code></td>
+    </tr>
+    <tr>
+      <td>Table header cell</td>
+      <td><code class="language-plaintext highlighter-rouge">px-4 py-3</code></td>
+    </tr>
+    <tr>
+      <td>Table body row</td>
+      <td><code class="language-plaintext highlighter-rouge">border-b border-slate-800 hover:bg-slate-800/30 transition-colors</code></td>
+    </tr>
+    <tr>
+      <td>Table body cell</td>
+      <td><code class="language-plaintext highlighter-rouge">px-4 py-3 text-sm text-slate-300</code></td>
+    </tr>
+    <tr>
+      <td>Monospace data cell</td>
+      <td><code class="language-plaintext highlighter-rouge">font-mono text-slate-200</code></td>
+    </tr>
+    <tr>
+      <td>Failed result row</td>
+      <td><code class="language-plaintext highlighter-rouge">bg-red-500/5 border-red-500/10</code> with <code class="language-plaintext highlighter-rouge">text-red-400</code> for status cell</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h3 id="79-settings-section-icons">7.9 Settings Section Icons</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Section</th>
+      <th>Icon</th>
+      <th>Color</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Test Interval</td>
+      <td><code class="language-plaintext highlighter-rouge">Clock</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-cyan-400</code></td>
+    </tr>
+    <tr>
+      <td>Exporters</td>
+      <td><code class="language-plaintext highlighter-rouge">Database</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-violet-400</code></td>
+    </tr>
+    <tr>
+      <td>Alerts</td>
+      <td><code class="language-plaintext highlighter-rouge">Bell</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-orange-400</code></td>
+    </tr>
+    <tr>
+      <td>API Key</td>
+      <td><code class="language-plaintext highlighter-rouge">Key</code></td>
+      <td><code class="language-plaintext highlighter-rouge">text-amber-400</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="8-charts-recharts">8. Charts (Recharts)</h2>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">&lt;</span><span class="nc">LineChart</span> <span class="na">strokeWidth</span><span class="p">=</span><span class="si">{</span><span class="mi">2</span><span class="si">}</span> <span class="na">dot</span><span class="p">=</span><span class="si">{</span><span class="kc">false</span><span class="si">}</span><span class="p">&gt;</span>
+  <span class="p">&lt;</span><span class="nc">CartesianGrid</span>
+    <span class="na">strokeDasharray</span><span class="p">=</span><span class="s">"3 3"</span>
+    <span class="na">stroke</span><span class="p">=</span><span class="s">"#1e293b"</span>
+    <span class="na">vertical</span><span class="p">=</span><span class="si">{</span><span class="kc">false</span><span class="si">}</span>
+  <span class="p">/&gt;</span>
+</code></pre></div></div>
+
+<h3 id="81-line-colors">8.1 Line Colors</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Series</th>
+      <th>Hex</th>
+      <th>Token</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Download</td>
+      <td><code class="language-plaintext highlighter-rouge">#22d3ee</code></td>
+      <td><code class="language-plaintext highlighter-rouge">cyan-400</code></td>
+    </tr>
+    <tr>
+      <td>Upload</td>
+      <td><code class="language-plaintext highlighter-rouge">#a78bfa</code></td>
+      <td><code class="language-plaintext highlighter-rouge">violet-400</code></td>
+    </tr>
+    <tr>
+      <td>Ping</td>
+      <td><code class="language-plaintext highlighter-rouge">#fbbf24</code></td>
+      <td><code class="language-plaintext highlighter-rouge">amber-400</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p>Jitter is not included in the Performance History chart. It is displayed as a metric card only.</p>
+</blockquote>
+
+<h3 id="82-active-dot">8.2 Active Dot</h3>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">activeDot</span><span class="o">=</span><span class="p">{{</span> <span class="na">r</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="na">stroke</span><span class="p">:</span> <span class="dl">'</span><span class="s1">#0f172a</span><span class="dl">'</span><span class="p">,</span> <span class="na">strokeWidth</span><span class="p">:</span> <span class="mi">2</span> <span class="p">}}</span>
+</code></pre></div></div>
+
+<h3 id="83-axes">8.3 Axes</h3>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Shared axis props</span>
+<span class="nx">stroke</span><span class="o">=</span><span class="dl">"</span><span class="s2">#64748b</span><span class="dl">"</span>    <span class="c1">// slate-500 — acceptable for non-text decorative axis lines</span>
+<span class="nx">fontSize</span><span class="o">=</span><span class="p">{</span><span class="mi">12</span><span class="p">}</span>
+<span class="nx">tickLine</span><span class="o">=</span><span class="p">{</span><span class="kc">false</span><span class="p">}</span>
+<span class="nx">axisLine</span><span class="o">=</span><span class="p">{</span><span class="kc">false</span><span class="p">}</span>
+
+<span class="c1">// XAxis</span>
+<span class="nx">dy</span><span class="o">=</span><span class="p">{</span><span class="mi">10</span><span class="p">}</span>
+
+<span class="c1">// YAxis</span>
+<span class="nx">dx</span><span class="o">=</span><span class="p">{</span><span class="o">-</span><span class="mi">10</span><span class="p">}</span>
+<span class="c1">// left margin: -20</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>Note: <code class="language-plaintext highlighter-rouge">slate-500</code> is used here for the axis <strong>tick labels</strong> —
+these should be <code class="language-plaintext highlighter-rouge">text-slate-400</code> / <code class="language-plaintext highlighter-rouge">#94a3b8</code>.
+Update tick <code class="language-plaintext highlighter-rouge">fill</code> to <code class="language-plaintext highlighter-rouge">#94a3b8</code>. The axis <strong>line</strong> itself (<code class="language-plaintext highlighter-rouge">stroke</code>)
+can remain <code class="language-plaintext highlighter-rouge">slate-500</code> as it is a non-text decorative element.</p>
+</blockquote>
+
+<h3 id="84-tooltip">8.4 Tooltip</h3>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">/* Container */</span>
+<span class="nt">bg-slate-900</span> <span class="nt">border</span> <span class="nt">border-slate-700</span> <span class="nt">p-3</span> <span class="nt">rounded-lg</span> <span class="nt">shadow-xl</span>
+
+<span class="c">/* Label */</span>    <span class="nt">text-slate-300</span> <span class="nt">text-sm</span>
+<span class="c">/* Server */</span>   <span class="nt">text-slate-400</span> <span class="nt">text-xs</span>
+<span class="c">/* Name */</span>     <span class="nt">text-slate-400</span>
+<span class="c">/* Value */</span>    <span class="nt">font-medium</span> <span class="nt">text-slate-200</span>
+<span class="c">/* Dot */</span>      <span class="nt">w-2</span> <span class="nt">h-2</span> <span class="nt">rounded-full</span> <span class="o">(</span><span class="nt">series</span> <span class="nt">color</span><span class="o">)</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="9-scrollbar">9. Scrollbar</h2>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">scrollbar-width</span><span class="o">:</span> <span class="nt">thin</span><span class="o">;</span>
+<span class="nt">scrollbar-color</span><span class="o">:</span> <span class="err">#475569</span> <span class="nt">transparent</span><span class="o">;</span> <span class="c">/* slate-600 thumb — updated from slate-700 */</span>
+
+<span class="nd">::-webkit-scrollbar</span>        <span class="p">{</span> <span class="nl">width</span><span class="p">:</span> <span class="m">6px</span><span class="p">;</span> <span class="nl">height</span><span class="p">:</span> <span class="m">6px</span><span class="p">;</span> <span class="p">}</span>
+<span class="nd">::-webkit-scrollbar-track</span>  <span class="p">{</span> <span class="nl">background</span><span class="p">:</span> <span class="nb">transparent</span><span class="p">;</span> <span class="p">}</span>
+<span class="nd">::-webkit-scrollbar-thumb</span>  <span class="p">{</span>
+  <span class="nl">background-color</span><span class="p">:</span> <span class="nx">#475569</span><span class="p">;</span> <span class="c">/* slate-600, was #334155 slate-700 */</span>
+  <span class="nl">border-radius</span><span class="p">:</span> <span class="m">9999px</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>Changed from original:</strong> thumb color <code class="language-plaintext highlighter-rouge">#334155</code> (slate-700, 1.6:1) →
+<code class="language-plaintext highlighter-rouge">#475569</code> (slate-600, ~3.4:1). Meets WCAG 1.4.11 Non-text Contrast.</p>
+</blockquote>
+
+<hr />
+
+<h2 id="10-motion-patterns-framer-motion">10. Motion Patterns (Framer Motion)</h2>
+
+<h3 id="101-standard-patterns">10.1 Standard Patterns</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Pattern</th>
+      <th>Props</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Page enter</td>
+      <td><code class="language-plaintext highlighter-rouge">initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}</code></td>
+    </tr>
+    <tr>
+      <td>Card / section enter</td>
+      <td><code class="language-plaintext highlighter-rouge">initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}</code></td>
+    </tr>
+    <tr>
+      <td>Staggered metric cards</td>
+      <td><code class="language-plaintext highlighter-rouge">transition={{ delay: i * 0.08 }}</code></td>
+    </tr>
+    <tr>
+      <td>Mobile sidebar</td>
+      <td><code class="language-plaintext highlighter-rouge">initial={{ x: '-100%' }} animate={{ x: 0 }}</code> · <code class="language-plaintext highlighter-rouge">type: 'tween', duration: 0.22</code></td>
+    </tr>
+    <tr>
+      <td>Collapsible panel</td>
+      <td><code class="language-plaintext highlighter-rouge">height: 0 → 'auto'</code> + <code class="language-plaintext highlighter-rouge">opacity: 0 → 1</code> via <code class="language-plaintext highlighter-rouge">AnimatePresence</code></td>
+    </tr>
+    <tr>
+      <td>Overlay backdrop</td>
+      <td><code class="language-plaintext highlighter-rouge">opacity: 0 → 1</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="102-standard-duration-tokens">10.2 Standard Duration Tokens</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Value</th>
+      <th>Used for</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Fast</td>
+      <td><code class="language-plaintext highlighter-rouge">0.15s</code></td>
+      <td>Hover color transitions, toggle state</td>
+    </tr>
+    <tr>
+      <td>Default</td>
+      <td><code class="language-plaintext highlighter-rouge">0.20s</code></td>
+      <td>Card enter, collapse, sidebar</td>
+    </tr>
+    <tr>
+      <td>Slow</td>
+      <td><code class="language-plaintext highlighter-rouge">0.30s</code></td>
+      <td>Page enter, staggered sequences</td>
+    </tr>
+    <tr>
+      <td>Stagger step</td>
+      <td><code class="language-plaintext highlighter-rouge">0.08s</code></td>
+      <td>Per-card delay in metric grid</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="103-tailwind-animation-utilities">10.3 Tailwind Animation Utilities</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Class</th>
+      <th>Usage</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">animate-spin</code></td>
+      <td>Activity icon while test is running</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">animate-pulse</code></td>
+      <td>Metric value and clock icon when almost due</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="104-reduced-motion">10.4 Reduced Motion</h3>
+
+<p>All animations must respect <code class="language-plaintext highlighter-rouge">prefers-reduced-motion</code>. Use Framer Motion’s <code class="language-plaintext highlighter-rouge">useReducedMotion()</code> hook:</p>
+
+<div class="language-jsx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="p">{</span> <span class="nx">useReducedMotion</span> <span class="p">}</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">framer-motion</span><span class="dl">'</span><span class="p">;</span>
+
+<span class="kd">function</span> <span class="nf">MyComponent</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kd">const</span> <span class="nx">reduceMotion</span> <span class="o">=</span> <span class="nf">useReducedMotion</span><span class="p">();</span>
+
+  <span class="kd">const</span> <span class="nx">variants</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">hidden</span><span class="p">:</span> <span class="p">{</span> <span class="na">opacity</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="na">y</span><span class="p">:</span> <span class="nx">reduceMotion</span> <span class="p">?</span> <span class="mi">0</span> <span class="p">:</span> <span class="mi">20</span> <span class="p">},</span>
+    <span class="na">visible</span><span class="p">:</span> <span class="p">{</span> <span class="na">opacity</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="na">y</span><span class="p">:</span> <span class="mi">0</span> <span class="p">},</span>
+  <span class="p">};</span>
+
+  <span class="k">return </span><span class="p">(</span>
+    <span class="p">&lt;</span><span class="nt">motion</span><span class="p">.</span><span class="nt">div</span>
+      <span class="na">variants</span><span class="p">=</span><span class="si">{</span><span class="nx">variants</span><span class="si">}</span>
+      <span class="na">initial</span><span class="p">=</span><span class="s">"hidden"</span>
+      <span class="na">animate</span><span class="p">=</span><span class="s">"visible"</span>
+      <span class="na">transition</span><span class="p">=</span><span class="si">{</span><span class="p">{</span> <span class="na">duration</span><span class="p">:</span> <span class="nx">reduceMotion</span> <span class="p">?</span> <span class="mi">0</span> <span class="p">:</span> <span class="mf">0.2</span> <span class="p">}</span><span class="si">}</span>
+    <span class="p">&gt;</span>
+      ...
+    <span class="p">&lt;/</span><span class="nt">motion</span><span class="p">.</span><span class="nt">div</span><span class="p">&gt;</span>
+  <span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>Fallback behaviour when reduced motion is preferred: instant opacity transition only, no translate, no stagger delay.</p>
+
+<hr />
+
+<h2 id="11-empty--loading-states">11. Empty &amp; Loading States</h2>
+
+<h3 id="empty-state">Empty state</h3>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">text-center</span> <span class="nt">py-20</span> <span class="nt">text-slate-400</span>
+<span class="c">/* Icon: */</span> <span class="nt">w-10</span> <span class="nt">h-10</span> <span class="nt">mx-auto</span> <span class="nt">mb-3</span> <span class="nt">opacity-30</span>
+<span class="c">/* Heading: */</span> <span class="nt">text-lg</span>
+<span class="c">/* Sub-text: */</span> <span class="nt">text-sm</span> <span class="nt">mt-1</span>  <span class="c">/* accent word: text-cyan-400 font-medium */</span>
+</code></pre></div></div>
+
+<h3 id="loading--config-not-ready">Loading / config not ready</h3>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">text-slate-400</span> <span class="nt">text-sm</span> <span class="nt">py-10</span> <span class="nt">text-center</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>Changed from original:</strong> <code class="language-plaintext highlighter-rouge">text-slate-500</code> → <code class="language-plaintext highlighter-rouge">text-slate-400</code> for all empty and loading state text.</p>
+</blockquote>
+
+<h3 id="loading-spinner-inline">Loading spinner (inline)</h3>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">w-4</span> <span class="nt">h-4</span> <span class="nt">border-2</span> <span class="nt">border-slate-400</span> <span class="nt">border-t-transparent</span> <span class="nt">rounded-full</span> <span class="nt">animate-spin</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="12-logo--brand-rules">12. Logo &amp; Brand Rules</h2>
+
+<p>The Hermes mark is a circular emblem containing a stylized winged foot
+(Hermes/Mercury motif) with circuit-board speed lines trailing to the left.
+The speed lines use all four metric colors — this is intentional and should be treated as a brand element, not decoration.</p>
+
+<h3 id="121-logo-anatomy">12.1 Logo Anatomy</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Element</th>
+      <th>Color</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Outer ring</td>
+      <td><code class="language-plaintext highlighter-rouge">#22d3ee</code> (cyan-400)</td>
+      <td>Matches primary accent</td>
+    </tr>
+    <tr>
+      <td>Inner field</td>
+      <td><code class="language-plaintext highlighter-rouge">#0a0e1a</code> (near-black)</td>
+      <td>Darker than slate-950</td>
+    </tr>
+    <tr>
+      <td>Winged foot outline</td>
+      <td><code class="language-plaintext highlighter-rouge">#22d3ee</code> (cyan-400)</td>
+      <td>Neon line art</td>
+    </tr>
+    <tr>
+      <td>Speed line 1 (top)</td>
+      <td><code class="language-plaintext highlighter-rouge">#22d3ee</code></td>
+      <td>Download / cyan</td>
+    </tr>
+    <tr>
+      <td>Speed line 2</td>
+      <td><code class="language-plaintext highlighter-rouge">#a78bfa</code></td>
+      <td>Upload / violet</td>
+    </tr>
+    <tr>
+      <td>Speed line 3</td>
+      <td><code class="language-plaintext highlighter-rouge">#8b5cf6</code></td>
+      <td>Violet mid</td>
+    </tr>
+    <tr>
+      <td>Speed line 4</td>
+      <td><code class="language-plaintext highlighter-rouge">#22d3ee</code> / <code class="language-plaintext highlighter-rouge">#06b6d4</code></td>
+      <td>Cyan variant</td>
+    </tr>
+    <tr>
+      <td>Speed line 5</td>
+      <td><code class="language-plaintext highlighter-rouge">#fbbf24</code></td>
+      <td>Ping / amber</td>
+    </tr>
+    <tr>
+      <td>Lower lines</td>
+      <td>gradient violet→cyan</td>
+      <td>Decorative, follows metric palette</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>The four metric colors appearing in the logo speed lines is the
+visual connection between the brand mark and the data the app displays.
+Preserve this when resizing or reproducing the mark.</p>
+
+<h3 id="122-wordmark-color-by-background">12.2 Wordmark Color by Background</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Background</th>
+      <th>Logo treatment</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Dark (<code class="language-plaintext highlighter-rouge">#0f172a</code>, <code class="language-plaintext highlighter-rouge">#141414</code>)</td>
+      <td>Full color — cyan ring + neon foot</td>
+    </tr>
+    <tr>
+      <td>Light surface</td>
+      <td>Not recommended — this is a dark-only mark. Use on dark bg only.</td>
+    </tr>
+    <tr>
+      <td>On cyan surface</td>
+      <td>Use white/light version if created; avoid full-color on cyan</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="123-minimum-sizes">12.3 Minimum Sizes</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Context</th>
+      <th>Minimum</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Emblem (screen)</td>
+      <td>24×24px</td>
+    </tr>
+    <tr>
+      <td>Emblem (print)</td>
+      <td>6mm</td>
+    </tr>
+    <tr>
+      <td>In-app nav (current)</td>
+      <td>28×28px — appropriate</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="124-clear-space">12.4 Clear Space</h3>
+
+<p>Maintain clear space equal to the emblem height on all sides. No other text or icons within this zone.</p>
+
+<h3 id="125-prohibited-uses">12.5 Prohibited Uses</h3>
+
+<ul>
+  <li>Do not recolor the cyan outline to any other color</li>
+  <li>Do not remove or recolor the speed lines — they carry semantic meaning (metric colors)</li>
+  <li>Do not place on light backgrounds without a dedicated light-mode variant</li>
+  <li>Do not add drop shadows or glows beyond what is in the original asset</li>
+  <li>Do not stretch or distort the aspect ratio</li>
+</ul>
+
+<hr />
+
+<h2 id="13-ai-assistance-notes">13. AI Assistance Notes</h2>
+
+<p>This section provides direct rules for AI code generation tools
+(Claude, Copilot, Cursor, etc.) to generate on-brand, accessible Hermes UI code.</p>
+
+<h3 id="when-generating-hermes-ui-components">When generating Hermes UI components</h3>
+
+<p><strong>Typography:</strong></p>
+
+<ul>
+  <li>Always use <code class="language-plaintext highlighter-rouge">font-family: 'Inter', system-ui, sans-serif</code> with <code class="language-plaintext highlighter-rouge">-webkit-font-smoothing: antialiased</code></li>
+  <li>Page titles: <code class="language-plaintext highlighter-rouge">text-2xl font-bold text-slate-100</code></li>
+  <li>Card headings: <code class="language-plaintext highlighter-rouge">text-base font-semibold text-slate-200</code></li>
+  <li>Body/description text: <code class="language-plaintext highlighter-rouge">text-sm text-slate-300</code> (on card surfaces) or <code class="language-plaintext highlighter-rouge">text-sm text-slate-400</code> (on page bg)</li>
+  <li>Helper/caption: <code class="language-plaintext highlighter-rouge">text-xs text-slate-400</code> — never <code class="language-plaintext highlighter-rouge">text-slate-500</code> for readable text</li>
+</ul>
+
+<p><strong>Color rules:</strong></p>
+
+<ul>
+  <li>Never use <code class="language-plaintext highlighter-rouge">text-slate-500</code> for any readable text — it fails WCAG AA</li>
+  <li>Minimum text color on <code class="language-plaintext highlighter-rouge">slate-950</code> bg: <code class="language-plaintext highlighter-rouge">slate-400</code> (#94a3b8)</li>
+  <li>Minimum text color on <code class="language-plaintext highlighter-rouge">slate-900/40</code> card bg: <code class="language-plaintext highlighter-rouge">slate-300</code> (#cbd5e1)</li>
+  <li><code class="language-plaintext highlighter-rouge">slate-500</code> is permitted only for decorative non-text elements (borders, dividers, disabled states, decorative axis lines)</li>
+  <li>All placeholder text: <code class="language-plaintext highlighter-rouge">placeholder:text-slate-400</code> — never <code class="language-plaintext highlighter-rouge">placeholder:text-slate-500</code></li>
+  <li>Scrollbar thumb: <code class="language-plaintext highlighter-rouge">#475569</code> (slate-600) — not <code class="language-plaintext highlighter-rouge">#334155</code> (slate-700)</li>
+</ul>
+
+<p><strong>Accent colors — semantic rules:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">cyan-400</code> / <code class="language-plaintext highlighter-rouge">cyan-500</code> — primary accent, download metric, interactive actions</li>
+  <li><code class="language-plaintext highlighter-rouge">violet-400</code> — upload metric only</li>
+  <li><code class="language-plaintext highlighter-rouge">amber-400</code> — ping metric, warnings, API key context</li>
+  <li><code class="language-plaintext highlighter-rouge">emerald-400</code> — jitter metric, success states</li>
+  <li><code class="language-plaintext highlighter-rouge">orange-400</code> — alerts (user-configured notifications) only</li>
+  <li><code class="language-plaintext highlighter-rouge">red-400</code> — system/test failures only. Never use red for alert notifications.</li>
+</ul>
+
+<p><strong>Components:</strong></p>
+
+<ul>
+  <li>All toggles require: <code class="language-plaintext highlighter-rouge">role="switch"</code> <code class="language-plaintext highlighter-rouge">aria-checked={boolean}</code> <code class="language-plaintext highlighter-rouge">aria-label="[setting name]"</code></li>
+  <li>All icon-only buttons require: <code class="language-plaintext highlighter-rouge">aria-label="[action]"</code></li>
+  <li>All collapsible sections require: <code class="language-plaintext highlighter-rouge">aria-expanded={boolean}</code> on the trigger</li>
+  <li>Buttons: <code class="language-plaintext highlighter-rouge">rounded-lg</code> — not <code class="language-plaintext highlighter-rouge">rounded-full</code> or <code class="language-plaintext highlighter-rouge">rounded-xl</code></li>
+  <li>Cards: <code class="language-plaintext highlighter-rouge">rounded-2xl</code></li>
+  <li>Inputs: <code class="language-plaintext highlighter-rouge">rounded-lg</code> with <code class="language-plaintext highlighter-rouge">placeholder:text-slate-400</code></li>
+  <li>Tint chips/badges: <code class="language-plaintext highlighter-rouge">rounded-full</code> for pills, <code class="language-plaintext highlighter-rouge">rounded-md</code> for inline status chips</li>
+</ul>
+
+<p><strong>Surfaces:</strong></p>
+
+<ul>
+  <li>This is a dark-mode-only app. Always use dark backgrounds.</li>
+  <li>Card surface: <code class="language-plaintext highlighter-rouge">bg-slate-900/40 border border-slate-800 rounded-2xl</code></li>
+  <li>Never add <code class="language-plaintext highlighter-rouge">box-shadow</code> glow effects beyond the existing <code class="language-plaintext highlighter-rouge">shadow-cyan-500/20</code> button shadow</li>
+  <li>No <code class="language-plaintext highlighter-rouge">backdrop-blur</code> except on the fixed header</li>
+</ul>
+
+<p><strong>Motion:</strong></p>
+
+<ul>
+  <li>Always include <code class="language-plaintext highlighter-rouge">useReducedMotion()</code> check for any Framer Motion animation</li>
+  <li>Standard duration: 200ms. Fast: 150ms. Slow: 300ms.</li>
+  <li>Stagger delay: <code class="language-plaintext highlighter-rouge">i * 0.08s</code> for metric card grids</li>
+</ul>
+
+<p><strong>Copy tone:</strong></p>
+
+<ul>
+  <li>Terse, technical, data-forward</li>
+  <li>Prefer: “Scheduler running”, “Last run”, “ms”, “Mbps”, “42 entries”</li>
+  <li>Avoid: marketing language, decorative descriptions, emoji in UI text</li>
+</ul>
+
+<hr />
+
+<h2 id="14-changelog">14. Changelog</h2>
+
+<h3 id="current-post-audit">Current (post-audit)</h3>
+
+<ul>
+  <li><strong>Accessibility fixes (4 token changes):</strong>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">text-slate-500</code> → <code class="language-plaintext highlighter-rouge">text-slate-400</code> for all readable text
+(helper, caption, chart axes, metric labels, version badge, empty states)</li>
+      <li><code class="language-plaintext highlighter-rouge">placeholder:text-slate-500</code> → <code class="language-plaintext highlighter-rouge">placeholder:text-slate-400</code> on all inputs and textareas</li>
+      <li>Scrollbar thumb <code class="language-plaintext highlighter-rouge">#334155</code> (slate-700) → <code class="language-plaintext highlighter-rouge">#475569</code> (slate-600) — fixes WCAG 1.4.11</li>
+      <li>Card body text minimum raised to <code class="language-plaintext highlighter-rouge">text-slate-300</code> on semi-transparent card surfaces</li>
+    </ul>
+  </li>
+  <li><strong>Added:</strong> toggle ARIA pattern (<code class="language-plaintext highlighter-rouge">role="switch"</code>, <code class="language-plaintext highlighter-rouge">aria-checked</code>, <code class="language-plaintext highlighter-rouge">aria-label</code>) with real JSX snippet</li>
+  <li><strong>Added:</strong> icon-only button <code class="language-plaintext highlighter-rouge">aria-label</code> requirement documented</li>
+  <li><strong>Added:</strong> <code class="language-plaintext highlighter-rouge">useReducedMotion()</code> pattern in motion section</li>
+  <li><strong>Added:</strong> animation duration tokens (fast/default/slow/stagger)</li>
+  <li><strong>Added:</strong> Result Log / collapsible panel component specification</li>
+  <li><strong>Added:</strong> data table component specification with failed row state</li>
+  <li><strong>Added:</strong> Logo &amp; brand rules section</li>
+  <li><strong>Added:</strong> AI assistance notes section</li>
+  <li><strong>Added:</strong> Jitter chart line clarification (not in Performance History chart)</li>
+  <li><strong>Added:</strong> red vs orange semantic boundary definition</li>
+  <li><strong>Added:</strong> disabled color pattern for colored elements</li>
+  <li><strong>Fixed:</strong> all code fence closing tags corrected (removed erroneous language tag on closing fences)</li>
+  <li><strong>Fixed:</strong> toggle component replaced pseudo-code with real JSX using conditional classes</li>
+  <li><strong>Fixed:</strong> chart section separated into Recharts props and style values subsections</li>
+  <li><strong>Fixed:</strong> stack table updated with version column</li>
+</ul>
+
+<h3 id="original-pre-audit">Original (pre-audit)</h3>
+
+<ul>
+  <li>Initial style guide covering stack, color palette,
+typography, spacing, borders, components, charts, scrollbar, and motion patterns</li>
+</ul>
+
+<hr />
+
+<h3 id="hermes-style-guide--post-audit-revision--2026">Hermes Style Guide · Post-audit revision · 2026*</h3>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/Hermes" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Frontend Style Guide
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

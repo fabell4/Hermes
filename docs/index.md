@@ -1,98 +1,50 @@
 ---
-layout: default
+layout: home
 title: "Hermes Documentation"
----
+description: "Self-hosted internet speed test monitoring with modern observability stack integration"
+show_header: false
 
-<img src="assets/Hermes.png" width="80" alt="Hermes logo">
+hero_title: "Hermes Docs"
+hero_subtitle: "Self-hosted internet speed test monitoring with automated scheduling, multi-destination export, and full observability stack integration."
+hero_cta:
+  - label: "Get Started"
+    url: /getting-started
+    primary: true
+  - label: "View on GitHub"
+    url: https://github.com/fabell4/hermes
 
-![Hermes Dashboard](assets/Hermes-Screenshot.png)
-
-| Analysis | Reports | Alert Settings |
-|---|---|---|
-| ![Analysis screen](assets/Hermes-analysis.png) | ![Reports screen](assets/Hermes-reports.png) | ![Alert Settings screen](assets/Hermes-alerts.png) |
-
-**Hermes** is a self-hosted internet speed test monitoring solution that periodically tests your
-connection and exports results to multiple destinations. It features a modern React frontend,
-comprehensive API, and integrates seamlessly with your observability stack.
-
----
-
-## Features
-
-### 🚀 Core Capabilities
-
-- **Automated Speed Testing** — Scheduled tests at configurable intervals with manual triggers
-
-- **Multi-Destination Export** — CSV, SQLite, Prometheus, Loki
-
-- **Modern Web UI** — Five dedicated screens: Dashboard, Analysis, Reports, Alert Settings, Settings
-
-- **REST API** — Full-featured FastAPI backend for automation and integration
-
-- **Alert Notifications** — Webhook, Gotify, ntfy, Apprise (100+ services) via dedicated Alert
-  Settings screen
-
-- **Analytics** — Anomaly detection, time-of-day speed patterns, and month-over-month trends
-
-- **Filterable Reports** — Date/speed/ISP filters, column visibility toggles, and CSV export
-
-- **Production-Ready** — Docker deployment, health checks, data retention policies
-
-### 📊 Data Collection
-
-Each speed test captures:
-
-- Download speed (Mbps)
-
-- Upload speed (Mbps)
-
-- Ping latency (ms)
-
-- Jitter (ms)
-
-- ISP name
-
-- Timestamp
-
-### 🔔 Alert System
-
-Send notifications when consecutive test failures occur:
-
-- Configurable failure threshold
-
-- Cooldown periods to prevent spam
-
-- Multiple provider support (webhook, Gotify, ntfy, Apprise)
-
-- Test notifications before deploying
-
-- UI or environment variable configuration
-
-### 🔒 Security
-
-- API key authentication with timing-attack prevention
-
-- Per-key rate limiting with sliding windows
-
-- SSRF protection on alert URLs
-
-- Request size limits
-
-- Security headers (X-Frame-Options, CSP, etc.)
-
-- Input validation on all endpoints
-
-- 130+ security-focused tests
-
+quick_links:
+  - title: "Getting Started"
+    url: /getting-started
+    icon: "🚀"
+    description: "Deploy with Docker, configure exporters, and run your first speed test."
+  - title: "Architecture"
+    url: /architecture
+    icon: "🏗️"
+    description: "System design, data flow, and two-container deployment topology."
+  - title: "API Reference"
+    url: /api-reference
+    icon: "🔌"
+    description: "REST endpoints, authentication, and request/response examples."
+  - title: "Alert Configuration"
+    url: /alerts
+    icon: "🔔"
+    description: "Webhook, Gotify, ntfy, and Apprise notification setup."
+  - title: "Security Guide"
+    url: /security
+    icon: "🔐"
+    description: "API key auth, rate limiting, SSRF protection, and best practices."
+  - title: "Runbook"
+    url: /runbook
+    icon: "📖"
+    description: "Operational guide for diagnosing and resolving production issues."
 ---
 
 ## Quick Start
 
 ```bash
-# Create docker-compose.yml
+# Pull and configure
 curl -o docker-compose.yml https://raw.githubusercontent.com/fabell4/hermes/main/docker-compose.yml
-
-# Create .env file
 curl -o .env https://raw.githubusercontent.com/fabell4/hermes/main/.env.example
 
 # Start containers
@@ -102,94 +54,20 @@ docker compose up -d
 open http://localhost:8080
 ```
 
-The React UI will be available at `http://localhost:8080`.
-
 ---
 
-## Documentation
-
-### 📘 Getting Started
-
-**[Getting Started Guide](getting-started)** — Deployment, configuration, and first steps
-
-### 🏗️ Architecture
-
-**[Architecture Overview](architecture)** — System design, data flow, deployment topology
-
-### 🔌 API Reference
-
-**[API Documentation](api-reference)** — REST endpoints, authentication, examples
-
-### 🔐 Security
-
-**[Security Guide](security)** — Features, best practices, audit reports
-
-### 🔔 Alerts
-
-**[Alert Configuration](alerts)** — Setup guides for webhook, Gotify, ntfy, Apprise
-
-### 📦 Release Process
-
-**[Release Process](RELEASE-PROCESS)** — Checklist and workflow for releases
-
-### 🛡️ Security Audit
-
-**[Security Audit Report](SECURITY-AUDIT)** — Comprehensive security analysis (v1.0)
-
-### ✨ Security Enhancements
-
-**[Security Enhancements](SECURITY-ENHANCEMENTS)** — Implementation details of v1.0 security fixes
-
-### 🛡️ Defensive Coding Review
-
-**[Defensive Coding Review](DEFENSIVE-CODING-REVIEW)** — Comprehensive defensive coding analysis (v1.0)
-
-### ✨ Best Practices Review
-
-**[Best Practices Review](BEST-PRACTICES-REVIEW)** — Code quality and simplification analysis (v1.0)
-
-### 🧪 Test Coverage Review
-
-**[Test Coverage Review](TEST-COVERAGE-REVIEW)** — Comprehensive test coverage analysis (v1.0)
-
-### ⚡ Performance Optimization Review
-
-**[Performance Optimization Review](PERFORMANCE-OPTIMIZATION-REVIEW)** — Performance analysis and improvements (v1.0)
-
-### 📝 Documentation Accuracy Review
-
-**[Documentation Accuracy Review](DOCUMENTATION-ACCURACY-REVIEW)** — Documentation validation and corrections (v1.0)
-
-### 🛡️ Vulnerability Reporting
-
-**[Security Policy](https://github.com/fabell4/hermes/blob/main/SECURITY.md)** — How to report vulnerabilities responsibly
-
----
-
-## Quick Links
-
-- **[GitHub Repository](https://github.com/fabell4/hermes)** — Source code and issues
-
-- **[Docker Image](https://github.com/fabell4/hermes/pkgs/container/hermes)** — ghcr.io/fabell4/hermes
-
-- **[Grafana Dashboard](grafana-dashboard.json)** — Pre-built dashboard for import
-
----
-
-## Environment Variables Reference
-
-Key configuration options (see [Getting Started](getting-started) for complete list):
+## Key Configuration
 
 | Variable | Default | Description |
 | --- | --- | --- |
 | `SPEEDTEST_INTERVAL_MINUTES` | `60` | How often to run speed tests |
 | `ENABLED_EXPORTERS` | `csv` | Comma-separated: `csv`, `sqlite`, `prometheus`, `loki` |
-| `API_KEY` | *(unset)* | API key for authentication (disables auth if empty) |
+| `API_KEY` | *(unset)* | Enables authentication when set |
 | `ALERT_FAILURE_THRESHOLD` | `0` | Consecutive failures before alerting (0 = disabled) |
-| `PROMETHEUS_PORT` | `8000` | Port for /metrics scrape endpoint |
+| `PROMETHEUS_PORT` | `8000` | Port for `/metrics` scrape endpoint |
 | `LOKI_URL` | *(unset)* | Loki push URL, e.g., `http://loki:3100` |
 
-See [Getting Started](getting-started) for the full variable list with descriptions.
+See [Getting Started](/getting-started) for the full environment variable reference.
 
 ---
 
@@ -197,35 +75,7 @@ See [Getting Started](getting-started) for the full variable list with descripti
 
 Hermes runs as two containers:
 
-- **hermes-scheduler** — Background worker running speed tests on schedule, exposing Prometheus
-  metrics, and pushing to Loki
+- **hermes-scheduler** — Background worker running speed tests on schedule, exposing Prometheus metrics on port `8000`
+- **hermes-api** — FastAPI backend + React frontend on port `8080`
 
-- **hermes-api** — FastAPI REST API serving the React frontend and providing programmatic access
-
-Both containers share volumes for `runtime_config.json`, `results.csv`, and `hermes.db`.
-
-**Observability Integration:**
-
-- **Prometheus** scrapes `:8000/metrics` every 15 seconds
-
-- **Loki** receives push events on each test completion
-
-- **Grafana** visualizes data from both sources
-
-See [Architecture](architecture) for detailed diagrams.
-
----
-
-## Support & Contributing
-
-- **Issues:** [GitHub Issues](https://github.com/fabell4/hermes/issues)
-
-- **Discussions:** [GitHub Discussions](https://github.com/fabell4/hermes/discussions)
-
-- **Contributing:** See [README](https://github.com/fabell4/hermes#readme) for development setup
-
----
-
-## License
-
-Licensed under MIT. See [LICENSE](https://github.com/fabell4/hermes/blob/main/LICENSE) for details.
+Data flows from the scheduler through exporters (CSV, SQLite, Prometheus, Loki) and is consumed by the frontend via the REST API.

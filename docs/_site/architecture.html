@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Architecture — Hermes Documentation</title>
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Architecture | Hermes Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Architecture" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<link rel="canonical" href="http://localhost:4001/architecture.html" />
+<meta property="og:url" content="http://localhost:4001/architecture.html" />
+<meta property="og:site_name" content="Hermes Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Architecture" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted internet speed test monitoring with modern observability stack integration","headline":"Architecture","url":"http://localhost:4001/architecture.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration">
+
+<title>
+  
+    Architecture — Hermes Documentation
+  
+</title>
+
+
+<link rel="icon" type="image/png" href="/assets/Hermes.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="/" class="nav-brand">
+    <span class="brand-name">
+      Hermes
+      <span>Docs</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/alloy"
+                 >
+                Grafana Alloy
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-ENHANCEMENTS"
+                 >
+                Security Enhancements
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Error Handling</h3>
+        <ul>
+          
+            <li>
+              <a href="/error-catalog"
+                 >
+                Error Catalog
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-handling-conventions"
+                 >
+                Handling Conventions
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-messages"
+                 >
+                Error Messages
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/RELEASE-PROCESS"
+                 >
+                Release Process
+              </a>
+            </li>
+          
+            <li>
+              <a href="/styleguide"
+                 >
+                Frontend Style Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/suppression-decisions"
+                 >
+                Suppression Decisions
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Code Reviews</h3>
+        <ul>
+          
+            <li>
+              <a href="/BEST-PRACTICES-REVIEW"
+                 >
+                Best Practices
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DEFENSIVE-CODING-REVIEW"
+                 >
+                Defensive Coding
+              </a>
+            </li>
+          
+            <li>
+              <a href="/ERROR-HANDLING-REVIEW"
+                 >
+                Error Handling Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/PERFORMANCE-OPTIMIZATION-REVIEW"
+                 >
+                Performance Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/TEST-COVERAGE-REVIEW"
+                 >
+                Test Coverage
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DOCUMENTATION-ACCURACY-REVIEW"
+                 >
+                Documentation Review
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Architecture</h1>
+
+            
+          </header>
+        
+
+        <p>Hermes is designed as a distributed two-container system that periodically runs internet speed tests and
+exports results to multiple observability destinations.</p>
+
+<hr />
+
+<h2 id="system-architecture">System Architecture</h2>
+
+<h3 id="data-flow">Data Flow</h3>
+
+<pre><code class="language-mermaid">flowchart TD
+    subgraph API_CONTAINER["hermes-api container"]
+        API["**FastAPI REST API**\nsrc/api/main.py\n:8080"]
+        REACT["**React Frontend**\nfrontend/dist\n(served by FastAPI)"]
+    end
+
+    subgraph SCHED_CONTAINER["hermes-scheduler container"]
+        MAIN["**main.py**\nEntry point + scheduler"]
+        RUNNER["**SpeedtestRunner**\nsrc/services/speedtest_runner.py"]
+        MODEL["**SpeedResult**\nsrc/models/speed_result.py"]
+        DISP["**ResultDispatcher**\nsrc/result_dispatcher.py"]
+        ALERT["**AlertManager**\nsrc/services/alert_manager.py"]
+        CSV["CSVExporter"]
+        SQLITE["SQLiteExporter"]
+        PROM["PrometheusExporter\n:8000/metrics"]
+        LOKI["LokiExporter"]
+    end
+
+    SHARED_VOL[("**Shared Volume**\nruntime_config.json\n.run_trigger\nresults.csv")]
+    DATA_VOL[("**Data Volume**\nhermes.db")]
+    ALERT_DEST[("**Alert Destinations**\nWebhook, Gotify,\nntfy, Apprise")]
+
+    REACT -- "HTTP GET/POST" --&gt; API
+    API -- "POST /api/trigger\nPUT /api/config\nPUT /api/alerts" --&gt; SHARED_VOL
+    API -- "GET /api/results" --&gt; DATA_VOL
+    SHARED_VOL -- "polls every 30s" --&gt; MAIN
+    MAIN -- "scheduled / triggered" --&gt; RUNNER
+    RUNNER -- "success" --&gt; MODEL
+    RUNNER -- "success/failure" --&gt; ALERT
+    MODEL --&gt; DISP
+    DISP --&gt; CSV
+    DISP --&gt; SQLITE
+    DISP --&gt; PROM
+    DISP --&gt; LOKI
+    CSV -- "writes" --&gt; SHARED_VOL
+    SQLITE -- "writes" --&gt; DATA_VOL
+    ALERT -- "on threshold" --&gt; ALERT_DEST
+
+    style API fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style REACT fill:#1565c0,stroke:#90caf9,color:#ffffff
+    style MAIN fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style RUNNER fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style MODEL fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style DISP fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style ALERT fill:#c62828,stroke:#ef5350,color:#ffffff
+    style CSV fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style SQLITE fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style PROM fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style LOKI fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style SHARED_VOL fill:#f57c00,stroke:#ffb74d,color:#ffffff
+    style DATA_VOL fill:#f57c00,stroke:#ffb74d,color:#ffffff
+    style ALERT_DEST fill:#c62828,stroke:#ef5350,color:#ffffff
+</code></pre>
+
+<h3 id="deployment-topology">Deployment Topology</h3>
+
+<pre><code class="language-mermaid">flowchart LR
+    subgraph HERMES_HOST["Hermes Host"]
+        subgraph SCHED_CONTAINER["hermes-scheduler"]
+            PROM_EP["PrometheusExporter\n:8000/metrics"]
+            LOKI_EXP["LokiExporter"]
+            ALERT_MGR["AlertManager"]
+        end
+        subgraph API_CONTAINER["hermes-api"]
+            API["FastAPI + React UI\n:8080"]
+        end
+    end
+
+    subgraph OBS_HOST["Observability Host"]
+        PROMETHEUS["Prometheus\n:9090"]
+        LOKI["Loki\n:3100"]
+        GRAFANA["Grafana\n:3000"]
+    end
+
+    subgraph ALERT_HOST["Alert Services (optional)"]
+        GOTIFY["Gotify"]
+        NTFY["ntfy"]
+        APPRISE["Apprise API"]
+        WEBHOOK["Custom Webhook"]
+    end
+
+    PROMETHEUS -- "scrapes :8000/metrics\nevery 15s" --&gt; PROM_EP
+    LOKI_EXP -- "HTTP push\n/loki/api/v1/push" --&gt; LOKI
+    GRAFANA -- "PromQL queries" --&gt; PROMETHEUS
+    GRAFANA -- "LogQL queries" --&gt; LOKI
+    ALERT_MGR -- "HTTP POST\non failure threshold" --&gt; GOTIFY
+    ALERT_MGR -- "HTTP POST\non failure threshold" --&gt; NTFY
+    ALERT_MGR -- "HTTP POST\non failure threshold" --&gt; APPRISE
+    ALERT_MGR -- "HTTP POST\non failure threshold" --&gt; WEBHOOK
+
+    style PROM_EP fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style LOKI_EXP fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style ALERT_MGR fill:#c62828,stroke:#ef5350,color:#ffffff
+    style API fill:#1565c0,stroke:#90caf9,color:#ffffff
+    style PROMETHEUS fill:#e65100,stroke:#ffcc80,color:#ffffff
+    style LOKI fill:#1565c0,stroke:#90caf9,color:#ffffff
+    style GRAFANA fill:#4a148c,stroke:#ce93d8,color:#ffffff
+    style GOTIFY fill:#c62828,stroke:#ef5350,color:#ffffff
+    style NTFY fill:#c62828,stroke:#ef5350,color:#ffffff
+    style APPRISE fill:#c62828,stroke:#ef5350,color:#ffffff
+    style WEBHOOK fill:#c62828,stroke:#ef5350,color:#ffffff
+</code></pre>
+
+<p><strong>Note:</strong> Both containers use the same Docker image (<code class="language-plaintext highlighter-rouge">hermes:latest</code>) but with different entry points:</p>
+
+<ul>
+  <li><strong>hermes-scheduler:</strong> Runs <code class="language-plaintext highlighter-rouge">python -m src.main</code> (background worker with scheduler)</li>
+  <li><strong>hermes-api:</strong> Uses the default CMD which starts the FastAPI server</li>
+</ul>
+
+<p>This single-image design simplifies builds and deployments while enabling flexible scaling of each service independently.</p>
+
+<hr />
+
+<h2 id="component-details">Component Details</h2>
+
+<h3 id="hermes-scheduler-container">hermes-scheduler Container</h3>
+
+<p><strong>Purpose:</strong> Background worker that runs speed tests on schedule and exports results.</p>
+
+<p><strong>Key Components:</strong></p>
+
+<ul>
+  <li><strong><code class="language-plaintext highlighter-rouge">main.py</code></strong> — Entry point, wires scheduler and watches for trigger file</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">SpeedtestRunner</code></strong> — Orchestrates speed test providers with automatic fallback; primary provider is retried once
+before falling back to the next in the configured chain</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">src/providers/</code></strong> — Pluggable test provider implementations: <code class="language-plaintext highlighter-rouge">OoklaProvider</code> (Ookla CLI), <code class="language-plaintext highlighter-rouge">NDT7Provider</code>
+(M-Lab WebSocket), <code class="language-plaintext highlighter-rouge">CustomHttpProvider</code> (user-supplied HTTP endpoints)</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">SpeedResult</code></strong> — Data model capturing download, upload, ping, jitter, ISP, timestamp</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">ResultDispatcher</code></strong> — Fans out results to all enabled exporters</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">AlertManager</code></strong> — Tracks consecutive failures and sends notifications</li>
+  <li><strong>Exporters:</strong> CSV, SQLite, Prometheus, Loki</li>
+</ul>
+
+<p><strong>Exposed Ports:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">:8000</code> — Prometheus <code class="language-plaintext highlighter-rouge">/metrics</code> scrape endpoint</li>
+</ul>
+
+<p><strong>Volumes:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">/app/logs</code> — CSV results and application logs</li>
+  <li><code class="language-plaintext highlighter-rouge">/app/data</code> — SQLite database, runtime config, trigger file</li>
+</ul>
+
+<p><strong>Environment Variables:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">SPEEDTEST_INTERVAL_MINUTES</code> — Test frequency (default: 60)</li>
+  <li><code class="language-plaintext highlighter-rouge">RUN_ON_STARTUP</code> — Run test immediately on start (default: true)</li>
+  <li><code class="language-plaintext highlighter-rouge">SPEEDTEST_PROVIDERS</code> — Ordered, comma-separated provider chain (default: <code class="language-plaintext highlighter-rouge">ookla</code>); values: <code class="language-plaintext highlighter-rouge">ookla</code>, <code class="language-plaintext highlighter-rouge">ndt7</code>, <code class="language-plaintext highlighter-rouge">custom</code></li>
+  <li><code class="language-plaintext highlighter-rouge">SPEEDTEST_SERVER_ID</code> — Pin Ookla tests to a specific server ID (default: auto-select)</li>
+  <li><code class="language-plaintext highlighter-rouge">SPEEDTEST_CUSTOM_URL_DOWNLOAD</code> — Download URL for the <code class="language-plaintext highlighter-rouge">custom</code> provider (required when <code class="language-plaintext highlighter-rouge">custom</code> is in the chain)</li>
+  <li><code class="language-plaintext highlighter-rouge">SPEEDTEST_CUSTOM_URL_UPLOAD</code> — Upload URL for the <code class="language-plaintext highlighter-rouge">custom</code> provider (optional)</li>
+  <li><code class="language-plaintext highlighter-rouge">SPEEDTEST_CUSTOM_DURATION_S</code> — Download stream duration in seconds (default: 10)</li>
+  <li><code class="language-plaintext highlighter-rouge">SPEEDTEST_CUSTOM_CONNECTIONS</code> — Parallel download connections (default: 1)</li>
+  <li><code class="language-plaintext highlighter-rouge">SPEEDTEST_CUSTOM_CHUNK_SIZE_MB</code> — Upload payload size in MB (default: 25)</li>
+  <li><code class="language-plaintext highlighter-rouge">ENABLED_EXPORTERS</code> — Comma-separated list: <code class="language-plaintext highlighter-rouge">csv</code>, <code class="language-plaintext highlighter-rouge">sqlite</code>, <code class="language-plaintext highlighter-rouge">prometheus</code>, <code class="language-plaintext highlighter-rouge">loki</code></li>
+  <li><code class="language-plaintext highlighter-rouge">PROMETHEUS_PORT</code> — Port for metrics endpoint (default: 8000)</li>
+  <li><code class="language-plaintext highlighter-rouge">LOKI_URL</code> — Loki push endpoint (e.g., <code class="language-plaintext highlighter-rouge">http://loki:3100</code>)</li>
+  <li>Alert configuration (see <a href="alerts">Alerts</a>)</li>
+</ul>
+
+<h3 id="hermes-api-container">hermes-api Container</h3>
+
+<p><strong>Purpose:</strong> FastAPI REST API serving the React frontend and providing programmatic access.</p>
+
+<p><strong>Key Components:</strong></p>
+
+<ul>
+  <li><strong><code class="language-plaintext highlighter-rouge">src/api/main.py</code></strong> — FastAPI application with middleware</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">src/api/auth.py</code></strong> — API key authentication and rate limiting</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">src/api/routes/</code></strong> — Endpoint modules (config, results, trigger, alerts)</li>
+  <li><strong><code class="language-plaintext highlighter-rouge">frontend/dist</code></strong> — Built React SPA served as static files</li>
+</ul>
+
+<p><strong>Exposed Ports:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">:8080</code> — HTTP API and frontend</li>
+</ul>
+
+<p><strong>Volumes:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">/app/logs</code> — Shared CSV results (for fallback reads)</li>
+  <li><code class="language-plaintext highlighter-rouge">/app/data</code> — Shared SQLite database and runtime config</li>
+</ul>
+
+<p><strong>Environment Variables:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">API_KEY</code> — Optional API key for auth (32+ chars, disables auth if unset)</li>
+  <li><code class="language-plaintext highlighter-rouge">RATE_LIMIT_PER_MINUTE</code> — Max write requests per API key per 60s (default: 60)</li>
+  <li><code class="language-plaintext highlighter-rouge">CORS_ORIGINS</code> — Comma-separated allowed origins (default: <code class="language-plaintext highlighter-rouge">http://localhost:5173,http://localhost:4173</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">MAX_REQUEST_BODY_SIZE</code> — Request size limit in bytes (default: 1048576 = 1 MB)</li>
+</ul>
+
+<p><strong>Middleware:</strong></p>
+
+<ul>
+  <li><strong>RequestSizeLimitMiddleware</strong> — Rejects requests &gt; <code class="language-plaintext highlighter-rouge">MAX_REQUEST_BODY_SIZE</code></li>
+  <li><strong>SecurityHeadersMiddleware</strong> — Adds <code class="language-plaintext highlighter-rouge">X-Frame-Options</code>, <code class="language-plaintext highlighter-rouge">X-Content-Type-Options</code>, <code class="language-plaintext highlighter-rouge">Cross-Origin-Resource-Policy</code>, <code class="language-plaintext highlighter-rouge">Referrer-Policy</code></li>
+  <li><strong>CORSMiddleware</strong> — Validates origins, restricts methods (GET, POST, PUT) and headers</li>
+</ul>
+
+<hr />
+
+<h2 id="data-models">Data Models</h2>
+
+<h3 id="speedresult">SpeedResult</h3>
+
+<p>Shared data contract between all components:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">SpeedResult</span><span class="p">:</span>
+    <span class="n">download_mbps</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">upload_mbps</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">ping_ms</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">jitter_ms</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">isp</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># ISO 8601 format
+</span></code></pre></div></div>
+
+<h3 id="runtime-configuration">Runtime Configuration</h3>
+
+<p>Stored in <code class="language-plaintext highlighter-rouge">data/runtime_config.json</code>, managed via API or UI:</p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"speedtest_interval_minutes"</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"enabled_exporters"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"csv"</span><span class="p">,</span><span class="w"> </span><span class="s2">"sqlite"</span><span class="p">,</span><span class="w"> </span><span class="s2">"prometheus"</span><span class="p">],</span><span class="w">
+  </span><span class="nl">"alerts"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"failure_threshold"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"cooldown_minutes"</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"providers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"webhook"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="w"> </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"gotify"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w"> </span><span class="nl">"token"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w"> </span><span class="nl">"priority"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"ntfy"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">"https://ntfy.sh"</span><span class="p">,</span><span class="w"> </span><span class="nl">"topic"</span><span class="p">:</span><span class="w"> </span><span class="s2">"hermes_alerts"</span><span class="p">,</span><span class="w"> </span><span class="nl">"token"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w"> </span><span class="nl">"priority"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="nl">"tags"</span><span class="p">:</span><span class="w"> </span><span class="s2">"warning,rotating_light"</span><span class="w"> </span><span class="p">},</span><span class="w">
+      </span><span class="nl">"apprise"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"> </span><span class="nl">"url"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w"> </span><span class="nl">"urls"</span><span class="p">:</span><span class="w"> </span><span class="p">[]</span><span class="w"> </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<hr />
+
+<h2 id="exporters">Exporters</h2>
+
+<h3 id="csv-exporter">CSV Exporter</h3>
+
+<p><strong>Path:</strong> <code class="language-plaintext highlighter-rouge">logs/results.csv</code></p>
+
+<p><strong>Format:</strong></p>
+
+<pre><code class="language-csv">timestamp,download_mbps,upload_mbps,ping_ms,jitter_ms,isp
+2026-04-29T12:00:00Z,250.5,35.2,15.3,2.1,Comcast
+</code></pre>
+
+<p><strong>Configuration:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">CSV_MAX_ROWS</code> — Limit total rows (oldest removed first)</li>
+  <li><code class="language-plaintext highlighter-rouge">CSV_RETENTION_DAYS</code> — Delete rows older than N days</li>
+</ul>
+
+<p><strong>Use Case:</strong> Simple log file for manual inspection or external processing.</p>
+
+<h3 id="sqlite-exporter">SQLite Exporter</h3>
+
+<p><strong>Path:</strong> <code class="language-plaintext highlighter-rouge">data/hermes.db</code></p>
+
+<p><strong>Table Schema:</strong></p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">CREATE</span> <span class="k">TABLE</span> <span class="n">results</span> <span class="p">(</span>
+    <span class="n">id</span> <span class="nb">INTEGER</span> <span class="k">PRIMARY</span> <span class="k">KEY</span> <span class="n">AUTOINCREMENT</span><span class="p">,</span>
+    <span class="nb">timestamp</span> <span class="nb">TEXT</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+    <span class="n">download_mbps</span> <span class="nb">REAL</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+    <span class="n">upload_mbps</span> <span class="nb">REAL</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+    <span class="n">ping_ms</span> <span class="nb">REAL</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+    <span class="n">jitter_ms</span> <span class="nb">REAL</span> <span class="k">NOT</span> <span class="k">NULL</span><span class="p">,</span>
+    <span class="n">isp</span> <span class="nb">TEXT</span> <span class="k">NOT</span> <span class="k">NULL</span>
+<span class="p">);</span>
+<span class="k">CREATE</span> <span class="k">INDEX</span> <span class="n">idx_timestamp</span> <span class="k">ON</span> <span class="n">results</span><span class="p">(</span><span class="nb">timestamp</span> <span class="k">DESC</span><span class="p">);</span>
+</code></pre></div></div>
+
+<p><strong>Configuration:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">SQLITE_MAX_ROWS</code> — Limit total rows (oldest removed first)</li>
+  <li><code class="language-plaintext highlighter-rouge">SQLITE_RETENTION_DAYS</code> — Delete rows older than N days</li>
+  <li>Uses WAL (Write-Ahead Logging) mode for concurrency</li>
+</ul>
+
+<p><strong>Use Case:</strong> Primary storage for API and UI queries. Best performance for dashboard charts.</p>
+
+<h3 id="prometheus-exporter">Prometheus Exporter</h3>
+
+<p><strong>Endpoint:</strong> <code class="language-plaintext highlighter-rouge">http://&lt;hermes-host&gt;:8000/metrics</code></p>
+
+<p><strong>Metrics:</strong></p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hermes_download_mbps{isp="Comcast"} 250.5
+hermes_upload_mbps{isp="Comcast"} 35.2
+hermes_ping_ms{isp="Comcast"} 15.3
+hermes_jitter_ms{isp="Comcast"} 2.1
+hermes_last_test_timestamp{isp="Comcast"} 1714396800
+hermes_test_failure{isp="Comcast"} 0
+</code></pre></div></div>
+
+<p><strong>Configuration:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">PROMETHEUS_PORT</code> — Port for <code class="language-plaintext highlighter-rouge">/metrics</code> endpoint (default: 8000)</li>
+</ul>
+
+<p><strong>Integration:</strong></p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">scrape_configs</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">job_name</span><span class="pi">:</span> <span class="s1">'</span><span class="s">hermes'</span>
+    <span class="na">scrape_interval</span><span class="pi">:</span> <span class="s">15s</span>
+    <span class="na">static_configs</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">targets</span><span class="pi">:</span> <span class="pi">[</span><span class="s1">'</span><span class="s">hermes-scheduler:8000'</span><span class="pi">]</span>
+</code></pre></div></div>
+
+<p><strong>Use Case:</strong> Time-series metrics for Grafana dashboards, alerting rules, long-term retention.</p>
+
+<h3 id="loki-exporter">Loki Exporter</h3>
+
+<p><strong>Endpoint:</strong> Pushes to <code class="language-plaintext highlighter-rouge">http://&lt;loki-host&gt;:3100/loki/api/v1/push</code></p>
+
+<p><strong>Log Format:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"streams"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+    </span><span class="nl">"stream"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"job"</span><span class="p">:</span><span class="w"> </span><span class="s2">"hermes_speedtest"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"isp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Comcast"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"level"</span><span class="p">:</span><span class="w"> </span><span class="s2">"info"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nl">"values"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+      </span><span class="p">[</span><span class="s2">"1714396800000000000"</span><span class="p">,</span><span class="w"> </span><span class="s2">"{</span><span class="se">\"</span><span class="s2">download_mbps</span><span class="se">\"</span><span class="s2">: 250.5, </span><span class="se">\"</span><span class="s2">upload_mbps</span><span class="se">\"</span><span class="s2">: 35.2, </span><span class="se">\"</span><span class="s2">ping_ms</span><span class="se">\"</span><span class="s2">: 15.3, </span><span class="se">\"</span><span class="s2">jitter_ms</span><span class="se">\"</span><span class="s2">: 2.1, </span><span class="se">\"</span><span class="s2">isp</span><span class="se">\"</span><span class="s2">: </span><span class="se">\"</span><span class="s2">Comcast</span><span class="se">\"</span><span class="s2">, </span><span class="se">\"</span><span class="s2">timestamp</span><span class="se">\"</span><span class="s2">: </span><span class="se">\"</span><span class="s2">2026-04-29T12:00:00Z</span><span class="se">\"</span><span class="s2">}"</span><span class="p">]</span><span class="w">
+    </span><span class="p">]</span><span class="w">
+  </span><span class="p">}]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Configuration:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">LOKI_URL</code> — Loki push endpoint (e.g., <code class="language-plaintext highlighter-rouge">http://loki:3100</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">LOKI_JOB_LABEL</code> — Job label for log entries (default: <code class="language-plaintext highlighter-rouge">hermes_speedtest</code>)</li>
+</ul>
+
+<p><strong>Use Case:</strong> Structured logs for LogQL queries in Grafana, correlation with other application logs.</p>
+
+<hr />
+
+<h2 id="alert-system">Alert System</h2>
+
+<h3 id="alertmanager-component">AlertManager Component</h3>
+
+<p><strong>Purpose:</strong> Tracks consecutive test failures and sends notifications when threshold is met.</p>
+
+<p><strong>Behavior:</strong></p>
+
+<ul>
+  <li>Maintains failure counter across test runs</li>
+  <li>Resets counter on successful test</li>
+  <li>Sends alerts when <code class="language-plaintext highlighter-rouge">failure_count &gt;= ALERT_FAILURE_THRESHOLD</code></li>
+  <li>Enforces cooldown period (<code class="language-plaintext highlighter-rouge">ALERT_COOLDOWN_MINUTES</code>) after each alert</li>
+  <li>Supports multiple simultaneous providers</li>
+</ul>
+
+<p><strong>Providers:</strong></p>
+
+<ul>
+  <li><strong>Webhook</strong> — POST JSON to custom HTTP endpoint</li>
+  <li><strong>Gotify</strong> — Self-hosted push notifications</li>
+  <li><strong>ntfy</strong> — Simple pub-sub notifications</li>
+  <li><strong>Apprise</strong> — 100+ services via Apprise API</li>
+</ul>
+
+<p><strong>Configuration:</strong></p>
+
+<ul>
+  <li>Via UI Settings page (recommended)</li>
+  <li>Via environment variables</li>
+  <li>Stored in <code class="language-plaintext highlighter-rouge">data/runtime_config.json</code></li>
+</ul>
+
+<p>See <a href="alerts">Alert Configuration</a> for detailed setup guides.</p>
+
+<hr />
+
+<h2 id="integration-points">Integration Points</h2>
+
+<h3 id="prometheus-integration">Prometheus Integration</h3>
+
+<p><strong>Hermes exposes metrics</strong> for Prometheus scraping:</p>
+
+<ol>
+  <li>
+    <p><strong>Configure Prometheus scrape job:</strong></p>
+
+    <div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">scrape_configs</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">job_name</span><span class="pi">:</span> <span class="s1">'</span><span class="s">hermes'</span>
+    <span class="na">scrape_interval</span><span class="pi">:</span> <span class="s">15s</span>
+    <span class="na">static_configs</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">targets</span><span class="pi">:</span> <span class="pi">[</span><span class="s1">'</span><span class="s">hermes-scheduler:8000'</span><span class="pi">]</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Verify metrics:</strong></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://localhost:8000/metrics
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Query in Grafana with PromQL:</strong></p>
+
+    <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>hermes_download_mbps{job="hermes"}
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h3 id="loki-integration">Loki Integration</h3>
+
+<p><strong>Hermes pushes logs</strong> directly to Loki:</p>
+
+<ol>
+  <li>
+    <p><strong>Set <code class="language-plaintext highlighter-rouge">LOKI_URL</code> environment variable:</strong></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">LOKI_URL</span><span class="o">=</span>http://loki:3100
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Enable loki exporter:</strong></p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ENABLED_EXPORTERS</span><span class="o">=</span>csv,sqlite,loki
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Query in Grafana with LogQL:</strong></p>
+
+    <div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{job="hermes_speedtest"} | json | download_mbps &gt; 100
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h3 id="grafana-dashboard">Grafana Dashboard</h3>
+
+<p><strong>Import pre-built dashboard:</strong></p>
+
+<ol>
+  <li>Download <code class="language-plaintext highlighter-rouge">docs/grafana-dashboard.json</code></li>
+  <li>In Grafana: <strong>+ → Import → Upload JSON file</strong></li>
+  <li>Select Prometheus and Loki datasources</li>
+  <li>
+    <p>Dashboard includes:</p>
+
+    <ul>
+      <li>Download/upload trend charts</li>
+      <li>Ping/jitter statistics</li>
+      <li>Test failure annotations</li>
+      <li>ISP labels</li>
+    </ul>
+  </li>
+</ol>
+
+<hr />
+
+<h2 id="project-structure">Project Structure</h2>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Hermes/
+├── src/
+│   ├── main.py                        # Entry point — wires scheduler, dispatcher, and exporters
+│   ├── config.py                      # Static config loaded from environment variables
+│   ├── constants.py                   # Centralized constants for exporters and alert providers
+│   ├── runtime_config.py              # Persistent runtime state (interval, enabled exporters)
+│   ├── shared_state.py                # Shared state for alert_manager access across API
+│   ├── result_dispatcher.py           # ResultDispatcher — fans out SpeedResult to exporters
+│   ├── api/
+│   │   ├── main.py                    # FastAPI app — REST API + React frontend serving
+│   │   ├── auth.py                    # API key authentication and rate limiting
+│   │   └── routes/                    # API endpoint modules (config, results, trigger, alerts)
+│   ├── models/
+│   │   └── speed_result.py            # SpeedResult dataclass — shared data contract
+│   ├── providers/
+│   │   ├── base.py                    # BaseTestProvider ABC — provider interface
+│   │   ├── ookla.py                   # OoklaProvider — Ookla CLI subprocess runner
+│   │   ├── ndt7.py                    # NDT7Provider — M-Lab WebSocket speed test
+│   │   └── custom_http.py             # CustomHttpProvider — user-supplied HTTP endpoints
+│   ├── services/
+│   │   ├── speedtest_runner.py        # SpeedtestRunner — orchestrates providers with fallback
+│   │   ├── alert_manager.py           # AlertManager — tracks failures and sends alerts
+│   │   ├── alert_providers.py         # Alert provider implementations (Webhook, Gotify, ntfy, Apprise)
+│   │   ├── alert_provider_factory.py  # Shared alert provider registration logic
+│   │   ├── health_server.py           # Health check endpoint
+│   │   └── log_service.py             # Logging configuration
+│   ├── exporters/
+│   │   ├── base_exporter.py           # Abstract BaseExporter interface
+│   │   ├── csv_exporter.py            # CSVExporter — appends rows to CSV log
+│   │   ├── prometheus_exporter.py     # PrometheusExporter — updates Gauges, /metrics endpoint
+│   │   ├── loki_exporter.py           # LokiExporter — ships JSON log events via HTTP push
+│   │   └── sqlite_exporter.py         # SQLiteExporter — stores results in hermes.db (WAL mode)
+├── frontend/
+│   ├── src/
+│   │   ├── main.tsx                   # React app entry point
+│   │   ├── pages/                     # Dashboard and Settings pages
+│   │   ├── components/                # Reusable UI components
+│   │   ├── context/                   # React context for global state
+│   │   └── lib/                       # API client and utilities
+│   ├── package.json                   # Frontend dependencies
+│   └── vite.config.ts                 # Vite build configuration
+├── tests/
+│   ├── test_main.py
+│   ├── test_api_*.py                  # FastAPI endpoint tests (including alerts)
+│   ├── test_alert_manager.py
+│   ├── test_alert_providers.py
+│   ├── test_csv_exporter.py
+│   ├── test_loki_exporter.py
+│   ├── test_prometheus_exporter.py
+│   ├── test_result_dispatcher.py
+│   ├── test_runtime_config.py
+│   └── test_sqlite_exporter.py
+├── .env.example                       # Example environment variables
+├── docker-compose.yml                 # Production deployment (two-container architecture)
+├── Dockerfile                         # Multi-stage build (Python + Node.js)
+├── requirements.txt                   # Python dependencies
+├── pytest.ini                         # pytest configuration
+└── README.md
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="design-principles">Design Principles</h2>
+
+<h3 id="separation-of-concerns">Separation of Concerns</h3>
+
+<ul>
+  <li><strong>Scheduler container</strong> handles test execution and data export</li>
+  <li><strong>API container</strong> handles user interaction and REST access</li>
+  <li>Clear boundaries via shared volumes</li>
+</ul>
+
+<h3 id="multi-destination-export">Multi-Destination Export</h3>
+
+<ul>
+  <li>Single test result dispatched to multiple exporters</li>
+  <li>Exporters are independent — one failure doesn’t affect others</li>
+  <li>Configurable via runtime settings</li>
+</ul>
+
+<h3 id="stateless-api">Stateless API</h3>
+
+<ul>
+  <li>API reads shared data (SQLite, CSV) but doesn’t run tests</li>
+  <li>Triggers are file-based (<code class="language-plaintext highlighter-rouge">.run_trigger</code>) for container isolation</li>
+  <li>Runtime config stored in JSON, not in-memory</li>
+</ul>
+
+<h3 id="defense-in-depth">Defense in Depth</h3>
+
+<ul>
+  <li>Multiple security layers (auth, rate limiting, SSRF protection, size limits)</li>
+  <li>Input validation at API boundary</li>
+  <li>Security headers on all responses</li>
+</ul>
+
+<h3 id="observability-first">Observability First</h3>
+
+<ul>
+  <li>Native Prometheus metrics exposure</li>
+  <li>Native Loki log pushing</li>
+  <li>Pre-built Grafana dashboard</li>
+  <li>Health check endpoints</li>
+</ul>
+
+<hr />
+
+<h2 id="see-also">See Also</h2>
+
+<ul>
+  <li><a href="getting-started">Getting Started</a> — Deployment and configuration</li>
+  <li><a href="api-reference">API Reference</a> — REST endpoints and examples</li>
+  <li><a href="security">Security Guide</a> — Production security best practices</li>
+  <li><a href="alerts">Alert Configuration</a> — Failure notification setup</li>
+</ul>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/Hermes" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Architecture
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

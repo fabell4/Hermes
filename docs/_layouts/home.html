@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>{% if page.title and page.title != site.title %}{{ page.title }} — {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
+  {% include head.html %}
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  {% include nav.html %}
+
+  <!-- Hero section for doc home page -->
+  <section class="doc-hero">
+    <div class="doc-hero__inner">
+      <div class="doc-hero__eyebrow">Documentation</div>
+      <h1 class="doc-hero__title">{{ page.hero_title | default: site.title }}</h1>
+      <p class="doc-hero__subtitle">{{ page.hero_subtitle | default: site.description }}</p>
+
+      {% if page.hero_cta %}
+        <div class="doc-hero__ctas">
+          {% for cta in page.hero_cta %}
+            <a href="{{ cta.url | relative_url }}"
+               class="btn {% if cta.primary %}btn--primary{% else %}btn--outline{% endif %}">
+              {{ cta.label }}
+            </a>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  </section>
+
+  {% if page.quick_links %}
+    <section class="quick-links">
+      <div class="quick-links__inner">
+        {% for card in page.quick_links %}
+          <a href="{{ card.url | relative_url }}" class="quick-card">
+            <div class="quick-card__icon">{{ card.icon | default: "→" }}</div>
+            <div class="quick-card__title">{{ card.title }}</div>
+            <div class="quick-card__desc">{{ card.description }}</div>
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+
+  <div class="page-wrapper">
+    {% include sidebar.html %}
+    <main id="main-content" class="main-content">
+      <article class="prose">
+        {{ content }}
+      </article>
+    </main>
+  </div>
+
+  {% include footer.html %}
+  <script src="{{ '/assets/js/main.js' | relative_url }}"></script>
+</body>
+</html>

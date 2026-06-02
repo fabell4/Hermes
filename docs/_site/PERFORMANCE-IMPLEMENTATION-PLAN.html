@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Performance Implementation Plan — Hermes Documentation</title>
+  <!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Performance Implementation Plan | Hermes Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Performance Implementation Plan" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted internet speed test monitoring with modern observability stack integration" />
+<link rel="canonical" href="http://localhost:4001/PERFORMANCE-IMPLEMENTATION-PLAN.html" />
+<meta property="og:url" content="http://localhost:4001/PERFORMANCE-IMPLEMENTATION-PLAN.html" />
+<meta property="og:site_name" content="Hermes Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Performance Implementation Plan" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted internet speed test monitoring with modern observability stack integration","headline":"Performance Implementation Plan","url":"http://localhost:4001/PERFORMANCE-IMPLEMENTATION-PLAN.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted internet speed test monitoring with modern observability stack integration">
+
+<title>
+  
+    Performance Implementation Plan — Hermes Documentation
+  
+</title>
+
+
+<link rel="icon" type="image/png" href="/assets/Hermes.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="/" class="nav-brand">
+    <span class="brand-name">
+      Hermes
+      <span>Docs</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/alloy"
+                 >
+                Grafana Alloy
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-ENHANCEMENTS"
+                 >
+                Security Enhancements
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Error Handling</h3>
+        <ul>
+          
+            <li>
+              <a href="/error-catalog"
+                 >
+                Error Catalog
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-handling-conventions"
+                 >
+                Handling Conventions
+              </a>
+            </li>
+          
+            <li>
+              <a href="/error-messages"
+                 >
+                Error Messages
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/RELEASE-PROCESS"
+                 >
+                Release Process
+              </a>
+            </li>
+          
+            <li>
+              <a href="/styleguide"
+                 >
+                Frontend Style Guide
+              </a>
+            </li>
+          
+            <li>
+              <a href="/suppression-decisions"
+                 >
+                Suppression Decisions
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Code Reviews</h3>
+        <ul>
+          
+            <li>
+              <a href="/BEST-PRACTICES-REVIEW"
+                 >
+                Best Practices
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DEFENSIVE-CODING-REVIEW"
+                 >
+                Defensive Coding
+              </a>
+            </li>
+          
+            <li>
+              <a href="/ERROR-HANDLING-REVIEW"
+                 >
+                Error Handling Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/PERFORMANCE-OPTIMIZATION-REVIEW"
+                 >
+                Performance Review
+              </a>
+            </li>
+          
+            <li>
+              <a href="/TEST-COVERAGE-REVIEW"
+                 >
+                Test Coverage
+              </a>
+            </li>
+          
+            <li>
+              <a href="/SECURITY-AUDIT"
+                 >
+                Security Audit
+              </a>
+            </li>
+          
+            <li>
+              <a href="/DOCUMENTATION-ACCURACY-REVIEW"
+                 >
+                Documentation Review
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Performance Implementation Plan</h1>
+
+            
+          </header>
+        
+
+        <p><strong>Review:</strong> <a href="/PERFORMANCE-OPTIMIZATION-REVIEW.html">PERFORMANCE-OPTIMIZATION-REVIEW.md</a><br />
+<strong>Status:</strong> Ready for implementation<br />
+<strong>Estimated Total Effort:</strong> 4-5 hours<br />
+<strong>Target:</strong> v1.0 release</p>
+
+<hr />
+
+<h2 id="high-priority-items-required-for-v10">High Priority Items (Required for v1.0)</h2>
+
+<h3 id="-issue-1-sqlite-timestamp-index">✅ Issue #1: SQLite Timestamp Index</h3>
+
+<p><strong>Status:</strong> Not started<br />
+<strong>Estimated Effort:</strong> 1 hour<br />
+<strong>Priority:</strong> Critical — Affects API query performance</p>
+
+<p><strong>Changes Required:</strong></p>
+
+<ol>
+  <li>Update <code class="language-plaintext highlighter-rouge">_CREATE_TABLE</code> in <a href="../src/exporters/sqlite_exporter.py">src/exporters/sqlite_exporter.py</a> to include index creation</li>
+  <li>Add index migration to <code class="language-plaintext highlighter-rouge">_MIGRATIONS</code> list</li>
+  <li>Update <code class="language-plaintext highlighter-rouge">_init_db()</code> to check for missing indexes (not just columns)</li>
+  <li>Add tests to verify index exists and is used</li>
+</ol>
+
+<p><strong>Files to modify:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">src/exporters/sqlite_exporter.py</code> (lines 39-48, 107-127)</li>
+</ul>
+
+<p><strong>Test coverage:</strong></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Test index creation on new database</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Test index migration on existing database</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Test query performance with index vs without</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Test pruning performance with index</li>
+</ul>
+
+<p><strong>Performance Impact:</strong> 10-100× faster queries for tables with &gt;1,000 rows</p>
+
+<hr />
+
+<h3 id="-issue-2-async-alert-sending">✅ Issue #2: Async Alert Sending</h3>
+
+<p><strong>Status:</strong> Not started<br />
+<strong>Estimated Effort:</strong> 2-3 hours<br />
+<strong>Priority:</strong> High — Prevents scheduler blocking</p>
+
+<p><strong>Changes Required:</strong></p>
+
+<ol>
+  <li>Add <code class="language-plaintext highlighter-rouge">concurrent.futures.ThreadPoolExecutor</code> to <code class="language-plaintext highlighter-rouge">AlertManager.__init__()</code></li>
+  <li>Create <code class="language-plaintext highlighter-rouge">_send_alert_async()</code> helper method</li>
+  <li>Update <code class="language-plaintext highlighter-rouge">_maybe_send_alert()</code> to submit alerts to thread pool</li>
+  <li>Keep <code class="language-plaintext highlighter-rouge">send_test_alert()</code> synchronous (for API response)</li>
+  <li>Add tests for async behavior</li>
+</ol>
+
+<p><strong>Files to modify:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">src/services/alert_manager.py</code> (lines 138-147, 176-207)</li>
+</ul>
+
+<p><strong>Test coverage:</strong></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Test alerts are sent without blocking</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Test multiple providers execute in parallel</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Test alert failure doesn’t crash thread</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Test <code class="language-plaintext highlighter-rouge">send_test_alert()</code> remains synchronous</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Test thread pool cleanup on shutdown</li>
+</ul>
+
+<p><strong>Performance Impact:</strong> Alert sending overhead reduced from 30s worst case to &lt;1ms (non-blocking)</p>
+
+<hr />
+
+<h3 id="-issue-3-static-file-middleware">✅ Issue #3: Static File Middleware</h3>
+
+<p><strong>Status:</strong> Not started<br />
+<strong>Estimated Effort:</strong> 1 hour<br />
+<strong>Priority:</strong> High — Improves page load time</p>
+
+<p><strong>Changes Required:</strong></p>
+
+<ol>
+  <li>Mount static files BEFORE adding middleware</li>
+  <li>Verify middleware still applies to API routes</li>
+  <li>Test that static files bypass middleware</li>
+  <li>Update comments documenting the order</li>
+</ol>
+
+<p><strong>Files to modify:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">src/api/main.py</code> (lines 115-127, 173-182)</li>
+</ul>
+
+<p><strong>Test coverage:</strong></p>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Test API routes still have middleware (rate limiting, headers)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Test static files bypass middleware</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Test CORS still works for API</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Test security headers on API responses</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Integration test: full page load</li>
+</ul>
+
+<p><strong>Performance Impact:</strong> 100-200 µs per static asset request (20% faster page loads)</p>
+
+<hr />
+
+<h2 id="medium-priority-items-monitor-then-implement-in-v11">Medium Priority Items (Monitor, then implement in v1.1)</h2>
+
+<h3 id="-issue-4-prometheus-label-cardinality">🟡 Issue #4: Prometheus Label Cardinality</h3>
+
+<p><strong>Status:</strong> Deferred to v1.1<br />
+<strong>Action:</strong> Monitor Prometheus memory usage and time series count</p>
+
+<p><strong>Monitoring Command:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Check number of hermes time series</span>
+curl http://localhost:9090/api/v1/label/__name__/values | <span class="nb">grep </span>hermes | <span class="nb">wc</span> <span class="nt">-l</span>
+
+<span class="c"># Check memory usage</span>
+docker stats prometheus
+</code></pre></div></div>
+
+<p><strong>Trigger for implementation:</strong> &gt;1,000 unique time series OR &gt;100MB memory growth</p>
+
+<hr />
+
+<h3 id="-issue-5-exporter-registry-duplication">🟡 Issue #5: Exporter Registry Duplication</h3>
+
+<p><strong>Status:</strong> Deferred to v1.1<br />
+<strong>Effort:</strong> 30 minutes<br />
+<strong>Priority:</strong> Code quality improvement</p>
+
+<hr />
+
+<h3 id="-issue-6-sqlite-wal-checkpoint">🟡 Issue #6: SQLite WAL Checkpoint</h3>
+
+<p><strong>Status:</strong> Deferred to v1.1<br />
+<strong>Effort:</strong> 30 minutes<br />
+<strong>Priority:</strong> Reduces disk usage</p>
+
+<p><strong>Monitoring Command:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Check WAL file size</span>
+<span class="nb">ls</span> <span class="nt">-lh</span> data/hermes.db<span class="k">*</span>
+</code></pre></div></div>
+
+<p><strong>Trigger for implementation:</strong> WAL file &gt;10MB OR user complaints about disk usage</p>
+
+<hr />
+
+<h3 id="-issue-7-http-connection-pooling">🟡 Issue #7: HTTP Connection Pooling</h3>
+
+<p><strong>Status:</strong> Deferred to v1.1<br />
+<strong>Effort:</strong> 2 hours<br />
+<strong>Priority:</strong> Only beneficial if testing interval &lt;5 minutes</p>
+
+<hr />
+
+<h2 id="implementation-checklist">Implementation Checklist</h2>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><strong>Issue #1: SQLite Timestamp Index</strong>
+    <ul class="task-list">
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Update schema with index</li>
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Add migration logic</li>
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Write tests</li>
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Verify performance improvement</li>
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Document change in CHANGELOG</li>
+    </ul>
+  </li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><strong>Issue #2: Async Alert Sending</strong>
+    <ul class="task-list">
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Add ThreadPoolExecutor</li>
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Implement async sending</li>
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Update tests</li>
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Verify non-blocking behavior</li>
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Document change in CHANGELOG</li>
+    </ul>
+  </li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><strong>Issue #3: Static File Middleware</strong>
+    <ul class="task-list">
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Reorder middleware and mounts</li>
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Update tests</li>
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Verify API middleware still works</li>
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Document change in CHANGELOG</li>
+    </ul>
+  </li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><strong>Validation</strong>
+    <ul class="task-list">
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />All 397 tests passing</li>
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />No static analysis errors (mypy, ruff)</li>
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Code coverage maintained (≥90%)</li>
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Manual testing of API performance</li>
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Manual testing of page load speed</li>
+    </ul>
+  </li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" /><strong>Documentation</strong>
+    <ul class="task-list">
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Update CHANGELOG.md</li>
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Update README if needed</li>
+      <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Update TODO.md</li>
+    </ul>
+  </li>
+</ul>
+
+<hr />
+
+<h2 id="regression-testing-commands">Regression Testing Commands</h2>
+
+<p>After implementing optimizations, run full test suite:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Python tests</span>
+pytest tests/ <span class="nt">-v</span> <span class="nt">--cov</span><span class="o">=</span>src <span class="nt">--cov-report</span><span class="o">=</span>term-missing
+
+<span class="c"># Static analysis</span>
+mypy src/
+ruff check src/
+
+<span class="c"># API integration tests</span>
+pytest tests/api/ <span class="nt">-v</span>
+
+<span class="c"># Frontend tests</span>
+<span class="nb">cd </span>frontend <span class="o">&amp;&amp;</span> npm <span class="nb">test</span>
+
+<span class="c"># Manual performance test</span>
+python <span class="nt">-m</span> pytest tests/performance/ <span class="nt">-v</span> <span class="nt">--benchmark</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="performance-benchmarks-beforeafter">Performance Benchmarks (Before/After)</h2>
+
+<p>Record benchmarks before and after implementation:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Operation</th>
+      <th>Before (ms)</th>
+      <th>After (ms)</th>
+      <th>Improvement</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>SQLite query (10 rows, 10K total)</td>
+      <td>50-100</td>
+      <td><em>TBD</em></td>
+      <td><em>TBD</em></td>
+    </tr>
+    <tr>
+      <td>SQLite pruning (10K rows)</td>
+      <td>200-500</td>
+      <td><em>TBD</em></td>
+      <td><em>TBD</em></td>
+    </tr>
+    <tr>
+      <td>API <code class="language-plaintext highlighter-rouge">/results</code> response</td>
+      <td>60-120</td>
+      <td><em>TBD</em></td>
+      <td><em>TBD</em></td>
+    </tr>
+    <tr>
+      <td>Alert sending (3 providers)</td>
+      <td>150-30000</td>
+      <td><em>TBD</em></td>
+      <td><em>TBD</em></td>
+    </tr>
+    <tr>
+      <td>Static asset serving</td>
+      <td>1-2</td>
+      <td><em>TBD</em></td>
+      <td><em>TBD</em></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="approval-criteria">Approval Criteria</h2>
+
+<p>✅ <strong>Ready for v1.0 when:</strong></p>
+
+<ol>
+  <li>All 3 high priority issues implemented</li>
+  <li>All tests passing (397+ tests)</li>
+  <li>Code coverage ≥90%</li>
+  <li>Static analysis clean</li>
+  <li>Performance benchmarks show expected improvements</li>
+  <li>No new bugs introduced</li>
+  <li>Documentation updated</li>
+</ol>
+
+<hr />
+
+<p><strong>Next Steps:</strong></p>
+
+<ol>
+  <li>Start with Issue #1 (SQLite index) — highest impact, easiest to implement</li>
+  <li>Proceed to Issue #2 (async alerts) — most complex, needs careful testing</li>
+  <li>Finish with Issue #3 (middleware) — simple but needs integration testing</li>
+  <li>Run full validation suite</li>
+  <li>Update documentation</li>
+  <li>Ready for v1.0 release! 🎉</li>
+</ol>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/Hermes" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Performance Implementation Plan
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

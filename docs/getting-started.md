@@ -2,9 +2,6 @@
 layout: default
 title: "Getting Started"
 ---
-
-# Getting Started
-
 This guide covers deployment, configuration, and first steps with Hermes.
 
 ---

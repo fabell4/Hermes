@@ -1,132 +1,67 @@
 <!DOCTYPE html>
-<html lang="{{ site.lang | default: "en-US" }}">
-  <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ page.title | default: site.title }}</title>
-    <link rel="icon" type="image/png" href="{{ '/assets/Hermes.png' | relative_url }}">
-    <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
-    <style>
-      /* Constrain header content to match body width */
-      header .inner {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 0 24px;
-      }
+<html lang="en">
+<head>
+  <title>{% if page.title and page.title != site.title %}{{ page.title }} — {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
+  {% include head.html %}
+</head>
+<body>
 
-      #sidebar nav ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
-      #sidebar nav ul li {
-        display: block;
-        margin-bottom: 6px;
-        margin-right: 0;
-      }
-      #sidebar nav ul li a {
-        color: #9ddcff;
-        text-decoration: none;
-        font-size: 0.9em;
-      }
-      #sidebar nav ul li a:hover {
-        color: #fff;
-        text-decoration: underline;
-      }
-      #sidebar nav ul li a.active {
-        color: #fff;
-        font-weight: bold;
-      }
-      #sidebar hr {
-        border-color: #3a3a3a;
-        margin: 12px 0;
-      }
-      #sidebar .sidebar-section-title {
-        font-size: 0.75em;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: #666;
-        margin-bottom: 6px;
-      }
+  <a class="skip-link" href="#main-content">Skip to content</a>
 
-      /* ── Two-column layout ── */
-      #content-wrapper {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 20px 24px;
-      }
-      #content-wrapper .inner {
-        display: flex;
-        flex-direction: row;
-        gap: 2rem;
-        align-items: flex-start;
-      }
-      aside#sidebar {
-        width: 220px;
-        flex-shrink: 0;
-        order: -1;
-        position: sticky;
-        top: 20px;
-      }
-      section#main-content {
-        flex: 1;
-        min-width: 0;
-      }
-      @media (max-width: 768px) {
-        #content-wrapper .inner {
-          flex-direction: column;
-        }
-        aside#sidebar {
-          width: 100%;
-          position: static;
-          order: 0;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <div class="inner">
-        <a href="{{ '/' | relative_url }}">
-          <h1>{{ site.title | default: site.github.repository_name }}</h1>
-        </a>
-        <h2>{{ site.description | default: site.github.project_tagline }}</h2>
-        {% if site.github.is_project_page %}
-          <a href="{{ site.github.repository_url }}" class="button"><small>View project on</small> GitHub</a>
+  {% include nav.html %}
+
+  <div class="page-wrapper">
+    {% include sidebar.html %}
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        {% if page.show_header != false %}
+          <header class="page-header">
+            {% if page.version or page.status %}
+              <div class="page-meta">
+                {% if page.version %}
+                  <span class="badge badge--version">v{{ page.version }}</span>
+                {% endif %}
+                {% if page.status %}
+                  <span class="badge badge--{{ page.status }}">{{ page.status }}</span>
+                {% endif %}
+              </div>
+            {% endif %}
+
+            <h1>{{ page.title }}</h1>
+
+            {% if page.description %}
+              <p class="page-lead">{{ page.description }}</p>
+            {% endif %}
+          </header>
         {% endif %}
-      </div>
-    </header>
 
-    <div id="content-wrapper">
-      <div class="inner clearfix">
-        <section id="main-content">
-          {{ content }}
-        </section>
+        {{ content }}
 
-        <aside id="sidebar">
-          <nav>
-            <p class="sidebar-section-title">Navigation</p>
-            <ul>
-              {% for item in site.navigation %}
-                <li>
-                  <a href="{{ item.url | relative_url }}"
-                     {% if page.url == item.url or page.url == item.url | append: '.html' %}class="active"{% endif %}>
-                    {{ item.title }}
-                  </a>
-                </li>
-              {% endfor %}
-            </ul>
+        {% if page.prev_page or page.next_page %}
+          <nav class="page-nav" aria-label="Page navigation">
+            {% if page.prev_page %}
+              <a href="{{ page.prev_page.url | relative_url }}" class="prev">
+                <span class="nav-label">← Previous</span>
+                <span class="nav-title">{{ page.prev_page.title }}</span>
+              </a>
+            {% endif %}
+            {% if page.next_page %}
+              <a href="{{ page.next_page.url | relative_url }}" class="next">
+                <span class="nav-label">Next →</span>
+                <span class="nav-title">{{ page.next_page.title }}</span>
+              </a>
+            {% endif %}
           </nav>
-          <hr>
-          <p class="sidebar-section-title">Project</p>
-          <a href="{{ site.github.repository_url }}" class="button">
-            <small>View on</small> GitHub
-          </a>
-        </aside>
-      </div>
-    </div>
+        {% endif %}
 
-    <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>
-  </body>
+      </article>
+    </main>
+  </div>
+
+  {% include footer.html %}
+
+  <script src="{{ '/assets/js/main.js' | relative_url }}"></script>
+</body>
 </html>

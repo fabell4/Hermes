@@ -1,0 +1,24 @@
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      {% if site.footer.main_site %}
+        <li><a href="{{ site.footer.main_site }}">Main Site</a></li>
+      {% endif %}
+      {% if site.footer.github %}
+        <li><a href="{{ site.footer.github }}" target="_blank" rel="noopener">GitHub</a></li>
+      {% endif %}
+      {% if site.footer.linkedin %}
+        <li><a href="{{ site.footer.linkedin }}" target="_blank" rel="noopener">LinkedIn</a></li>
+      {% endif %}
+    </ul>
+
+    <p class="footer-copy">
+      &copy; {{ "now" | date: "%Y" }} Green Flame Tech. All rights reserved.
+      {% if page.title %} &mdash; {{ page.title }}{% endif %}
+    </p>
+  </div>
+</footer>

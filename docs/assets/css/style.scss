@@ -3,32 +3,6 @@
 
 @import "main";
 
-/* Custom dark theme styling to match Zeniscal */
-body {
-  background-color: #1e1e1e;
-  color: #e0e0e0;
-}
-
-header {
-  background-color: #2d2d2d;
-  border-bottom: 1px solid #3d3d3d;
-}
-
-.container {
-  max-width: 1200px;
-}
-
-/* Code blocks */
-pre, code {
-  background-color: #2d2d2d;
-  border: 1px solid #3d3d3d;
-}
-
-pre code {
-  background-color: transparent;
-  border: none;
-}
-
 /* Tables */
 table {
   border-collapse: collapse;

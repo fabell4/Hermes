@@ -1,4 +1,9 @@
-# Hermes Style Guide
+---
+layout: default
+title: "Frontend Style Guide"
+description: "Design tokens, component patterns, and conventions used across the Hermes frontend."
+render_with_liquid: false
+---
 
 Design tokens, component patterns, and conventions used across the Hermes frontend.
 
