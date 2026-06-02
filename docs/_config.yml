@@ -5,7 +5,7 @@ description: Self-hosted internet speed test monitoring with modern observabilit
 url: https://hermes-docs.greenflametech.com
 baseurl: ""
 
-theme: jekyll-theme-hacker
+remote_theme: fabell4/green-flame-jekyll
 
 # Navigation
 navigation:
@@ -48,6 +48,8 @@ kramdown:
 # Plugins
 plugins:
   - jekyll-github-metadata
+  - jekyll-relative-links
+  - jekyll-remote-theme
   - jekyll-relative-links
 
 # Include files

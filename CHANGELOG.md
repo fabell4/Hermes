@@ -12,6 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.6.1-beta] - 2026-06-01
+
+### Changed
+
+- **GitHub Pages theme** — switched from `jekyll-theme-hacker` to the custom
+  `fabell4/green-flame-jekyll` remote theme via `jekyll-remote-theme`; updated `docs/Gemfile`,
+  `docs/_config.yml` (`remote_theme` key, `jekyll-remote-theme` plugin), and
+  `docs/assets/css/style.scss` (`@import "main"`).
+
+---
+
 ## [0.6.0-beta] - 2026-05-29
 
 ### Changed
