@@ -901,7 +901,7 @@ jobs:
           docker run --rm \
             -v "$(pwd)/docs:/src" \
             -v "$(pwd)/_site:/out" \
-            ruby:3.3-alpine \
+            registry.greenflametech.net/ruby:3.3-alpine \
             sh -c "cd /src \
               && gem install bundler --no-document \
               && bundle install --quiet \
