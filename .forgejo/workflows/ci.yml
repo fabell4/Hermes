@@ -884,7 +884,7 @@ jobs:
           retention-days: 7
 
 
-    publish-docs:
+  publish-docs:
     runs-on: docker
     timeout-minutes: 15
     if: github.ref == 'refs/heads/main'
