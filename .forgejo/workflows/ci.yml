@@ -884,7 +884,7 @@ jobs:
           retention-days: 7
 
 
-  publish-docs:
+    publish-docs:
     runs-on: docker
     timeout-minutes: 15
     if: github.ref == 'refs/heads/main'
@@ -895,13 +895,26 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Publish docs to hub
+ 
+      - name: Build Jekyll site
         run: |
-          CID=$(docker run -d -v marion_mkdocs_content:/docs registry.greenflametech.net/alpine sleep 30)
-          docker exec "$CID" mkdir -p /docs/docs/hermes/assets
-          docker cp docs/. "$CID:/docs/docs/hermes/"
-          docker cp docs/zeniscal.yml "$CID:/docs/docs/hermes/zeniscal.yml"
+          docker run --rm \
+            -v "$(pwd)/docs:/src" \
+            -v "$(pwd)/_site:/out" \
+            ruby:3.3-alpine \
+            sh -c "cd /src \
+              && gem install bundler --no-document \
+              && bundle install --quiet \
+              && bundle exec jekyll build -d /out"
+ 
+      - name: Deploy to internal docs hub
+        run: |
+          CID=$(docker run -d \
+            -v marion_docs_content:/docs \
+            registry.greenflametech.net/alpine sleep 60)
+          docker exec "$CID" rm -rf /docs/hermes
+          docker exec "$CID" mkdir -p /docs/hermes
+          docker cp _site/. "$CID:/docs/hermes/"
           docker rm -f "$CID"
 
   notify:
