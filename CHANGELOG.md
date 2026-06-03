@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.6.2-beta] - 2026-06-03
+
+### Fixed
+
+- **Docs release pipeline** - added dedicated GitHub Pages Jekyll workflow
+  (`.github/workflows/docs.yml`) for public docs deployment and fixed Forgejo internal
+  docs build to run bundler/jekyll from `docs/` reliably in CI containers.
+
+---
+
 ## [0.6.1-beta] - 2026-06-01
 
 ### Changed
